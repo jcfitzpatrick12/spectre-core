@@ -4,7 +4,7 @@
   
 Core Python package used by [`SPECTRE`](https://github.com/jcfitzpatrick12/spectre.git).
 
-📢 **This project is under active development, with current efforts set on `spectre` and `spectre-host`. Once the testing framework is in place, we will be looking for contributors.**  📢 
+📢 **This project is under active development**  📢 
 
 
 ## Installation
