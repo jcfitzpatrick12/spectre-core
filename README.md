@@ -2,7 +2,7 @@
 
 ## Description
   
-Core Python package used by [`SPECTRE`](https://github.com/jcfitzpatrick12/spectre.git).
+Core Python package used by [`spectre`](https://github.com/jcfitzpatrick12/spectre.git).
 
 📢 **This project is under active development**  📢 
 
