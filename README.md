@@ -8,7 +8,7 @@ Core Python package used by [`SPECTRE`](https://github.com/jcfitzpatrick12/spect
 
 
 ## Installation
-Simply call ```pip install spectre_core```. Alternatively, for development you can clone the repository in your preferred directory:  
+Simply call ```pip install spectre-core```. Alternatively, for development you can clone the repository in your preferred directory:  
 ```git clone https://github.com/jcfitzpatrick12/spectre-core.git```  
 
 Change directory:  
