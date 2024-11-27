@@ -2,10 +2,9 @@
 
 ## Description
   
-Core Python package used by [`spectre`](https://github.com/jcfitzpatrick12/spectre.git).
-
 📢 **This project is under active development**  📢 
 
+Core Python package used by [`spectre`](https://github.com/jcfitzpatrick12/spectre.git).
 
 ## Installation
 Simply call ```pip install spectre-core```. 
@@ -17,5 +16,5 @@ Then run:
 ```pip install -e .```
 
 
-# Contributing
+## Contributing
 This repository is in active development. If you are interested, feel free to contact  jcfitzpatrick12@gmail.com :)
