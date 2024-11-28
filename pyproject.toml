@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spectre-core"
-version = "0.0.1"
+version = "0.0.2"
 maintainers = [
   { name="Jimmy Fitzpatrick", email="jcfitzpatrick12@gmail.com" },
 ]
-description = ""
+description = "The core Python package used by the spectre program. "
 readme = "README.md"
 requires-python = ">=3.10.2"
 classifiers = [
@@ -23,6 +23,7 @@ dependencies = [
     'matplotlib==3.5.0',
     'watchdog==4.0.0'
 ]
+license = { file = "LICENSE" }
 
 [project.urls]
 Homepage = "https://github.com/jcfitzpatrick12/spectre-core"
