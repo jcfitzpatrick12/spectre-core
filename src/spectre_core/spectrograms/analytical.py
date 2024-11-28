@@ -16,7 +16,7 @@ from spectre_core.exceptions import ModeNotFoundError
 
 @dataclass
 class TestResults:
-    # Whether the times array matches analytically
+    # Whether the times array matches analytically 
     times_validated: bool = False  
     # Whether the frequencies array matches analytically
     frequencies_validated: bool = False  
