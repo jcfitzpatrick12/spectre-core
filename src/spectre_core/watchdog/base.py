@@ -15,7 +15,6 @@ from math import floor
 from watchdog.events import FileSystemEventHandler
 
 from spectre_core.chunks.factory import get_chunk_from_tag
-from spectre_core.chunks.base import BaseChunk
 from spectre_core.file_handlers.configs import CaptureConfig
 from spectre_core.spectrograms.spectrogram import Spectrogram
 from spectre_core.spectrograms.transform import join_spectrograms
