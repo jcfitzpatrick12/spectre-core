@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "spectre-core"
 version = "0.0.1"
-authors = [
+maintainers = [
   { name="Jimmy Fitzpatrick", email="jcfitzpatrick12@gmail.com" },
 ]
 description = ""
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10.2"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
