@@ -12,6 +12,7 @@ from typing import Callable, Optional
 import warnings
 from collections import OrderedDict
 from datetime import datetime
+from functools import wraps
 
 from spectre_core.file_handlers.text import TextHandler
 from spectre_core.cfg import (
@@ -206,17 +207,15 @@ def configure_root_logger(process_type: str,
 
     return log_handler
 
-# Logger must be passed in to preserve context of the service function
-def log_call(logger: logging.Logger
-) -> Callable:
-    def decorator(func: Callable) -> Callable:
-        def wrapper(*args, **kwargs):
-            try:
-                logger.info(f"Calling the function: {func.__name__}")
-                return func(*args, **kwargs)
-            except Exception as e:
-                logger.error(f"An error occurred while calling the function: {func.__name__}",
-                              exc_info=True)
-                raise
-        return wrapper
-    return decorator
+
+def log_call(func: Callable) -> Callable:
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        logger = logging.getLogger(func.__module__)  # Automatically get module-level logger
+        try:
+            logger.info(f"Calling the function: {func.__name__}")
+            return func(*args, **kwargs)
+        except Exception as e:
+            logger.error(f"Error in function: {func.__name__}", exc_info=True)
+            raise
+    return wrapper
