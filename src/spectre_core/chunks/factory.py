@@ -6,7 +6,7 @@
 from spectre_core.chunks.base import BaseChunk
 from spectre_core.file_handlers.configs import CaptureConfig
 from spectre_core.exceptions import ChunkNotFoundError
-
+from spectre_core.chunks.chunk_register import chunk_map
 
 def get_chunk(chunk_key: str) -> BaseChunk:
     Chunk = chunk_map.get(chunk_key)
