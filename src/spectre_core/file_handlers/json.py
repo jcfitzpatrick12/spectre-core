@@ -26,11 +26,15 @@ class JsonHandler(BaseFileHandler):
 
     def save(self, 
              d: dict, 
-             doublecheck_overwrite: bool = True) -> None:
+             force: bool = False) -> None:
         self.make_parent_path()
 
-        if self.exists and doublecheck_overwrite:
-            self.doublecheck_overwrite()
-        
+        if self.exists:
+            if force:
+                pass
+            else:
+                raise RuntimeError((f"{self.file_name} exists, write has been abandonded. "
+                                    f"You can override this functionality with `force`"))
+
         with open(self.file_path, 'w') as file:
-            json.dump(d, file, indent=4)
+                json.dump(d, file, indent=4)

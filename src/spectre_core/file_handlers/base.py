@@ -56,39 +56,13 @@ class BaseFileHandler(ABC):
         os.makedirs(self.parent_path, exist_ok=True) 
     
 
-    def delete(self, 
-               doublecheck_delete = True) -> None:
+    def delete(self) -> None:
         if not self.exists:
             warn(f"{self.file_path} does not exist. No deletion taking place")
             return
         else:
-            if doublecheck_delete:
-                self.doublecheck_delete()
             os.remove(self.file_path)
     
 
     def cat(self) -> None:
         print(self.read())
-
-
-    def _doublecheck_action(self, 
-                            action_message: str) -> None:
-        proceed_with_action = False
-        while not proceed_with_action:
-            user_input = input(f"{action_message} [y/n]: ").strip().lower()
-            if user_input == "y":
-                proceed_with_action = True
-            elif user_input == "n":
-                print("Operation cancelled by the user")
-                raise exit(1)
-            else:
-                print(f"Please enter one of [y/n], received {user_input}")
-                proceed_with_action = False
-
-
-    def doublecheck_overwrite(self) -> None:
-        self._doublecheck_action(action_message=f"The file '{self.file_path}' already exists. Overwrite?")
-
-
-    def doublecheck_delete(self) -> None:
-        self._doublecheck_action(action_message=f"Are you sure you would like to delete '{self.file_path}'?")

@@ -34,8 +34,8 @@ class EventHandler(BaseEventHandler):
 
         bin_chunk = chunk.get_file('bin')
         _LOGGER.info(f"Deleting {bin_chunk.file_path}")
-        bin_chunk.delete(doublecheck_delete = False)
+        bin_chunk.delete()
 
         hdr_chunk = chunk.get_file('hdr')
         _LOGGER.info(f"Deleting {hdr_chunk.file_path}")
-        hdr_chunk.delete(doublecheck_delete = False)
+        hdr_chunk.delete()
