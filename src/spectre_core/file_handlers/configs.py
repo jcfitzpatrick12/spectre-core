@@ -243,8 +243,8 @@ class FitsConfig(SPECTREConfig):
                     ) -> None:
         d = type_cast_params(params, 
                              self.type_template)
-        d = validate_against_type_template(d, 
-                                           self.type_template)
+        validate_against_type_template(d, 
+                                       self.type_template)
         self.save(d, 
                   force = force)
         
