@@ -33,7 +33,7 @@ class JsonHandler(BaseFileHandler):
             if force:
                 pass
             else:
-                raise RuntimeError((f"{self.file_name} exists, write has been abandoned. "
+                raise RuntimeError((f"{self.file_name} already exists, write has been abandoned. "
                                     f"You can override this functionality with `force`"))
 
         with open(self.file_path, 'w') as file:
