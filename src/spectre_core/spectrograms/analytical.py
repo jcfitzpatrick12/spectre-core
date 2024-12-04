@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Callable
+from typing import Callable, Any
 from dataclasses import dataclass
 
 import numpy as np
@@ -23,15 +23,25 @@ class TestResults:
     # Maps each time to whether the corresponding spectrum matched analytically
     spectrum_validated: dict[float, bool] = None
 
+
     @property
     def num_validated_spectrums(self) -> int:
         """Counts the number of validated spectrums."""
         return sum(is_validated for is_validated in self.spectrum_validated.values())
 
+
     @property
     def num_invalid_spectrums(self) -> int:
         """Counts the number of spectrums that are not validated."""
         return len(self.spectrum_validated) - self.num_validated_spectrums
+    
+
+    def jsonify(self) -> dict[str, Any]:
+        return {
+            "time_validated": self.times_validated,
+            "frequencies_validated": self.frequencies_validated,
+            "spectrum_validated": self.spectrum_validated
+        }
 
 
 class _AnalyticalFactory:

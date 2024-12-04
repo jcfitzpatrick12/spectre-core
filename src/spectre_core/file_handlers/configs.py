@@ -239,12 +239,14 @@ class FitsConfig(SPECTREConfig):
 
     def save_params(self, 
                     params: list[str], 
-                    doublecheck_overwrite: bool = True
+                    force: bool = False
                     ) -> None:
         d = type_cast_params(params, 
                              self.type_template)
+        validate_against_type_template(d, 
+                                       self.type_template)
         self.save(d, 
-                  doublecheck_overwrite = doublecheck_overwrite)
+                  force = force)
         
     
 class CaptureConfig(SPECTREConfig):
