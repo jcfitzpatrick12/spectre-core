@@ -56,10 +56,10 @@ class BaseFileHandler(ABC):
         os.makedirs(self.parent_path, exist_ok=True) 
     
 
-    def delete(self) -> None:
-        if not self.exists:
-            warn(f"{self.file_path} does not exist. No deletion taking place")
-            return
+    def delete(self,
+               ignore_if_missing: bool = False) -> None:
+        if not self.exists and not ignore_if_missing:
+            raise FileNotFoundError(f"{self.file_name} does not exist, and so cannot be deleted")
         else:
             os.remove(self.file_path)
     
