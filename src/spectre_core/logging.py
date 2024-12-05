@@ -22,8 +22,8 @@ from spectre_core.cfg import (
 )
 
 PROCESS_TYPES = [
-    "USER", 
-    "WORKER"
+    "user", 
+    "worker"
 ]
 
 
