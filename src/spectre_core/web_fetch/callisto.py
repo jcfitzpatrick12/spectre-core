@@ -15,7 +15,7 @@ from spectre_core.cfg import (
 )
 from spectre_core.cfg import get_chunks_dir_path
 
-temp_dir = os.path.join(os.environ['SPECTRE_DIR_PATH'], "tmp")
+temp_dir = os.path.join(os.environ['SPECTRE_DATA_DIR_PATH'], "tmp")
 
 def get_chunk_name(station: str, date: str, time: str, instrument_code: str) -> str:
     dt = datetime.strptime(f"{date}T{time}", '%Y%m%dT%H%M%S')
