@@ -239,7 +239,7 @@ class SPECTREReceiver(BaseReceiver):
                 "window_type": str, # window type for STFFT
                 "window_kwargs": dict, # keyword arguments for window function, must be in order as in scipy documentation.
                 "window_size": int, # number of samples in STFFT window
-                "STFFT_kwargs": dict, # keyword arguments for the scipy STFFT class
+                "hop": int, # STFFT window hops by so many samples
                 "chunk_key": str, # tag will map to the chunk with this key
                 "event_handler_key": str, # tag will map to event handler with this key during post processing
             },
@@ -259,7 +259,7 @@ class SPECTREReceiver(BaseReceiver):
                 "window_type": str, # window type for STFFT
                 "window_kwargs": dict, # keyword arguments for window function, must be in order as in scipy documentation.
                 "window_size": int, # number of samples in STFFT window
-                "STFFT_kwargs": dict, # keyword arguments for the scipy STFFT class
+                "hop": int, # keyword arguments for the scipy STFFT class
                 "chunk_key": str, # tag will map to the chunk with this key
                 "event_handler_key": str, # tag will map to event handler with this key during post processing
             }
@@ -289,7 +289,7 @@ class SPECTREReceiver(BaseReceiver):
         window_type = capture_config["window_type"]
         window_kwargs = capture_config["window_kwargs"]
         window_size = capture_config["window_size"]
-        STFFT_kwargs = capture_config["STFFT_kwargs"]
+        hop = capture_config["hop"]
         chunk_key = capture_config["chunk_key"]
         event_handler_key = capture_config[ "event_handler_key"]
 
@@ -307,7 +307,7 @@ class SPECTREReceiver(BaseReceiver):
                           window_size,
                           chunk_size,
                           samp_rate)
-        validators.STFFT_kwargs(STFFT_kwargs)
+        validators.hop(hop)
         validators.chunk_key(chunk_key, "sweep")
         validators.event_handler_key(event_handler_key, "sweep")
         validators.gain_is_negative(IF_gain)
@@ -347,7 +347,7 @@ class SPECTREReceiver(BaseReceiver):
         window_type = capture_config["window_type"]
         window_kwargs = capture_config["window_kwargs"]
         window_size = capture_config["window_size"]
-        STFFT_kwargs = capture_config["STFFT_kwargs"]
+        hop = capture_config["hop"]
         chunk_key = capture_config["chunk_key"]
         event_handler_key = capture_config["event_handler_key"]
 
@@ -362,7 +362,7 @@ class SPECTREReceiver(BaseReceiver):
                           window_size,
                           chunk_size,
                           samp_rate)
-        validators.STFFT_kwargs(STFFT_kwargs)
+        validators.hop(hop)
         validators.chunk_key(chunk_key, 
                              "fixed")
         validators.event_handler_key(event_handler_key, 

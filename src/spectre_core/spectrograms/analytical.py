@@ -92,7 +92,7 @@ class _AnalyticalFactory:
         samp_rate = capture_config['samp_rate']
         amplitude = capture_config['amplitude']
         frequency = capture_config['frequency']
-        hop = capture_config['STFFT_kwargs']['hop']
+        hop = capture_config['hop']
 
         # Calculate derived parameters a (sampling rate ratio) and p (sampled periods).
         a = int(samp_rate / frequency)

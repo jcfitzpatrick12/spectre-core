@@ -69,20 +69,8 @@ def window(window_type: str,
         raise Exception(f"An error has occurred while validating the window. Received: {str(e)}")
     
 
-def STFFT_kwargs(STFFT_kwargs: dict):
-    if len(STFFT_kwargs) == 0:
-        raise ValueError("STFFT kwargs cannot be empty")
-    
-    STFFT_keys = STFFT_kwargs.keys()
-    if "hop" not in STFFT_keys:
-        raise KeyError(f"\"hop\" is a required key in STFFT kwargs. Received: {STFFT_keys}")
-    
-    hop_value = STFFT_kwargs.get("hop")
-    hop_value_type = type(hop_value)
-    if hop_value_type != int:
-        raise TypeError(f"\"hop\" must be specified as an integer. Received: {hop_value_type}")
-    
-    if hop_value < 0:
+def hop(hop: int):
+    if hop < 0:
         raise ValueError(f"\"hop\" must be strictly positive. Received: {hop_value}")
     
     

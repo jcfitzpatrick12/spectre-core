@@ -147,6 +147,7 @@ class SPECTREChunk(BaseChunk):
     
 
     def __get_SFT_instance(self) -> ShortTimeFFT:
+        hop = self.capture_config.get("hop")
         window_type = self.capture_config.get("window_type")
         window_params = self.capture_config.get("window_kwargs").values()
         window_size = self.capture_config.get("window_size")
@@ -155,6 +156,6 @@ class SPECTREChunk(BaseChunk):
                              window_size)
         samp_rate = self.capture_config.get("samp_rate")
         return ShortTimeFFT(window, 
-                            fs=samp_rate, 
-                            fft_mode="centered", 
-                            **self.capture_config.get("STFFT_kwargs"))
+                            hop,
+                            samp_rate, 
+                            fft_mode = "centered")
