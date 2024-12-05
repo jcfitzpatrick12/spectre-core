@@ -18,9 +18,9 @@ LOGS_DIR_PATH = os.environ.get("SPECTRE_LOGS_DIR_PATH",
 os.makedirs(LOGS_DIR_PATH, 
             exist_ok=True)
 
-JSON_CONFIGS_DIR_PATH = os.environ.get("SPECTRE_JSON_CONFIGS_DIR_PATH",
+CONFIGS_DIR_PATH = os.environ.get("SPECTRE_CONFIGS_DIR_PATH",
                                        os.path.join(SPECTRE_DATA_DIR_PATH, "configs"))
-os.makedirs(JSON_CONFIGS_DIR_PATH, 
+os.makedirs(CONFIGS_DIR_PATH, 
             exist_ok=True)
 
 DEFAULT_TIME_FORMAT = "%H:%M:%S"

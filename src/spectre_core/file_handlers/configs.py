@@ -7,7 +7,7 @@ from abc import ABC
 import ast
 
 from spectre_core.file_handlers.json import JsonHandler
-from spectre_core.cfg import JSON_CONFIGS_DIR_PATH
+from spectre_core.cfg import CONFIGS_DIR_PATH
 from spectre_core.exceptions import InvalidTagError
 
 
@@ -146,7 +146,7 @@ class SPECTREConfig(JsonHandler, ABC):
         self._config_type = config_type
 
         self._dict = None # cache
-        super().__init__(JSON_CONFIGS_DIR_PATH, 
+        super().__init__(CONFIGS_DIR_PATH, 
                          f"{config_type}_{tag}", 
                          **kwargs)
 
