@@ -192,24 +192,21 @@ def validate_analytically(spectrogram: Spectrogram,
 
     test_results = TestResults()
 
-    if is_close(analytical_spectrogram.times,
-                spectrogram.times,
-                absolute_tolerance):
-        test_results.times_validated = True
+    test_results.times_validated = bool(is_close(analytical_spectrogram.times,
+                                                 spectrogram.times,
+                                                 absolute_tolerance))
 
-
-    if is_close(analytical_spectrogram.frequencies,
-                spectrogram.frequencies,
-                absolute_tolerance):
-        test_results.frequencies_validated = True
+    test_results.frequencies_validated = bool(is_close(analytical_spectrogram.frequencies,
+                                                       spectrogram.frequencies,
+                                                       absolute_tolerance))
 
     test_results.spectrum_validated = {}
     for i in range(spectrogram.num_times):
         time = spectrogram.times[i]
         analytical_spectrum = analytical_spectrogram.dynamic_spectra[:, i]
         spectrum = spectrogram.dynamic_spectra[:, i]
-        test_results.spectrum_validated[time] = is_close(analytical_spectrum, 
-                                                         spectrum,
-                                                         absolute_tolerance)
+        test_results.spectrum_validated = bool(is_close(analytical_spectrum, 
+                                                        spectrum,
+                                                        absolute_tolerance))
 
     return test_results
