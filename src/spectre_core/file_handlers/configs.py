@@ -147,7 +147,7 @@ class SPECTREConfig(JsonHandler, ABC):
 
         self._dict = None # cache
         super().__init__(JSON_CONFIGS_DIR_PATH, 
-                         f"{config_type}_config_{tag}", 
+                         f"{config_type}_{tag}", 
                          **kwargs)
 
 
