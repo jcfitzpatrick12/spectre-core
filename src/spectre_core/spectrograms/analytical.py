@@ -38,7 +38,7 @@ class TestResults:
 
     def jsonify(self) -> dict[str, Any]:
         return {
-            "time_validated": self.times_validated,
+            "times_validated": self.times_validated,
             "frequencies_validated": self.frequencies_validated,
             "spectrum_validated": self.spectrum_validated
         }
