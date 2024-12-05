@@ -38,7 +38,7 @@ class TestResults:
 
     def jsonify(self) -> dict[str, Any]:
         return {
-            "time_validated": self.times_validated,
+            "times_validated": self.times_validated,
             "frequencies_validated": self.frequencies_validated,
             "spectrum_validated": self.spectrum_validated
         }
@@ -92,7 +92,7 @@ class _AnalyticalFactory:
         samp_rate = capture_config['samp_rate']
         amplitude = capture_config['amplitude']
         frequency = capture_config['frequency']
-        hop = capture_config['STFFT_kwargs']['hop']
+        hop = capture_config['hop']
 
         # Calculate derived parameters a (sampling rate ratio) and p (sampled periods).
         a = int(samp_rate / frequency)
@@ -192,24 +192,21 @@ def validate_analytically(spectrogram: Spectrogram,
 
     test_results = TestResults()
 
-    if is_close(analytical_spectrogram.times,
-                spectrogram.times,
-                absolute_tolerance):
-        test_results.times_validated = True
+    test_results.times_validated = bool(is_close(analytical_spectrogram.times,
+                                                 spectrogram.times,
+                                                 absolute_tolerance))
 
-
-    if is_close(analytical_spectrogram.frequencies,
-                spectrogram.frequencies,
-                absolute_tolerance):
-        test_results.frequencies_validated = True
+    test_results.frequencies_validated = bool(is_close(analytical_spectrogram.frequencies,
+                                                       spectrogram.frequencies,
+                                                       absolute_tolerance))
 
     test_results.spectrum_validated = {}
     for i in range(spectrogram.num_times):
         time = spectrogram.times[i]
         analytical_spectrum = analytical_spectrogram.dynamic_spectra[:, i]
         spectrum = spectrogram.dynamic_spectra[:, i]
-        test_results.spectrum_validated[time] = is_close(analytical_spectrum, 
-                                                         spectrum,
-                                                         absolute_tolerance)
+        test_results.spectrum_validated[time] = bool(is_close(analytical_spectrum, 
+                                                              spectrum,
+                                                              absolute_tolerance))
 
     return test_results
