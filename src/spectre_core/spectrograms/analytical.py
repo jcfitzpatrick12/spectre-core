@@ -205,8 +205,8 @@ def validate_analytically(spectrogram: Spectrogram,
         time = spectrogram.times[i]
         analytical_spectrum = analytical_spectrogram.dynamic_spectra[:, i]
         spectrum = spectrogram.dynamic_spectra[:, i]
-        test_results.spectrum_validated = bool(is_close(analytical_spectrum, 
-                                                        spectrum,
-                                                        absolute_tolerance))
+        test_results.spectrum_validated[time] = bool(is_close(analytical_spectrum, 
+                                                              spectrum,
+                                                              absolute_tolerance))
 
     return test_results
