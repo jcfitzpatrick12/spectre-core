@@ -43,7 +43,7 @@ class Receiver(SPECTREReceiver):
                 'window_type': str, # the window type for the STFFT
                 'window_kwargs': dict, # keyword arguments for scipy get window function. Must be in order as in scipy documentation.
                 'window_size': int, # number of samples for the window
-                'hop': dict, # STFFT hop shifts window by so many samples
+                'hop': int, # STFFT hop shifts window by so many samples
                 'chunk_key': str, # tag will map to the chunk with this key
                 'event_handler_key': str # tag will map to event handler with this key during post processing
             },
