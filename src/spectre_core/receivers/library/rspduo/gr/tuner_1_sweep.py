@@ -5,8 +5,12 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: Not titled yet
+# Title: tuner_1_sweep
 # GNU Radio version: 3.10.1.1
+
+# SPDX-FileCopyrightText: © 2024 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# This file is part of SPECTRE
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 import sys
 import signal
@@ -31,7 +35,7 @@ from spectre_core.file_handlers.configs import CaptureConfig
 class tuner_1_sweep(gr.top_block):
     def __init__(self, 
                  capture_config: CaptureConfig):
-        gr.top_block.__init__(self, "tuner-1-sweep", catch_exceptions=True)
+        gr.top_block.__init__(self, "tuner_1_sweep", catch_exceptions=True)
 
         ##################################################
         # Unpack capture config
@@ -93,8 +97,8 @@ class tuner_1_sweep(gr.top_block):
         self.sdrplay3_rspduo_0.set_debug_mode(False)
         self.sdrplay3_rspduo_0.set_sample_sequence_gaps_check(False)
         self.sdrplay3_rspduo_0.set_show_gain_changes(False)
-        self.blocks_tag_debug_0 = blocks.tag_debug(gr.sizeof_gr_complex*1, 'freq', "freq")
-        self.blocks_tag_debug_0.set_display(True)
+        # self.blocks_tag_debug_0 = blocks.tag_debug(gr.sizeof_gr_complex*1, 'freq', "freq")
+        # self.blocks_tag_debug_0.set_display(True)
 
 
         ##################################################
@@ -103,14 +107,6 @@ class tuner_1_sweep(gr.top_block):
         self.msg_connect((self.spectre_sweep_driver_0, 'freq'), (self.sdrplay3_rspduo_0, 'freq'))
         self.connect((self.sdrplay3_rspduo_0, 0), (self.spectre_batched_file_sink_0, 0))
         self.connect((self.sdrplay3_rspduo_0, 0), (self.spectre_sweep_driver_0, 0))
-
-
-    def get_samp_rate(self):
-        return self.samp_rate
-
-    def set_samp_rate(self, samp_rate):
-        self.samp_rate = samp_rate
-        self.sdrplay3_rspduo_0.set_sample_rate(self.samp_rate, True)
 
 
 

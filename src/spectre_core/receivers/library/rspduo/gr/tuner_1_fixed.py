@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: Options 0
+# Title: tuner_1_fixed
 # GNU Radio version: 3.10.1.1
 
 # SPDX-FileCopyrightText: © 2024 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
@@ -50,7 +50,11 @@ class tuner_1_fixed(gr.top_block):
         ##################################################
         # Blocks
         ##################################################
-        self.spectre_batched_file_sink_0 = spectre.batched_file_sink(CHUNKS_DIR_PATH, tag, chunk_size, samp_rate, is_sweeping)
+        self.spectre_batched_file_sink_0 = spectre.batched_file_sink(CHUNKS_DIR_PATH, 
+                                                                     tag, 
+                                                                     chunk_size, 
+                                                                     samp_rate, 
+                                                                     is_sweeping)
         self.sdrplay3_rspduo_0 = sdrplay3.rspduo(
             '',
             rspduo_mode="Single Tuner",
