@@ -19,7 +19,8 @@ from gnuradio import eng_notation
 from gnuradio import sdrplay3
 from gnuradio import spectre
 
-
+from spectre_core.cfg import CHUNKS_DIR_PATH
+from spectre_core.file_handlers.configs import CaptureConfig
 
 
 class tuner_2_sweep(gr.top_block):
