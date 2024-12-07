@@ -62,7 +62,7 @@ class tuner_2_sweep(gr.top_block):
         self.sdrplay3_rspduo_0 = sdrplay3.rspduo(
             '',
             rspduo_mode="Single Tuner",
-            antenna="Tuner 1 50 ohm",
+            antenna="Tuner 2 50 ohm",
             stream_args=sdrplay3.stream_args(
                 output_type='fc32',
                 channels_size=1
