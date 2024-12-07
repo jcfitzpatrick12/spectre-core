@@ -4,7 +4,7 @@
   
 :loudspeaker: **This project is under active development. Contributors welcome.** :loudspeaker:  
 
-```spectre-core``` provides a SDR receiver-agnostic digital signal processing framework. It is the core Python package used by the [`spectre`](https://github.com/jcfitzpatrick12/spectre.git) program. 
+```spectre-core``` provides a SDR receiver-agnostic digital signal processing framework. It is the core Python package used by the [`spectre`](https://github.com/jcfitzpatrick12/spectre.git) program.  
 
 
 ## Installation
