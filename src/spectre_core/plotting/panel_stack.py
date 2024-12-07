@@ -9,13 +9,10 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
 from spectre_core.spectrograms.spectrogram import Spectrogram
-from spectre_core.plotting.base import BasePanel
-from spectre_core.plotting.factory import get_panel
-from spectre_core.plotting.library.time_cuts.panel import Panel as TimeCutsPanel
-from spectre_core.plotting.library.frequency_cuts.panel import Panel as FrequencyCutsPanel
-from spectre_core.plotting.library.spectrogram.panel import Panel as SpectrogramPanel
-from spectre_core.plotting.base import CutsPanel
+from spectre_core.plotting.base import BasePanel, CutsPanel
 from spectre_core.plotting.format import DEFAULT_FORMATS
+from spectre_core.plotting.factory import get_panel
+from spectre_core.plotting.library.spectrogram.panel import Panel as SpectrogramPanel
 
 class PanelStack:
     def __init__(self, time_type: str, figsize: Tuple[int, int] = (10, 10)):
