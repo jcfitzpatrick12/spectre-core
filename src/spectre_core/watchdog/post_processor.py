@@ -12,7 +12,7 @@ from watchdog.observers import Observer
 from spectre_core.watchdog.factory import get_event_handler_from_tag
 from spectre_core.cfg import CHUNKS_DIR_PATH
 
-class PostProcesser:
+class PostProcessor:
     def __init__(self, 
                  tag: str):
         self._observer: Observer = Observer()
