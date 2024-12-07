@@ -4,7 +4,12 @@
 
 from spectre_core.receivers.base import SDRPlayReceiver
 from spectre_core.receivers.receiver_register import register_receiver
-from spectre_core.receivers.library.rspduo.gr import tuner_1_fixed, tuner_1_sweep
+from spectre_core.receivers.library.rspduo.gr import (
+    tuner_1_fixed, 
+    tuner_1_sweep,
+    tuner_2_fixed,
+    tuner_2_sweep
+)
 from spectre_core.file_handlers.configs import CaptureConfig
 
 
@@ -17,14 +22,18 @@ class Receiver(SDRPlayReceiver):
     def _set_capture_methods(self) -> None:
         self._capture_methods = {
             "tuner-1-fixed": self.__tuner_1_fixed,
-            "tuner-1-sweep": self.__tuner_1_sweep
+            "tuner-1-sweep": self.__tuner_1_sweep,
+            "tuner-2-fixed": self.__tuner_2_fixed,
+            "tuner-2-sweep": self.__tuner_2_sweep
         }
     
 
     def _set_validators(self) -> None:
         self._validators = {
             "tuner-1-fixed": self.__tuner_1_fixed_validator,
-            "tuner-1-sweep": self.__tuner_1_sweep_validator
+            "tuner-1-sweep": self.__tuner_1_sweep_validator,
+            "tuner-2-fixed": self.__tuner_2_fixed_validator,
+            "tuner-2-sweep": self.__tuner_2_sweep_validator,
         }
         return
     
@@ -33,6 +42,8 @@ class Receiver(SDRPlayReceiver):
         self._type_templates = {
             "tuner-1-fixed": self._get_default_type_template("fixed"),
             "tuner-1-sweep": self._get_default_type_template("sweep"),
+            "tuner-2-fixed": self._get_default_type_template("fixed"),
+            "tuner-2-sweep": self._get_default_type_template("sweep"),
         }
 
     def _set_specifications(self) -> None:
@@ -55,14 +66,32 @@ class Receiver(SDRPlayReceiver):
 
     def __tuner_1_sweep(self, capture_config: CaptureConfig) -> None:
         tuner_1_sweep.main(capture_config)
+
     
+    def __tuner_2_fixed(self, capture_config: CaptureConfig) -> None:
+        tuner_2_fixed.main(capture_config)
+    
+
+    def __tuner_2_sweep(self, capture_config: CaptureConfig) -> None:
+        tuner_2_sweep(capture_config)
+
 
     def __tuner_1_fixed_validator(self, capture_config: CaptureConfig) -> None:
         self._default_fixed_validator(capture_config)
         self._sdrplay_validator(capture_config)
-    
-    
+ 
+
     def __tuner_1_sweep_validator(self, capture_config: CaptureConfig) -> None:
+        self._default_sweep_validator(capture_config)
+        self._sdrplay_validator(capture_config)  
+
+
+    def __tuner_2_fixed_validator(self, capture_config: CaptureConfig) -> None:
+        self._default_fixed_validator(capture_config)
+        self._sdrplay_validator(capture_config)
+
+
+    def __tuner_2_sweep_validator(self, capture_config: CaptureConfig) -> None:
         self._default_sweep_validator(capture_config)
         self._sdrplay_validator(capture_config)
     
