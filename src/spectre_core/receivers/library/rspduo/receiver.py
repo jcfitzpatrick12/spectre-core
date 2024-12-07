@@ -73,7 +73,7 @@ class Receiver(SDRPlayReceiver):
     
 
     def __tuner_2_sweep(self, capture_config: CaptureConfig) -> None:
-        tuner_2_sweep(capture_config)
+        tuner_2_sweep.main(capture_config)
 
 
     def __tuner_1_fixed_validator(self, capture_config: CaptureConfig) -> None:
