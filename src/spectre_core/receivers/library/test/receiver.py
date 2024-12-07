@@ -68,6 +68,7 @@ class Receiver(SPECTREReceiver):
     
     def _set_specifications(self) -> None:
         self._specifications = {
+            "samp_rate_lower_bound": 64000
         } 
 
 
@@ -104,6 +105,9 @@ class Receiver(SPECTREReceiver):
         validators.hop(hop)
         validators.chunk_key(chunk_key, "fixed")
         validators.event_handler_key(event_handler_key, "fixed")
+
+        if samp_rate < self.specifications.get("samp_rate_lower_bound"):
+            raise ValueError(f"Sample rate must be greater than or equal to {self.specifications.get('samp_rate_lower_bound')}")
 
         if time_resolution != 0:
             raise ValueError(f"Time resolution must be zero. Received: {time_resolution}")
