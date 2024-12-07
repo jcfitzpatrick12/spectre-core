@@ -12,7 +12,7 @@ from watchdog.observers import Observer
 from spectre_core.watchdog.factory import get_event_handler_from_tag
 from spectre_core.cfg import CHUNKS_DIR_PATH
 
-class Watcher:
+class PostProcesser:
     def __init__(self, 
                  tag: str):
         self._observer: Observer = Observer()
@@ -25,7 +25,7 @@ class Watcher:
 
 
     def start(self):
-        _LOGGER.info("Starting watcher...")
+        _LOGGER.info("Starting post processor...")
 
         # Schedule and start the observer
         self._observer.schedule(self._event_handler, 
