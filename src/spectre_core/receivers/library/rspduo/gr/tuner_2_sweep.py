@@ -71,7 +71,7 @@ class tuner_2_sweep(gr.top_block):
         self.sdrplay3_rspduo_0.set_sample_rate(samp_rate, True)
         self.sdrplay3_rspduo_0.set_center_freq(start_freq, True)
         self.sdrplay3_rspduo_0.set_bandwidth(bandwidth)
-        self.sdrplay3_rspduo_0.set_antenna("Tuner 1 50 ohm")
+        self.sdrplay3_rspduo_0.set_antenna("Tuner 2 50 ohm")
         self.sdrplay3_rspduo_0.set_gain_mode(False)
         self.sdrplay3_rspduo_0.set_gain(IF_gain, 'IF', True)
         self.sdrplay3_rspduo_0.set_gain(RF_gain, 'RF', True)
