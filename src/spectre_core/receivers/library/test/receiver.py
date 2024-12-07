@@ -33,41 +33,42 @@ class Receiver(SPECTREReceiver):
     def _set_type_templates(self) -> None:
         self._type_templates = {
             "cosine-signal-1": {
-                'samp_rate': int, # [Hz]
-                'frequency': float, # [Hz]
-                'amplitude': float, # unitless
-                'chunk_size': int, # [s]
-                'joining_time': int, # [s]
-                'time_resolution': float, # [s]
-                'frequency_resolution': float, # [Hz]
-                'window_type': str, # the window type for the STFFT
-                'window_kwargs': dict, # keyword arguments for scipy get window function. Must be in order as in scipy documentation.
-                'window_size': int, # number of samples for the window
-                'hop': int, # STFFT hop shifts window by so many samples
-                'chunk_key': str, # tag will map to the chunk with this key
-                'event_handler_key': str # tag will map to event handler with this key during post processing
+                "samp_rate": int, # [Hz]
+                "frequency": float, # [Hz]
+                "amplitude": float, # unitless
+                "chunk_size": int, # [s]
+                "joining_time": int, # [s]
+                "time_resolution": float, # [s]
+                "frequency_resolution": float, # [Hz]
+                "window_type": str, # the window type for the STFFT
+                "window_kwargs": dict, # keyword arguments for scipy get window function. Must be in order as in scipy documentation.
+                "window_size": int, # number of samples for the window
+                "hop": int, # STFFT hop shifts window by so many samples
+                "chunk_key": str, # maps to the corresponding chunk class
+                "event_handler_key": str, # maps to the event handler used in post processing
             },
             "tagged-staircase": {
-                'samp_rate': int, # [Hz]
-                'min_samples_per_step': int, # [samples]
-                'max_samples_per_step': int, # [samples]
-                'freq_step': float, # [Hz]
-                'step_increment': int, # [samples]
-                'chunk_size': int, # [s]
-                'joining_time': int, # [s]
-                'time_resolution': float, # [s]
-                'frequency_resolution': float, # [Hz]
-                'window_type': str, # the window type for the STFFT
-                'window_kwargs': dict, # keyword arguments for scipy get window function. Must be in order as in scipy documentation.
-                'window_size': int, # number of samples for the window
-                'hop': int, # keyword arguments for scipy STFFT class
-                'chunk_key': str, # tag will map to the chunk with this key
-                'event_handler_key': str, # tag will map to event handler with this key during post processing
+                "samp_rate": int, # [Hz]
+                "min_samples_per_step": int, # [samples]
+                "max_samples_per_step": int, # [samples]
+                "freq_step": float, # [Hz]
+                "step_increment": int, # [samples]
+                "chunk_size": int, # [s]
+                "joining_time": int, # [s]
+                "time_resolution": float, # [s]
+                "frequency_resolution": float, # [Hz]
+                "window_type": str, # the window type for the STFFT
+                "window_kwargs": dict, # keyword arguments for scipy get window function. Must be in order as in scipy documentation.
+                "window_size": int, # number of samples for the window
+                "hop": int, # keyword arguments for scipy STFFT class
+                "chunk_key": str, # maps to the corresponding chunk class
+                "event_handler_key": str, # maps to the event handler used in post processing
             }
         }
     
     def _set_specifications(self) -> None:
         self._specifications = {
+            "samp_rate_lower_bound": 64000
         } 
 
 
@@ -104,6 +105,9 @@ class Receiver(SPECTREReceiver):
         validators.hop(hop)
         validators.chunk_key(chunk_key, "fixed")
         validators.event_handler_key(event_handler_key, "fixed")
+
+        if samp_rate < self.specifications.get("samp_rate_lower_bound"):
+            raise ValueError(f"Sample rate must be greater than or equal to {self.specifications.get('samp_rate_lower_bound')}")
 
         if time_resolution != 0:
             raise ValueError(f"Time resolution must be zero. Received: {time_resolution}")

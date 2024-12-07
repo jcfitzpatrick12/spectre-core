@@ -240,8 +240,8 @@ class SPECTREReceiver(BaseReceiver):
                 "window_kwargs": dict, # keyword arguments for window function, must be in order as in scipy documentation.
                 "window_size": int, # number of samples in STFFT window
                 "hop": int, # STFFT window hops by so many samples
-                "chunk_key": str, # tag will map to the chunk with this key
-                "event_handler_key": str, # tag will map to event handler with this key during post processing
+                "chunk_key": str, # maps to the corresponding chunk class
+                "event_handler_key": str, # maps to the event handler used in post processing
             },
             "sweep": {
                 "min_freq": float, # [Hz]
@@ -260,8 +260,8 @@ class SPECTREReceiver(BaseReceiver):
                 "window_kwargs": dict, # keyword arguments for window function, must be in order as in scipy documentation.
                 "window_size": int, # number of samples in STFFT window
                 "hop": int, # keyword arguments for the scipy STFFT class
-                "chunk_key": str, # tag will map to the chunk with this key
-                "event_handler_key": str, # tag will map to event handler with this key during post processing
+                "chunk_key": str, # maps to the corresponding chunk class
+                "event_handler_key": str, # maps to the event handler used in post processing
             }
         }
     
