@@ -87,8 +87,6 @@ class tuner_2_sweep(gr.top_block):
         self.sdrplay3_rspduo_0.set_debug_mode(False)
         self.sdrplay3_rspduo_0.set_sample_sequence_gaps_check(False)
         self.sdrplay3_rspduo_0.set_show_gain_changes(False)
-        # self.blocks_tag_debug_0 = blocks.tag_debug(gr.sizeof_gr_complex*1, 'freq', "freq")
-        # self.blocks_tag_debug_0.set_display(True)
 
 
         ##################################################
