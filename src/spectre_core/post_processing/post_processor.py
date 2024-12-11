@@ -9,7 +9,7 @@ from queue import Queue, Empty
 
 from watchdog.observers import Observer
 
-from spectre_core.watchdog.factory import get_event_handler_from_tag
+from spectre_core.post_processing.factory import get_event_handler_from_tag
 from spectre_core.cfg import CHUNKS_DIR_PATH
 
 class PostProcessor:
@@ -20,8 +20,7 @@ class PostProcessor:
 
         EventHandler = get_event_handler_from_tag(tag)
         self._event_handler = EventHandler(tag, 
-                                           self._exception_queue,
-                                           "bin")
+                                           self._exception_queue)
 
 
     def start(self):
@@ -29,8 +28,8 @@ class PostProcessor:
 
         # Schedule and start the observer
         self._observer.schedule(self._event_handler, 
-                               CHUNKS_DIR_PATH, 
-                               recursive=True)
+                                CHUNKS_DIR_PATH, 
+                                recursive=True)
         self._observer.start()
 
         try:
@@ -39,7 +38,7 @@ class PostProcessor:
                 try:
                     exc = self._exception_queue.get(block=True, timeout=0.25)
                     if exc:
-                        raise exc  # Propagate the exception
+                        raise exc  # Propagate the exception to the main thread
                 except Empty:
                     pass  # Continue looping if no exception in queue
         finally:

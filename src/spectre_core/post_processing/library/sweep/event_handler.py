@@ -8,8 +8,8 @@ _LOGGER = getLogger(__name__)
 import os
 
 from spectre_core.chunks.base import BaseChunk
-from spectre_core.watchdog.base import BaseEventHandler
-from spectre_core.watchdog.event_handler_register import register_event_handler
+from spectre_core.post_processing.base import BaseEventHandler
+from spectre_core.post_processing.event_handler_register import register_event_handler
 
 @register_event_handler("sweep")
 class EventHandler(BaseEventHandler):

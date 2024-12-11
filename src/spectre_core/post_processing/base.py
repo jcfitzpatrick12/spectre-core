@@ -8,11 +8,15 @@ _LOGGER = getLogger(__name__)
 import os
 import time
 from queue import Queue
-from typing import Any
+from typing import Optional
 from abc import ABC, abstractmethod
 from math import floor
 
-from watchdog.events import FileSystemEventHandler
+from watchdog.events import (
+    FileSystemEventHandler, 
+    FileCreatedEvent, 
+    DirCreatedEvent
+)
 
 from spectre_core.chunks.factory import get_chunk_from_tag
 from spectre_core.file_handlers.configs import CaptureConfig
@@ -27,17 +31,17 @@ from spectre_core.spectrograms.transform import (
 class BaseEventHandler(ABC, FileSystemEventHandler):
     def __init__(self, 
                  tag: str, 
-                 exception_queue: Queue, 
-                 extension: str):
+                 exception_queue: Queue):
         self._tag = tag
+        self._exception_queue = exception_queue  
+
         self._Chunk = get_chunk_from_tag(tag)
-
         self._capture_config = CaptureConfig(tag)
+        self._notice_extension = self._capture_config["extension"]
 
-        self._extension = extension
-        self._exception_queue = exception_queue  # Queue to propagate exceptions
-
-        self._spectrogram: Spectrogram = None # spectrogram cache
+        self._process_queue: Queue = Queue(maxsize=2)
+        self._spectrogram: Optional[Spectrogram] = None # cache
+        
 
 
     @abstractmethod
@@ -45,30 +49,37 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         pass
 
 
-    def on_created(self, event):
-        if not event.is_directory and event.src_path.endswith(self._extension):
-            _LOGGER.info(f"Noticed: {event.src_path}")
-            try:
-                self._wait_until_stable(event.src_path)
-                self.process(event.src_path)
-            except Exception as e:
-                _LOGGER.error(f"An error has occured while processing {event.src_path}",
-                              exc_info=True)
-                self._flush_spectrogram() # flush the internally stored spectrogram
-                # Capture the exception and propagate it through the queue
-                self._exception_queue.put(e)
+    def on_created(self, event: DirCreatedEvent | FileCreatedEvent):
+        notice_file = (not event.is_directory) and event.src_path.endswith(self._notice_extension)
+        if notice_file:
+            self._process_queue.put(event.src_path)
+            self.process( self._process_queue.get(block=True) )
+            
+            # # if this is the first noticed file, there is no previous file to process
+            # if self._noticed_file is None:
+            #     self._process_next = event.src_path
+            #     return
+            # try:
+            #     self.process(self._process_next)
+            #     self._process_next = event.src_path
+            # except Exception as e:
+            #     _LOGGER.error(f"An error has occured while processing {event.src_path}",
+            #                   exc_info=True)
+            #     self._flush_spectrogram() # flush the internally stored spectrogram
+            #     # Capture the exception and propagate it through the queue
+            #     self._exception_queue.put(e)
 
 
-    def _wait_until_stable(self, file_path: str):
-        _LOGGER.info(f"Waiting for file stability: {file_path}")
-        size = -1
-        while True:
-            current_size = os.path.getsize(file_path)
-            if current_size == size:
-                _LOGGER.info(f"File is now stable: {file_path}")
-                break  # File is stable when the size hasn't changed
-            size = current_size
-            time.sleep(0.25)
+    # def _wait_until_stable(self):
+    #     _LOGGER.info(f"Waiting for file stability: {file_path}")
+    #     size = -1
+    #     while True:
+    #         current_size = os.path.getsize(file_path)
+    #         if current_size == size:
+    #             _LOGGER.info(f"File is now stable: {file_path}")
+    #             break  # File is stable when the size hasn't changed
+    #         size = current_size
+    #         time.sleep(0.25)
 
 
     def _average_in_time(self, spectrogram: Spectrogram) -> Spectrogram:

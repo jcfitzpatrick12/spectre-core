@@ -2,8 +2,8 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from spectre_core.watchdog.event_handler_register import event_handler_map
-from spectre_core.watchdog.base import BaseEventHandler
+from spectre_core.post_processing.event_handler_register import event_handler_map
+from spectre_core.post_processing.base import BaseEventHandler
 from spectre_core.file_handlers.configs import CaptureConfig
 from spectre_core.exceptions import EventHandlerNotFoundError
 
