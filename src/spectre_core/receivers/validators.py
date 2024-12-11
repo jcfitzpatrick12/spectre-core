@@ -91,7 +91,7 @@ def center_freq_strictly_positive(center_freq: float):
 def bandwidth_strictly_positive(bandwidth: float) -> None:
     if bandwidth < 0:
         raise ValueError((f"Bandwidth must be non-negative. "
-                          f"Received: {bandwidth*1e-6} [MHz]"))
+                          f"Got {bandwidth*1e-6} [MHz]"))
     
 
 def nyquist_criterion(samp_rate: int, 
@@ -102,18 +102,18 @@ def nyquist_criterion(samp_rate: int,
 
 def samp_rate_strictly_positive(samp_rate: int) -> None:
     if samp_rate < 0:
-        raise ValueError(f"Sample rate must be strictly positive. Received: {samp_rate} [Hz]")
+        raise ValueError(f"Sample rate must be strictly positive. Got {samp_rate} [Hz]")
     
 
 def chunk_size_strictly_positive(chunk_size: int) -> None:
     if chunk_size <= 0:
-        raise ValueError(f"Chunk size must be strictly positive. Received: {chunk_size} [s]")
+        raise ValueError(f"Chunk size must be strictly positive. Got {chunk_size} [s]")
     
 
 def time_resolution(time_resolution: float, 
                     chunk_size: int) -> None:
     if time_resolution < 0:
-        raise ValueError(f"Time resolution must be non-negative. Received: {time_resolution} [s]")
+        raise ValueError(f"Time resolution must be non-negative. Got {time_resolution} [s]")
     
     if time_resolution > chunk_size:
         raise ValueError("Time resolution must be less than or equal to chunk size")
@@ -122,27 +122,27 @@ def time_resolution(time_resolution: float,
 def frequency_resolution(frequency_resolution: float,
                          bandwidth: float = None) -> None:
     if frequency_resolution < 0:
-        raise ValueError(f"Frequency resolution must be non-negative. Received {frequency_resolution} [Hz]")
+        raise ValueError(f"Frequency resolution must be non-negative. Got {frequency_resolution} [Hz]")
     
     if bandwidth is not None and frequency_resolution >= bandwidth:
-        raise ValueError(f"Frequency resolution must be less than the bandwidth. Received frequency resolution to be {frequency_resolution} [Hz], with bandwidth {bandwidth} [Hz]")
+        raise ValueError(f"Frequency resolution must be less than the bandwidth. Got frequency resolution to be {frequency_resolution} [Hz], with bandwidth {bandwidth} [Hz]")
     
 
 def chunk_key(chunk_key: str, 
               expected_chunk_key: str) -> None:
     if chunk_key != expected_chunk_key:
-        raise ValueError(f"Expected \"{expected_chunk_key}\" for the chunk_key, received: {chunk_key}")
+        raise ValueError(f"Expected \"{expected_chunk_key}\" for the chunk_key, Got {chunk_key}")
     
 
 def event_handler_key(event_handler_key: str, 
                       expected_event_handler_key: str) -> None:
     if event_handler_key != expected_event_handler_key:
-        raise ValueError(f"Expected \"{expected_event_handler_key}\" for the event_handler_key, received: {event_handler_key}")
+        raise ValueError(f"Expected \"{expected_event_handler_key}\" for the event_handler_key, Got {event_handler_key}")
     
 
 def gain_is_negative(gain: float) -> None:
     if gain > 0:
-        raise ValueError(f"Gain must be non-positive. Received {gain} [dB]")
+        raise ValueError(f"Gain must be non-positive. Got {gain} [dB]")
     
 
 def _compute_num_steps_per_sweep(min_freq: float, 
@@ -188,7 +188,7 @@ def num_samples_per_step(samples_per_step: int,
     if window_size >= samples_per_step:
         raise ValueError((f"Window size must be strictly less than the number of samples per step. "
                           f"Got window size '{window_size}' [samples], which is more than or equal "
-                          f"to the number of samples per step {samples_per_step}"))
+                          f"to the number of samples per step '{samples_per_step}'"))
     
 
 def non_overlapping_steps(freq_step: float, 
