@@ -72,7 +72,6 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
             
             # Process the previously queued file, if any
             if self._queued_file is not None:
-                _LOGGER.info(f"Processing {self._queued_file}")
                 self.process(self._queued_file)
             
             # Queue the current file for processing next
