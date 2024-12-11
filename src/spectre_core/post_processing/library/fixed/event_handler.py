@@ -16,10 +16,12 @@ class EventHandler(BaseEventHandler):
         super().__init__(*args, **kwargs)
 
 
-    def process(self, file_path: str):
-        _LOGGER.info(f"Processing: {file_path}")
-        file_name = os.path.basename(file_path)
-        chunk_start_time, _ = os.path.splitext(file_name)[0].split('_')
+    def process(self, 
+                absolute_file_path: str):
+        _LOGGER.info(f"Processing: {absolute_file_path}")
+        file_name = os.path.basename(absolute_file_path)
+        base_file_name, _ = os.path.splitext(file_name)
+        chunk_start_time, _ = base_file_name.split('_')
         chunk = self._Chunk(chunk_start_time, self._tag)
 
         _LOGGER.info("Creating spectrogram")
