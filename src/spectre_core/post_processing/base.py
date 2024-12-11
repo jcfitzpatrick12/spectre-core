@@ -36,7 +36,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         self._Chunk = get_chunk_from_tag(tag)
 
         self._capture_config = CaptureConfig(tag)
-        self._notice_extension = self._capture_config["extension"]
+        self._watch_extension = self._capture_config["watch_extension"]
 
         # attribute to store the next file to be processed 
         # (specifically, the absolute file path)
@@ -63,17 +63,21 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         they are post processed. Notably, files are processed sequentially
         not parallely. 
         """
+
         absolute_file_path = event.src_path
-        _LOGGER.info(f"Noticed {absolute_file_path}")
         
-        # Process the previously queued file, if any
-        if self._queued_file is not None:
-            _LOGGER.info(f"Processing {self._queued_file}")
-            self.process(self._queued_file)
-        
-        # Queue the current file for processing next
-        _LOGGER.info(f"Queueing {absolute_file_path} for post processing")
-        self._queued_file = absolute_file_path
+        # only notice a file if it ends with the appropriate extension
+        if absolute_file_path.endswith(self._watch_extension):
+            _LOGGER.info(f"Noticed {absolute_file_path}")
+            
+            # Process the previously queued file, if any
+            if self._queued_file is not None:
+                _LOGGER.info(f"Processing {self._queued_file}")
+                self.process(self._queued_file)
+            
+            # Queue the current file for processing next
+            _LOGGER.info(f"Queueing {absolute_file_path} for post processing")
+            self._queued_file = absolute_file_path
 
 
     def _average_in_time(self, 
