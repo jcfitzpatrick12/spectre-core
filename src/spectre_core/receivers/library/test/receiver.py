@@ -114,13 +114,16 @@ class Receiver(SPECTREReceiver):
                                    "bin")
 
         if samp_rate < self.specifications.get("samp_rate_lower_bound"):
-            raise ValueError(f"Sample rate must be greater than or equal to {self.specifications.get('samp_rate_lower_bound')}")
+            raise ValueError((f"Sample rate must be greater than or equal to "
+                              f"{self.specifications.get('samp_rate_lower_bound')}"))
 
         if time_resolution != 0:
-            raise ValueError(f"Time resolution must be zero. Received: {time_resolution}")
+            raise ValueError(f"Time resolution must be zero. "
+                             f"Got {time_resolution} [s]")
         
         if frequency_resolution != 0:
-            raise ValueError(f"Frequency resolution must be zero. Received {frequency_resolution}")
+            raise ValueError((f"Frequency resolution must be zero. "
+                              f"Got {frequency_resolution}"))
         
         # check that the sample rate is an integer multiple of the underlying signal frequency
         if samp_rate % frequency != 0:
@@ -128,22 +131,26 @@ class Receiver(SPECTREReceiver):
 
         a = samp_rate/frequency
         if a < 2:
-            raise ValueError(f"The ratio of sampling rate over frequency must be a natural number greater than two.  Received: {a}")
+            raise ValueError((f"The ratio of sampling rate over frequency must be a natural number greater than two. "
+                             f"Got {a}"))
         
         # ensuring the window type is rectangular
         if window_type != "boxcar":
-            raise ValueError(f"The window type must be \"boxcar\". Received: {window_type}")
+            raise ValueError((f"The window type must be 'boxcar'. "
+                              f"Got {window_type}"))
         
         # analytical requirement
         # if p is the number of sampled cycles, we can find that p = window_size / a
         # the number of sampled cycles must be a positive natural number.
         p = window_size / a
         if window_size % a != 0:
-            raise ValueError(f"The number of sampled cycles must be a positive natural number. Computed that p={p}")
+            raise ValueError((f"The number of sampled cycles must be a positive natural number. "
+                              f"Computed that p={p}"))
     
     
         if amplitude <= 0:
-            raise ValueError(f"The amplitude must be strictly positive. Received: {amplitude}")
+            raise ValueError((f"The amplitude must be strictly positive. "
+                              f"Got {amplitude}"))
     
 
     def __tagged_staircase_validator(self, capture_config: CaptureConfig) -> None:
@@ -180,13 +187,17 @@ class Receiver(SPECTREReceiver):
             raise ValueError(f"The frequency step must be equal to the sampling rate")
         
         if min_samples_per_step <= 0:
-            raise ValueError(f"Minimum samples per step must be strictly positive. Received: {min_samples_per_step}")
+            raise ValueError((f"Minimum samples per step must be strictly positive. "
+                              f"Got {min_samples_per_step}"))
         
         if max_samples_per_step <= 0:
-            raise ValueError(f"Maximum samples per step must be strictly positive. Received: {max_samples_per_step}")
+            raise ValueError((f"Maximum samples per step must be strictly positive. "
+                              f"Got {max_samples_per_step}"))
         
         if step_increment <= 0:
-            raise ValueError(f"Step increment must be strictly positive. Received: {step_increment}")
+            raise ValueError((f"Step increment must be strictly positive. "
+                              f"Got {step_increment}"))
         
         if min_samples_per_step > max_samples_per_step:
-            raise ValueError(f"Minimum samples per step cannot be greater than the maximum samples per step. Received: {min_samples_per_step} > {max_samples_per_step}")
+            raise ValueError((f"Minimum samples per step cannot be greater than the maximum samples per step. "
+                              f"Got {min_samples_per_step}, which is greater than {max_samples_per_step}"))
