@@ -25,11 +25,8 @@ class EventHandler(BaseEventHandler):
         _LOGGER.info("Creating spectrogram")
         spectrogram = chunk.build_spectrogram()
 
-        _LOGGER.info("Averaging spectrogram")
         spectrogram = self._average_in_time(spectrogram)
         spectrogram = self._average_in_frequency(spectrogram)
-
-        _LOGGER.info("Joining spectrogram")
         self._join_spectrogram(spectrogram)
 
         bin_chunk = chunk.get_file('bin')

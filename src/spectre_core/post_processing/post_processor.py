@@ -5,9 +5,8 @@
 from logging import getLogger
 _LOGGER = getLogger(__name__)
 
-from queue import Queue, Empty
-
 from watchdog.observers import Observer
+from watchdog.events import FileSystemEvent
 
 from spectre_core.post_processing.factory import get_event_handler_from_tag
 from spectre_core.cfg import CHUNKS_DIR_PATH
@@ -15,35 +14,28 @@ from spectre_core.cfg import CHUNKS_DIR_PATH
 class PostProcessor:
     def __init__(self, 
                  tag: str):
-        self._observer: Observer = Observer()
-        self._exception_queue: Queue = Queue()  # A thread-safe queue for exceptions
+        self._observer = Observer()
 
         EventHandler = get_event_handler_from_tag(tag)
-        self._event_handler = EventHandler(tag, 
-                                           self._exception_queue)
+        self._event_handler = EventHandler(tag)
 
 
     def start(self):
-        _LOGGER.info("Starting post processor...")
+        """Start an observer and wait for the thread to terminate."""
 
         # Schedule and start the observer
         self._observer.schedule(self._event_handler, 
                                 CHUNKS_DIR_PATH, 
-                                recursive=True)
-        self._observer.start()
-
+                                recursive=True,
+                                event_filter=[FileSystemEvent])
+        
         try:
-            # Monitor the observer and handle exceptions
-            while self._observer.is_alive():
-                try:
-                    exc = self._exception_queue.get(block=True, timeout=0.25)
-                    if exc:
-                        raise exc  # Propagate the exception to the main thread
-                except Empty:
-                    pass  # Continue looping if no exception in queue
-        finally:
-            # Ensure the observer is properly stopped
-            self._observer.stop()
+            _LOGGER.info("Starting the post processing thread...") 
+            self._observer.start()
             self._observer.join()
-
+        except KeyboardInterrupt:
+            _LOGGER.warning(("Keyboard interrupt detected. Signalling "
+                             "post processing thread to stop."))
+            self._observer.stop()
+            _LOGGER.warning(("Post processing thread stopped."))
 

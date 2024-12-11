@@ -30,81 +30,81 @@ from spectre_core.spectrograms.transform import (
 
 class BaseEventHandler(ABC, FileSystemEventHandler):
     def __init__(self, 
-                 tag: str, 
-                 exception_queue: Queue):
+                 tag: str):
         self._tag = tag
-        self._exception_queue = exception_queue  
 
         self._Chunk = get_chunk_from_tag(tag)
+
         self._capture_config = CaptureConfig(tag)
         self._notice_extension = self._capture_config["extension"]
 
-        self._process_queue: Queue = Queue(maxsize=2)
+        # attribute to store the next file to be processed 
+        # (specifically, the absolute file path)
+        self._queued_file: Optional[str] = None
         self._spectrogram: Optional[Spectrogram] = None # cache
         
 
 
     @abstractmethod
-    def process(self, file_path: str) -> None:
-        pass
+    def process(self, 
+                absolute_file_path: str) -> None:
+        """Process the file at 'absolute_file_path'.
+        
+        Must be implemented by a derived event handler class.
+        """
 
 
-    def on_created(self, event: DirCreatedEvent | FileCreatedEvent):
-        notice_file = (not event.is_directory) and event.src_path.endswith(self._notice_extension)
-        if notice_file:
-            self._process_queue.put(event.src_path)
-            self.process( self._process_queue.get(block=True) )
-            
-            # # if this is the first noticed file, there is no previous file to process
-            # if self._noticed_file is None:
-            #     self._process_next = event.src_path
-            #     return
-            # try:
-            #     self.process(self._process_next)
-            #     self._process_next = event.src_path
-            # except Exception as e:
-            #     _LOGGER.error(f"An error has occured while processing {event.src_path}",
-            #                   exc_info=True)
-            #     self._flush_spectrogram() # flush the internally stored spectrogram
-            #     # Capture the exception and propagate it through the queue
-            #     self._exception_queue.put(e)
+    def on_created(self, 
+                   event: FileCreatedEvent):
+        """Process a batched file, only once the next batch is created.
+        
+        Since we assume that the batches are non-overlapping, this guarantees
+        that all files are stable (i.e., finished being written to) before
+        they are post processed. Notably, files are processed sequentially
+        not parallely. 
+        """
+        absolute_file_path = event.src_path
+        _LOGGER.info(f"Noticed {absolute_file_path}")
+        
+        # Process the previously queued file, if any
+        if self._queued_file is not None:
+            _LOGGER.info(f"Processing {self._queued_file}")
+            self.process(self._queued_file)
+        
+        # Queue the current file for processing next
+        _LOGGER.info(f"Queueing {absolute_file_path} for post processing")
+        self._queued_file = absolute_file_path
 
 
-    # def _wait_until_stable(self):
-    #     _LOGGER.info(f"Waiting for file stability: {file_path}")
-    #     size = -1
-    #     while True:
-    #         current_size = os.path.getsize(file_path)
-    #         if current_size == size:
-    #             _LOGGER.info(f"File is now stable: {file_path}")
-    #             break  # File is stable when the size hasn't changed
-    #         size = current_size
-    #         time.sleep(0.25)
-
-
-    def _average_in_time(self, spectrogram: Spectrogram) -> Spectrogram:
-        requested_time_resolution = self._capture_config.get('time_resolution') # [s]
+    def _average_in_time(self, 
+                         spectrogram: Spectrogram) -> Spectrogram:
+        _LOGGER.info("Averaging spectrogram in time")
+        requested_time_resolution = self._capture_config['time_resolution'] # [s]
         if requested_time_resolution is None:
             raise KeyError(f"Time resolution has not been specified in the capture config!")
         average_over = floor(requested_time_resolution/spectrogram.time_resolution) if requested_time_resolution > spectrogram.time_resolution else 1
         return time_average(spectrogram, average_over)
     
     
-    def _average_in_frequency(self, spectrogram: Spectrogram) -> Spectrogram:
-        frequency_resolution = self._capture_config.get('frequency_resolution') # [Hz]
+    def _average_in_frequency(self, 
+                              spectrogram: Spectrogram) -> Spectrogram:
+        _LOGGER.info("Averaging spectrogram in frequency")
+        frequency_resolution = self._capture_config['frequency_resolution'] # [Hz]
         if frequency_resolution is None:
             raise KeyError(f"Frequency resolution has not been specified in the capture config!")
         average_over = floor(frequency_resolution/spectrogram.frequency_resolution) if frequency_resolution > spectrogram.frequency_resolution else 1
         return frequency_average(spectrogram, average_over)
     
 
-    def _join_spectrogram(self, spectrogram: Spectrogram) -> None:
+    def _join_spectrogram(self, 
+                          spectrogram: Spectrogram) -> None:
+        _LOGGER.info("Joining spectrogram")
         if self._spectrogram is None:
             self._spectrogram = spectrogram
         else:
             self._spectrogram = join_spectrograms([self._spectrogram, spectrogram])
 
-        if self._spectrogram.time_range >= self._capture_config.get("joining_time"):
+        if self._spectrogram.time_range >= self._capture_config['joining_time']:
             self._flush_spectrogram()
     
 
