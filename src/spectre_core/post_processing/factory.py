@@ -8,7 +8,6 @@ from spectre_core.file_handlers.configs import CaptureConfig
 from spectre_core.exceptions import EventHandlerNotFoundError
 
 def get_event_handler(event_handler_key: str) -> BaseEventHandler:
-    # try and fetch the capture config mount
     EventHandler = event_handler_map.get(event_handler_key)
     if EventHandler is None:
         valid_event_handler_keys = list(event_handler_map.keys())
