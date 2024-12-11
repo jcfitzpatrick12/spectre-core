@@ -14,14 +14,14 @@ from scipy.signal import get_window
 def closed_upper_bound_RF_gain(RF_gain: float, 
                                RF_gain_upper_bound: float) -> None:
     if not (RF_gain <= RF_gain_upper_bound):
-        raise ValueError((f"RF gain must be strictly less than or equal to {RF_gain_upper_bound} [dB]. "
+        raise ValueError((f"RF gain must be less than or equal to {RF_gain_upper_bound} [dB]. "
                           f"Got {RF_gain} [dB]"))
 
 
 def closed_upper_bound_IF_gain(IF_gain: float, 
                                IF_gain_upper_bound: float) -> None:
     if not (IF_gain <= IF_gain_upper_bound):
-        raise ValueError((f"IF gain must be strictly less than or equal to {IF_gain_upper_bound} [dB]. "
+        raise ValueError((f"IF gain must be less than or equal to {IF_gain_upper_bound} [dB]. "
                           f"Got {IF_gain} [dB]"))
 
 
@@ -61,11 +61,13 @@ def window(window_type: str,
     
     if not is_power_of_two(window_size):
         raise ValueError((f"Window size must be some power of two. "
-                          f"Got '{window_size}'"))
+                          f"Got {window_size} [samples]"))
     
-
-    if window_size*(1/samp_rate) > chunk_size:
-        raise ValueError("Windowing interval must be strictly less than the chunk size")
+    window_interval = window_size*(1/samp_rate)
+    if window_interval > chunk_size:
+        raise ValueError((f"The windowing interval must be strictly less than the chunk size. "
+                          f"Computed the windowing interval to be {window_interval} [s], "
+                          f"but the chunk size is {chunk_size} [s]"))
     
     try:
         window_params = (window_type, 
@@ -73,13 +75,13 @@ def window(window_type: str,
         _ = get_window(window_params, window_size)
     except Exception as e:
         raise Exception((f"An error has occurred while validating the window. "
-                         f"Got '{str(e)}'"))
+                         f"Got {str(e)}"))
     
 
 def hop(hop: int):
     if hop < 0:
         raise ValueError((f"Window hop must be strictly positive. "
-                          f"Got '{hop}'"))
+                          f"Got {hop} [samples]"))
     
     
 def center_freq_strictly_positive(center_freq: float):
@@ -97,52 +99,64 @@ def bandwidth_strictly_positive(bandwidth: float) -> None:
 def nyquist_criterion(samp_rate: int, 
                       bandwidth: float) -> None:
     if samp_rate < bandwidth:
-        raise ValueError("Sample rate must be greater than or equal to the bandwidth")
+        raise ValueError((f"Sample rate must be greater than or equal to the bandwidth. "
+                          f"Got sample rate {samp_rate} [Hz], and bandwidth {bandwidth} [Hz]"))
     
 
 def samp_rate_strictly_positive(samp_rate: int) -> None:
-    if samp_rate < 0:
-        raise ValueError(f"Sample rate must be strictly positive. Got {samp_rate} [Hz]")
+    if samp_rate <= 0:
+        raise ValueError((f"Sample rate must be strictly positive. "
+                          f"Got {samp_rate} [Hz]"))
     
 
 def chunk_size_strictly_positive(chunk_size: int) -> None:
     if chunk_size <= 0:
-        raise ValueError(f"Chunk size must be strictly positive. Got {chunk_size} [s]")
+        raise ValueError((f"Chunk size must be strictly positive. "
+                          f"Got {chunk_size} [s]"))
     
 
 def time_resolution(time_resolution: float, 
                     chunk_size: int) -> None:
     if time_resolution < 0:
-        raise ValueError(f"Time resolution must be non-negative. Got {time_resolution} [s]")
+        raise ValueError((f"Time resolution must be non-negative. "
+                          f"Got {time_resolution} [s]"))
     
     if time_resolution > chunk_size:
-        raise ValueError("Time resolution must be less than or equal to chunk size")
+        raise ValueError(f"Time resolution must be less than or equal to chunk size. "
+                         f"Got time resolution {time_resolution} [s], "
+                         f"and chunk size {chunk_size} [s]")
     
 
 def frequency_resolution(frequency_resolution: float,
                          bandwidth: float = None) -> None:
     if frequency_resolution < 0:
-        raise ValueError(f"Frequency resolution must be non-negative. Got {frequency_resolution} [Hz]")
+        raise ValueError((f"Frequency resolution must be non-negative. "
+                          f"Got {frequency_resolution} [Hz]"))
     
     if bandwidth is not None and frequency_resolution >= bandwidth:
-        raise ValueError(f"Frequency resolution must be less than the bandwidth. Got frequency resolution to be {frequency_resolution} [Hz], with bandwidth {bandwidth} [Hz]")
+        raise ValueError((f"Frequency resolution must be less than the bandwidth. "
+                          f"Got frequency resolution to be {frequency_resolution} [Hz], "
+                          f"with bandwidth {bandwidth} [Hz]"))
     
 
 def chunk_key(chunk_key: str, 
               expected_chunk_key: str) -> None:
     if chunk_key != expected_chunk_key:
-        raise ValueError(f"Expected '{expected_chunk_key}' for the chunk_key, got {chunk_key}")
+        raise ValueError((f"Expected {expected_chunk_key} for the chunk key. "
+                          f"Got {chunk_key}"))
     
 
 def event_handler_key(event_handler_key: str, 
                       expected_event_handler_key: str) -> None:
     if event_handler_key != expected_event_handler_key:
-        raise ValueError(f"Expected '{expected_event_handler_key}' for the event_handler_key, got {event_handler_key}")
+        raise ValueError((f"Expected {expected_event_handler_key} for the event handler key. "
+                          f"Got {event_handler_key}"))
     
 
 def gain_is_negative(gain: float) -> None:
     if gain > 0:
-        raise ValueError(f"Gain must be non-positive. Got {gain} [dB]")
+        raise ValueError(f"Gain must be non-positive. "
+                         f"Got {gain} [dB]")
     
 
 def _compute_num_steps_per_sweep(min_freq: float, 
@@ -161,8 +175,8 @@ def num_steps_per_sweep(min_freq: float,
                                                        samp_rate, 
                                                        freq_step)
     if num_steps_per_sweep <= 1:
-        raise ValueError((f"We need strictly greater than one sample per step. "
-                          f"Computed: {num_steps_per_sweep}"))
+        raise ValueError((f"We need strictly greater than one step per sweep. "
+                          f"Computed {num_steps_per_sweep} step per sweep"))
     
 
 def sweep_interval(min_freq: float, 
@@ -179,23 +193,24 @@ def sweep_interval(min_freq: float,
     sweep_interval = num_samples_per_sweep * 1/samp_rate
     if sweep_interval > chunk_size:
         raise ValueError((f"Sweep interval must be less than the chunk size. "
-                          f"Computed sweep interval: {sweep_interval} [s] is greater than "
-                          f"the given chunk size {chunk_size} [s]"))
+                          f"The computed sweep interval is {sweep_interval} [s], "
+                          f"but the given chunk size is {chunk_size} [s]"))
     
 
 def num_samples_per_step(samples_per_step: int, 
                          window_size: int) -> None:
     if window_size >= samples_per_step:
         raise ValueError((f"Window size must be strictly less than the number of samples per step. "
-                          f"Got window size '{window_size}' [samples], which is more than or equal "
-                          f"to the number of samples per step '{samples_per_step}'"))
+                          f"Got window size {window_size} [samples], which is more than or equal "
+                          f"to the number of samples per step {samples_per_step}"))
     
 
 def non_overlapping_steps(freq_step: float, 
                           samp_rate: int) -> None:
     if freq_step < samp_rate:
         raise NotImplementedError(f"SPECTRE does not yet support spectral steps overlapping in frequency. "
-                                  f"Got frequency step {freq_step/1e6} [MHz] which is less than the sample rate {samp_rate/1e6} [MHz]")
+                                  f"Got frequency step {freq_step/1e6} [MHz] which is less than the sample "
+                                  f"rate {samp_rate/1e6} [MHz]")
     
 
 def step_interval(samples_per_step: int, 
@@ -212,5 +227,5 @@ def step_interval(samples_per_step: int,
 def watch_extension(watch_extension: str,
                     target_extension: str) -> None:
     if watch_extension != target_extension:
-        raise ValueError((f"Expected '{target_extension}' for the watch extension, "
-                          f"but got '{watch_extension}'"))
+        raise ValueError((f"Expected {target_extension} for the watch extension. "
+                          f"Got {watch_extension}"))
