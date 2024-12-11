@@ -13,7 +13,6 @@ from math import floor
 from watchdog.events import (
     FileSystemEventHandler, 
     FileCreatedEvent, 
-    DirCreatedEvent
 )
 
 from spectre_core.chunks.factory import get_chunk_from_tag
@@ -36,7 +35,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         self._capture_config = CaptureConfig(tag)
         self._watch_extension = self._capture_config["watch_extension"]
 
-        # attribute to store the next file to be processed 
+        # space to store the next file to be processed 
         # (specifically, the absolute file path)
         self._queued_file: Optional[str] = None
 
@@ -47,10 +46,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
     @abstractmethod
     def process(self, 
                 absolute_file_path: str) -> None:
-        """Process the file at 'absolute_file_path'.
-        
-        Must be implemented by a derived event handler class.
-        """
+        """Process the file at 'absolute_file_path'"""
 
 
     def on_created(self, 
@@ -76,7 +72,8 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
                 except Exception:
                     _LOGGER.error(f"An error has occured while processing {self._queued_file}",
                                   exc_info=True)
-                    self._flush_spectrogram() # flush the internally stored spectrogram
+                     # flush any internally stored spectrogram
+                    self._flush_spectrogram()
                     raise
             
             # Queue the current file for processing next
