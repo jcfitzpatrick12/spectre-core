@@ -35,7 +35,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         self._capture_config = CaptureConfig(tag)
         self._watch_extension = self._capture_config["watch_extension"]
 
-        # space to store the next file to be processed 
+        # attribute to store the next file to be processed 
         # (specifically, the absolute file path)
         self._queued_file: Optional[str] = None
 
