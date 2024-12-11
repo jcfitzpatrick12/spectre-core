@@ -5,8 +5,6 @@
 from logging import getLogger
 _LOGGER = getLogger(__name__)
 
-import os
-import time
 from queue import Queue
 from typing import Optional
 from abc import ABC, abstractmethod
@@ -73,7 +71,13 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
             
             # Process the previously queued file, if any
             if self._queued_file is not None:
-                self.process(self._queued_file)
+                try:
+                    self.process(self._queued_file)
+                except Exception:
+                    _LOGGER.error(f"An error has occured while processing {self._queued_file}",
+                                  exc_info=True)
+                    self._flush_spectrogram() # flush the internally stored spectrogram
+                    raise
             
             # Queue the current file for processing next
             _LOGGER.info(f"Queueing {absolute_file_path} for post processing")
