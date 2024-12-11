@@ -131,13 +131,13 @@ def frequency_resolution(frequency_resolution: float,
 def chunk_key(chunk_key: str, 
               expected_chunk_key: str) -> None:
     if chunk_key != expected_chunk_key:
-        raise ValueError(f"Expected '{expected_chunk_key}' for the chunk_key, Got {chunk_key}")
+        raise ValueError(f"Expected '{expected_chunk_key}' for the chunk_key, got {chunk_key}")
     
 
 def event_handler_key(event_handler_key: str, 
                       expected_event_handler_key: str) -> None:
     if event_handler_key != expected_event_handler_key:
-        raise ValueError(f"Expected '{expected_event_handler_key}' for the event_handler_key, Got {event_handler_key}")
+        raise ValueError(f"Expected '{expected_event_handler_key}' for the event_handler_key, got {event_handler_key}")
     
 
 def gain_is_negative(gain: float) -> None:
