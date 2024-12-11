@@ -46,6 +46,7 @@ class Receiver(SPECTREReceiver):
                 "hop": int, # STFFT hop shifts window by so many samples
                 "chunk_key": str, # maps to the corresponding chunk class
                 "event_handler_key": str, # maps to the event handler used in post processing
+                "watch_extension": str
             },
             "tagged-staircase": {
                 "samp_rate": int, # [Hz]
@@ -63,6 +64,7 @@ class Receiver(SPECTREReceiver):
                 "hop": int, # keyword arguments for scipy STFFT class
                 "chunk_key": str, # maps to the corresponding chunk class
                 "event_handler_key": str, # maps to the event handler used in post processing
+                "watch_extension": str
             }
         }
     
