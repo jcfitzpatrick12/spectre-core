@@ -14,6 +14,7 @@ from spectre_core.cfg import CHUNKS_DIR_PATH
 class PostProcessor:
     def __init__(self, 
                  tag: str):
+        
         self._observer = Observer()
 
         EventHandler = get_event_handler_from_tag(tag)
@@ -21,8 +22,7 @@ class PostProcessor:
 
 
     def start(self):
-        """Start an observer and wait for the thread to terminate."""
-        
+        """Start an observer to process newly created files in the chunks directory"""
         self._observer.schedule(self._event_handler, 
                                 CHUNKS_DIR_PATH, 
                                 recursive=True,
@@ -34,7 +34,7 @@ class PostProcessor:
             self._observer.join()
         except KeyboardInterrupt:
             _LOGGER.warning(("Keyboard interrupt detected. Signalling "
-                             "post processing thread to stop."))
+                             "the post processing thread to stop"))
             self._observer.stop()
-            _LOGGER.warning(("Post processing thread stopped."))
+            _LOGGER.warning(("Post processing thread has been successfully stopped"))
 
