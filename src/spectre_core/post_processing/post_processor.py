@@ -22,8 +22,7 @@ class PostProcessor:
 
     def start(self):
         """Start an observer and wait for the thread to terminate."""
-
-        # Schedule and start the observer
+        
         self._observer.schedule(self._event_handler, 
                                 CHUNKS_DIR_PATH, 
                                 recursive=True,
