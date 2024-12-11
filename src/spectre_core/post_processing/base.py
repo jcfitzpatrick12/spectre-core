@@ -41,6 +41,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         # attribute to store the next file to be processed 
         # (specifically, the absolute file path)
         self._queued_file: Optional[str] = None
+
         self._spectrogram: Optional[Spectrogram] = None # cache
         
 
