@@ -94,7 +94,7 @@ def fetch_chunks(instrument_code: Optional[str],
         os.mkdir(temp_dir)
 
     if instrument_code not in CALLISTO_INSTRUMENT_CODES:
-        raise ValueError(f"No match found for \"{instrument_code}\". Expected one of {CALLISTO_INSTRUMENT_CODES}")
+        raise ValueError(f"No match found for '{instrument_code}'. Expected one of {CALLISTO_INSTRUMENT_CODES}")
 
     download_callisto_data(instrument_code, year, month, day)
     unzip_to_chunks()

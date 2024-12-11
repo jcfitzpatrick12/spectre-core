@@ -8,8 +8,8 @@ _LOGGER = getLogger(__name__)
 import os
 
 from spectre_core.chunks.base import BaseChunk
-from spectre_core.watchdog.base import BaseEventHandler
-from spectre_core.watchdog.event_handler_register import register_event_handler
+from spectre_core.post_processing.base import BaseEventHandler
+from spectre_core.post_processing.event_handler_register import register_event_handler
 
 @register_event_handler("sweep")
 class EventHandler(BaseEventHandler):
@@ -19,23 +19,22 @@ class EventHandler(BaseEventHandler):
         self.previous_chunk: BaseChunk = None # cache for previous chunk
         
 
-    def process(self, file_path: str):
-        _LOGGER.info(f"Processing: {file_path}")
-        file_name = os.path.basename(file_path)
-        chunk_start_time, _ = os.path.splitext(file_name)[0].split('_')
+    def process(self, 
+                absolute_file_path: str):
+        _LOGGER.info(f"Processing: {absolute_file_path}")
+        file_name = os.path.basename(absolute_file_path)
+        base_file_name, _ = os.path.splitext(file_name)
+        chunk_start_time, _ = base_file_name.split('_')
         chunk = self._Chunk(chunk_start_time, self._tag)
 
         _LOGGER.info("Creating spectrogram")
         spectrogram = chunk.build_spectrogram(previous_chunk = self.previous_chunk)
 
-        _LOGGER.info("Averaging spectrogram")
         spectrogram = self._average_in_time(spectrogram)
         spectrogram = self._average_in_frequency(spectrogram)
-
-        _LOGGER.info("Joining spectrogram")
         self._join_spectrogram(spectrogram)
 
-        # if the previous chunk has not yet been set, it means we were processing the first chunk
+        # if the previous chunk has not yet been set, it means we are processing the first chunk
         # so we don't need to handle the previous chunk
         if self.previous_chunk is None:
             # instead, only set it for the next time this method is called

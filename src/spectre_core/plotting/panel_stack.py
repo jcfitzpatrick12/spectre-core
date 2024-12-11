@@ -15,7 +15,9 @@ from spectre_core.plotting.factory import get_panel
 from spectre_core.plotting.library.spectrogram.panel import Panel as SpectrogramPanel
 
 class PanelStack:
-    def __init__(self, time_type: str, figsize: Tuple[int, int] = (10, 10)):
+    def __init__(self, 
+                 time_type: str = "seconds", 
+                 figsize: Tuple[int, int] = (10, 10)):
         self._time_type = time_type
         self._figsize = figsize
         self._panels: List[BasePanel] = []

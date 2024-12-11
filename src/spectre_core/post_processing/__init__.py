@@ -3,4 +3,4 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # dynamically import all event handlers
-import spectre_core.watchdog.library
+import spectre_core.post_processing.library
