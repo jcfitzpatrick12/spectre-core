@@ -93,18 +93,23 @@ class Receiver(SPECTREReceiver):
         event_handler_key = capture_config["event_handler_key"]
         time_resolution = capture_config["time_resolution"]
         frequency_resolution = capture_config["frequency_resolution"]
+        watch_extension = capture_config["watch_extension"]
 
         validators.samp_rate_strictly_positive(samp_rate)
         validators.chunk_size_strictly_positive(chunk_size)
         validators.time_resolution(time_resolution, chunk_size) 
         validators.window(window_type, 
-                                          {}, 
-                                          window_size,
-                                          chunk_size,
-                                          samp_rate)
+                          {}, 
+                          window_size,
+                          chunk_size,
+                          samp_rate)
         validators.hop(hop)
-        validators.chunk_key(chunk_key, "fixed")
-        validators.event_handler_key(event_handler_key, "fixed")
+        validators.chunk_key(chunk_key, 
+                             "fixed")
+        validators.event_handler_key(event_handler_key, 
+                                     "fixed")
+        validators.watch_extension(watch_extension, 
+                                   "bin")
 
         if samp_rate < self.specifications.get("samp_rate_lower_bound"):
             raise ValueError(f"Sample rate must be greater than or equal to {self.specifications.get('samp_rate_lower_bound')}")
@@ -153,15 +158,22 @@ class Receiver(SPECTREReceiver):
         chunk_key = capture_config["chunk_key"]
         event_handler_key = capture_config["event_handler_key"]
         time_resolution = capture_config["time_resolution"]
-
+        watch_extension = capture_config["watch_extension"]
+        
         validators.samp_rate_strictly_positive(samp_rate)
         validators.chunk_size_strictly_positive(chunk_size)
         validators.time_resolution(time_resolution, chunk_size)
-        validators.window(window_type, window_kwargs, window_size, chunk_size, samp_rate)
+        validators.window(window_type, 
+                          window_kwargs, 
+                          window_size, 
+                          chunk_size, 
+                          samp_rate)
         validators.hop(hop)
         validators.chunk_key(chunk_key, "sweep")
         validators.event_handler_key(event_handler_key, "sweep")
-
+        validators.watch_extension(watch_extension, 
+                                   "bin")
+        
         if freq_step != samp_rate:
             raise ValueError(f"The frequency step must be equal to the sampling rate")
         

@@ -242,6 +242,7 @@ class SPECTREReceiver(BaseReceiver):
                 "hop": int, # STFFT window hops by so many samples
                 "chunk_key": str, # maps to the corresponding chunk class
                 "event_handler_key": str, # maps to the event handler used in post processing
+                "watch_extension": str, # event handlers watch for files with this extension
             },
             "sweep": {
                 "min_freq": float, # [Hz]
@@ -262,6 +263,7 @@ class SPECTREReceiver(BaseReceiver):
                 "hop": int, # keyword arguments for the scipy STFFT class
                 "chunk_key": str, # maps to the corresponding chunk class
                 "event_handler_key": str, # maps to the event handler used in post processing
+                "watch_extension": str, # event handlers watch for files with this extension
             }
         }
     
@@ -291,17 +293,18 @@ class SPECTREReceiver(BaseReceiver):
         window_size = capture_config["window_size"]
         hop = capture_config["hop"]
         chunk_key = capture_config["chunk_key"]
-        event_handler_key = capture_config[ "event_handler_key"]
+        event_handler_key = capture_config["event_handler_key"]
+        watch_extension = capture_config["watch_extension"]
 
         validators.center_freq_strictly_positive(min_freq)
         validators.center_freq_strictly_positive(max_freq)
         validators.samp_rate_strictly_positive(samp_rate)
         validators.bandwidth_strictly_positive(bandwidth)
         validators.nyquist_criterion(samp_rate, 
-                                              bandwidth)
+                                     bandwidth)
         validators.chunk_size_strictly_positive(chunk_size)
         validators.time_resolution(time_resolution, 
-                                             chunk_size) 
+                                   chunk_size) 
         validators.window(window_type, 
                           window_kwargs, 
                           window_size,
@@ -326,6 +329,8 @@ class SPECTREReceiver(BaseReceiver):
                                          samp_rate)
         validators.num_samples_per_step(samples_per_step, 
                                         window_size)
+        validators.watch_extension(watch_extension,
+                                   "bin")
 
         # if the api latency is defined, raise a warning if the step interval is of the same order
         api_latency = self.specifications.get("api_latency")
@@ -350,6 +355,7 @@ class SPECTREReceiver(BaseReceiver):
         hop = capture_config["hop"]
         chunk_key = capture_config["chunk_key"]
         event_handler_key = capture_config["event_handler_key"]
+        watch_extension = capture_config["watch_extension"]
 
         validators.center_freq_strictly_positive(center_freq)
         validators.samp_rate_strictly_positive(samp_rate)
@@ -369,7 +375,8 @@ class SPECTREReceiver(BaseReceiver):
                                      "fixed")
         validators.gain_is_negative(IF_gain)
         validators.gain_is_negative(RF_gain)
-    
+        validators.watch_extension(watch_extension,
+                                "bin")
 
 # parent class for shared methods and attributes of SDRPlay receivers
 class SDRPlayReceiver(SPECTREReceiver):
