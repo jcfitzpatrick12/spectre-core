@@ -193,7 +193,7 @@ _ptemplates = {
 T = TypeVar('T')
 def get_ptemplate(name: str, 
                   default: Optional[T],
-                  enforce_default: bool = True,
+                  enforce_default: bool = False,
                   add_pconstraints: Optional[list[PConstraint]] = None
 ) -> PTemplate:
     """Create a fresh copy of one of the default PTemplates"""
