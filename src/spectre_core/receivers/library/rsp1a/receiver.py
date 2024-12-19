@@ -21,10 +21,10 @@
 #         return
     
 
-#     def _set_validators(self) -> None:
-#         self._validators = {
-#             "fixed": self.__fixed_validator,
-#             "sweep": self.__sweep_validator
+#     def _set_pvalidators(self) -> None:
+#         self._pvalidators = {
+#             "fixed": self.__fixed_pvalidator,
+#             "sweep": self.__sweep_pvalidator
 #         }
 #         return
     
@@ -58,11 +58,11 @@
 #         sweep.main(capture_config)
     
 
-#     def __fixed_validator(self, capture_config: CaptureConfig) -> None:
-#         self._default_fixed_validator(capture_config)
-#         self._sdrplay_validator(capture_config)
+#     def __fixed_pvalidator(self, capture_config: CaptureConfig) -> None:
+#         self._default_fixed_pvalidator(capture_config)
+#         self._sdrplay_pvalidator(capture_config)
     
 
-#     def __sweep_validator(self, capture_config: CaptureConfig) -> None:
-#         self._default_sweep_validator(capture_config)
-#         self._sdrplay_validator(capture_config)
+#     def __sweep_pvalidator(self, capture_config: CaptureConfig) -> None:
+#         self._default_sweep_pvalidator(capture_config)
+#         self._sdrplay_pvalidator(capture_config)

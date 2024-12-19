@@ -8,7 +8,7 @@ from typing import Optional, Callable
 from spectre_core.capture_config import CaptureTemplate
 from spectre_core.pconstraints import enforce_positive, EnforceBounds
 from spectre_core.parameters import PTemplate, Parameters
-from spectre_core.receivers import pstore, vstore
+from spectre_core.receivers import pstore, pvalidators
 from spectre_core.receivers.base import BaseReceiver
 from spectre_core.receivers.receiver_register import register_receiver
 from spectre_core.receivers.library.test.gr import (
@@ -35,9 +35,9 @@ class Receiver(BaseReceiver):
         self.add_capture_method( Modes.TAGGED_STAIRCASE, self.__get_capture_method_tagged_staircase())
     
 
-    def _init_validators(self) -> None:
-        self.add_validator( Modes.COSINE_SIGNAL_1 , self.__get_validator_cosine_signal_1()  )
-        self.add_validator( Modes.TAGGED_STAIRCASE, self.__get_validator_tagged_staircase() )
+    def _init_pvalidators(self) -> None:
+        self.add_pvalidator( Modes.COSINE_SIGNAL_1 , self.__get_pvalidator_cosine_signal_1()  )
+        self.add_pvalidator( Modes.TAGGED_STAIRCASE, self.__get_pvalidator_tagged_staircase() )
 
     
 
@@ -300,14 +300,14 @@ class Receiver(BaseReceiver):
         return capture_template
     
     
-    def __get_validator_cosine_signal_1(self) -> Callable:
+    def __get_pvalidator_cosine_signal_1(self) -> Callable:
 
-        def validator_cosine_signal_1(parameters: Parameters):
+        def pvalidator_cosine_signal_1(parameters: Parameters):
             sample_rate          = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
             frequency            = parameters.get_parameter_value(pstore.PNames.FREQUENCY)
             window_size          = parameters.get_parameter_value(pstore.PNames.WINDOW_SIZE)
 
-            vstore.validate_window(parameters)
+            pvalidators.validate_window(parameters)
 
             # check that the sample rate is an integer multiple of the underlying signal frequency
             if sample_rate % frequency != 0:
@@ -328,12 +328,12 @@ class Receiver(BaseReceiver):
                 raise ValueError((f"The number of sampled cycles must be a positive natural number. "
                                 f"Computed that p={p}"))
             
-        return validator_cosine_signal_1
+        return pvalidator_cosine_signal_1
 
 
-    def __get_validator_tagged_staircase(self) -> None:
+    def __get_pvalidator_tagged_staircase(self) -> None:
 
-        def validator_tagged_staircase(parameters: Parameters):
+        def pvalidator_tagged_staircase(parameters: Parameters):
             freq_step            = parameters.get_parameter_value(pstore.PNames.FREQ_STEP)
             sample_rate          = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
             min_samples_per_step = parameters.get_parameter_value(pstore.PNames.MIN_SAMPLES_PER_STEP)
@@ -347,5 +347,5 @@ class Receiver(BaseReceiver):
                 raise ValueError((f"Minimum samples per step cannot be greater than the maximum samples per step. "
                                 f"Got {min_samples_per_step}, which is greater than {max_samples_per_step}"))
             
-        return validator_tagged_staircase
+        return pvalidator_tagged_staircase
         

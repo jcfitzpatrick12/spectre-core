@@ -15,12 +15,12 @@ from spectre_core.receivers import pstore
 
 
 # ------------------------- # 
-# Validator store
+# pvalidator store
 # ------------------------- # 
 
 
 #
-# Functions frequently used in validators.
+# Functions frequently used in pvalidators.
 #
 def validate_window(
         parameters: Parameters

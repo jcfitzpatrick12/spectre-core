@@ -28,12 +28,12 @@
 #         }
     
 
-#     def _set_validators(self) -> None:
-#         self._validators = {
-#             "tuner-1-fixed": self.__tuner_1_fixed_validator,
-#             "tuner-1-sweep": self.__tuner_1_sweep_validator,
-#             "tuner-2-fixed": self.__tuner_2_fixed_validator,
-#             "tuner-2-sweep": self.__tuner_2_sweep_validator,
+#     def _set_pvalidators(self) -> None:
+#         self._pvalidators = {
+#             "tuner-1-fixed": self.__tuner_1_fixed_pvalidator,
+#             "tuner-1-sweep": self.__tuner_1_sweep_pvalidator,
+#             "tuner-2-fixed": self.__tuner_2_fixed_pvalidator,
+#             "tuner-2-sweep": self.__tuner_2_sweep_pvalidator,
 #         }
 #         return
     
@@ -76,22 +76,22 @@
 #         tuner_2_sweep.main(capture_config)
 
 
-#     def __tuner_1_fixed_validator(self, capture_config: CaptureConfig) -> None:
-#         self._default_fixed_validator(capture_config)
-#         self._sdrplay_validator(capture_config)
+#     def __tuner_1_fixed_pvalidator(self, capture_config: CaptureConfig) -> None:
+#         self._default_fixed_pvalidator(capture_config)
+#         self._sdrplay_pvalidator(capture_config)
  
 
-#     def __tuner_1_sweep_validator(self, capture_config: CaptureConfig) -> None:
-#         self._default_sweep_validator(capture_config)
-#         self._sdrplay_validator(capture_config)  
+#     def __tuner_1_sweep_pvalidator(self, capture_config: CaptureConfig) -> None:
+#         self._default_sweep_pvalidator(capture_config)
+#         self._sdrplay_pvalidator(capture_config)  
 
 
-#     def __tuner_2_fixed_validator(self, capture_config: CaptureConfig) -> None:
-#         self._default_fixed_validator(capture_config)
-#         self._sdrplay_validator(capture_config)
+#     def __tuner_2_fixed_pvalidator(self, capture_config: CaptureConfig) -> None:
+#         self._default_fixed_pvalidator(capture_config)
+#         self._sdrplay_pvalidator(capture_config)
 
 
-#     def __tuner_2_sweep_validator(self, capture_config: CaptureConfig) -> None:
-#         self._default_sweep_validator(capture_config)
-#         self._sdrplay_validator(capture_config)
+#     def __tuner_2_sweep_pvalidator(self, capture_config: CaptureConfig) -> None:
+#         self._default_sweep_pvalidator(capture_config)
+#         self._sdrplay_pvalidator(capture_config)
     

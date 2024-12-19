@@ -26,8 +26,8 @@ class BaseReceiver(ABC):
         self._capture_methods: dict[str, Callable] = {}
         self._init_capture_methods()
     
-        self._validators: dict[str, Callable] = {}
-        self._init_validators()
+        self._pvalidators: dict[str, Callable] = {}
+        self._init_pvalidators()
 
         self._capture_templates: dict[str, CaptureTemplate] = {}
         self._init_capture_templates()
@@ -42,7 +42,7 @@ class BaseReceiver(ABC):
 
 
     @abstractmethod
-    def _init_validators(self) -> None:
+    def _init_pvalidators(self) -> None:
         pass
 
 
@@ -67,8 +67,8 @@ class BaseReceiver(ABC):
     
 
     @property
-    def validators(self) -> dict[str, Callable]:
-        return self._validators
+    def pvalidators(self) -> dict[str, Callable]:
+        return self._pvalidators
 
 
     @property
@@ -84,10 +84,10 @@ class BaseReceiver(ABC):
     @property
     def valid_modes(self) -> None:
         capture_method_modes   = list(self.capture_methods.keys())
-        validator_modes        = list(self.validators.keys())
+        pvalidator_modes        = list(self.pvalidators.keys())
         capture_template_modes = list(self.capture_templates.keys())
 
-        if capture_method_modes == validator_modes == capture_template_modes:
+        if capture_method_modes == pvalidator_modes == capture_template_modes:
             return capture_method_modes
         else:
             raise ValueError(f"Mode mismatch for the receiver {self.name}. Could not define valid modes")
@@ -112,8 +112,8 @@ class BaseReceiver(ABC):
 
 
     @property
-    def validator(self) -> Callable:
-        return self.validators[self.mode]
+    def pvalidator(self) -> Callable:
+        return self.pvalidators[self.mode]
 
 
     @property
@@ -127,10 +127,10 @@ class BaseReceiver(ABC):
         self._capture_methods[mode] = capture_method
 
 
-    def add_validator(self,
+    def add_pvalidator(self,
                       mode: str,
-                      validator: Callable) -> None:
-        self._validators[mode] = validator
+                      pvalidator: Callable) -> None:
+        self._pvalidators[mode] = pvalidator
 
 
     def add_capture_template(self,
@@ -161,7 +161,7 @@ class BaseReceiver(ABC):
                             parameters: Parameters,
                             force: bool = False) -> False:
         parameters = self.capture_template.apply_template(parameters)
-        self.validator(parameters)
+        self.pvalidator(parameters)
         capture_config = CaptureConfig(tag)
         capture_config.save_parameters(self.name,
                                        self.mode,
@@ -171,12 +171,12 @@ class BaseReceiver(ABC):
     def load_capture_config(self,
                             tag: str) -> CaptureConfig:
         capture_config = CaptureConfig(tag)
-        self.validator(capture_config.parameters)
+        self.pvalidator(capture_config.parameters)
         return capture_config
     
 # class SDRPlayReceiver(Base)
 
-# def sdrplay_validator(self, 
+# def sdrplay_pvalidator(self, 
 #                      capture_config: CaptureConfig) -> None:
 #     # RSPduo specific validations in single tuner mode
 #     center_frequency_lower_bound = get_spec("center_frequency_lower_bound")
@@ -186,37 +186,37 @@ class BaseReceiver(ABC):
 #     max_frequency = capture_config.get("max_frequency")
 
 #     if center_frequency:
-#         validators.closed_bound_center_frequency(center_frequency, 
+#         pvalidators.closed_bound_center_frequency(center_frequency, 
 #                                                 center_frequency_lower_bound, 
 #                                                 center_frequency_upper_bound)
         
 #     if min_frequency:
-#         validators.closed_bound_center_frequency(min_frequency, 
+#         pvalidators.closed_bound_center_frequency(min_frequency, 
 #                                                 center_frequency_lower_bound, 
 #                                                 center_frequency_upper_bound)
 #     if max_frequency:
-#         validators.closed_bound_center_frequency(max_frequency, 
+#         pvalidators.closed_bound_center_frequency(max_frequency, 
 #                                                 center_frequency_lower_bound, 
 #                                                 center_frequency_upper_bound)
 
-#     validators.closed_bound_sample_rate(capture_config["sample_rate"], 
+#     pvalidators.closed_bound_sample_rate(capture_config["sample_rate"], 
 #                                         self.get_spec("sample_rate_lower_bound"), 
 #                                         self.get_spec("sample_rate_upper_bound"))
 
 
-#     validators.closed_bound_bandwidth(capture_config["bandwidth"], 
+#     pvalidators.closed_bound_bandwidth(capture_config["bandwidth"], 
 #                                         self.get_spec("bandwidth_lower_bound"), 
 #                                         self.get_spec("bandwidth_upper_bound"))
 
-#     validators.closed_upper_bound_if_gain(capture_config["if_gain"], 
+#     pvalidators.closed_upper_bound_if_gain(capture_config["if_gain"], 
 #                                             self.get_spec("if_gain_upper_bound"))
     
-#     validators.closed_upper_bound_rf_gain(capture_config["rf_gain"], 
+#     pvalidators.closed_upper_bound_rf_gain(capture_config["rf_gain"], 
 #                                             self.get_spec("rf_gain_upper_bound"))
 
         # # if the api latency is defined, raise a warning if the step interval is of the same order
         # api_latency = self.specs.get("api_latency")
         # if api_latency:
-        #     validators.step_interval(samples_per_step, 
+        #     pvalidators.step_interval(samples_per_step, 
         #                              sample_rate, 
         #                              api_latency)
