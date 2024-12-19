@@ -5,9 +5,9 @@
 from dataclasses import dataclass
 from typing import Optional, Callable
 
-from spectre_core.capture_config import CaptureConfig, CaptureTemplate
+from spectre_core.capture_config import CaptureTemplate
 from spectre_core.pconstraints import enforce_positive, EnforceBounds
-from spectre_core.parameters import PTemplate
+from spectre_core.parameters import PTemplate, Parameters
 from spectre_core.receivers import pstore, vstore
 from spectre_core.receivers.base import BaseReceiver
 from spectre_core.receivers.receiver_register import register_receiver
@@ -37,7 +37,7 @@ class Receiver(BaseReceiver):
 
     def _init_validators(self) -> None:
         self.add_validator( Modes.COSINE_SIGNAL_1 , self.__get_validator_cosine_signal_1()  )
-        self.add_validator( Modes.TAGGED_STAIRCASE, self.__validator_tagged_staircase )
+        self.add_validator( Modes.TAGGED_STAIRCASE, self.__get_validator_tagged_staircase() )
 
     
 
@@ -301,13 +301,13 @@ class Receiver(BaseReceiver):
     
     
     def __get_validator_cosine_signal_1(self) -> Callable:
-        def validator_cosine_signal_1(capture_config: CaptureConfig):
-            sample_rate          = capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-            frequency            = capture_config.get_parameter_value(pstore.PNames.FREQUENCY)
-            window_size          = capture_config.get_parameter_value(pstore.PNames.WINDOW_SIZE)
 
-            vstore.validate_window(capture_config)
-            vstore.validate_nyquist_criterion(capture_config)
+        def validator_cosine_signal_1(parameters: Parameters):
+            sample_rate          = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
+            frequency            = parameters.get_parameter_value(pstore.PNames.FREQUENCY)
+            window_size          = parameters.get_parameter_value(pstore.PNames.WINDOW_SIZE)
+
+            vstore.validate_window(parameters)
 
             # check that the sample rate is an integer multiple of the underlying signal frequency
             if sample_rate % frequency != 0:
@@ -327,21 +327,25 @@ class Receiver(BaseReceiver):
             if window_size % a != 0:
                 raise ValueError((f"The number of sampled cycles must be a positive natural number. "
                                 f"Computed that p={p}"))
+            
         return validator_cosine_signal_1
 
 
-    def __validator_tagged_staircase(self,
-                                     capture_config: CaptureConfig) -> None:
+    def __get_validator_tagged_staircase(self) -> None:
+
+        def validator_tagged_staircase(parameters: Parameters):
+            freq_step            = parameters.get_parameter_value(pstore.PNames.FREQ_STEP)
+            sample_rate          = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
+            min_samples_per_step = parameters.get_parameter_value(pstore.PNames.MIN_SAMPLES_PER_STEP)
+            max_samples_per_step = parameters.get_parameter_value(pstore.PNames.MAX_SAMPLES_PER_STEP)
+            
+            if freq_step != sample_rate:
+                raise ValueError(f"The frequency step must be equal to the sampling rate")
+            
+            
+            if min_samples_per_step > max_samples_per_step:
+                raise ValueError((f"Minimum samples per step cannot be greater than the maximum samples per step. "
+                                f"Got {min_samples_per_step}, which is greater than {max_samples_per_step}"))
+            
+        return validator_tagged_staircase
         
-        freq_step            = capture_config.get_parameter_value(pstore.PNames.FREQ_STEP)
-        sample_rate          = capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-        min_samples_per_step = capture_config.get_parameter_value(pstore.PNames.MIN_SAMPLES_PER_STEP)
-        max_samples_per_step = capture_config.get_parameter_value(pstore.PNames.MAX_SAMPLES_PER_STEP)
-        
-        if freq_step != sample_rate:
-            raise ValueError(f"The frequency step must be equal to the sampling rate")
-        
-        
-        if min_samples_per_step > max_samples_per_step:
-            raise ValueError((f"Minimum samples per step cannot be greater than the maximum samples per step. "
-                              f"Got {min_samples_per_step}, which is greater than {max_samples_per_step}"))

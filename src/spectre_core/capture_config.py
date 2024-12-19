@@ -124,7 +124,7 @@ class CaptureTemplate:
 
 
     def __cast_and_constrain_parameters(self,
-                                       parameters: Parameters) -> None:
+                                        parameters: Parameters) -> None:
         """Explicity cast and constrain all explictly specified parameters"""
         for parameter in parameters:
             self.__cast_and_constrain_parameter(parameter)
@@ -140,33 +140,12 @@ class CaptureTemplate:
                                          parameter.value)
 
 
-    def save_capture_config(self,
-                            tag: str,
-                            receiver_name: str,
-                            receiver_mode: str,
-                            parameters: Parameters,
-                            force: bool = False) -> None:
-        """Validate parameters, fill missing defaults, and save a capture configuration."""
+    def apply_template(self,
+                       parameters: Parameters) -> None:
+        """Validate parameters, fill missing with defaults, and return anew."""
         self.__cast_and_constrain_parameters(parameters)
         self.__fill_missing_with_defaults(parameters)
-
-        capture_config = CaptureConfig(tag)
-        capture_config.save_parameters(receiver_name,
-                                       receiver_mode,
-                                       parameters,
-                                       force=force)
-        
-
-    def load_capture_config(self,
-                            tag: str) -> CaptureConfig:
-        """Load the capture config for the input tag.
-        
-        Capture config parameters are casted and validated before return.
-        """
-        capture_config = CaptureConfig(tag)
-        self.__cast_and_constrain_parameters(capture_config.parameters)
-        self.__fill_missing_with_defaults(capture_config.parameters)
-        return capture_config.parameters
+        return parameters
 
 
     def __iter__(self):

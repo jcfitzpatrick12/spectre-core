@@ -5,6 +5,7 @@
 from abc import ABC, abstractmethod
 from typing import Callable, Any, Optional
 
+from spectre_core.capture_config import CaptureConfig
 from spectre_core.exceptions import ModeNotFoundError
 from spectre_core.capture_config import (
     CaptureTemplate, 
@@ -159,12 +160,19 @@ class BaseReceiver(ABC):
                             tag: str,
                             parameters: Parameters,
                             force: bool = False) -> False:
-        self.capture_template.save_capture_config(tag,
-                                                  self.name,
-                                                  self.mode,
-                                                  parameters,
-                                                  force=force)
+        parameters = self.capture_template.apply_template(parameters)
+        self.validator(parameters)
+        capture_config = CaptureConfig(tag)
+        capture_config.save_parameters(self.name,
+                                       self.mode,
+                                       parameters,
+                                       force=force)
 
+    def load_capture_config(self,
+                            tag: str) -> CaptureConfig:
+        capture_config = CaptureConfig(tag)
+        self.validator(capture_config.parameters)
+        return capture_config
     
 # class SDRPlayReceiver(Base)
 
