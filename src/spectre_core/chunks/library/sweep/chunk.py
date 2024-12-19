@@ -12,7 +12,7 @@ import numpy as np
 from spectre_core.chunks.chunk_register import register_chunk
 from spectre_core.spectrograms.spectrogram import Spectrogram
 from spectre_core.chunks.library.fixed.chunk import BinChunk, FitsChunk
-from spectre_core.cfg import DEFAULT_DATETIME_FORMAT
+from spectre_core.paths import DEFAULT_DATETIME_FORMAT
 from spectre_core.chunks.base import SPECTREChunk, ChunkFile
 from spectre_core.exceptions import InvalidSweepMetadataError
 

@@ -13,6 +13,8 @@ class JsonHandler(BaseFileHandler):
                  base_file_name: str,
                  extension: str = "json",
                  **kwargs):
+        
+        self._dict = None # cache
         super().__init__(parent_path, 
                          base_file_name, 
                          extension,
@@ -38,3 +40,40 @@ class JsonHandler(BaseFileHandler):
 
         with open(self.file_path, 'w') as file:
                 json.dump(d, file, indent=4)
+
+
+    @property
+    def dict(self) -> dict[str, Any]:
+        if self._dict is None:
+            self._dict = self.read()
+        return self._dict
+    
+
+    def __getitem__(self, 
+                    key: str) -> Any:
+        return self.dict[key]
+    
+
+    def get(self, 
+            *args, 
+            **kwargs) -> Any:
+        return self.dict.get(*args, 
+                             **kwargs)
+    
+    
+    def update(self, 
+               *args, 
+               **kwargs) -> None:
+        self.dict.update(*args, **kwargs)
+
+    
+    def items(self):
+        return self.dict.items()
+    
+    
+    def keys(self):
+        return self.dict.keys()
+    
+    
+    def values(self):
+        return self.dict.values()

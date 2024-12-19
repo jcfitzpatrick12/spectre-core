@@ -7,7 +7,7 @@ from abc import ABC
 import ast
 
 from spectre_core.file_handlers.json import JsonHandler
-from spectre_core.cfg import CONFIGS_DIR_PATH
+from spectre_core.paths import CONFIGS_DIR_PATH
 from spectre_core.exceptions import InvalidTagError
 
 
@@ -57,13 +57,13 @@ def _convert_string_to_type(value: str,
 
 
 def _type_cast_string_dict(d: dict[str, str], 
-                           type_template: dict[str, Type]) -> dict[str, Any]:
+                           capture_template: dict[str, Type]) -> dict[str, Any]:
     """Cast the values of the input dictionary according to a type template."""
     casted_d = {}
     for key, value in d.items():
-        target_type = type_template.get(key)
+        target_type = capture_template.get(key)
         if target_type is None:
-            raise KeyError(f'Key "{key}" not found in type template. Expected keys: {list(type_template.keys())}')
+            raise KeyError(f'Key "{key}" not found in type template. Expected keys: {list(capture_template.keys())}')
         try:
             casted_d[key] = _convert_string_to_type(value, target_type)
         except ValueError:
@@ -72,18 +72,18 @@ def _type_cast_string_dict(d: dict[str, str],
 
 
 def _validate_keys(d: dict[str, Any], 
-                   type_template: dict[str, type], 
+                   capture_template: dict[str, type], 
                    ignore_keys: Optional[list] = None) -> None:
     """Validate that the keys in the input dictionary map one-to-one to the input type template."""
     if ignore_keys is None:
         ignore_keys = []
 
-    type_template_keys = set(type_template.keys())
+    capture_template_keys = set(capture_template.keys())
     input_keys = set(d.keys())
     ignore_keys = set(ignore_keys)
 
-    missing_keys = type_template_keys - input_keys
-    invalid_keys = input_keys - type_template_keys - ignore_keys
+    missing_keys = capture_template_keys - input_keys
+    invalid_keys = input_keys - capture_template_keys - ignore_keys
 
     errors = []
     
@@ -98,7 +98,7 @@ def _validate_keys(d: dict[str, Any],
 
 
 def _validate_types(d: dict[str, Any], 
-                    type_template: dict[str, type], 
+                    capture_template: dict[str, type], 
                     ignore_keys: Optional[list] = None) -> None:
     """Validate the types in the input dictionary are consistent with the input type template."""
 
@@ -108,7 +108,7 @@ def _validate_types(d: dict[str, Any],
     for k, v in d.items():
         if k in ignore_keys:
             continue
-        expected_type = type_template[k]
+        expected_type = capture_template[k]
         if expected_type is None:
             raise KeyError(f'Type not found for key "{k}" in the type template.')
         
@@ -116,23 +116,23 @@ def _validate_types(d: dict[str, Any],
             raise TypeError(f'Expected {expected_type} for "{k}", but got {type(v)}.')
 
 
-def validate_against_type_template(d: dict[str, Any], 
-                                   type_template: dict[str, type], 
+def validate_against_capture_template(d: dict[str, Any], 
+                                   capture_template: dict[str, type], 
                                    ignore_keys: Optional[list] = None) -> None:
     """Validates the keys and values of the input dictionary, according to the input type template."""
     _validate_keys(d, 
-                   type_template, 
+                   capture_template, 
                    ignore_keys = ignore_keys)
     _validate_types(d, 
-                    type_template, 
+                    capture_template, 
                     ignore_keys = ignore_keys)
 
 
 def type_cast_params(params: list[str], 
-                     type_template: dict[str, type]) -> dict[str, Any]:
+                     capture_template: dict[str, type]) -> dict[str, Any]:
     d = _params_to_string_dict(params)
     return _type_cast_string_dict(d, 
-                                  type_template)
+                                  capture_template)
 
 
 
@@ -207,7 +207,7 @@ class SPECTREConfig(JsonHandler, ABC):
 
 class FitsConfig(SPECTREConfig):
 
-    type_template = {
+    capture_template = {
         "ORIGIN": str,
         "TELESCOP": str,
         "INSTRUME": str,
@@ -228,7 +228,7 @@ class FitsConfig(SPECTREConfig):
                                    tag: str, 
                                    as_string: bool = False) -> list[str] | str:
         command_as_list = ["spectre", "create", "fits-config", "-t", tag]
-        for key, value in self.type_template.items():
+        for key, value in self.capture_template.items():
             command_as_list += ["-p"]
             command_as_list += [f"{key}={value.__name__}"]
         if as_string:
@@ -242,9 +242,9 @@ class FitsConfig(SPECTREConfig):
                     force: bool = False
                     ) -> None:
         d = type_cast_params(params, 
-                             self.type_template)
-        validate_against_type_template(d, 
-                                       self.type_template)
+                             self.capture_template)
+        validate_against_capture_template(d, 
+                                       self.capture_template)
         self.save(d, 
                   force = force)
         

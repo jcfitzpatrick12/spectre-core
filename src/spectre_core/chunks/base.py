@@ -9,10 +9,10 @@ from typing import Optional
 from scipy.signal import ShortTimeFFT, get_window
 
 from spectre_core.file_handlers.base import BaseFileHandler
-from spectre_core.cfg import get_chunks_dir_path
-from spectre_core.file_handlers.configs import CaptureConfig
+from spectre_core.paths import get_chunks_dir_path
+from spectre_core.capture_config import CaptureConfig
 from spectre_core.spectrograms.spectrogram import Spectrogram
-from spectre_core.cfg import DEFAULT_DATETIME_FORMAT
+from spectre_core.constants import DEFAULT_DATETIME_FORMAT
 from spectre_core.exceptions import ChunkFileNotFoundError
 
 class ChunkFile(BaseFileHandler):

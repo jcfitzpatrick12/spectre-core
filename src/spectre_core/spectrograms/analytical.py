@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from spectre_core.file_handlers.configs import CaptureConfig
+from spectre_core.capture_config import CaptureConfig
 from spectre_core.spectrograms.spectrogram import Spectrogram
 from spectre_core.spectrograms.array_operations import is_close
 from spectre_core.exceptions import ModeNotFoundError
@@ -36,7 +36,7 @@ class TestResults:
         return len(self.spectrum_validated) - self.num_validated_spectrums
     
 
-    def jsonify(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "times_validated": self.times_validated,
             "frequencies_validated": self.frequencies_validated,

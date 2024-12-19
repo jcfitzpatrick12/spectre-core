@@ -8,6 +8,7 @@ _LOGGER = getLogger(__name__)
 
 import os
 import logging
+from dataclasses import dataclass
 from typing import Callable, Optional
 import warnings
 from collections import OrderedDict
@@ -15,11 +16,9 @@ from datetime import datetime
 from functools import wraps
 
 from spectre_core.file_handlers.text import TextHandler
-from spectre_core.cfg import (
-    LOGS_DIR_PATH, 
-    DEFAULT_DATETIME_FORMAT, 
-    get_logs_dir_path
-)
+from spectre_core.paths import get_logs_dir_path
+from spectre_core.constants import DEFAULT_DATETIME_FORMAT
+
 
 PROCESS_TYPES = [
     "user", 
@@ -44,8 +43,7 @@ class LogHandler(TextHandler):
         self._process_type = process_type
 
         dt = datetime.strptime(datetime_stamp, DEFAULT_DATETIME_FORMAT)
-        date_dir = os.path.join(dt.strftime("%Y"), dt.strftime("%m"), dt.strftime("%d"))
-        parent_path = os.path.join(LOGS_DIR_PATH, date_dir)
+        parent_path = get_logs_dir_path(dt.year, dt.month, dt.day)
         base_file_name = f"{datetime_stamp}_{pid}_{process_type}"
 
         super().__init__(parent_path, base_file_name, extension = "log")

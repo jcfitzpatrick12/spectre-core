@@ -2,201 +2,345 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from spectre_core.receivers import validators
-from spectre_core.receivers.base import SPECTREReceiver
+from dataclasses import dataclass
+from typing import Optional, Callable
+
+from spectre_core.capture_config import CaptureConfig, CaptureTemplate
+from spectre_core.pconstraints import enforce_positive, EnforceBounds
+from spectre_core.parameters import PTemplate
+from spectre_core.receivers import pstore, vstore
+from spectre_core.receivers.base import BaseReceiver
 from spectre_core.receivers.receiver_register import register_receiver
-from spectre_core.receivers.library.test.gr import cosine_signal_1
-from spectre_core.receivers.library.test.gr import tagged_staircase
-from spectre_core.file_handlers.configs import CaptureConfig
+from spectre_core.receivers.library.test.gr import (
+    cosine_signal_1,
+    tagged_staircase
+)
+
+@dataclass
+class Modes:
+    COSINE_SIGNAL_1  = "cosine-signal-1"
+    TAGGED_STAIRCASE = "tagged-staircase"
 
 
 @register_receiver("test")
-class Receiver(SPECTREReceiver):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class Receiver(BaseReceiver):
+    def __init__(self, 
+                 name: str,
+                 mode: Optional[str]):
+        super().__init__(name,
+                         mode)
 
-
-    def _set_capture_methods(self) -> None:
-        self._capture_methods = {
-            "cosine-signal-1": self.__cosine_signal_1,
-            "tagged-staircase": self.__tagged_staircase
-        }
+    def _init_capture_methods(self) -> None:
+        self.add_capture_method( Modes.COSINE_SIGNAL_1 , self.__get_capture_method_cosine_signal_1() )
+        self.add_capture_method( Modes.TAGGED_STAIRCASE, self.__get_capture_method_tagged_staircase())
     
 
-    def _set_validators(self) -> None:
-        self._validators = {
-            "cosine-signal-1": self.__cosine_signal_1_validator,
-            "tagged-staircase": self.__tagged_staircase_validator
-        }
+    def _init_validators(self) -> None:
+        self.add_validator( Modes.COSINE_SIGNAL_1 , self.__get_validator_cosine_signal_1()  )
+        self.add_validator( Modes.TAGGED_STAIRCASE, self.__validator_tagged_staircase )
+
     
 
-    def _set_type_templates(self) -> None:
-        self._type_templates = {
-            "cosine-signal-1": {
-                "samp_rate": int, # [Hz]
-                "frequency": float, # [Hz]
-                "amplitude": float, # unitless
-                "chunk_size": int, # [s]
-                "joining_time": int, # [s]
-                "time_resolution": float, # [s]
-                "frequency_resolution": float, # [Hz]
-                "window_type": str, # the window type for the STFFT
-                "window_kwargs": dict, # keyword arguments for scipy get window function. Must be in order as in scipy documentation.
-                "window_size": int, # number of samples for the window
-                "hop": int, # STFFT hop shifts window by so many samples
-                "chunk_key": str, # maps to the corresponding chunk class
-                "event_handler_key": str, # maps to the event handler used in post processing
-                "watch_extension": str # event handlers watch for files with this extension
-            },
-            "tagged-staircase": {
-                "samp_rate": int, # [Hz]
-                "min_samples_per_step": int, # [samples]
-                "max_samples_per_step": int, # [samples]
-                "freq_step": float, # [Hz]
-                "step_increment": int, # [samples]
-                "chunk_size": int, # [s]
-                "joining_time": int, # [s]
-                "time_resolution": float, # [s]
-                "frequency_resolution": float, # [Hz]
-                "window_type": str, # the window type for the STFFT
-                "window_kwargs": dict, # keyword arguments for scipy get window function. Must be in order as in scipy documentation.
-                "window_size": int, # number of samples for the window
-                "hop": int, # keyword arguments for scipy STFFT class
-                "chunk_key": str, # maps to the corresponding chunk class
-                "event_handler_key": str, # maps to the event handler used in post processing
-                "watch_extension": str # event handlers watch for files with this extension
-            }
-        }
+    def _init_capture_templates(self) -> None:
+        self.add_capture_template( Modes.COSINE_SIGNAL_1 , self.__get_capture_template_cosine_signal_1()  )
+        self.add_capture_template( Modes.TAGGED_STAIRCASE, self.__make_capture_template_tagged_staircase() )
     
-    def _set_specifications(self) -> None:
-        self._specifications = {
-            "samp_rate_lower_bound": 64000
-        } 
+    
+    def _init_specs(self) -> None:
+        self.add_spec( pstore.SpecNames.SAMPLE_RATE_LOWER_BOUND, 64000  )
+        self.add_spec( pstore.SpecNames.SAMPLE_RATE_UPPER_BOUND, 640000 )
+        self.add_spec( pstore.SpecNames.FREQUENCY_LOWER_BOUND  , 16000  )
+        self.add_spec( pstore.SpecNames.FREQUENCY_UPPER_BOUND  , 160000 )
 
 
-    def __cosine_signal_1(self, capture_config: CaptureConfig) -> None:
-        cosine_signal_1.main(capture_config)
+    def __get_capture_method_cosine_signal_1(self) -> Callable:
+        return cosine_signal_1.capture
     
 
-    def __tagged_staircase(self, capture_config: CaptureConfig) -> None:
-        tagged_staircase.main(capture_config)
-    
-
-    def __cosine_signal_1_validator(self, capture_config: CaptureConfig) -> None:
-        # unpack the capture config
-        samp_rate = capture_config["samp_rate"]
-        frequency = capture_config["frequency"]
-        amplitude = capture_config["amplitude"]
-        chunk_size = capture_config["chunk_size"]
-        window_type = capture_config["window_type"]
-        window_size = capture_config["window_size"]
-        hop = capture_config["hop"]
-        chunk_key = capture_config["chunk_key"]
-        event_handler_key = capture_config["event_handler_key"]
-        time_resolution = capture_config["time_resolution"]
-        frequency_resolution = capture_config["frequency_resolution"]
-        watch_extension = capture_config["watch_extension"]
-
-        validators.samp_rate_strictly_positive(samp_rate)
-        validators.chunk_size_strictly_positive(chunk_size)
-        validators.time_resolution(time_resolution, chunk_size) 
-        validators.window(window_type, 
-                          {}, 
-                          window_size,
-                          chunk_size,
-                          samp_rate)
-        validators.hop(hop)
-        validators.chunk_key(chunk_key, 
-                             "fixed")
-        validators.event_handler_key(event_handler_key, 
-                                     "fixed")
-        validators.watch_extension(watch_extension, 
-                                   "bin")
-
-        if samp_rate < self.specifications.get("samp_rate_lower_bound"):
-            raise ValueError((f"Sample rate must be greater than or equal to "
-                              f"{self.specifications.get('samp_rate_lower_bound')}"))
-
-        if time_resolution != 0:
-            raise ValueError(f"Time resolution must be zero. "
-                             f"Got {time_resolution} [s]")
+    def __get_capture_method_tagged_staircase(self) -> Callable:
+        return tagged_staircase.capture
         
-        if frequency_resolution != 0:
-            raise ValueError((f"Frequency resolution must be zero. "
-                              f"Got {frequency_resolution}"))
-        
-        # check that the sample rate is an integer multiple of the underlying signal frequency
-        if samp_rate % frequency != 0:
-            raise ValueError("The sampling rate must be some integer multiple of frequency")
 
-        a = samp_rate/frequency
-        if a < 2:
-            raise ValueError((f"The ratio of sampling rate over frequency must be a natural number greater than two. "
-                             f"Got {a}"))
-        
-        # ensuring the window type is rectangular
-        if window_type != "boxcar":
-            raise ValueError((f"The window type must be 'boxcar'. "
-                              f"Got {window_type}"))
-        
-        # analytical requirement
-        # if p is the number of sampled cycles, we can find that p = window_size / a
-        # the number of sampled cycles must be a positive natural number.
-        p = window_size / a
-        if window_size % a != 0:
-            raise ValueError((f"The number of sampled cycles must be a positive natural number. "
-                              f"Computed that p={p}"))
-    
-    
-        if amplitude <= 0:
-            raise ValueError((f"The amplitude must be strictly positive. "
-                              f"Got {amplitude}"))
-    
+    def __get_capture_template_cosine_signal_1(self) -> CaptureTemplate:
+        capture_template = CaptureTemplate()
 
-    def __tagged_staircase_validator(self, capture_config: CaptureConfig) -> None:
-        samp_rate = capture_config["samp_rate"]
-        min_samples_per_step = capture_config["min_samples_per_step"]
-        max_samples_per_step = capture_config["max_samples_per_step"]
-        freq_step = capture_config["freq_step"]
-        step_increment = capture_config["step_increment"]
-        chunk_size = capture_config["chunk_size"]
-        window_type = capture_config["window_type"]
-        window_kwargs = capture_config["window_kwargs"]
-        window_size = capture_config["window_size"]
-        hop = capture_config["hop"]
-        chunk_key = capture_config["chunk_key"]
-        event_handler_key = capture_config["event_handler_key"]
-        time_resolution = capture_config["time_resolution"]
-        watch_extension = capture_config["watch_extension"]
+        #
+        # Add default ptemplates
+        #
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.TIME_RESOLUTION,
+                default=0.0,
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.FREQUENCY_RESOLUTION,
+                default=0.0,
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.TIME_RANGE,
+                default=0.0,
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.SAMPLE_RATE,
+                default=128000,
+                add_pconstraints = [
+                    EnforceBounds(lower_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_LOWER_BOUND),
+                                  upper_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_UPPER_BOUND))
+                ]
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.BATCH_SIZE,
+                default=3.0,
+                enforce_default=False
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.WINDOW_TYPE,
+                default="boxcar",
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.WINDOW_HOP,
+                default=512
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.WINDOW_SIZE,
+                default=512
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.EVENT_HANDLER_KEY,
+                default="fixed-center-frequency",
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.CHUNK_KEY,
+                default="fixed-center-frequency",
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.WATCH_EXTENSION,
+                default="bin",
+                enforce_default=True
+            )
+        )
+
+        #
+        # Add custom ptemplates
+        #
+        capture_template.add_ptemplate(
+            PTemplate(
+                pstore.PNames.AMPLITUDE,
+                float,
+                default=2.0
+            )
+        )
+        capture_template.add_ptemplate(
+            PTemplate(
+                pstore.PNames.FREQUENCY,
+                int,
+                default=32000,
+                add_pconstraints=[
+                    EnforceBounds(lower_bound=self.get_spec(pstore.SpecNames.FREQUENCY_LOWER_BOUND),
+                                  upper_bound=self.get_spec(pstore.SpecNames.FREQUENCY_UPPER_BOUND))
+                ]
+            )
+        )
+        return capture_template
+
+
+    def __make_capture_template_tagged_staircase(self) -> CaptureTemplate:
+        capture_template = CaptureTemplate()
+        #
+        # Add default ptemplates
+        #
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.TIME_RESOLUTION,
+                default=0.0,
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.FREQUENCY_RESOLUTION,
+                default=0.0,
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.TIME_RANGE,
+                default=0.0,
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.SAMPLE_RATE,
+                default=128000,
+                add_pconstraints = [
+                    EnforceBounds(lower_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_LOWER_BOUND),
+                                  upper_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_UPPER_BOUND))
+                ]
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.BATCH_SIZE,
+                default=3.0,
+                enforce_default=False
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.WINDOW_TYPE,
+                default="boxcar",
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.WINDOW_HOP,
+                default=512
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.WINDOW_SIZE,
+                default=512
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.EVENT_HANDLER_KEY,
+                default="swept-center-frequency",
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.CHUNK_KEY,
+                default="swept-center-frequency",
+                enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.WATCH_EXTENSION,
+                default="bin",
+                enforce_default=True
+            )
+        )
+
+        #
+        # Add custom ptemplates
+        #
+        capture_template.add_ptemplate(
+            PTemplate(
+                pstore.PNames.MIN_SAMPLES_PER_STEP,
+                int,
+                default=4000,
+                add_pconstraints=[
+                    enforce_positive
+                ]
+            )
+        )
+        capture_template.add_ptemplate(
+            PTemplate(
+                pstore.PNames.MAX_SAMPLES_PER_STEP,
+                int,
+                default=5000,
+                add_pconstraints=[
+                    enforce_positive
+                ]
+            )
+        )
+        capture_template.add_ptemplate(
+            PTemplate(
+                pstore.PNames.FREQ_STEP,
+                int,
+                default=128000,
+                add_pconstraints=[
+                    enforce_positive
+                ]
+            )
+        )
+        capture_template.add_ptemplate(
+            PTemplate(
+                pstore.PNames.STEP_INCREMENT,
+                int,
+                default=200,
+                add_pconstraints=[
+                    enforce_positive
+                ]
+            )
+        )
+        return capture_template
+    
+    
+    def __get_validator_cosine_signal_1(self) -> Callable:
+        def validator_cosine_signal_1(capture_config: CaptureConfig):
+            sample_rate          = capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE)
+            frequency            = capture_config.get_parameter_value(pstore.PNames.FREQUENCY)
+            window_size          = capture_config.get_parameter_value(pstore.PNames.WINDOW_SIZE)
+
+            vstore.validate_window(capture_config)
+            vstore.validate_nyquist_criterion(capture_config)
+
+            # check that the sample rate is an integer multiple of the underlying signal frequency
+            if sample_rate % frequency != 0:
+                raise ValueError("The sampling rate must be some integer multiple of frequency")
+
+
+            a = sample_rate/frequency
+            if a < 2:
+                raise ValueError((f"The ratio of sampling rate over frequency must be a natural number greater than two. "
+                                f"Got {a}"))
+            
+
+            # analytical requirement
+            # if p is the number of sampled cycles, we can find that p = window_size / a
+            # the number of sampled cycles must be a positive natural number.
+            p = window_size / a
+            if window_size % a != 0:
+                raise ValueError((f"The number of sampled cycles must be a positive natural number. "
+                                f"Computed that p={p}"))
+        return validator_cosine_signal_1
+
+
+    def __validator_tagged_staircase(self,
+                                     capture_config: CaptureConfig) -> None:
         
-        validators.samp_rate_strictly_positive(samp_rate)
-        validators.chunk_size_strictly_positive(chunk_size)
-        validators.time_resolution(time_resolution, chunk_size)
-        validators.window(window_type, 
-                          window_kwargs, 
-                          window_size, 
-                          chunk_size, 
-                          samp_rate)
-        validators.hop(hop)
-        validators.chunk_key(chunk_key, "sweep")
-        validators.event_handler_key(event_handler_key, "sweep")
-        validators.watch_extension(watch_extension, 
-                                   "bin")
+        freq_step            = capture_config.get_parameter_value(pstore.PNames.FREQ_STEP)
+        sample_rate          = capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE)
+        min_samples_per_step = capture_config.get_parameter_value(pstore.PNames.MIN_SAMPLES_PER_STEP)
+        max_samples_per_step = capture_config.get_parameter_value(pstore.PNames.MAX_SAMPLES_PER_STEP)
         
-        if freq_step != samp_rate:
+        if freq_step != sample_rate:
             raise ValueError(f"The frequency step must be equal to the sampling rate")
         
-        if min_samples_per_step <= 0:
-            raise ValueError((f"Minimum samples per step must be strictly positive. "
-                              f"Got {min_samples_per_step}"))
-        
-        if max_samples_per_step <= 0:
-            raise ValueError((f"Maximum samples per step must be strictly positive. "
-                              f"Got {max_samples_per_step}"))
-        
-        if step_increment <= 0:
-            raise ValueError((f"Step increment must be strictly positive. "
-                              f"Got {step_increment}"))
         
         if min_samples_per_step > max_samples_per_step:
             raise ValueError((f"Minimum samples per step cannot be greater than the maximum samples per step. "

@@ -25,8 +25,8 @@ from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 from gnuradio import spectre
 
-from spectre_core.cfg import CHUNKS_DIR_PATH
-from spectre_core.file_handlers.configs import CaptureConfig
+from spectre_core.paths import get_chunks_dir_path
+from spectre_core.capture_config import CaptureConfig
 
 class tagged_staircase(gr.top_block):
 
@@ -37,26 +37,26 @@ class tagged_staircase(gr.top_block):
         ##################################################
         # Unpack capture config
         ##################################################
-        tag = capture_config['tag']
-        step_increment = capture_config['step_increment']
-        samp_rate = capture_config['samp_rate']
-        min_samples_per_step = capture_config['min_samples_per_step']
-        max_samples_per_step = capture_config['max_samples_per_step']
-        freq_step = capture_config['freq_step']
-        chunk_size = capture_config['chunk_size']
-        is_sweeping = True
+        tag                  = capture_config.tag
+        step_increment       = capture_config.get_parameter_value("step_increment")
+        samp_rate            = capture_config.get_parameter_value("sample_rate")
+        min_samples_per_step = capture_config.get_parameter_value("min_samples_per_step")
+        max_samples_per_step = capture_config.get_parameter_value("max_samples_per_step")
+        frequency_step       = capture_config.get_parameter_value("frequency_step")
+        batch_size           = capture_config.get_parameter_value("batch_size")
+        is_sweeping          = True
 
         ##################################################
         # Blocks
         ##################################################
         self.spectre_tagged_staircase_0 = spectre.tagged_staircase(min_samples_per_step, 
                                                                    max_samples_per_step, 
-                                                                   freq_step,
+                                                                   frequency_step,
                                                                    step_increment, 
                                                                    samp_rate)
-        self.spectre_batched_file_sink_0 = spectre.batched_file_sink(CHUNKS_DIR_PATH,
+        self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_chunks_dir_path(),
                                                                      tag, 
-                                                                     chunk_size, 
+                                                                     batch_size, 
                                                                      samp_rate, 
                                                                      is_sweeping,
                                                                      'rx_freq',
@@ -74,9 +74,9 @@ class tagged_staircase(gr.top_block):
 
 
 
-def main(capture_config: CaptureConfig, 
-         top_block_cls=tagged_staircase, 
-         options=None):
+def capture(capture_config: CaptureConfig, 
+           top_block_cls=tagged_staircase, 
+           options=None):
     tb = top_block_cls(capture_config)
 
     def sig_handler(sig=None, frame=None):

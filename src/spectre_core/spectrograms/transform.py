@@ -8,7 +8,7 @@ from typing import Optional
 
 from spectre_core.spectrograms.array_operations import find_closest_index
 from spectre_core.spectrograms.spectrogram import Spectrogram
-from spectre_core.cfg import DEFAULT_DATETIME_FORMAT
+from spectre_core.paths import DEFAULT_DATETIME_FORMAT
 
 
 def _average_array(array: np.ndarray, average_over: int, axis=0) -> np.ndarray:

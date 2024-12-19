@@ -9,7 +9,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileCreatedEvent
 
 from spectre_core.post_processing.factory import get_event_handler_from_tag
-from spectre_core.cfg import CHUNKS_DIR_PATH
+from spectre_core.paths import get_chunks_dir_path
 
 class PostProcessor:
     def __init__(self, 
@@ -24,7 +24,7 @@ class PostProcessor:
     def start(self):
         """Start an observer to process newly created files in the chunks directory"""
         self._observer.schedule(self._event_handler, 
-                                CHUNKS_DIR_PATH, 
+                                get_chunks_dir_path(), 
                                 recursive=True,
                                 event_filter=[FileCreatedEvent])
         

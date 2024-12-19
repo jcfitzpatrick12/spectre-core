@@ -4,7 +4,7 @@
 
 # after we decorate all chunks, we can import the chunk_key -> chunk maps
 from spectre_core.chunks.base import BaseChunk
-from spectre_core.file_handlers.configs import CaptureConfig
+from spectre_core.capture_config import CaptureConfig
 from spectre_core.exceptions import ChunkNotFoundError
 from spectre_core.chunks.chunk_register import chunk_map
 
