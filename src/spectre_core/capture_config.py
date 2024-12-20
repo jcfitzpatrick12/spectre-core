@@ -17,7 +17,6 @@ from spectre_core.parameters import (
 
 @dataclass
 class CaptureConfigKeys:
-    TAG           = "tag"
     RECEIVER_NAME = "receiver_name"
     RECEIVER_MODE = "receiver_mode"
     PARAMETERS    = "parameters"
@@ -47,13 +46,13 @@ class CaptureConfig(JsonHandler):
 
     @property
     def receiver_name(self) -> str:
-        """The name of the receiver which created this capture config."""
+        """The name of the receiver which created the capture config."""
         return self.dict[CaptureConfigKeys.RECEIVER_NAME]
     
 
     @property
     def receiver_mode(self) -> str:
-        """The mode of the receiver which created this capture config."""
+        """The mode of the receiver which created the capture config."""
         return self.dict[CaptureConfigKeys.RECEIVER_MODE]
     
 
@@ -80,10 +79,9 @@ class CaptureConfig(JsonHandler):
                         force: bool = False):
         """Write the input parameters to file."""
         d = {
-            CaptureConfigKeys.TAG: self.tag,
             CaptureConfigKeys.RECEIVER_MODE: receiver_mode,
             CaptureConfigKeys.RECEIVER_NAME: receiver_name,
-            CaptureConfigKeys.PARAMETERS: {parameter.name: parameter.value for parameter in parameters}
+            CaptureConfigKeys.PARAMETERS   : {parameter.name: parameter.value for parameter in parameters}
         }
         self.save(d,
                   force=force)
@@ -116,18 +114,18 @@ class CaptureTemplate:
         return self._dict[parameter_name]
       
 
-    def __cast_and_constrain_parameter(self,
-                                      parameter: Parameter):
-        """Validate a parameter against the corresponding ptemplate"""
+    def __apply_parameter_template(self,
+                                   parameter: Parameter):
+        """Apply the corresponding parameter template to the input parameter"""
         ptemplate = self.get_ptemplate(parameter.name)
-        parameter.value = ptemplate.cast_and_constrain(parameter.value)
+        parameter.value = ptemplate.apply_template(parameter.value)
 
 
-    def __cast_and_constrain_parameters(self,
-                                        parameters: Parameters) -> None:
-        """Explicity cast and constrain all explictly specified parameters"""
+    def __apply_parameter_templates(self,
+                                    parameters: Parameters) -> None:
+        """Apply the corresponding parameter template to all explictly specified parameters"""
         for parameter in parameters:
-            self.__cast_and_constrain_parameter(parameter)
+            self.__apply_parameter_template(parameter)
 
     
     def __fill_missing_with_defaults(self,
@@ -141,9 +139,9 @@ class CaptureTemplate:
 
 
     def apply_template(self,
-                       parameters: Parameters) -> None:
+                       parameters: Parameters) -> Parameters:
         """Validate parameters, fill missing with defaults, and return anew."""
-        self.__cast_and_constrain_parameters(parameters)
+        self.__apply_parameter_templates(parameters)
         self.__fill_missing_with_defaults(parameters)
         return parameters
 

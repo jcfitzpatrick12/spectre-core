@@ -152,27 +152,31 @@ class BaseReceiver(ABC):
 
     def start_capture(self, 
                       tag: str) -> None:
-        capture_config = self.capture_template.load_capture_config(tag)
-        self.capture_method(capture_config)
+        self.capture_method( tag, self.load_parameters(tag) )
 
 
-    def save_capture_config(self,
-                            tag: str,
-                            parameters: Parameters,
-                            force: bool = False) -> False:
+    def save_parameters(self,
+                        tag: str,
+                        parameters: Parameters,
+                        force: bool = False) -> False:
+        
         parameters = self.capture_template.apply_template(parameters)
         self.pvalidator(parameters)
+
         capture_config = CaptureConfig(tag)
         capture_config.save_parameters(self.name,
                                        self.mode,
                                        parameters,
                                        force=force)
 
-    def load_capture_config(self,
-                            tag: str) -> CaptureConfig:
+    def load_parameters(self,
+                        tag: str) -> Parameters:
         capture_config = CaptureConfig(tag)
-        self.pvalidator(capture_config.parameters)
-        return capture_config
+
+        parameters = self.capture_template.apply_template(capture_config.parameters)
+        self.pvalidator(parameters)
+        
+        return parameters
     
 # class SDRPlayReceiver(Base)
 

@@ -75,49 +75,49 @@ _ptemplates = {
                                              help = """
                                                     
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_positive]),
+                                             pconstraints=[pconstraints.enforce_positive]),
     PNames.MIN_FREQUENCY:          PTemplate(PNames.MIN_FREQUENCY,          
                                              float, 
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_positive]),
+                                             pconstraints=[pconstraints.enforce_positive]),
     PNames.MAX_FREQUENCY:          PTemplate(PNames.MAX_FREQUENCY,          
                                              float, 
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_positive]),
+                                             pconstraints=[pconstraints.enforce_positive]),
     PNames.FREQUENCY_STEP:         PTemplate(PNames.FREQUENCY_STEP,         
                                              float, 
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_positive]),
+                                             pconstraints=[pconstraints.enforce_positive]),
     PNames.BANDWIDTH:              PTemplate(PNames.BANDWIDTH,              
                                              float, 
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_positive]),
+                                             pconstraints=[pconstraints.enforce_positive]),
     PNames.SAMPLE_RATE:            PTemplate(PNames.SAMPLE_RATE,            
                                              int,   
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_positive]),
+                                             pconstraints=[pconstraints.enforce_positive]),
     PNames.IF_GAIN:                PTemplate(PNames.IF_GAIN,                
                                              float, 
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_negative]),
+                                             pconstraints=[pconstraints.enforce_negative]),
     PNames.RF_GAIN:                PTemplate(PNames.RF_GAIN,                
                                              float, 
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_non_positive]),
+                                             pconstraints=[pconstraints.enforce_non_positive]),
     PNames.EVENT_HANDLER_KEY:      PTemplate(PNames.EVENT_HANDLER_KEY,      
                                              str,
                                              help = """
@@ -134,13 +134,13 @@ _ptemplates = {
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_positive, pconstraints.enforce_power_of_two]),
+                                             pconstraints=[pconstraints.enforce_positive, pconstraints.enforce_power_of_two]),
     PNames.WINDOW_HOP:             PTemplate(PNames.WINDOW_HOP,             
                                              int,   
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_positive]),
+                                             pconstraints=[pconstraints.enforce_positive]),
     PNames.WINDOW_TYPE:            PTemplate(PNames.WINDOW_TYPE,            
                                              str,
                                              help = """
@@ -159,31 +159,31 @@ _ptemplates = {
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_non_negative]),
+                                             pconstraints=[pconstraints.enforce_non_negative]),
     PNames.FREQUENCY_RESOLUTION:   PTemplate(PNames.FREQUENCY_RESOLUTION,   
                                              float, 
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_non_negative]),
+                                             pconstraints=[pconstraints.enforce_non_negative]),
     PNames.TIME_RANGE:             PTemplate(PNames.TIME_RANGE,             
                                              float, 
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_non_negative]),
+                                             pconstraints=[pconstraints.enforce_non_negative]),
     PNames.BATCH_SIZE:             PTemplate(PNames.BATCH_SIZE,             
                                              int,   
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_positive]),
+                                             pconstraints=[pconstraints.enforce_positive]),
     PNames.SAMPLES_PER_STEP:       PTemplate(PNames.SAMPLES_PER_STEP,       
                                              int,   
                                              help = """
 
                                                     """,
-                                             add_pconstraints=[pconstraints.enforce_positive]),
+                                             pconstraints=[pconstraints.enforce_positive]),
 }
 
 #
@@ -194,9 +194,12 @@ T = TypeVar('T')
 def get_ptemplate(name: str, 
                   default: Optional[T],
                   enforce_default: bool = False,
-                  add_pconstraints: Optional[list[PConstraint]] = None
+                  pconstraints: Optional[list[PConstraint]] = None
 ) -> PTemplate:
-    """Create a fresh copy of one of the default PTemplates"""
+    """Create a fresh copy of one of the default PTemplates
+    
+    Notably, pconstraints are stacked with those which already exist.
+    """
     if name not in _ptemplates:
         raise KeyError(f"No default PTemplate found for parameter name '{name}'.")
 
@@ -206,5 +209,5 @@ def get_ptemplate(name: str,
     # Clone it with the updated default and enforce_default values
     return ptemplate.clone(default=default,
                            enforce_default=enforce_default,
-                           add_pconstraints=add_pconstraints)
+                           pconstraints=pconstraints)
 

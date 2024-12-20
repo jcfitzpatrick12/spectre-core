@@ -116,7 +116,7 @@ def make_parameters(d: dict[str, Any]):
 class PTemplate:
     """A parameter template. 
     
-    Constrains what values a parameter of a given name can take.
+    Constrain the value and type that a parameter can take.
     """
     def __init__(self,
                  name: str,
@@ -124,7 +124,7 @@ class PTemplate:
                  default: Optional[T] = None,
                  enforce_default: Optional[bool] = False,
                  help: Optional[str] = None,
-                 add_pconstraints: Optional[list[PConstraint]] = None):
+                 pconstraints: Optional[list[PConstraint]] = None):
         if not callable(ptype):
             raise TypeError("ptype must be callable.")
 
@@ -132,12 +132,8 @@ class PTemplate:
         self._ptype = ptype
         self._default = default
         self._enforce_default = enforce_default
-        self._help = help
-        self._pconstraints: list[PConstraint] = []
-    
-        if add_pconstraints is not None:
-            for pconstraint in add_pconstraints:
-                self.add_pconstraint(pconstraint)
+        self._help = dedent(help).strip() if help else "No help has been provided."
+        self._pconstraints: list[PConstraint] = pconstraints or []
 
 
     @property
@@ -166,16 +162,8 @@ class PTemplate:
 
     @property
     def help(self) -> str:
-        if self._help is None:
-            return "No help has been provided."
-        return dedent(self._help).strip()
-    
-    
-
-    def add_pconstraint(self, 
-                        pconstraint: PConstraint) -> None:
-        """Add a pconstraint to this template."""
-        self._pconstraints.append(pconstraint)
+        """A description of what the parameter is, and the value it stores."""
+        return self._help
 
 
     def _cast(self, 
@@ -189,7 +177,7 @@ class PTemplate:
 
     def _constrain(self, 
                    value: T) -> T:
-        """Constrain the input value according to constraints of the template"""
+        """Constrain the input value according to constraints of the template."""
         if self._enforce_default and value != self._default:
             raise ValueError(f"The default value of '{self._default}' is required for the parameter '{self._name}'.")
         
@@ -204,8 +192,8 @@ class PTemplate:
         return value
 
 
-    def cast_and_constrain(self, 
-                           value: Optional[Any]) -> T:
+    def apply_template(self, 
+                       value: Optional[Any]) -> T:
         """Cast the value and constrain it according to this ptemplate."""
         if value is None:
             if self._default is None:
@@ -218,7 +206,7 @@ class PTemplate:
 
     def make_parameter(self, 
                        value: Optional[Any] = None) -> Parameter:
-        value = self.cast_and_constrain(value)
+        value = self.apply_template(value)
         return Parameter(self._name, value)
 
 
@@ -226,13 +214,16 @@ class PTemplate:
               default: Optional[T] = None,
               enforce_default: bool = False,
               help: Optional[str] = None,
-              add_pconstraints: Optional[list[PConstraint]] = None) -> 'PTemplate':
-        """Return a clone of the current instance with optional overrides."""
+              pconstraints: Optional[list[PConstraint]] = None,) -> 'PTemplate':
+        """Return a clone of the current instance with optional overrides.
+        
+        Notably, pconstraints are always stacked with those that already exist.
+        """
         # Use the new values if provided, otherwise fall back to current instance values
         default         = default         if default         is not None else self._default
         enforce_default = enforce_default if enforce_default is not None else self._enforce_default
         help            = help            if help            is not None else self._help
-        pconstraints = (self._pconstraints + add_pconstraints) if (add_pconstraints is not None) else self._pconstraints
+        pconstraints = (self._pconstraints + pconstraints) if (pconstraints is not None) else self._pconstraints
 
         return PTemplate(
             name=self.name,
@@ -240,7 +231,7 @@ class PTemplate:
             default=default,
             enforce_default=enforce_default,
             help=help,
-            add_pconstraints=pconstraints
+            pconstraints=pconstraints
         )
 
 
@@ -251,7 +242,7 @@ class PTemplate:
             "type": self._ptype.__name__ if hasattr(self._ptype, '__name__') else str(self._ptype),
             "default": self._default,
             "enforce_default": self._enforce_default,
-            "help": self.help,
+            "help": self._help,
             "constraints": [f"{constraint}" for constraint in self._pconstraints]
         }
 

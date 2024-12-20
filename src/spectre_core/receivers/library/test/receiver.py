@@ -92,7 +92,7 @@ class Receiver(BaseReceiver):
             pstore.get_ptemplate(
                 pstore.PNames.SAMPLE_RATE,
                 default=128000,
-                add_pconstraints = [
+                pconstraints = [
                     EnforceBounds(lower_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_LOWER_BOUND),
                                   upper_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_UPPER_BOUND))
                 ]
@@ -161,7 +161,7 @@ class Receiver(BaseReceiver):
                 pstore.PNames.FREQUENCY,
                 int,
                 default=32000,
-                add_pconstraints=[
+                pconstraints = [
                     EnforceBounds(lower_bound=self.get_spec(pstore.SpecNames.FREQUENCY_LOWER_BOUND),
                                   upper_bound=self.get_spec(pstore.SpecNames.FREQUENCY_UPPER_BOUND))
                 ]
@@ -200,7 +200,7 @@ class Receiver(BaseReceiver):
             pstore.get_ptemplate(
                 pstore.PNames.SAMPLE_RATE,
                 default=128000,
-                add_pconstraints = [
+                pconstraints = [
                     EnforceBounds(lower_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_LOWER_BOUND),
                                   upper_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_UPPER_BOUND))
                 ]
@@ -262,7 +262,7 @@ class Receiver(BaseReceiver):
                 pstore.PNames.MIN_SAMPLES_PER_STEP,
                 int,
                 default=4000,
-                add_pconstraints=[
+                pconstraints=[
                     enforce_positive
                 ]
             )
@@ -272,7 +272,7 @@ class Receiver(BaseReceiver):
                 pstore.PNames.MAX_SAMPLES_PER_STEP,
                 int,
                 default=5000,
-                add_pconstraints=[
+                pconstraints=[
                     enforce_positive
                 ]
             )
@@ -282,7 +282,7 @@ class Receiver(BaseReceiver):
                 pstore.PNames.FREQ_STEP,
                 int,
                 default=128000,
-                add_pconstraints=[
+                pconstraints=[
                     enforce_positive
                 ]
             )
@@ -292,7 +292,7 @@ class Receiver(BaseReceiver):
                 pstore.PNames.STEP_INCREMENT,
                 int,
                 default=200,
-                add_pconstraints=[
+                pconstraints=[
                     enforce_positive
                 ]
             )
@@ -316,7 +316,7 @@ class Receiver(BaseReceiver):
 
             a = sample_rate/frequency
             if a < 2:
-                raise ValueError((f"The ratio of sampling rate over frequency must be a natural number greater than two. "
+                raise ValueError((f"The ratio of sampling rate over frequency must be greater than two. "
                                 f"Got {a}"))
             
 
@@ -326,7 +326,7 @@ class Receiver(BaseReceiver):
             p = window_size / a
             if window_size % a != 0:
                 raise ValueError((f"The number of sampled cycles must be a positive natural number. "
-                                f"Computed that p={p}"))
+                                  f"Computed that p={p}"))
             
         return pvalidator_cosine_signal_1
 

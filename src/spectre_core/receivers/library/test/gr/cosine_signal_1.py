@@ -27,22 +27,22 @@ from gnuradio import spectre
 
 from spectre_core.paths import get_chunks_dir_path
 from spectre_core.receivers import pstore
-from spectre_core.capture_config import CaptureConfig
+from spectre_core.parameters import Parameters
 
 class cosine_signal_1(gr.top_block):
 
     def __init__(self, 
-                 capture_config: CaptureConfig):
+                 tag: str,
+                 parameters: Parameters):
         gr.top_block.__init__(self, "cosine-signal-1", catch_exceptions=True)
 
         ##################################################
         # Unpack capture config
         ##################################################
-        tag         = capture_config.tag
-        samp_rate   = capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-        batch_size  = capture_config.get_parameter_value(pstore.PNames.BATCH_SIZE)
-        frequency   = capture_config.get_parameter_value(pstore.PNames.FREQUENCY)
-        amplitude   = capture_config.get_parameter_value(pstore.PNames.AMPLITUDE)
+        samp_rate   = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
+        batch_size  = parameters.get_parameter_value(pstore.PNames.BATCH_SIZE)
+        frequency   = parameters.get_parameter_value(pstore.PNames.FREQUENCY)
+        amplitude   = parameters.get_parameter_value(pstore.PNames.AMPLITUDE)
 
         ##################################################
         # Blocks
@@ -73,10 +73,12 @@ class cosine_signal_1(gr.top_block):
         self.connect((self.blocks_throttle_0_1, 0), (self.blocks_float_to_complex_1, 1))
 
 
-def capture(capture_config: CaptureConfig, 
+def capture(tag: str,
+            parameters: Parameters, 
             top_block_cls=cosine_signal_1, 
             options=None):
-    tb = top_block_cls(capture_config)
+    tb = top_block_cls(tag,
+                       parameters)
 
     def sig_handler(sig=None, frame=None):
         tb.stop()
