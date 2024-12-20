@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from spectre_core.capture_config import CaptureConfig
+from spectre_core import pstore
 from spectre_core.spectrograms.spectrogram import Spectrogram
 from spectre_core.spectrograms.array_operations import is_close
 from spectre_core.exceptions import ModeNotFoundError
@@ -87,14 +88,14 @@ class _AnalyticalFactory:
                         num_spectrums: int,
                         capture_config: CaptureConfig) -> Spectrogram:
         # Extract necessary parameters from the capture configuration.
-        window_size = capture_config['window_size']
-        samp_rate = capture_config['samp_rate']
-        amplitude = capture_config['amplitude']
-        frequency = capture_config['frequency']
-        hop = capture_config['hop']
+        window_size   = capture_config.get_parameter_value(pstore.PNames.WINDOW_SIZE)
+        sample_rate   = capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE)
+        amplitude     = capture_config.get_parameter_value(pstore.PNames.AMPLITUDE)
+        frequency     = capture_config.get_parameter_value(pstore.PNames.FREQUENCY)
+        window_hop    = capture_config.get_parameter_value(pstore.PNames.WINDOW_HOP)
 
         # Calculate derived parameters a (sampling rate ratio) and p (sampled periods).
-        a = int(samp_rate / frequency)
+        a = int(sample_rate / frequency)
         p = int(window_size / a)
 
         # Create the analytical spectrum, which is constant in time.
@@ -110,8 +111,8 @@ class _AnalyticalFactory:
         analytical_dynamic_spectra = np.ones((window_size, num_spectrums)) * spectrum[:, np.newaxis]
 
         # Compute time array.
-        sampling_interval = 1 / samp_rate
-        times = np.arange(num_spectrums) * hop * sampling_interval
+        sampling_interval = 1 / sample_rate
+        times = np.arange(num_spectrums) * window_hop * sampling_interval
 
         # compute the frequency array.
         frequencies = np.fft.fftshift(np.fft.fftfreq(window_size, sampling_interval))
@@ -128,11 +129,11 @@ class _AnalyticalFactory:
                         num_spectrums: int,
                         capture_config: CaptureConfig) -> Spectrogram:
         # Extract necessary parameters from the capture configuration.
-        window_size = capture_config['window_size']
-        min_samples_per_step = capture_config['min_samples_per_step']
-        max_samples_per_step = capture_config['max_samples_per_step']
-        step_increment = capture_config['step_increment']
-        samp_rate = capture_config['samp_rate']
+        window_size          = capture_config.get_parameter_value(pstore.PNames.WINDOW_SIZE)
+        min_samples_per_step = capture_config.get_parameter_value(pstore.PNames.MIN_SAMPLES_PER_STEP)
+        max_samples_per_step = capture_config.get_parameter_value(pstore.PNames.MAX_SAMPLES_PER_STEP)
+        step_increment       = capture_config.get_parameter_value(pstore.PNames.STEP_INCREMENT)
+        samp_rate            = capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE)
 
         # Calculate step sizes and derived parameters.
         num_samples_per_step = np.arange(min_samples_per_step, max_samples_per_step + 1, step_increment)
