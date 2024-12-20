@@ -72,12 +72,11 @@ class _AnalyticalFactory:
         by parameters in the corresponding capture config and the number of spectrums
         in the output spectrogram.
         """
-        receiver_name, test_mode = capture_config['receiver'], capture_config['mode']
 
-        if receiver_name != "test":
+        if capture_config.receiver_name != "test":
             raise ValueError(f"Input capture config must correspond to the test receiver")
         
-        builder_method = self.builders.get(test_mode)
+        builder_method = self.builders.get(capture_config.receiver_mode)
         if builder_method is None:
             raise ModeNotFoundError(f"Test mode not found. Expected one of {self.test_modes}, but received {test_mode}")
         return builder_method(num_spectrums, 

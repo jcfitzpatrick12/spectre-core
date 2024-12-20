@@ -13,6 +13,7 @@ from astropy.io.fits.hdu.hdulist import HDUList
 
 from spectre_core.chunks.chunk_register import register_chunk
 from spectre_core.spectrograms.spectrogram import Spectrogram
+from spectre_core import pstore
 from spectre_core.chunks.base import (
     SPECTREChunk, 
     ChunkFile
@@ -78,7 +79,7 @@ class Chunk(SPECTREChunk):
                            p1 = p1)
 
         # assign physical frequencies to each spectral component
-        frequencies = self.SFT.f + self.capture_config.get('center_freq', 0.0) 
+        frequencies = self.SFT.f + self.capture_config.get_parameter_value(pstore.PNames.CENTER_FREQUENCY) 
 
         return times, frequencies, dynamic_spectra
 

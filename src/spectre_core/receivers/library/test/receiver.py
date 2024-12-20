@@ -8,7 +8,8 @@ from typing import Optional, Callable
 from spectre_core.capture_config import CaptureTemplate
 from spectre_core.pconstraints import enforce_positive, EnforceBounds
 from spectre_core.parameters import PTemplate, Parameters
-from spectre_core.receivers import pstore, pvalidators
+from spectre_core import pstore
+from spectre_core.receivers import pvalidators
 from spectre_core.receivers.base import BaseReceiver
 from spectre_core.receivers.receiver_register import register_receiver
 from spectre_core.receivers.library.test.gr import (
@@ -67,6 +68,13 @@ class Receiver(BaseReceiver):
         #
         # Add default ptemplates
         #
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.CENTER_FREQUENCY,
+                default=0.0,
+                enforce_default=True
+            )
+        )
         capture_template.add_ptemplate(
             pstore.get_ptemplate(
                 pstore.PNames.TIME_RESOLUTION,
@@ -143,6 +151,41 @@ class Receiver(BaseReceiver):
                 pstore.PNames.WATCH_EXTENSION,
                 default="bin",
                 enforce_default=True
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.ORIGIN
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.OBJECT
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.INSTRUMENT
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.TELESCOPE
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.OBSERVATION_LATITUDE
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.OBSERVATION_LONGITUDE
+            )
+        )
+        capture_template.add_ptemplate(
+            pstore.get_ptemplate(
+                pstore.PNames.OBSERVATION_ALTITUDE
             )
         )
 

@@ -11,7 +11,7 @@ from numbers import Number
 from warnings import warn
 
 from spectre_core.parameters import Parameters
-from spectre_core.receivers import pstore
+from spectre_core import pstore
 
 
 # ------------------------- # 

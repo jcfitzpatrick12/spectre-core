@@ -17,6 +17,8 @@ from watchdog.events import (
 
 from spectre_core.chunks.factory import get_chunk_from_tag
 from spectre_core.capture_config import CaptureConfig
+from spectre_core import pstore
+from spectre_core import pstore
 from spectre_core.spectrograms.spectrogram import Spectrogram
 from spectre_core.spectrograms.transform import join_spectrograms
 from spectre_core.spectrograms.transform import (
@@ -34,7 +36,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
 
         self._capture_config = CaptureConfig(tag)
 
-        self._watch_extension = self._capture_config.get("watch_extension")
+        self._watch_extension = self._capture_config.get_parameter_value(pstore.PNames.WATCH_EXTENSION)
         if self._watch_extension is None:
             raise KeyError("The watch extension has not been specified in the capture config")
 
@@ -95,7 +97,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
     def _average_in_time(self, 
                          spectrogram: Spectrogram) -> Spectrogram:
         _LOGGER.info("Averaging spectrogram in time")
-        requested_time_resolution = self._capture_config['time_resolution'] # [s]
+        requested_time_resolution = self._capture_config.get_parameter_value(pstore.PNames.TIME_RESOLUTION)
         if requested_time_resolution is None:
             raise KeyError(f"Time resolution has not been specified in the capture config")
         average_over = floor(requested_time_resolution/spectrogram.time_resolution) if requested_time_resolution > spectrogram.time_resolution else 1
@@ -105,7 +107,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
     def _average_in_frequency(self, 
                               spectrogram: Spectrogram) -> Spectrogram:
         _LOGGER.info("Averaging spectrogram in frequency")
-        frequency_resolution = self._capture_config['frequency_resolution'] # [Hz]
+        frequency_resolution = self._capture_config.get_parameter_value(pstore.PNames.FREQUENCY_RESOLUTION)
         if frequency_resolution is None:
             raise KeyError(f"Frequency resolution has not been specified in the capture config")
         average_over = floor(frequency_resolution/spectrogram.frequency_resolution) if frequency_resolution > spectrogram.frequency_resolution else 1
@@ -120,7 +122,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         else:
             self._spectrogram = join_spectrograms([self._spectrogram, spectrogram])
 
-        if self._spectrogram.time_range >= self._capture_config['joining_time']:
+        if self._spectrogram.time_range >= self._capture_config.get_parameter_value(pstore.PNames.TIME_RANGE):
             self._flush_spectrogram()
     
 

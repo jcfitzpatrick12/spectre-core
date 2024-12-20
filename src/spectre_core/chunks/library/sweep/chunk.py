@@ -12,7 +12,8 @@ import numpy as np
 from spectre_core.chunks.chunk_register import register_chunk
 from spectre_core.spectrograms.spectrogram import Spectrogram
 from spectre_core.chunks.library.fixed.chunk import BinChunk, FitsChunk
-from spectre_core.paths import DEFAULT_DATETIME_FORMAT
+from spectre_core.constants import DEFAULT_DATETIME_FORMAT
+from spectre_core import pstore
 from spectre_core.chunks.base import SPECTREChunk, ChunkFile
 from spectre_core.exceptions import InvalidSweepMetadataError
 
@@ -165,7 +166,8 @@ class Chunk(SPECTREChunk):
                          millisecond_correction: int,
                          num_samples_prepended: int):
         """Correct the start time for this chunk based on the number of samples we prepended reconstructing the initial sweep."""
-        elapsed_time = num_samples_prepended * (1 / self.capture_config.get("samp_rate"))
+        sample_interval = (1 / self.capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE))
+        elapsed_time = num_samples_prepended * sample_interval
 
         corrected_datetime = self.chunk_start_datetime + timedelta(milliseconds = millisecond_correction) - timedelta(seconds = float(elapsed_time))
         return corrected_datetime.strftime(DEFAULT_DATETIME_FORMAT), corrected_datetime.microsecond * 1e-3
@@ -177,7 +179,7 @@ class Chunk(SPECTREChunk):
         min_frequency = np.min(center_frequencies)
         diffs = np.diff(center_frequencies)
         # Extract the expected difference between each step within a sweep. 
-        freq_step = self.capture_config.get("freq_step")
+        freq_step = self.capture_config.get_parameter_value(pstore.PNames.FREQUENCY_STEP)
         # Validate frequency steps
         for i, diff in enumerate(diffs):
             # steps should either increase by freq_step or drop to the minimum
@@ -267,7 +269,7 @@ class Chunk(SPECTREChunk):
                      num_steps_per_sweep: int) -> None:
         """Assign physical times to each swept spectrum. We use (by convention) the time of the midpoint sample in each sweep."""
 
-        sampling_interval = 1 / self.capture_config.get("samp_rate")
+        sampling_interval = 1 / self.capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE)
         cumulative_samples = 0
         for sweep_index in range(num_full_sweeps):
             # find the total number of samples across the sweep

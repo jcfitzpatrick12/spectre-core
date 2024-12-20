@@ -26,7 +26,7 @@ from gnuradio import eng_notation
 from gnuradio import spectre
 
 from spectre_core.paths import get_chunks_dir_path
-from spectre_core.receivers import pstore
+from spectre_core import pstore
 from spectre_core.parameters import Parameters
 
 class cosine_signal_1(gr.top_block):
