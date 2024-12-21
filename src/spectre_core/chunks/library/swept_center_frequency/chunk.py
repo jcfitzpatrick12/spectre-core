@@ -11,9 +11,9 @@ import numpy as np
 
 from spectre_core.chunks.chunk_register import register_chunk
 from spectre_core.spectrograms.spectrogram import Spectrogram
-from spectre_core.chunks.library.fixed.chunk import BinChunk, FitsChunk
+from spectre_core.chunks.library.fixed_center_frequency.chunk import BinChunk, FitsChunk
 from spectre_core.constants import DEFAULT_DATETIME_FORMAT
-from spectre_core import pstore
+from spectre_core.parameter_store import PNames, CaptureTypes
 from spectre_core.chunks.base import SPECTREChunk, ChunkFile
 from spectre_core.exceptions import InvalidSweepMetadataError
 
@@ -39,7 +39,7 @@ class SweepMetadata:
     num_samples: np.ndarray
 
 
-@register_chunk('sweep')
+@register_chunk(CaptureTypes.SWEPT_CENTER_FREQUENCY)
 class Chunk(SPECTREChunk):
     def __init__(self, chunk_start_time, tag):
         super().__init__(chunk_start_time, tag)
@@ -166,7 +166,7 @@ class Chunk(SPECTREChunk):
                          millisecond_correction: int,
                          num_samples_prepended: int):
         """Correct the start time for this chunk based on the number of samples we prepended reconstructing the initial sweep."""
-        sample_interval = (1 / self.capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE))
+        sample_interval = (1 / self.capture_config.get_parameter_value(PNames.SAMPLE_RATE))
         elapsed_time = num_samples_prepended * sample_interval
 
         corrected_datetime = self.chunk_start_datetime + timedelta(milliseconds = millisecond_correction) - timedelta(seconds = float(elapsed_time))
@@ -179,7 +179,7 @@ class Chunk(SPECTREChunk):
         min_frequency = np.min(center_frequencies)
         diffs = np.diff(center_frequencies)
         # Extract the expected difference between each step within a sweep. 
-        freq_step = self.capture_config.get_parameter_value(pstore.PNames.FREQUENCY_STEP)
+        freq_step = self.capture_config.get_parameter_value(PNames.FREQUENCY_STEP)
         # Validate frequency steps
         for i, diff in enumerate(diffs):
             # steps should either increase by freq_step or drop to the minimum
@@ -240,8 +240,8 @@ class Chunk(SPECTREChunk):
                 num_slices = self.SFT.upper_border_begin(num_samples[global_step_index])[1]
                 # perform a short time fast fourier transform on the step
                 complex_spectra = self.SFT.stft(iq_data[start_sample_index:end_sample_index], 
-                                           p0=0, 
-                                           p1=num_slices)
+                                                p0=0, 
+                                                p1=num_slices)
                 # and pack the absolute values into the stepped spectrogram where the step slot is padded to the maximum size for ease of processing later)
                 stepped_dynamic_spectra[sweep_index, step_index, :, :num_slices] = np.abs(complex_spectra)
                 # reassign the start_sample_index for the next step
@@ -269,7 +269,7 @@ class Chunk(SPECTREChunk):
                      num_steps_per_sweep: int) -> None:
         """Assign physical times to each swept spectrum. We use (by convention) the time of the midpoint sample in each sweep."""
 
-        sampling_interval = 1 / self.capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE)
+        sampling_interval = 1 / self.capture_config.get_parameter_value(PNames.SAMPLE_RATE)
         cumulative_samples = 0
         for sweep_index in range(num_full_sweeps):
             # find the total number of samples across the sweep

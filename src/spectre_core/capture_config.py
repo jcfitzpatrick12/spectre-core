@@ -153,7 +153,9 @@ class CaptureTemplate:
         yield from self._dict.values() 
 
 
-    def set_default(self, pname: str, default: Any) -> None:
+    def set_default(self, 
+                    pname: str, 
+                    default: Any) -> None:
         """Set the default of an existing ptemplate."""
         self.get_ptemplate(pname).default = default
 
@@ -161,7 +163,7 @@ class CaptureTemplate:
     def set_defaults(self, 
                         *ptuples: tuple[str, Any]) -> None:
         """Update defaults for multiple ptemplates."""
-        for pname, default in ptuples:
+        for (pname, default) in ptuples:
             self.set_default(pname, default)
 
 

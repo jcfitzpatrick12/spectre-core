@@ -26,7 +26,7 @@ from gnuradio import eng_notation
 from gnuradio import spectre
 
 from spectre_core.paths import get_chunks_dir_path
-from spectre_core import pstore
+from spectre_core import parameter_store
 from spectre_core.parameters import Parameters
 
 class cosine_signal_1(gr.top_block):
@@ -39,10 +39,10 @@ class cosine_signal_1(gr.top_block):
         ##################################################
         # Unpack capture config
         ##################################################
-        samp_rate   = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-        batch_size  = parameters.get_parameter_value(pstore.PNames.BATCH_SIZE)
-        frequency   = parameters.get_parameter_value(pstore.PNames.COSINE_FREQUENCY)
-        amplitude   = parameters.get_parameter_value(pstore.PNames.COSINE_AMPLITUDE)
+        samp_rate   = parameters.get_parameter_value(PNames.SAMPLE_RATE)
+        batch_size  = parameters.get_parameter_value(PNames.BATCH_SIZE)
+        frequency   = parameters.get_parameter_value(PNames.COSINE_FREQUENCY)
+        amplitude   = parameters.get_parameter_value(PNames.COSINE_AMPLITUDE)
 
         ##################################################
         # Blocks

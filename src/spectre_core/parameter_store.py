@@ -54,12 +54,9 @@ class PNames:
     OBS_LON                 : str = "obs_lon"
     OBS_ALT                 : str = "obs_alt"
 
-
-
 #
-# A protected map to default PTemplate instances
+# All stored base ptemplates
 #
-
 _base_ptemplates = {
     PNames.CENTER_FREQUENCY:       PTemplate(PNames.CENTER_FREQUENCY,       
                                              float, 
@@ -342,7 +339,7 @@ def get_base_ptemplate(
 
 
 def make_base_capture_template(*parameter_names: str):
-    """Make a basic capture template, composed of pre-defined ptemplates in the parameter store."""
+    """Make a basic capture template, composed of base ptemplates."""
     capture_template = CaptureTemplate()
     for name in parameter_names:
         capture_template.add_ptemplate( get_base_ptemplate(name) )
@@ -351,7 +348,7 @@ def make_base_capture_template(*parameter_names: str):
 
 @dataclass(frozen=True)
 class CaptureTypes:
-    """Pre-defined capture modes"""
+    """Pre-defined capture types"""
     FIXED_CENTER_FREQUENCY: str = "fixed-center-frequency"
     SWEPT_CENTER_FREQUENCY: str = "swept-center-frequency"
 

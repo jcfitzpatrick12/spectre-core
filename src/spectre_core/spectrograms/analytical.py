@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from spectre_core.capture_config import CaptureConfig
-from spectre_core import pstore
+from spectre_core.parameter_store import PNames
 from spectre_core.spectrograms.spectrogram import Spectrogram
 from spectre_core.spectrograms.array_operations import is_close
 from spectre_core.exceptions import ModeNotFoundError
@@ -79,7 +79,7 @@ class _AnalyticalFactory:
         
         builder_method = self.builders.get(capture_config.receiver_mode)
         if builder_method is None:
-            raise ModeNotFoundError(f"Test mode not found. Expected one of {self.test_modes}, but received {test_mode}")
+            raise ModeNotFoundError(f"Test mode not found. Expected one of {self.test_modes}, but received {capture_config.receiver_mode}")
         return builder_method(num_spectrums, 
                               capture_config)
     
@@ -88,11 +88,11 @@ class _AnalyticalFactory:
                         num_spectrums: int,
                         capture_config: CaptureConfig) -> Spectrogram:
         # Extract necessary parameters from the capture configuration.
-        window_size   = capture_config.get_parameter_value(pstore.PNames.WINDOW_SIZE)
-        sample_rate   = capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-        amplitude     = capture_config.get_parameter_value(pstore.PNames.AMPLITUDE)
-        frequency     = capture_config.get_parameter_value(pstore.PNames.FREQUENCY)
-        window_hop    = capture_config.get_parameter_value(pstore.PNames.WINDOW_HOP)
+        window_size   = capture_config.get_parameter_value(PNames.WINDOW_SIZE)
+        sample_rate   = capture_config.get_parameter_value(PNames.SAMPLE_RATE)
+        amplitude     = capture_config.get_parameter_value(PNames.AMPLITUDE)
+        frequency     = capture_config.get_parameter_value(PNames.FREQUENCY)
+        window_hop    = capture_config.get_parameter_value(PNames.WINDOW_HOP)
 
         # Calculate derived parameters a (sampling rate ratio) and p (sampled periods).
         a = int(sample_rate / frequency)
@@ -129,11 +129,11 @@ class _AnalyticalFactory:
                         num_spectrums: int,
                         capture_config: CaptureConfig) -> Spectrogram:
         # Extract necessary parameters from the capture configuration.
-        window_size          = capture_config.get_parameter_value(pstore.PNames.WINDOW_SIZE)
-        min_samples_per_step = capture_config.get_parameter_value(pstore.PNames.MIN_SAMPLES_PER_STEP)
-        max_samples_per_step = capture_config.get_parameter_value(pstore.PNames.MAX_SAMPLES_PER_STEP)
-        step_increment       = capture_config.get_parameter_value(pstore.PNames.STEP_INCREMENT)
-        samp_rate            = capture_config.get_parameter_value(pstore.PNames.SAMPLE_RATE)
+        window_size          = capture_config.get_parameter_value(PNames.WINDOW_SIZE)
+        min_samples_per_step = capture_config.get_parameter_value(PNames.MIN_SAMPLES_PER_STEP)
+        max_samples_per_step = capture_config.get_parameter_value(PNames.MAX_SAMPLES_PER_STEP)
+        step_increment       = capture_config.get_parameter_value(PNames.STEP_INCREMENT)
+        samp_rate            = capture_config.get_parameter_value(PNames.SAMPLE_RATE)
 
         # Calculate step sizes and derived parameters.
         num_samples_per_step = np.arange(min_samples_per_step, max_samples_per_step + 1, step_increment)

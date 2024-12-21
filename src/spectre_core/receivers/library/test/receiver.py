@@ -6,9 +6,8 @@ from dataclasses import dataclass
 from typing import Optional, Callable
 
 from spectre_core.capture_config import CaptureTemplate
-from spectre_core.pconstraints import enforce_positive, EnforceBounds
-from spectre_core.parameters import PTemplate, Parameters
-from spectre_core import pstore
+from spectre_core.pconstraints import EnforceBounds
+from spectre_core.parameters import Parameters
 from spectre_core.receivers import pvalidators
 from spectre_core.receivers.spec_names import SpecNames
 from spectre_core.receivers.base import BaseReceiver
@@ -17,7 +16,7 @@ from spectre_core.receivers.library.test.gr import (
     cosine_signal_1,
     tagged_staircase
 )
-from spectre_core.pstore import (
+from spectre_core.parameter_store import (
     make_base_capture_template,
     get_base_capture_template,
     get_base_ptemplate,

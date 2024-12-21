@@ -11,7 +11,7 @@ from scipy.signal import ShortTimeFFT, get_window
 from spectre_core.file_handlers.base import BaseFileHandler
 from spectre_core.paths import get_chunks_dir_path
 from spectre_core.capture_config import CaptureConfig
-from spectre_core import pstore
+from spectre_core.parameter_store import PNames
 from spectre_core.spectrograms.spectrogram import Spectrogram
 from spectre_core.constants import DEFAULT_DATETIME_FORMAT
 from spectre_core.exceptions import ChunkFileNotFoundError
@@ -149,10 +149,10 @@ class SPECTREChunk(BaseChunk):
     
 
     def __make_SFT_instance(self) -> ShortTimeFFT:
-        sample_rate = self.capture_config.get(pstore.PNames.SAMPLE_RATE)
-        window_hop    = self.capture_config.get_parameter_value(pstore.PNames.WINDOW_HOP)
-        window_type   = self.capture_config.get_parameter_value(pstore.PNames.WINDOW_TYPE)
-        window_size   = self.capture_config.get_parameter_value(pstore.PNames.WINDOW_SIZE)
+        sample_rate = self.capture_config.get(PNames.SAMPLE_RATE)
+        window_hop    = self.capture_config.get_parameter_value(PNames.WINDOW_HOP)
+        window_type   = self.capture_config.get_parameter_value(PNames.WINDOW_TYPE)
+        window_size   = self.capture_config.get_parameter_value(PNames.WINDOW_SIZE)
         window = get_window(window_type, 
                             window_size)
         

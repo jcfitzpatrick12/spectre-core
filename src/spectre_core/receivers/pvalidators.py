@@ -11,7 +11,7 @@ from numbers import Number
 from warnings import warn
 
 from spectre_core.parameters import Parameters
-from spectre_core import pstore
+from spectre_core.parameter_store import PNames
 
 
 # ------------------------- # 
@@ -25,10 +25,10 @@ from spectre_core import pstore
 def validate_window(
         parameters: Parameters
 ) -> None:
-    window_size = parameters.get_parameter_value(pstore.PNames.WINDOW_SIZE)
-    window_type = parameters.get_parameter_value(pstore.PNames.WINDOW_TYPE)
-    sample_rate = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-    batch_size  = parameters.get_parameter_value(pstore.PNames.BATCH_SIZE)
+    window_size = parameters.get_parameter_value(PNames.WINDOW_SIZE)
+    window_type = parameters.get_parameter_value(PNames.WINDOW_TYPE)
+    sample_rate = parameters.get_parameter_value(PNames.SAMPLE_RATE)
+    batch_size  = parameters.get_parameter_value(PNames.BATCH_SIZE)
     
     window_interval = window_size*(1 / sample_rate)
     if window_interval > batch_size:
@@ -46,8 +46,8 @@ def validate_window(
 def validate_nyquist_criterion(
         parameters: Parameters
 ) -> None:
-    sample_rate = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-    bandwidth   = parameters.get_parameter_value(pstore.PNames.BANDWIDTH)
+    sample_rate = parameters.get_parameter_value(PNames.SAMPLE_RATE)
+    bandwidth   = parameters.get_parameter_value(PNames.BANDWIDTH)
 
     if sample_rate < bandwidth:
         raise ValueError((f"Nyquist criterion has not been satisfied. "
@@ -65,10 +65,10 @@ def _compute_num_steps_per_sweep(min_freq: float,
 def validate_num_steps_per_sweep(
         parameters: Parameters
 ) -> None:
-    min_freq    = parameters.get_parameter_value(pstore.PNames.MIN_FREQUENCY)
-    max_freq    = parameters.get_parameter_value(pstore.PNames.MAX_FREQUENCY)
-    sample_rate = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-    freq_step   = parameters.get_parameter_value(pstore.PNames.FREQUENCY_STEP)
+    min_freq    = parameters.get_parameter_value(PNames.MIN_FREQUENCY)
+    max_freq    = parameters.get_parameter_value(PNames.MAX_FREQUENCY)
+    sample_rate = parameters.get_parameter_value(PNames.SAMPLE_RATE)
+    freq_step   = parameters.get_parameter_value(PNames.FREQUENCY_STEP)
 
     num_steps_per_sweep = _compute_num_steps_per_sweep(min_freq, 
                                                        max_freq, 
@@ -82,12 +82,12 @@ def validate_num_steps_per_sweep(
 def validate_sweep_interval(
         parameters: Parameters
 ) -> None: 
-    min_freq         = parameters.get_parameter_value(pstore.PNames.MIN_FREQUENCY)
-    max_freq         = parameters.get_parameter_value(pstore.PNames.MAX_FREQUENCY)
-    sample_rate      = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-    freq_step        = parameters.get_parameter_value(pstore.PNames.FREQUENCY_STEP)
-    samples_per_step = parameters.get_parameter_value(pstore.PNames.SAMPLES_PER_STEP)
-    batch_size       = parameters.get_parameter_value(pstore.PNames.BATCH_SIZE)
+    min_freq         = parameters.get_parameter_value(PNames.MIN_FREQUENCY)
+    max_freq         = parameters.get_parameter_value(PNames.MAX_FREQUENCY)
+    sample_rate      = parameters.get_parameter_value(PNames.SAMPLE_RATE)
+    freq_step        = parameters.get_parameter_value(PNames.FREQUENCY_STEP)
+    samples_per_step = parameters.get_parameter_value(PNames.SAMPLES_PER_STEP)
+    batch_size       = parameters.get_parameter_value(PNames.BATCH_SIZE)
 
     num_steps_per_sweep = _compute_num_steps_per_sweep(min_freq, 
                                                        max_freq, 
@@ -105,8 +105,8 @@ def validate_num_samples_per_step(
         parameters: Parameters
 ) -> None:
 
-    window_size      = parameters.get_parameter_value(pstore.PNames.WINDOW_SIZE)
-    samples_per_step = parameters.get_parameter_value(pstore.PNames.SAMPLES_PER_STEP)
+    window_size      = parameters.get_parameter_value(PNames.WINDOW_SIZE)
+    samples_per_step = parameters.get_parameter_value(PNames.SAMPLES_PER_STEP)
 
     if window_size >= samples_per_step:
         raise ValueError((f"Window size must be strictly less than the number of samples per step. "
@@ -118,8 +118,8 @@ def validate_non_overlapping_steps(
         parameters: Parameters
 ) -> None:
     
-    freq_step = parameters.get_parameter_value(pstore.PNames.FREQUENCY_STEP)
-    sample_rate = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
+    freq_step = parameters.get_parameter_value(PNames.FREQUENCY_STEP)
+    sample_rate = parameters.get_parameter_value(PNames.SAMPLE_RATE)
 
     if freq_step < sample_rate:
         raise NotImplementedError(f"SPECTRE does not yet support spectral steps overlapping in frequency. "
@@ -132,8 +132,8 @@ def validate_step_interval(
         api_latency: Number
 ) -> None:
     
-    samples_per_step = parameters.get_parameter_value(pstore.PNames.SAMPLES_PER_STEP)
-    sample_rate      = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
+    samples_per_step = parameters.get_parameter_value(PNames.SAMPLES_PER_STEP)
+    sample_rate      = parameters.get_parameter_value(PNames.SAMPLE_RATE)
 
     step_interval = samples_per_step * 1/ sample_rate # [s]
     if step_interval < api_latency:

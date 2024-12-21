@@ -17,10 +17,8 @@ from spectre_core.chunks.factory import get_chunk_from_tag
 from spectre_core.chunks.base import BaseChunk
 from spectre_core.spectrograms.spectrogram import Spectrogram
 from spectre_core.spectrograms import transform
-from spectre_core.paths import (
-    DEFAULT_DATETIME_FORMAT,
-    get_chunks_dir_path
-)
+from spectre_core.paths import get_chunks_dir_path
+from spectre_core.constants import DEFAULT_DATETIME_FORMAT
 from spectre_core.exceptions import (
     SpectrogramNotFoundError,
     ChunkNotFoundError

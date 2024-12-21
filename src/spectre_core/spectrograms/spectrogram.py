@@ -11,7 +11,7 @@ import os
 import numpy as np
 from astropy.io import fits
 
-from spectre_core import pstore
+from spectre_core.parameter_store import PNames
 from spectre_core.constants import DEFAULT_DATETIME_FORMAT
 from spectre_core.capture_config import CaptureConfig
 from spectre_core.paths import get_chunks_dir_path
@@ -37,7 +37,20 @@ class TimeCut:
     times: np.ndarray
     cut: np.ndarray
     spectrum_type: str
+
+
+@dataclass(frozen=True)
+class TimeTypes:
+    SECONDS   = "seconds"
+    DATETIMES = "datetimes"
     
+
+@dataclass(frozen=True)
+class SpectrumTypes:
+    AMPLITUDE = "amplitude"
+    POWER     = "power"
+    DIGITS    = "digits"
+
 
 class Spectrogram:
     def __init__(self, 
@@ -183,9 +196,9 @@ class Spectrogram:
             # Suppress divide by zero and invalid value warnings for this block of code
             with np.errstate(divide='ignore'):
                 # Depending on the spectrum type, compute the dBb values differently
-                if self._spectrum_type == "amplitude" or self._spectrum_type == "digits":
+                if self._spectrum_type == SpectrumTypes.AMPLITUDE or self._spectrum_type == SpectrumTypes.DIGITS:
                     self._dynamic_spectra_as_dBb = 10 * np.log10(self._dynamic_spectra / background_spectra)
-                elif self._spectrum_type == "power":
+                elif self._spectrum_type == SpectrumTypes.POWER:
                     self._dynamic_spectra_as_dBb = 20 * np.log10(self._dynamic_spectra / background_spectra)
                 else:
                     raise NotImplementedError(f"{self.spectrum_type} unrecognised, uncertain decibel conversion!")
@@ -305,7 +318,7 @@ class Spectrogram:
                      dBb: bool = False,
                      peak_normalise = False, 
                      correct_background = False, 
-                     return_time_type: str = "seconds") -> TimeCut:
+                     return_time_type: str = TimeTypes.SECONDS) -> TimeCut:
         
         # it is important to note that the "at frequency" specified by the user likely does not correspond
         # exactly to one of the physical frequencies assigned to each spectral component. So, we compute the nearest achievable,
@@ -315,9 +328,9 @@ class Spectrogram:
                                           enforce_strict_bounds = True)
         frequency_of_cut = self.frequencies[index_of_cut]
 
-        if return_time_type == "datetimes":
+        if return_time_type == TimeTypes.DATETIMES:
             times = self.datetimes
-        elif return_time_type == "seconds":
+        elif return_time_type == TimeTypes.SECONDS:
             times = self.times
         else:
             raise ValueError(f"Invalid return_time_type. Got {return_time_type}, expected one of 'datetimes' or 'seconds'")
@@ -361,13 +374,13 @@ def _save_spectrogram(write_path: str,
                       spectrogram: Spectrogram) -> None:
     
     capture_config = CaptureConfig(spectrogram.tag)
-    ORIGIN    = capture_config.get_parameter_value(pstore.PNames.ORIGIN)
-    INSTRUME  = capture_config.get_parameter_value(pstore.PNames.INSTRUMENT)
-    TELESCOP  = capture_config.get_parameter_value(pstore.PNames.TELESCOPE)
-    OBJECT    = capture_config.get_parameter_value(pstore.PNames.OBJECT)
-    OBS_ALT   = capture_config.get_parameter_value(pstore.PNames.OBSERVATION_ALTITUDE)
-    OBS_LAT   = capture_config.get_parameter_value(pstore.PNames.OBSERVATION_LATITUDE)
-    OBS_LON   = capture_config.get_parameter_value(pstore.PNames.OBSERVATION_LONGITUDE)
+    ORIGIN    = capture_config.get_parameter_value(PNames.ORIGIN)
+    INSTRUME  = capture_config.get_parameter_value(PNames.INSTRUMENT)
+    TELESCOP  = capture_config.get_parameter_value(PNames.TELESCOPE)
+    OBJECT    = capture_config.get_parameter_value(PNames.OBJECT)
+    OBS_ALT   = capture_config.get_parameter_value(PNames.OBS_ALT)
+    OBS_LAT   = capture_config.get_parameter_value(PNames.OBS_LAT)
+    OBS_LON   = capture_config.get_parameter_value(PNames.OBS_LON)
     
     # Primary HDU with data
     primary_data = spectrogram.dynamic_spectra.astype(dtype=np.float32) 
