@@ -12,14 +12,12 @@ T = TypeVar('T')
 
 class Parameter:
     """Simple container for any named value.
-    
-    Both the name and value are non-optional.
     """
     def __init__(self, 
                  name: str,
-                 value: T):
+                 value: Optional[T] = None):
         self._name = name
-        self._value: T = value
+        self._value: Optional[T] = value
 
 
     @property
@@ -29,13 +27,13 @@ class Parameter:
     
 
     @property
-    def value(self) -> T:
+    def value(self) -> Optional[T]:
         """The parameter value."""
         return self._value
     
     
     @value.setter
-    def value(self, v: T) -> None:
+    def value(self, v: Optional[T]) -> None:
         """Update the parameter value."""
         self._value = v
  
@@ -54,7 +52,7 @@ class Parameters:
 
     def add_parameter(self, 
                       name: str,
-                      value: T) -> None:
+                      value: Optional[T] = None) -> None:
         """Add a new parameter."""
         if name in self._dict:
             raise ValueError(f"Parameter with name {name} already exists. "
@@ -73,7 +71,7 @@ class Parameters:
 
 
     def get_parameter_value(self,
-                            name: str) -> T:
+                            name: str) -> Optional[T]:
         """Get the value of the parameter with the corresponding name."""
         parameter = self.get_parameter(name)
         return parameter.value 
@@ -112,6 +110,7 @@ def make_parameters(d: dict[str, Any]):
         parameters.add_parameter(k, v)
     return parameters
 
+
 class PTemplate:
     """A parameter template. 
     
@@ -120,7 +119,7 @@ class PTemplate:
     def __init__(self,
                  name: str,
                  ptype: T,
-                 default: T,
+                 default: Optional[T],
                  enforce_default: Optional[bool] = False,
                  help: Optional[str] = None,
                  pconstraints: Optional[list[PConstraint]] = None):
@@ -148,7 +147,7 @@ class PTemplate:
     
 
     @property
-    def default(self) -> T:
+    def default(self) -> Optional[T]:
         """The value of the parameter, if the value is unspecified."""
         return self._default
     
@@ -211,11 +210,14 @@ class PTemplate:
                        value: Optional[Any]) -> T:
         """Cast the value and constrain it according to this ptemplate."""
         if value is None:
+            if self._default is None:
+                return None
             value = self._default
         
         value = self._cast(value)
         value = self._constrain(value)
         return value
+
 
     def make_parameter(self, 
                        value: Optional[Any] = None) -> Parameter:

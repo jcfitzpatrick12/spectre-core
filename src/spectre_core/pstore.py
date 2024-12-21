@@ -60,14 +60,10 @@ class PNames:
 # A protected map to default PTemplate instances
 #
 
-FLOAT_DEFAULT_NOT_SET = -1
-INT_DEFAULT_NOT_SET   = -1
-STR_DEFAULT_NOT_SET   = "NOT_SET"
-
 _base_ptemplates = {
     PNames.CENTER_FREQUENCY:       PTemplate(PNames.CENTER_FREQUENCY,       
                                              float, 
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     The center frequency of the SDR in Hz. 
                                                     This value determines the midpoint of the frequency range 
@@ -78,7 +74,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.MIN_FREQUENCY:          PTemplate(PNames.MIN_FREQUENCY,          
                                              float, 
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     The minimum center frequency, in Hz, for the frequency sweep. 
                                                     """,
@@ -87,7 +83,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.MAX_FREQUENCY:          PTemplate(PNames.MAX_FREQUENCY,          
                                              float, 
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     The maximum center frequency, in Hz, for the frequency sweep. 
                                                     """,
@@ -96,7 +92,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.FREQUENCY_STEP:         PTemplate(PNames.FREQUENCY_STEP,         
                                              float, 
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     The amount, in Hz, by which the center frequency is incremented
                                                     for each step in the frequency sweep. 
@@ -106,7 +102,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.BANDWIDTH:              PTemplate(PNames.BANDWIDTH,              
                                              float, 
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     The frequency range in Hz the signal will occupy without
                                                     significant attenutation.
@@ -116,7 +112,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.SAMPLE_RATE:            PTemplate(PNames.SAMPLE_RATE,            
                                              int,   
-                                             INT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     The number of samples per second in Hz.
                                                     """,
@@ -125,7 +121,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.IF_GAIN:                PTemplate(PNames.IF_GAIN,                
                                              float, 
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     The intermediate frequency gain, in dB. 
                                                     Negative value indicates attenuation.
@@ -135,7 +131,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.RF_GAIN:                PTemplate(PNames.RF_GAIN,                
                                              float, 
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     The radio frequency gain, in dB. 
                                                     Negative value indicates attenuation.
@@ -145,21 +141,21 @@ _base_ptemplates = {
                                                  ]),
     PNames.EVENT_HANDLER_KEY:      PTemplate(PNames.EVENT_HANDLER_KEY,      
                                              str,
-                                             STR_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     Identifies which post-processing functions to invoke
                                                     on newly created files.
                                                     """),
     PNames.CHUNK_KEY:              PTemplate(PNames.CHUNK_KEY,              
                                              str,
-                                             STR_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     Identifies the type of data is stored in each chunk.
                                                     """,
                                              ),
     PNames.WINDOW_SIZE:            PTemplate(PNames.WINDOW_SIZE,            
                                              int,  
-                                             INT_DEFAULT_NOT_SET, 
+                                             default=None,
                                              help = """
                                                     The size of the window, in samples, when performing the 
                                                     Short Time FFT.
@@ -170,7 +166,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.WINDOW_HOP:             PTemplate(PNames.WINDOW_HOP,             
                                              int,   
-                                             INT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     How much the window is shifted, in samples, 
                                                     when performing the Short Time FFT.
@@ -180,7 +176,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.WINDOW_TYPE:            PTemplate(PNames.WINDOW_TYPE,            
                                              str,
-                                             STR_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     The type of window applied when performing the Short 
                                                     Time FFT.
@@ -188,7 +184,7 @@ _base_ptemplates = {
                                              ),
     PNames.WATCH_EXTENSION:        PTemplate(PNames.WATCH_EXTENSION,        
                                              str,
-                                             STR_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     Post-processing is triggered by newly created files with this extension.
                                                     Extensions are specified without the '.' character.
@@ -196,7 +192,7 @@ _base_ptemplates = {
                                              ),
     PNames.TIME_RESOLUTION:        PTemplate(PNames.TIME_RESOLUTION,        
                                              float, 
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     Batched spectrograms are smoothed by averaging up to the time resolution, 
                                                     specified in seconds.
@@ -206,7 +202,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.FREQUENCY_RESOLUTION:   PTemplate(PNames.FREQUENCY_RESOLUTION,   
                                              float, 
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     Batched spectrograms are smoothed by averaging up to the frequency resolution, 
                                                     specified in Hz.
@@ -216,7 +212,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.TIME_RANGE:             PTemplate(PNames.TIME_RANGE,             
                                              float, 
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     Batched spectrograms are stitched together until 
                                                     the time range, in seconds, is surpassed.
@@ -226,7 +222,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.BATCH_SIZE:             PTemplate(PNames.BATCH_SIZE,             
                                              int,   
-                                             INT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     SDR data is collected in batches of this size, specified 
                                                     in seconds.
@@ -236,7 +232,7 @@ _base_ptemplates = {
                                                  ]),
     PNames.SAMPLES_PER_STEP:       PTemplate(PNames.SAMPLES_PER_STEP,       
                                              int,   
-                                             INT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help = """
                                                     The number of samples taken at each center frequency in the sweep. 
                                                     This may vary slightly from what is specified due to the nature of 
@@ -247,61 +243,61 @@ _base_ptemplates = {
                                                  ]),
     PNames.ORIGIN:                 PTemplate(PNames.ORIGIN,
                                              str,
-                                             STR_DEFAULT_NOT_SET,
+                                             default=None,
                                              help="""
                                                   Corresponds to the FITS keyword ORIGIN.
                                                   """),
     PNames.TELESCOPE:              PTemplate(PNames.TELESCOPE,
                                              str,
-                                             STR_DEFAULT_NOT_SET,
+                                             default=None,
                                              help="""
                                                   Corresponds to the FITS keyword TELESCOP.
                                                   """),
     PNames.INSTRUMENT:             PTemplate(PNames.INSTRUMENT,
                                              str,
-                                             STR_DEFAULT_NOT_SET,
+                                             default=None,
                                              help="""
                                                   Corresponds to the FITS keyword INSTRUME.
                                                   """),
     PNames.OBJECT:                 PTemplate(PNames.OBJECT,
                                              str,
-                                             STR_DEFAULT_NOT_SET,
+                                             default=None,
                                              help="""
                                                   Corresponds to the FITS keyword OBJECT.
                                                   """),
     PNames.OBS_LAT:                PTemplate(PNames.OBS_LAT,
                                              float,
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help="""
                                                   Corresponds to the FITS keyword OBS_LAT.
                                                   """),
     PNames.OBS_LON:                PTemplate(PNames.OBS_LON,
                                              float,
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help="""
                                                   Corresponds to the FITS keyword OBS_LONG.
                                                   """),
     PNames.OBS_ALT:                PTemplate(PNames.OBS_ALT,
                                              float,
-                                             FLOAT_DEFAULT_NOT_SET,
+                                             default=None,
                                              help="""
                                                   Corresponds to the FITS keyword OBS_ALT.
                                                   """),
     PNames.COSINE_AMPLITUDE:        PTemplate(PNames.COSINE_AMPLITUDE,
                                               float,
-                                              FLOAT_DEFAULT_NOT_SET,
+                                              default=None,
                                               help="""
                                                    The amplitude of the cosine signal source.
                                                    """),
     PNames.COSINE_FREQUENCY:        PTemplate(PNames.COSINE_FREQUENCY,
                                               float,
-                                              FLOAT_DEFAULT_NOT_SET,
+                                              default=None,
                                               help="""
                                                    The frequency, in Hz, of the cosine signal source.
                                                    """),
     PNames.MIN_SAMPLES_PER_STEP:    PTemplate(PNames.MIN_SAMPLES_PER_STEP,
                                               int,
-                                              INT_DEFAULT_NOT_SET,
+                                              default=None,
                                               help="""
                                                    The number of samples in the shortest step of the staircase.
                                                    """,
@@ -310,7 +306,7 @@ _base_ptemplates = {
                                                   ]),
     PNames.MAX_SAMPLES_PER_STEP:    PTemplate(PNames.MAX_SAMPLES_PER_STEP,
                                               int,
-                                              INT_DEFAULT_NOT_SET,
+                                              default=None,
                                               help="""
                                                    The number of samples in the longest step of the staircase.
                                                    """,
@@ -319,7 +315,7 @@ _base_ptemplates = {
                                                   ]),
     PNames.STEP_INCREMENT:          PTemplate(PNames.STEP_INCREMENT,
                                               int,
-                                              INT_DEFAULT_NOT_SET,
+                                              default=None,
                                               help="""
                                                    The length by which each step in the staircase is incremented.
                                                    """,

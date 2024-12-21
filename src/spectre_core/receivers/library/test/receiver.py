@@ -83,7 +83,7 @@ class Receiver(BaseReceiver):
         #
         capture_template.set_defaults(
             (PNames.BATCH_SIZE,            3.0),
-            (PNames.CENTER_FREQUENCY,      0.0),
+            (PNames.CENTER_FREQUENCY,      16000),
             (PNames.COSINE_AMPLITUDE,      2.0),
             (PNames.COSINE_FREQUENCY,      32000),
             (PNames.FREQUENCY_RESOLUTION,  0.0),
@@ -93,9 +93,9 @@ class Receiver(BaseReceiver):
             (PNames.WINDOW_HOP,            512),
             (PNames.WINDOW_SIZE,           512),
             (PNames.WINDOW_TYPE,           "boxcar"),
-            (PNames.EVENT_HANDLER_KEY,     CaptureModes.FIXED_CENTER_FREQUENCY)
-            (PNames.CHUNK_KEY,             CaptureModes.FIXED_CENTER_FREQUENCY)
-            (PNames.WATCH_EXTENSION,       "bin")
+            (PNames.EVENT_HANDLER_KEY,     CaptureModes.FIXED_CENTER_FREQUENCY),
+            (PNames.CHUNK_KEY,             CaptureModes.FIXED_CENTER_FREQUENCY),
+            (PNames.WATCH_EXTENSION,       "bin"),
         )
 
         #
@@ -152,10 +152,18 @@ class Receiver(BaseReceiver):
                 PNames.WINDOW_SIZE,
                 PNames.EVENT_HANDLER_KEY,
                 PNames.CHUNK_KEY,
+                PNames.WATCH_EXTENSION,
                 PNames.MIN_SAMPLES_PER_STEP,
                 PNames.MAX_SAMPLES_PER_STEP,
                 PNames.FREQUENCY_STEP,
-                PNames.STEP_INCREMENT
+                PNames.STEP_INCREMENT,
+                PNames.OBS_ALT,
+                PNames.OBS_LAT,
+                PNames.OBS_LON,
+                PNames.OBJECT,
+                PNames.ORIGIN,
+                PNames.TELESCOPE,
+                PNames.INSTRUMENT
         )
 
         #
@@ -184,14 +192,14 @@ class Receiver(BaseReceiver):
         # Enforce defaults
         #
         capture_template.enforce_defaults(
-            PNames.CENTER_FREQUENCY,
             PNames.TIME_RESOLUTION,
             PNames.TIME_RANGE,
             PNames.FREQUENCY_RESOLUTION,
             PNames.WINDOW_TYPE,
             PNames.EVENT_HANDLER_KEY,
             PNames.CHUNK_KEY,
-            PNames.WATCH_EXTENSION
+            PNames.WATCH_EXTENSION,
+            PNames.INSTRUMENT
         )
 
         return capture_template
@@ -201,7 +209,7 @@ class Receiver(BaseReceiver):
 
         def pvalidator_cosine_signal_1(parameters: Parameters):
             sample_rate          = parameters.get_parameter_value(PNames.SAMPLE_RATE)
-            frequency            = parameters.get_parameter_value(PNames.FREQUENCY)
+            frequency            = parameters.get_parameter_value(PNames.COSINE_FREQUENCY)
             window_size          = parameters.get_parameter_value(PNames.WINDOW_SIZE)
 
             pvalidators.validate_window(parameters)
