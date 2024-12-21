@@ -9,6 +9,7 @@ import gzip
 from datetime import datetime
 from typing import Optional
 
+from spectre_core.paths import SPECTRE_DATA_DIR_PATH
 from spectre_core.constants import (
     DEFAULT_DATETIME_FORMAT,
     CALLISTO_INSTRUMENT_CODES
@@ -16,7 +17,7 @@ from spectre_core.constants import (
 from spectre_core.paths import get_chunks_dir_path
 
 
-temp_dir = os.path.join(os.environ['SPECTRE_DATA_DIR_PATH'], "tmp")
+_temp_dir = os.path.join(SPECTRE_DATA_DIR_PATH, "tmp")
 
 
 def _get_chunk_name(station: str, date: str, time: str, instrument_code: str) -> str:
@@ -58,7 +59,7 @@ def _unzip_file_to_chunks(gz_path: str):
 
 
 def _unzip_to_chunks():
-    for entry in os.scandir(temp_dir):
+    for entry in os.scandir(_temp_dir):
         if entry.is_file() and entry.name.endswith('.gz'):
             _unzip_file_to_chunks(entry.path)
             os.remove(entry.path)
@@ -74,7 +75,7 @@ def _wget_callisto_data(instrument_code: str,
         'wget', '-r', '-l1', '-nd', '-np', 
         '-R', '.tmp',
         '-A', f'{instrument_code}*.fit.gz',
-        '-P', temp_dir,
+        '-P', _temp_dir,
         base_url
     ]
 
@@ -93,12 +94,12 @@ def download_callisto_data(instrument_code: Optional[str],
     if (year is None) or (month is None) or (day is None):
         raise ValueError(f"All of year, month and day should be specified")
     
-    if not os.path.exists(temp_dir):
-        os.mkdir(temp_dir)
+    if not os.path.exists(_temp_dir):
+        os.mkdir(_temp_dir)
 
     if instrument_code not in CALLISTO_INSTRUMENT_CODES:
         raise ValueError(f"No match found for '{instrument_code}'. Expected one of {CALLISTO_INSTRUMENT_CODES}")
 
     _wget_callisto_data(instrument_code, year, month, day)
     _unzip_to_chunks()
-    shutil.rmtree(temp_dir)
+    shutil.rmtree(_temp_dir)
