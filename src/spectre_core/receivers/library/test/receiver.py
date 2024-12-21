@@ -22,7 +22,7 @@ from spectre_core.pstore import (
     get_base_capture_template,
     get_base_ptemplate,
     PNames,
-    CaptureModes
+    CaptureTypes
 )
 
 @dataclass
@@ -74,7 +74,7 @@ class Receiver(BaseReceiver):
         #
         # Create the base template
         #
-        capture_template = get_base_capture_template( CaptureModes.FIXED_CENTER_FREQUENCY )
+        capture_template = get_base_capture_template( CaptureTypes.FIXED_CENTER_FREQUENCY )
         capture_template.add_ptemplate( get_base_ptemplate(PNames.COSINE_AMPLITUDE) )
         capture_template.add_ptemplate( get_base_ptemplate(PNames.COSINE_FREQUENCY) )
 
@@ -93,8 +93,8 @@ class Receiver(BaseReceiver):
             (PNames.WINDOW_HOP,            512),
             (PNames.WINDOW_SIZE,           512),
             (PNames.WINDOW_TYPE,           "boxcar"),
-            (PNames.EVENT_HANDLER_KEY,     CaptureModes.FIXED_CENTER_FREQUENCY),
-            (PNames.CHUNK_KEY,             CaptureModes.FIXED_CENTER_FREQUENCY),
+            (PNames.EVENT_HANDLER_KEY,     CaptureTypes.FIXED_CENTER_FREQUENCY),
+            (PNames.CHUNK_KEY,             CaptureTypes.FIXED_CENTER_FREQUENCY),
             (PNames.WATCH_EXTENSION,       "bin"),
         )
 
@@ -171,8 +171,8 @@ class Receiver(BaseReceiver):
         #
         capture_template.set_defaults(
             (PNames.BATCH_SIZE,            3.0),
-            (PNames.CHUNK_KEY,             CaptureModes.SWEPT_CENTER_FREQUENCY),
-            (PNames.EVENT_HANDLER_KEY,     CaptureModes.SWEPT_CENTER_FREQUENCY),
+            (PNames.CHUNK_KEY,             CaptureTypes.SWEPT_CENTER_FREQUENCY),
+            (PNames.EVENT_HANDLER_KEY,     CaptureTypes.SWEPT_CENTER_FREQUENCY),
             (PNames.FREQUENCY_RESOLUTION,  0.0),
             (PNames.FREQUENCY_STEP,        128000),
             (PNames.MAX_SAMPLES_PER_STEP,  5000),
