@@ -112,7 +112,6 @@ def make_parameters(d: dict[str, Any]):
         parameters.add_parameter(k, v)
     return parameters
 
-
 class PTemplate:
     """A parameter template. 
     
@@ -121,7 +120,7 @@ class PTemplate:
     def __init__(self,
                  name: str,
                  ptype: T,
-                 default: Optional[T] = None,
+                 default: T,
                  enforce_default: Optional[bool] = False,
                  help: Optional[str] = None,
                  pconstraints: Optional[list[PConstraint]] = None):
@@ -130,7 +129,7 @@ class PTemplate:
 
         self._name = name
         self._ptype = ptype
-        self._default = default
+        self.default = default
         self._enforce_default = enforce_default
         self._help = dedent(help).strip() if help else "No help has been provided."
         self._pconstraints: list[PConstraint] = pconstraints or []
@@ -149,10 +148,16 @@ class PTemplate:
     
 
     @property
-    def default(self) -> Optional[T]:
+    def default(self) -> T:
         """The value of the parameter, if the value is unspecified."""
         return self._default
     
+
+    @default.setter
+    def default(self, value: T) -> None:
+        """Update the default of a ptemplate"""
+        self._default = value
+
 
     @property
     def enforce_default(self) -> bool:
@@ -160,10 +165,20 @@ class PTemplate:
         return self._enforce_default
     
 
+    @enforce_default.setter
+    def enforce_default(self, value: bool) -> None:
+        self._enforce_default = value
+    
+
     @property
     def help(self) -> str:
         """A description of what the parameter is, and the value it stores."""
         return self._help
+    
+    
+    def add_pconstraint(self,
+                        pconstraint: PConstraint) -> None:
+        self._pconstraints.append(pconstraint)
 
 
     def _cast(self, 
@@ -196,8 +211,6 @@ class PTemplate:
                        value: Optional[Any]) -> T:
         """Cast the value and constrain it according to this ptemplate."""
         if value is None:
-            if self._default is None:
-                raise ValueError(f"There is no default for the parameter '{self._name}'. A value must be specified explicitly.")
             value = self._default
         
         value = self._cast(value)
@@ -208,31 +221,6 @@ class PTemplate:
                        value: Optional[Any] = None) -> Parameter:
         value = self.apply_template(value)
         return Parameter(self._name, value)
-
-
-    def clone(self,
-              default: Optional[T] = None,
-              enforce_default: bool = False,
-              help: Optional[str] = None,
-              pconstraints: Optional[list[PConstraint]] = None,) -> 'PTemplate':
-        """Return a clone of the current instance with optional overrides.
-        
-        Notably, pconstraints are always stacked with those that already exist.
-        """
-        # Use the new values if provided, otherwise fall back to current instance values
-        default         = default         if default         is not None else self._default
-        enforce_default = enforce_default if enforce_default is not None else self._enforce_default
-        help            = help            if help            is not None else self._help
-        pconstraints = (self._pconstraints + pconstraints) if (pconstraints is not None) else self._pconstraints
-
-        return PTemplate(
-            name=self.name,
-            ptype=self.ptype,
-            default=default,
-            enforce_default=enforce_default,
-            help=help,
-            pconstraints=pconstraints
-        )
 
 
     def to_dict(self) -> dict[str, Any]:

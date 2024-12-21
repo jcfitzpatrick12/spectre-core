@@ -82,7 +82,7 @@ class BaseReceiver(ABC):
 
 
     @property
-    def valid_modes(self) -> None:
+    def modes(self) -> list[str]:
         capture_method_modes   = list(self.capture_methods.keys())
         pvalidator_modes        = list(self.pvalidators.keys())
         capture_template_modes = list(self.capture_templates.keys())
@@ -90,7 +90,7 @@ class BaseReceiver(ABC):
         if capture_method_modes == pvalidator_modes == capture_template_modes:
             return capture_method_modes
         else:
-            raise ValueError(f"Mode mismatch for the receiver {self.name}. Could not define valid modes")
+            raise ValueError(f"Mode mismatch for the receiver {self.name}.")
 
 
     @property
@@ -100,9 +100,9 @@ class BaseReceiver(ABC):
 
     @mode.setter
     def mode(self, value: Optional[str]) -> None:
-        if (value is not None) and value not in self.valid_modes:
+        if (value is not None) and value not in self.modes:
             raise ModeNotFoundError((f"{value} is not a defined mode for the receiver {self.name}. "
-                                     f"Expected one of {self.valid_modes}"))
+                                     f"Expected one of {self.modes}"))
         self._mode = value
 
 
@@ -158,7 +158,7 @@ class BaseReceiver(ABC):
     def save_parameters(self,
                         tag: str,
                         parameters: Parameters,
-                        force: bool = False) -> False:
+                        force: bool = False) -> None:
         
         parameters = self.capture_template.apply_template(parameters)
         self.pvalidator(parameters)
@@ -178,6 +178,329 @@ class BaseReceiver(ABC):
         
         return parameters
     
+
+
+    # def _get_capture_template_fixed_center_frequency(self) -> CaptureTemplate:
+    #     capture_template = CaptureTemplate()
+
+    #     #
+    #     # Add default ptemplates
+    #     #
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.CENTER_FREQUENCY,
+    #             default=95800000,
+    #             pconstraints=[
+    #                 self.enforce_freq_bound
+    #             ]
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.BANDWIDTH,
+    #             default=1000000,
+    #             pconstraints=[
+    #                 self.enforce_bandwidth_bound
+    #             ]
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.RF_GAIN,
+    #             default=-30
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #            pstore.PNames.IF_GAIN,
+    #            default=-30 
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.TIME_RESOLUTION,
+    #             default=0.0
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.FREQUENCY_RESOLUTION,
+    #             default=0.0
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.TIME_RANGE,
+    #             default=0.0
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.SAMPLE_RATE,
+    #             default=1000000,
+    #             pconstraints = [
+    #                 self.enforce_sample_rate_bound
+    #             ]
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.BATCH_SIZE,
+    #             default=3.0,
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.WINDOW_TYPE,
+    #             default="blackman"
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.WINDOW_HOP,
+    #             default=256
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.WINDOW_SIZE,
+    #             default=512
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.EVENT_HANDLER_KEY,
+    #             default="fixed-center-frequency",
+    #             enforce_default=True
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.CHUNK_KEY,
+    #             default="fixed-center-frequency",
+    #             enforce_default=True
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.WATCH_EXTENSION,
+    #             default="bin",
+    #             enforce_default=True
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.ORIGIN
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.OBJECT
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.INSTRUMENT
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.TELESCOPE
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.OBSERVATION_LATITUDE
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.OBSERVATION_LONGITUDE
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.OBSERVATION_ALTITUDE
+    #         )
+    #     )
+    #     return capture_template
+    
+
+    # def _get_capture_template_swept_center_frequency(self) -> CaptureTemplate:
+    #     capture_template = CaptureTemplate()
+
+    #     #
+    #     # Add default ptemplates
+    #     #
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.MIN_FREQUENCY,
+    #             default=90000000,
+    #             pconstraints=[
+    #                 self.enforce_freq_bound
+    #             ]
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.MAX_FREQUENCY,
+    #             default=120000000,
+    #             pconstraints=[
+    #                 self.enforce_freq_bound
+    #             ]
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.SAMPLES_PER_STEP,
+    #             default=300000
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.FREQUENCY_STEP,
+    #             default=1000000
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.BANDWIDTH,
+    #             default=1000000,
+    #             pconstraints=[
+    #                 self.enforce_bandwidth_bound
+    #             ]
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.RF_GAIN,
+    #             default=-30
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #            pstore.PNames.IF_GAIN,
+    #            default=-20 
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.TIME_RESOLUTION,
+    #             default=0.0
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.FREQUENCY_RESOLUTION,
+    #             default=0.0
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.TIME_RANGE,
+    #             default=0.0
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.SAMPLE_RATE,
+    #             default=1000000,
+    #             pconstraints = [
+    #                 EnforceBounds(lower_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_LOWER_BOUND),
+    #                               upper_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_UPPER_BOUND))
+    #             ]
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.BATCH_SIZE,
+    #             default=3.0,
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.WINDOW_TYPE,
+    #             default="blackman"
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.WINDOW_HOP,
+    #             default=256
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.WINDOW_SIZE,
+    #             default=512
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.EVENT_HANDLER_KEY,
+    #             default="swept-center-frequency",
+    #             enforce_default=True
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.CHUNK_KEY,
+    #             default="swept-center-frequency",
+    #             enforce_default=True
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.WATCH_EXTENSION,
+    #             default="bin",
+    #             enforce_default=True
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.ORIGIN
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.OBJECT
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.INSTRUMENT
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.TELESCOPE
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.OBSERVATION_LATITUDE
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.OBSERVATION_LONGITUDE
+    #         )
+    #     )
+    #     capture_template.add_ptemplate(
+    #         pstore.get_ptemplate(
+    #             pstore.PNames.OBSERVATION_ALTITUDE
+    #         )
+    #     )
+    #     return capture_template
+
+
+    # def _get_pvalidator_fixed_center_frequency(self) -> Callable:
+    #     ...
+
+
+    # def _get_pvalidator_swept_center_frequency(self) -> Callable:
+    #     ...
+
 # class SDRPlayReceiver(Base)
 
 # def sdrplay_pvalidator(self, 
@@ -191,8 +514,8 @@ class BaseReceiver(ABC):
 
 #     if center_frequency:
 #         pvalidators.closed_bound_center_frequency(center_frequency, 
-#                                                 center_frequency_lower_bound, 
-#                                                 center_frequency_upper_bound)
+#                                                   center_frequency_lower_bound, 
+#                                                   center_frequency_upper_bound)
         
 #     if min_frequency:
 #         pvalidators.closed_bound_center_frequency(min_frequency, 

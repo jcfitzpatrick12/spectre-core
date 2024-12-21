@@ -68,7 +68,7 @@ def validate_num_steps_per_sweep(
     min_freq    = parameters.get_parameter_value(pstore.PNames.MIN_FREQUENCY)
     max_freq    = parameters.get_parameter_value(pstore.PNames.MAX_FREQUENCY)
     sample_rate = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-    freq_step   = parameters.get_parameter_value(pstore.PNames.FREQ_STEP)
+    freq_step   = parameters.get_parameter_value(pstore.PNames.FREQUENCY_STEP)
 
     num_steps_per_sweep = _compute_num_steps_per_sweep(min_freq, 
                                                        max_freq, 
@@ -85,7 +85,7 @@ def validate_sweep_interval(
     min_freq         = parameters.get_parameter_value(pstore.PNames.MIN_FREQUENCY)
     max_freq         = parameters.get_parameter_value(pstore.PNames.MAX_FREQUENCY)
     sample_rate      = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-    freq_step        = parameters.get_parameter_value(pstore.PNames.FREQ_STEP)
+    freq_step        = parameters.get_parameter_value(pstore.PNames.FREQUENCY_STEP)
     samples_per_step = parameters.get_parameter_value(pstore.PNames.SAMPLES_PER_STEP)
     batch_size       = parameters.get_parameter_value(pstore.PNames.BATCH_SIZE)
 

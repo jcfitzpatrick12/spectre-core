@@ -10,11 +10,19 @@ from spectre_core.pconstraints import enforce_positive, EnforceBounds
 from spectre_core.parameters import PTemplate, Parameters
 from spectre_core import pstore
 from spectre_core.receivers import pvalidators
+from spectre_core.receivers.spec_names import SpecNames
 from spectre_core.receivers.base import BaseReceiver
 from spectre_core.receivers.receiver_register import register_receiver
 from spectre_core.receivers.library.test.gr import (
     cosine_signal_1,
     tagged_staircase
+)
+from spectre_core.pstore import (
+    make_base_capture_template,
+    get_base_capture_template,
+    get_base_ptemplate,
+    PNames,
+    CaptureModes
 )
 
 @dataclass
@@ -48,10 +56,10 @@ class Receiver(BaseReceiver):
     
     
     def _init_specs(self) -> None:
-        self.add_spec( pstore.SpecNames.SAMPLE_RATE_LOWER_BOUND, 64000  )
-        self.add_spec( pstore.SpecNames.SAMPLE_RATE_UPPER_BOUND, 640000 )
-        self.add_spec( pstore.SpecNames.FREQUENCY_LOWER_BOUND  , 16000  )
-        self.add_spec( pstore.SpecNames.FREQUENCY_UPPER_BOUND  , 160000 )
+        self.add_spec( SpecNames.SAMPLE_RATE_LOWER_BOUND, 64000  )
+        self.add_spec( SpecNames.SAMPLE_RATE_UPPER_BOUND, 640000 )
+        self.add_spec( SpecNames.FREQUENCY_LOWER_BOUND  , 16000  )
+        self.add_spec( SpecNames.FREQUENCY_UPPER_BOUND  , 160000 )
 
 
     def __get_capture_method_cosine_signal_1(self) -> Callable:
@@ -63,292 +71,138 @@ class Receiver(BaseReceiver):
         
 
     def __get_capture_template_cosine_signal_1(self) -> CaptureTemplate:
-        capture_template = CaptureTemplate()
+        #
+        # Create the base template
+        #
+        capture_template = get_base_capture_template( CaptureModes.FIXED_CENTER_FREQUENCY )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.COSINE_AMPLITUDE) )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.COSINE_FREQUENCY) )
 
         #
-        # Add default ptemplates
+        # Update the defaults
         #
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.CENTER_FREQUENCY,
-                default=0.0,
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.TIME_RESOLUTION,
-                default=0.0,
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.FREQUENCY_RESOLUTION,
-                default=0.0,
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.TIME_RANGE,
-                default=0.0,
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.SAMPLE_RATE,
-                default=128000,
-                pconstraints = [
-                    EnforceBounds(lower_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_LOWER_BOUND),
-                                  upper_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_UPPER_BOUND))
-                ]
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.BATCH_SIZE,
-                default=3.0,
-                enforce_default=False
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.WINDOW_TYPE,
-                default="boxcar",
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.WINDOW_HOP,
-                default=512
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.WINDOW_SIZE,
-                default=512
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.EVENT_HANDLER_KEY,
-                default="fixed-center-frequency",
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.CHUNK_KEY,
-                default="fixed-center-frequency",
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.WATCH_EXTENSION,
-                default="bin",
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.ORIGIN
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.OBJECT
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.INSTRUMENT
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.TELESCOPE
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.OBSERVATION_LATITUDE
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.OBSERVATION_LONGITUDE
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.OBSERVATION_ALTITUDE
-            )
+        capture_template.set_defaults(
+            (PNames.BATCH_SIZE,            3.0),
+            (PNames.CENTER_FREQUENCY,      0.0),
+            (PNames.COSINE_AMPLITUDE,      2.0),
+            (PNames.COSINE_FREQUENCY,      32000),
+            (PNames.FREQUENCY_RESOLUTION,  0.0),
+            (PNames.SAMPLE_RATE,           128000),
+            (PNames.TIME_RANGE,            0.0),
+            (PNames.TIME_RESOLUTION,       0.0),
+            (PNames.WINDOW_HOP,            512),
+            (PNames.WINDOW_SIZE,           512),
+            (PNames.WINDOW_TYPE,           "boxcar"),
+            (PNames.EVENT_HANDLER_KEY,     CaptureModes.FIXED_CENTER_FREQUENCY)
+            (PNames.CHUNK_KEY,             CaptureModes.FIXED_CENTER_FREQUENCY)
+            (PNames.WATCH_EXTENSION,       "bin")
         )
 
         #
-        # Add custom ptemplates
+        # Enforce defaults
         #
-        capture_template.add_ptemplate(
-            PTemplate(
-                pstore.PNames.AMPLITUDE,
-                float,
-                default=2.0
-            )
+        capture_template.enforce_defaults(
+            PNames.CENTER_FREQUENCY,
+            PNames.TIME_RESOLUTION,
+            PNames.TIME_RANGE,
+            PNames.FREQUENCY_RESOLUTION,
+            PNames.WINDOW_TYPE,
+            PNames.EVENT_HANDLER_KEY,
+            PNames.CHUNK_KEY,
+            PNames.WATCH_EXTENSION
         )
-        capture_template.add_ptemplate(
-            PTemplate(
-                pstore.PNames.FREQUENCY,
-                int,
-                default=32000,
-                pconstraints = [
-                    EnforceBounds(lower_bound=self.get_spec(pstore.SpecNames.FREQUENCY_LOWER_BOUND),
-                                  upper_bound=self.get_spec(pstore.SpecNames.FREQUENCY_UPPER_BOUND))
-                ]
-            )
+
+
+        #
+        # Adding pconstraints
+        #
+        capture_template.add_pconstraint(
+            PNames.SAMPLE_RATE,
+            [
+                EnforceBounds(
+                    lower_bound=self.get_spec(SpecNames.SAMPLE_RATE_LOWER_BOUND),
+                    upper_bound=self.get_spec(SpecNames.SAMPLE_RATE_UPPER_BOUND)
+                )
+            ]
+        )
+        capture_template.add_pconstraint(
+            PNames.COSINE_FREQUENCY,
+            [
+                EnforceBounds(
+                    lower_bound=self.get_spec(SpecNames.FREQUENCY_LOWER_BOUND),
+                    upper_bound=self.get_spec(SpecNames.FREQUENCY_UPPER_BOUND)
+                )
+            ]
         )
         return capture_template
 
 
     def __make_capture_template_tagged_staircase(self) -> CaptureTemplate:
-        capture_template = CaptureTemplate()
         #
-        # Add default ptemplates
+        # Make the base template
         #
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.TIME_RESOLUTION,
-                default=0.0,
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.FREQUENCY_RESOLUTION,
-                default=0.0,
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.TIME_RANGE,
-                default=0.0,
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.SAMPLE_RATE,
-                default=128000,
-                pconstraints = [
-                    EnforceBounds(lower_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_LOWER_BOUND),
-                                  upper_bound=self.get_spec(pstore.SpecNames.SAMPLE_RATE_UPPER_BOUND))
-                ]
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.BATCH_SIZE,
-                default=3.0,
-                enforce_default=False
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.WINDOW_TYPE,
-                default="boxcar",
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.WINDOW_HOP,
-                default=512
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.WINDOW_SIZE,
-                default=512
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.EVENT_HANDLER_KEY,
-                default="swept-center-frequency",
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.CHUNK_KEY,
-                default="swept-center-frequency",
-                enforce_default=True
-            )
-        )
-        capture_template.add_ptemplate(
-            pstore.get_ptemplate(
-                pstore.PNames.WATCH_EXTENSION,
-                default="bin",
-                enforce_default=True
-            )
+        capture_template = make_base_capture_template(
+                PNames.TIME_RESOLUTION,
+                PNames.FREQUENCY_RESOLUTION,
+                PNames.TIME_RANGE,
+                PNames.SAMPLE_RATE,
+                PNames.BATCH_SIZE,
+                PNames.WINDOW_TYPE,
+                PNames.WINDOW_HOP,
+                PNames.WINDOW_SIZE,
+                PNames.EVENT_HANDLER_KEY,
+                PNames.CHUNK_KEY,
+                PNames.MIN_SAMPLES_PER_STEP,
+                PNames.MAX_SAMPLES_PER_STEP,
+                PNames.FREQUENCY_STEP,
+                PNames.STEP_INCREMENT
         )
 
         #
-        # Add custom ptemplates
+        # Update the defaults
         #
-        capture_template.add_ptemplate(
-            PTemplate(
-                pstore.PNames.MIN_SAMPLES_PER_STEP,
-                int,
-                default=4000,
-                pconstraints=[
-                    enforce_positive
-                ]
-            )
+        capture_template.set_defaults(
+            (PNames.BATCH_SIZE,            3.0),
+            (PNames.CHUNK_KEY,             CaptureModes.SWEPT_CENTER_FREQUENCY),
+            (PNames.EVENT_HANDLER_KEY,     CaptureModes.SWEPT_CENTER_FREQUENCY),
+            (PNames.FREQUENCY_RESOLUTION,  0.0),
+            (PNames.FREQUENCY_STEP,        128000),
+            (PNames.MAX_SAMPLES_PER_STEP,  5000),
+            (PNames.MIN_SAMPLES_PER_STEP,  4000),
+            (PNames.SAMPLE_RATE,           128000),
+            (PNames.STEP_INCREMENT,        200),
+            (PNames.TIME_RANGE,            0.0),
+            (PNames.TIME_RESOLUTION,       0.0),
+            (PNames.WATCH_EXTENSION,       "bin"),
+            (PNames.WINDOW_HOP,            512),
+            (PNames.WINDOW_SIZE,           512),
+            (PNames.WINDOW_TYPE,           "boxcar"),
         )
-        capture_template.add_ptemplate(
-            PTemplate(
-                pstore.PNames.MAX_SAMPLES_PER_STEP,
-                int,
-                default=5000,
-                pconstraints=[
-                    enforce_positive
-                ]
-            )
+
+
+        #
+        # Enforce defaults
+        #
+        capture_template.enforce_defaults(
+            PNames.CENTER_FREQUENCY,
+            PNames.TIME_RESOLUTION,
+            PNames.TIME_RANGE,
+            PNames.FREQUENCY_RESOLUTION,
+            PNames.WINDOW_TYPE,
+            PNames.EVENT_HANDLER_KEY,
+            PNames.CHUNK_KEY,
+            PNames.WATCH_EXTENSION
         )
-        capture_template.add_ptemplate(
-            PTemplate(
-                pstore.PNames.FREQ_STEP,
-                int,
-                default=128000,
-                pconstraints=[
-                    enforce_positive
-                ]
-            )
-        )
-        capture_template.add_ptemplate(
-            PTemplate(
-                pstore.PNames.STEP_INCREMENT,
-                int,
-                default=200,
-                pconstraints=[
-                    enforce_positive
-                ]
-            )
-        )
+
         return capture_template
     
     
     def __get_pvalidator_cosine_signal_1(self) -> Callable:
 
         def pvalidator_cosine_signal_1(parameters: Parameters):
-            sample_rate          = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-            frequency            = parameters.get_parameter_value(pstore.PNames.FREQUENCY)
-            window_size          = parameters.get_parameter_value(pstore.PNames.WINDOW_SIZE)
+            sample_rate          = parameters.get_parameter_value(PNames.SAMPLE_RATE)
+            frequency            = parameters.get_parameter_value(PNames.FREQUENCY)
+            window_size          = parameters.get_parameter_value(PNames.WINDOW_SIZE)
 
             pvalidators.validate_window(parameters)
 
@@ -377,10 +231,10 @@ class Receiver(BaseReceiver):
     def __get_pvalidator_tagged_staircase(self) -> None:
 
         def pvalidator_tagged_staircase(parameters: Parameters):
-            freq_step            = parameters.get_parameter_value(pstore.PNames.FREQ_STEP)
-            sample_rate          = parameters.get_parameter_value(pstore.PNames.SAMPLE_RATE)
-            min_samples_per_step = parameters.get_parameter_value(pstore.PNames.MIN_SAMPLES_PER_STEP)
-            max_samples_per_step = parameters.get_parameter_value(pstore.PNames.MAX_SAMPLES_PER_STEP)
+            freq_step            = parameters.get_parameter_value(PNames.FREQUENCY_STEP)
+            sample_rate          = parameters.get_parameter_value(PNames.SAMPLE_RATE)
+            min_samples_per_step = parameters.get_parameter_value(PNames.MIN_SAMPLES_PER_STEP)
+            max_samples_per_step = parameters.get_parameter_value(PNames.MAX_SAMPLES_PER_STEP)
             
             if freq_step != sample_rate:
                 raise ValueError(f"The frequency step must be equal to the sampling rate")

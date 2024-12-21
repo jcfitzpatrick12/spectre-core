@@ -3,10 +3,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from dataclasses import dataclass
+from typing import Any
 
 from spectre_core.paths import get_configs_dir_path
 from spectre_core.exceptions import InvalidTagError
 from spectre_core.file_handlers.json import JsonHandler
+from spectre_core.pconstraints import PConstraint
 from spectre_core.parameters import (
     PTemplate, 
     Parameter,
@@ -106,12 +108,12 @@ class CaptureTemplate:
 
 
     def get_ptemplate(self,
-                      parameter_name: str) -> PTemplate:
+                      pname: str) -> PTemplate:
         """Get the ptemplate corresponding with the parameter name."""
-        if parameter_name not in self._dict:
-            raise ValueError(f"Parameter with name '{parameter_name}' is not found in the template. "
+        if pname not in self._dict:
+            raise ValueError(f"Parameter with name '{pname}' is not found in the template. "
                              f"Expected one of {self.name_list}")   
-        return self._dict[parameter_name]
+        return self._dict[pname]
       
 
     def __apply_parameter_template(self,
@@ -148,9 +150,37 @@ class CaptureTemplate:
 
     def __iter__(self):
         """Iterate over stored ptemplates"""
-        yield from self._dict.values()
+        yield from self._dict.values() 
 
 
+    def set_default(self, pname: str, default: Any) -> None:
+        """Set the default of an existing ptemplate."""
+        self.get_ptemplate(pname).default = default
 
 
+    def set_defaults(self, 
+                        *ptuples: tuple[str, Any]) -> None:
+        """Update defaults for multiple ptemplates."""
+        for pname, default in ptuples:
+            self.set_default(pname, default)
 
+
+    def enforce_default(self,
+                        pname: str) -> None:
+        """Enforce the default of an existing ptemplate"""
+        self.get_ptemplate(pname).enforce_default = True
+
+
+    def enforce_defaults(self, 
+                         *pnames: str) -> None:
+        """Enforce defaults for multiple parameter names."""
+        for name in pnames:
+            self.enforce_default(name)
+
+
+    def add_pconstraint(self,
+                        pname: str,
+                        pconstraints: list[PConstraint]) -> None:
+        """Add a pconstraint to an existing ptemplate"""
+        for pconstraint in pconstraints:
+            self.get_ptemplate(pname).add_pconstraint(pconstraint)
