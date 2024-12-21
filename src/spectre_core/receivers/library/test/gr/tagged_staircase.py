@@ -27,6 +27,7 @@ from gnuradio import spectre
 
 from spectre_core.paths import get_chunks_dir_path
 from spectre_core.parameters import Parameters
+from spectre_core.parameter_store import PNames
 
 class tagged_staircase(gr.top_block):
 
@@ -38,12 +39,12 @@ class tagged_staircase(gr.top_block):
         ##################################################
         # Unpack capture config
         ##################################################
-        step_increment       = parameters.get_parameter_value("step_increment")
-        samp_rate            = parameters.get_parameter_value("sample_rate")
-        min_samples_per_step = parameters.get_parameter_value("min_samples_per_step")
-        max_samples_per_step = parameters.get_parameter_value("max_samples_per_step")
-        frequency_step       = parameters.get_parameter_value("frequency_step")
-        batch_size           = parameters.get_parameter_value("batch_size")
+        step_increment       = parameters.get_parameter_value(PNames.STEP_INCREMENT)
+        samp_rate            = parameters.get_parameter_value(PNames.SAMPLE_RATE)
+        min_samples_per_step = parameters.get_parameter_value(PNames.MIN_SAMPLES_PER_STEP)
+        max_samples_per_step = parameters.get_parameter_value(PNames.MAX_SAMPLES_PER_STEP)
+        frequency_step       = parameters.get_parameter_value(PNames.FREQUENCY_STEP)
+        batch_size           = parameters.get_parameter_value(PNames.BATCH_SIZE)
 
         ##################################################
         # Blocks

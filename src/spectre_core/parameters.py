@@ -52,11 +52,13 @@ class Parameters:
 
     def add_parameter(self, 
                       name: str,
-                      value: Optional[T] = None) -> None:
+                      value: Optional[T] = None,
+                      force: bool = False) -> None:
         """Add a new parameter."""
-        if name in self._dict:
+        if name in self._dict and not force:
             raise ValueError(f"Parameter with name {name} already exists. "
-                             f"Cannot add to parameters.")
+                             f"Cannot add to parameters."
+                             f"You can overrride this functionality with 'force'.")
         parameter = Parameter(name, value)
         self._dict[parameter.name] = parameter
 
@@ -80,6 +82,10 @@ class Parameters:
     def __iter__(self):
         """Iterate over stored parameters"""
         yield from self._dict.values() 
+
+    
+    def jsonify(self) -> dict:
+        return {p.name: p.value for p in self}
     
 
 
@@ -225,7 +231,7 @@ class PTemplate:
         return Parameter(self._name, value)
 
 
-    def to_dict(self) -> dict[str, Any]:
+    def jsonify(self) -> dict:
         """Convert the template to a dictionary representation."""
         return {
             "name": self._name,
@@ -235,8 +241,3 @@ class PTemplate:
             "help": self._help,
             "constraints": [f"{constraint}" for constraint in self._pconstraints]
         }
-
-
-    def pretty_print(self) -> str:
-        """Return a JSON-formatted string representation of the template."""
-        return json.dumps(self.to_dict(), indent=4)

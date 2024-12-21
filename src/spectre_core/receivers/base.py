@@ -83,9 +83,9 @@ class BaseReceiver(ABC):
 
     @property
     def modes(self) -> list[str]:
-        capture_method_modes   = list(self.capture_methods.keys())
+        capture_method_modes    = list(self.capture_methods.keys())
         pvalidator_modes        = list(self.pvalidators.keys())
-        capture_template_modes = list(self.capture_templates.keys())
+        capture_template_modes  = list(self.capture_templates.keys())
 
         if capture_method_modes == pvalidator_modes == capture_template_modes:
             return capture_method_modes

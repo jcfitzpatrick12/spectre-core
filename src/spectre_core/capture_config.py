@@ -83,11 +83,21 @@ class CaptureConfig(JsonHandler):
         d = {
             CaptureConfigKeys.RECEIVER_MODE: receiver_mode,
             CaptureConfigKeys.RECEIVER_NAME: receiver_name,
-            CaptureConfigKeys.PARAMETERS   : {parameter.name: parameter.value for parameter in parameters}
+            CaptureConfigKeys.PARAMETERS   : parameters.jsonify()
         }
         self.save(d,
                   force=force)
 
+
+    def jsonify(self) -> dict:
+        """Convert the instance to a dictionary representation."""
+        return {
+            "tag": self.tag,
+            "receiver_name": self.receiver_name,
+            "receiver_mode": self.receiver_mode,
+            "parameters": self.parameters.jsonify()
+        }
+    
 
 class CaptureTemplate:
     """A managed collection of PTemplates"""
@@ -186,3 +196,7 @@ class CaptureTemplate:
         """Add a pconstraint to an existing ptemplate"""
         for pconstraint in pconstraints:
             self.get_ptemplate(pname).add_pconstraint(pconstraint)
+
+
+    def jsonify(self) -> dict:
+        return {ptemplate.name: ptemplate.jsonify() for ptemplate in self}
