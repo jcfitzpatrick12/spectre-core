@@ -350,10 +350,10 @@ def make_base_capture_template(*parameter_names: str):
 
 
 @dataclass(frozen=True)
-class CaptureModes:
+class CaptureTypes:
     """Pre-defined capture modes"""
-    FIXED_CENTER_FREQUENCY: str = "fixed_center_frequency"
-    SWEPT_CENTER_FREQUENCY: str = "swept_center_frequency"
+    FIXED_CENTER_FREQUENCY: str = "fixed-center-frequency"
+    SWEPT_CENTER_FREQUENCY: str = "swept-center-frequency"
 
 
 def make_fixed_frequency_capture_template(
@@ -410,8 +410,8 @@ def make_swept_frequency_capture_template(
         PNames.WINDOW_TYPE)
 
 _base_capture_templates = {
-    CaptureModes.FIXED_CENTER_FREQUENCY: make_fixed_frequency_capture_template(),
-    CaptureModes.SWEPT_CENTER_FREQUENCY: make_swept_frequency_capture_template()
+    CaptureTypes.FIXED_CENTER_FREQUENCY: make_fixed_frequency_capture_template(),
+    CaptureTypes.SWEPT_CENTER_FREQUENCY: make_swept_frequency_capture_template()
 }
 
 def get_base_capture_template(
