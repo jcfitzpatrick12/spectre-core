@@ -95,10 +95,11 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
     def _average_in_time(self, 
                          spectrogram: Spectrogram) -> Spectrogram:
         _LOGGER.info("Averaging spectrogram in time")
-        requested_time_resolution = self._capture_config.get_parameter_value(PNames.TIME_RESOLUTION)
-        if requested_time_resolution is None:
-            raise KeyError(f"Time resolution has not been specified in the capture config")
-        average_over = floor(requested_time_resolution/spectrogram.time_resolution) if requested_time_resolution > spectrogram.time_resolution else 1
+        time_resolution = self._capture_config.get_parameter_value(PNames.TIME_RESOLUTION)
+        # if the resolution has not been specified return as is
+        if time_resolution is None:
+            return spectrogram
+        average_over = floor(time_resolution/spectrogram.time_resolution) if time_resolution > spectrogram.time_resolution else 1
         return time_average(spectrogram, average_over)
     
     
@@ -106,8 +107,9 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
                               spectrogram: Spectrogram) -> Spectrogram:
         _LOGGER.info("Averaging spectrogram in frequency")
         frequency_resolution = self._capture_config.get_parameter_value(PNames.FREQUENCY_RESOLUTION)
+        # if the resolution has not been specified, return as is
         if frequency_resolution is None:
-            raise KeyError(f"Frequency resolution has not been specified in the capture config")
+            return spectrogram
         average_over = floor(frequency_resolution/spectrogram.frequency_resolution) if frequency_resolution > spectrogram.frequency_resolution else 1
         return frequency_average(spectrogram, average_over)
     
@@ -115,12 +117,17 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
     def _join_spectrogram(self, 
                           spectrogram: Spectrogram) -> None:
         _LOGGER.info("Joining spectrogram")
+
         if self._spectrogram is None:
             self._spectrogram = spectrogram
         else:
             self._spectrogram = join_spectrograms([self._spectrogram, spectrogram])
 
-        if self._spectrogram.time_range >= self._capture_config.get_parameter_value(PNames.TIME_RANGE):
+        # if the time range is not specified
+        time_range = self._capture_config.get_parameter_value(PNames.TIME_RANGE)
+        if time_range is None:
+            self._flush_spectrogram()
+        elif self._spectrogram.time_range >= time_range:
             self._flush_spectrogram()
     
 

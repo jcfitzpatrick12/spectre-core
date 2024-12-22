@@ -7,10 +7,11 @@ _LOGGER = getLogger(__name__)
 
 import os
 
+from spectre_core.parameter_store import CaptureTypes
 from spectre_core.post_processing.base import BaseEventHandler
 from spectre_core.post_processing.event_handler_register import register_event_handler
 
-@register_event_handler("fixed")
+@register_event_handler(CaptureTypes.FIXED_CENTER_FREQUENCY)
 class EventHandler(BaseEventHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

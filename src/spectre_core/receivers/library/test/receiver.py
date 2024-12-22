@@ -74,8 +74,8 @@ class Receiver(BaseReceiver):
         # Create the base template
         #
         capture_template = get_base_capture_template( CaptureTypes.FIXED_CENTER_FREQUENCY )
-        capture_template.add_ptemplate( get_base_ptemplate(PNames.COSINE_AMPLITUDE) )
-        capture_template.add_ptemplate( get_base_ptemplate(PNames.COSINE_FREQUENCY) )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.AMPLITUDE) )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.FREQUENCY) )
 
         #
         # Update the defaults
@@ -83,8 +83,8 @@ class Receiver(BaseReceiver):
         capture_template.set_defaults(
             (PNames.BATCH_SIZE,            3.0),
             (PNames.CENTER_FREQUENCY,      16000),
-            (PNames.COSINE_AMPLITUDE,      2.0),
-            (PNames.COSINE_FREQUENCY,      32000),
+            (PNames.AMPLITUDE,      2.0),
+            (PNames.FREQUENCY,      32000),
             (PNames.SAMPLE_RATE,           128000),
             (PNames.WINDOW_HOP,            512),
             (PNames.WINDOW_SIZE,           512),
@@ -122,7 +122,7 @@ class Receiver(BaseReceiver):
             ]
         )
         capture_template.add_pconstraint(
-            PNames.COSINE_FREQUENCY,
+            PNames.FREQUENCY,
             [
                 EnforceBounds(
                     lower_bound=self.get_spec(SpecNames.FREQUENCY_LOWER_BOUND),
@@ -205,7 +205,7 @@ class Receiver(BaseReceiver):
 
         def pvalidator_cosine_signal_1(parameters: Parameters):
             sample_rate          = parameters.get_parameter_value(PNames.SAMPLE_RATE)
-            frequency            = parameters.get_parameter_value(PNames.COSINE_FREQUENCY)
+            frequency            = parameters.get_parameter_value(PNames.FREQUENCY)
             window_size          = parameters.get_parameter_value(PNames.WINDOW_SIZE)
 
             pvalidators.validate_window(parameters)

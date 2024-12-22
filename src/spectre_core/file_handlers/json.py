@@ -49,31 +49,31 @@ class JsonHandler(BaseFileHandler):
         return self._dict
     
 
-    def __getitem__(self, 
-                    key: str) -> Any:
-        return self.dict[key]
+    # def __getitem__(self, 
+    #                 key: str) -> Any:
+    #     return self.dict[key]
     
 
-    def get(self, 
-            *args, 
-            **kwargs) -> Any:
-        return self.dict.get(*args, 
-                             **kwargs)
+    # def get(self, 
+    #         *args, 
+    #         **kwargs) -> Any:
+    #     return self.dict.get(*args, 
+    #                          **kwargs)
     
     
-    def update(self, 
-               *args, 
-               **kwargs) -> None:
-        self.dict.update(*args, **kwargs)
+    # def update(self, 
+    #            *args, 
+    #            **kwargs) -> None:
+    #     self.dict.update(*args, **kwargs)
 
     
-    def items(self):
-        return self.dict.items()
+    # def items(self):
+    #     return self.dict.items()
     
     
-    def keys(self):
-        return self.dict.keys()
+    # def keys(self):
+    #     return self.dict.keys()
     
     
-    def values(self):
-        return self.dict.values()
+    # def values(self):
+    #     return self.dict.values()

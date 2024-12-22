@@ -41,8 +41,8 @@ class cosine_signal_1(gr.top_block):
         ##################################################
         samp_rate   = parameters.get_parameter_value(PNames.SAMPLE_RATE)
         batch_size  = parameters.get_parameter_value(PNames.BATCH_SIZE)
-        frequency   = parameters.get_parameter_value(PNames.COSINE_FREQUENCY)
-        amplitude   = parameters.get_parameter_value(PNames.COSINE_AMPLITUDE)
+        frequency   = parameters.get_parameter_value(PNames.FREQUENCY)
+        amplitude   = parameters.get_parameter_value(PNames.AMPLITUDE)
 
         ##################################################
         # Blocks

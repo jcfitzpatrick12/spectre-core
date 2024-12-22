@@ -30,8 +30,8 @@ class PNames:
     SAMPLE_RATE             : str = "sample_rate"
     IF_GAIN                 : str = "if_gain"
     RF_GAIN                 : str = "rf_gain"
-    COSINE_AMPLITUDE        : str = "cosine_amplitude"
-    COSINE_FREQUENCY        : str = "cosine_frequency"
+    AMPLITUDE               : str = "amplitude"
+    FREQUENCY               : str = "frequency"
     TIME_RESOLUTION         : str = "time_resolution"
     FREQUENCY_RESOLUTION    : str = "frequency_resolution"
     TIME_RANGE              : str = "time_range"
@@ -264,15 +264,15 @@ _base_ptemplates = {
                                              help="""
                                                   Corresponds to the FITS keyword OBS_ALT.
                                                   """),
-    PNames.COSINE_AMPLITUDE:       PTemplate(PNames.COSINE_AMPLITUDE,
+    PNames.AMPLITUDE:       PTemplate(PNames.AMPLITUDE,
                                              float,
                                              help="""
-                                                  The amplitude of the cosine signal source.
+                                                  The amplitude of the signal.
                                                   """),
-    PNames.COSINE_FREQUENCY:       PTemplate(PNames.COSINE_FREQUENCY,
+    PNames.FREQUENCY:       PTemplate(PNames.FREQUENCY,
                                              float,
                                              help="""
-                                                  The frequency, in Hz, of the cosine signal source.
+                                                  The frequency of the signal, in Hz.
                                                   """),
     PNames.MIN_SAMPLES_PER_STEP:   PTemplate(PNames.MIN_SAMPLES_PER_STEP,
                                              int,

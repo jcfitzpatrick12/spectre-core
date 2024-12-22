@@ -149,7 +149,7 @@ class SPECTREChunk(BaseChunk):
     
 
     def __make_SFT_instance(self) -> ShortTimeFFT:
-        sample_rate = self.capture_config.get(PNames.SAMPLE_RATE)
+        sample_rate   = self.capture_config.get_parameter_value(PNames.SAMPLE_RATE)
         window_hop    = self.capture_config.get_parameter_value(PNames.WINDOW_HOP)
         window_type   = self.capture_config.get_parameter_value(PNames.WINDOW_TYPE)
         window_size   = self.capture_config.get_parameter_value(PNames.WINDOW_SIZE)

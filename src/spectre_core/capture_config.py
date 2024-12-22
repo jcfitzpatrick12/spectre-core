@@ -87,15 +87,6 @@ class CaptureConfig(JsonHandler):
         }
         self.save(d,
                   force=force)
-
-
-    def to_dict(self) -> dict:
-        """Convert the instance to a dictionary representation."""
-        return {
-            "receiver_name": self.receiver_name,
-            "receiver_mode": self.receiver_mode,
-            "parameters": self.parameters.to_dict()
-        }
     
 
 class CaptureTemplate:
