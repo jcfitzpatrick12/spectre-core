@@ -11,8 +11,7 @@ from spectre_core.pconstraints import PConstraint
 T = TypeVar('T')
 
 class Parameter:
-    """Simple container for any named value.
-    """
+    """A named value."""
     def __init__(self, 
                  name: str,
                  value: Optional[T] = None):
@@ -41,13 +40,13 @@ class Parameter:
 class Parameters:
     """A collection of parameters."""
     def __init__(self):
-        self._dict: dict[str, Parameter] = {}
+        self._parameters: dict[str, Parameter] = {}
     
 
     @property
     def name_list(self) -> list[str]:
         """List the names of stored parameters."""
-        return list(self._dict.keys())
+        return list(self._parameters.keys())
 
 
     def add_parameter(self, 
@@ -55,36 +54,36 @@ class Parameters:
                       value: Optional[T] = None,
                       force: bool = False) -> None:
         """Add a new parameter."""
-        if name in self._dict and not force:
-            raise ValueError(f"Parameter with name {name} already exists. "
-                             f"Cannot add to parameters."
-                             f"You can overrride this functionality with 'force'.")
-        parameter = Parameter(name, value)
-        self._dict[parameter.name] = parameter
+        if name in self._parameters and not force:
+            raise ValueError(f"Cannot add a parameter with name '{name}', "
+                             f"since a parameter already exists with that name. "
+                             f"You can overrride this functionality with 'force', "
+                             f"to overwrite the existing parameter.")
+        self._parameters[name] = Parameter(name, value)
 
 
     def get_parameter(self, 
                       name: str) -> Parameter:
         """Get the parameter with the corresponding name."""
-        if name not in self._dict:
+        if name not in self._parameters:
             raise KeyError(f"Parameter with name '{name}' does not exist. "
                            f"Expected one of {self.name_list}")      
-        return self._dict[name]
+        return self._parameters[name]
 
 
     def get_parameter_value(self,
                             name: str) -> Optional[T]:
         """Get the value of the parameter with the corresponding name."""
-        parameter = self.get_parameter(name)
-        return parameter.value 
-
+        return self.get_parameter(name).value
+    
 
     def __iter__(self):
         """Iterate over stored parameters"""
-        yield from self._dict.values() 
+        yield from self._parameters.values() 
 
     
-    def jsonify(self) -> dict:
+    def to_dict(self) -> dict:
+        """Convert the class instance to an equivalent dictionary representation"""
         return {p.name: p.value for p in self}
     
 
@@ -125,7 +124,8 @@ class PTemplate:
     def __init__(self,
                  name: str,
                  ptype: T,
-                 default: Optional[T],
+                 default: Optional[T] = None,
+                 nullable: bool = False,
                  enforce_default: Optional[bool] = False,
                  help: Optional[str] = None,
                  pconstraints: Optional[list[PConstraint]] = None):
@@ -134,7 +134,8 @@ class PTemplate:
 
         self._name = name
         self._ptype = ptype
-        self.default = default
+        self._default = default
+        self._nullable = nullable
         self._enforce_default = enforce_default
         self._help = dedent(help).strip() if help else "No help has been provided."
         self._pconstraints: list[PConstraint] = pconstraints or []
@@ -165,13 +166,20 @@ class PTemplate:
 
 
     @property
+    def nullable(self) -> bool:
+        """Whether the value of the parameter is allowed to be of None type."""
+        return self._nullable
+    
+
+    @property
     def enforce_default(self) -> bool:
-        """Whether the default value is enforced."""
+        """Whether the provided default value is enforced."""
         return self._enforce_default
     
 
     @enforce_default.setter
     def enforce_default(self, value: bool) -> None:
+        """Set whether the provided default value is enforced."""
         self._enforce_default = value
     
 
@@ -198,17 +206,20 @@ class PTemplate:
     def _constrain(self, 
                    value: T) -> T:
         """Constrain the input value according to constraints of the template."""
+
         if self._enforce_default and value != self._default:
-            raise ValueError(f"The default value of '{self._default}' is required for the parameter '{self._name}'.")
-        
+            raise ValueError(f"The default value of '{self._default}' "
+                             f"is required for the parameter '{self._name}'.")
+
+        # apply existing pconstraints
         for constraint in self._pconstraints:
             try:
                 constraint.constrain(value)
             except ValueError as e:
-                raise ValueError(f"Constraint '{constraint.__class__.__name__}' failed for the parameter '{self._name}': {e}")
+                raise ValueError(f"PConstraint '{constraint.__class__.__name__}' failed for the parameter '{self._name}': {e}")
             except Exception as e:
-                print(f"An unexpected error occurred while constraining '{self.name}': {e}")
-                raise
+                raise RuntimeError(f"An unexpected error occurred while applying the pconstraint '{constraint.__class__.__name__}' to "
+                                    f"'{self.name}': {e}")
         return value
 
 
@@ -216,9 +227,14 @@ class PTemplate:
                        value: Optional[Any]) -> T:
         """Cast the value and constrain it according to this ptemplate."""
         if value is None:
-            if self._default is None:
+            if self._default is not None:
+                value = self._default
+            elif not self._nullable:
+                raise ValueError(f"The parameter '{self._name}' is not nullable, "
+                                 f"but no value or default has been provided. "
+                                 f"Either provide a value, or provide a default.")
+            else:
                 return None
-            value = self._default
         
         value = self._cast(value)
         value = self._constrain(value)
@@ -231,11 +247,11 @@ class PTemplate:
         return Parameter(self._name, value)
 
 
-    def jsonify(self) -> dict:
+    def to_dict(self) -> dict:
         """Convert the template to a dictionary representation."""
         return {
             "name": self._name,
-            "type": self._ptype.__name__ if hasattr(self._ptype, '__name__') else str(self._ptype),
+            "type": str(self._ptype),
             "default": self._default,
             "enforce_default": self._enforce_default,
             "help": self._help,

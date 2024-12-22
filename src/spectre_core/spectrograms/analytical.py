@@ -37,7 +37,7 @@ class TestResults:
         return len(self.spectrum_validated) - self.num_validated_spectrums
     
 
-    def jsonify(self) -> dict[str, bool | dict[float, bool]]:
+    def to_dict(self) -> dict[str, bool | dict[float, bool]]:
         return {
             "times_validated": self.times_validated,
             "frequencies_validated": self.frequencies_validated,

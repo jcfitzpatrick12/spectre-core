@@ -142,11 +142,11 @@ class BasePanel(ABC):
     
 
     def hide_x_axis_labels(self) -> None:
-        self.ax.tick_params(axis='x', labelbottom=False)
+        self.ax.tick_string_parameters(axis='x', labelbottom=False)
 
 
     def hide_y_axis_labels(self) -> None:
-        self.ax.tick_params(axis='y', labelbottom=False)
+        self.ax.tick_string_parameters(axis='y', labelbottom=False)
     
 
 class BaseTimeSeriesPanel(BasePanel):

@@ -85,16 +85,13 @@ class Receiver(BaseReceiver):
             (PNames.CENTER_FREQUENCY,      16000),
             (PNames.COSINE_AMPLITUDE,      2.0),
             (PNames.COSINE_FREQUENCY,      32000),
-            (PNames.FREQUENCY_RESOLUTION,  0.0),
             (PNames.SAMPLE_RATE,           128000),
-            (PNames.TIME_RANGE,            0.0),
-            (PNames.TIME_RESOLUTION,       0.0),
             (PNames.WINDOW_HOP,            512),
             (PNames.WINDOW_SIZE,           512),
             (PNames.WINDOW_TYPE,           "boxcar"),
             (PNames.EVENT_HANDLER_KEY,     CaptureTypes.FIXED_CENTER_FREQUENCY),
             (PNames.CHUNK_KEY,             CaptureTypes.FIXED_CENTER_FREQUENCY),
-            (PNames.WATCH_EXTENSION,       "bin"),
+            (PNames.WATCH_EXTENSION,       "bin")
         )
 
         #

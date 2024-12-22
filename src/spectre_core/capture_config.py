@@ -83,47 +83,47 @@ class CaptureConfig(JsonHandler):
         d = {
             CaptureConfigKeys.RECEIVER_MODE: receiver_mode,
             CaptureConfigKeys.RECEIVER_NAME: receiver_name,
-            CaptureConfigKeys.PARAMETERS   : parameters.jsonify()
+            CaptureConfigKeys.PARAMETERS   : parameters.to_dict()
         }
         self.save(d,
                   force=force)
 
 
-    def jsonify(self) -> dict:
+    def to_dict(self) -> dict:
         """Convert the instance to a dictionary representation."""
         return {
             "tag": self.tag,
             "receiver_name": self.receiver_name,
             "receiver_mode": self.receiver_mode,
-            "parameters": self.parameters.jsonify()
+            "parameters": self.parameters.to_dict()
         }
     
 
 class CaptureTemplate:
     """A managed collection of PTemplates"""
     def __init__(self):
-        self._dict: dict[str, PTemplate] = {}
+        self._ptemplates: dict[str, PTemplate] = {}
 
 
     @property
     def name_list(self) -> list[str]:
         """List the names of all stored PTemplates."""
-        return list(self._dict.keys())
+        return list(self._ptemplates.keys())
     
 
     def add_ptemplate(self,
                       ptemplate: PTemplate) -> None:
         """Add a ptemplate to this capture template."""
-        self._dict[ptemplate.name] = ptemplate
+        self._ptemplates[ptemplate.name] = ptemplate
 
 
     def get_ptemplate(self,
-                      pname: str) -> PTemplate:
+                      parameter_name: str) -> PTemplate:
         """Get the ptemplate corresponding with the parameter name."""
-        if pname not in self._dict:
-            raise ValueError(f"Parameter with name '{pname}' is not found in the template. "
+        if parameter_name not in self._ptemplates:
+            raise ValueError(f"Parameter with name '{parameter_name}' is not found in the template. "
                              f"Expected one of {self.name_list}")   
-        return self._dict[pname]
+        return self._ptemplates[parameter_name]
       
 
     def __apply_parameter_template(self,
@@ -160,43 +160,43 @@ class CaptureTemplate:
 
     def __iter__(self):
         """Iterate over stored ptemplates"""
-        yield from self._dict.values() 
+        yield from self._ptemplates.values() 
 
 
     def set_default(self, 
-                    pname: str, 
+                    parameter_name: str, 
                     default: Any) -> None:
         """Set the default of an existing ptemplate."""
-        self.get_ptemplate(pname).default = default
+        self.get_ptemplate(parameter_name).default = default
 
 
     def set_defaults(self, 
-                        *ptuples: tuple[str, Any]) -> None:
+                     *ptuples: tuple[str, Any]) -> None:
         """Update defaults for multiple ptemplates."""
-        for (pname, default) in ptuples:
-            self.set_default(pname, default)
+        for (parameter_name, default) in ptuples:
+            self.set_default(parameter_name, default)
 
 
     def enforce_default(self,
-                        pname: str) -> None:
+                        parameter_name: str) -> None:
         """Enforce the default of an existing ptemplate"""
-        self.get_ptemplate(pname).enforce_default = True
+        self.get_ptemplate(parameter_name).enforce_default = True
 
 
     def enforce_defaults(self, 
-                         *pnames: str) -> None:
+                         *parameter_names: str) -> None:
         """Enforce defaults for multiple parameter names."""
-        for name in pnames:
+        for name in parameter_names:
             self.enforce_default(name)
 
 
     def add_pconstraint(self,
-                        pname: str,
+                        parameter_name: str,
                         pconstraints: list[PConstraint]) -> None:
         """Add a pconstraint to an existing ptemplate"""
         for pconstraint in pconstraints:
-            self.get_ptemplate(pname).add_pconstraint(pconstraint)
+            self.get_ptemplate(parameter_name).add_pconstraint(pconstraint)
 
 
-    def jsonify(self) -> dict:
-        return {ptemplate.name: ptemplate.jsonify() for ptemplate in self}
+    def to_dict(self) -> dict:
+        return {ptemplate.name: ptemplate.to_dict() for ptemplate in self}
