@@ -162,8 +162,8 @@ class LogHandlers:
         yield from self.log_handler_list
 
 
-    def get_log_handler_from_file_name(self, 
-                                       file_name: str) -> LogHandler:
+    def get_from_file_name(self, 
+                           file_name: str) -> LogHandler:
         # auto strip the extension if present
         file_name, _ = os.path.splitext(file_name)
         try:
@@ -172,8 +172,8 @@ class LogHandlers:
             raise FileNotFoundError(f"Log handler for file name '{file_name}' not found in log map")
 
 
-    def get_log_handler_from_pid(self, 
-                                 pid: str) -> LogHandler:
+    def get_from_pid(self, 
+                     pid: str) -> LogHandler:
         for log_handler in self.log_handler_list:
             if log_handler.pid == pid:
                 return log_handler
