@@ -137,7 +137,7 @@ class PTemplate:
         self._default = default
         self._nullable = nullable
         self._enforce_default = enforce_default
-        self._help = dedent(help).strip() if help else "No help has been provided."
+        self._help = dedent(help).strip().replace("\n", " ") if help else "No help has been provided."
         self._pconstraints: list[PConstraint] = pconstraints or []
 
 

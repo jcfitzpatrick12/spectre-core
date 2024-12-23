@@ -61,8 +61,8 @@ _base_ptemplates = {
     PNames.CENTER_FREQUENCY:       PTemplate(PNames.CENTER_FREQUENCY,       
                                              float, 
                                              help = """
-                                                    The center frequency of the SDR in Hz. 
-                                                    This value determines the midpoint of the frequency range 
+                                                    The center frequency of the SDR in Hz.
+                                                    This value determines the midpoint of the frequency range
                                                     being processed.
                                                     """,
                                              pconstraints=[
@@ -71,7 +71,7 @@ _base_ptemplates = {
     PNames.MIN_FREQUENCY:          PTemplate(PNames.MIN_FREQUENCY,          
                                              float, 
                                              help = """
-                                                    The minimum center frequency, in Hz, for the frequency sweep. 
+                                                    The minimum center frequency, in Hz, for the frequency sweep.
                                                     """,
                                              pconstraints=[
                                                  pconstraints.enforce_positive
@@ -79,7 +79,7 @@ _base_ptemplates = {
     PNames.MAX_FREQUENCY:          PTemplate(PNames.MAX_FREQUENCY,          
                                              float, 
                                              help = """
-                                                    The maximum center frequency, in Hz, for the frequency sweep. 
+                                                    The maximum center frequency, in Hz, for the frequency sweep.
                                                     """,
                                              pconstraints=[
                                                  pconstraints.enforce_positive
@@ -113,7 +113,7 @@ _base_ptemplates = {
     PNames.IF_GAIN:                PTemplate(PNames.IF_GAIN,                
                                              float, 
                                              help = """
-                                                    The intermediate frequency gain, in dB. 
+                                                    The intermediate frequency gain, in dB.
                                                     Negative value indicates attenuation.
                                                     """,
                                              pconstraints=[
@@ -122,7 +122,7 @@ _base_ptemplates = {
     PNames.RF_GAIN:                PTemplate(PNames.RF_GAIN,                
                                              float, 
                                              help = """
-                                                    The radio frequency gain, in dB. 
+                                                    The radio frequency gain, in dB.
                                                     Negative value indicates attenuation.
                                                     """,
                                              pconstraints=[
@@ -143,7 +143,7 @@ _base_ptemplates = {
     PNames.WINDOW_SIZE:            PTemplate(PNames.WINDOW_SIZE,            
                                              int,  
                                              help = """
-                                                    The size of the window, in samples, when performing the 
+                                                    The size of the window, in samples, when performing the
                                                     Short Time FFT.
                                                     """,
                                              pconstraints=[
@@ -162,7 +162,7 @@ _base_ptemplates = {
     PNames.WINDOW_TYPE:            PTemplate(PNames.WINDOW_TYPE,            
                                              str,
                                              help = """
-                                                    The type of window applied when performing the Short 
+                                                    The type of window applied when performing the Short
                                                     Time FFT.
                                                     """,
                                              ),
@@ -177,7 +177,7 @@ _base_ptemplates = {
                                              float, 
                                              nullable=True,
                                              help = """
-                                                    Batched spectrograms are smoothed by averaging up to the time resolution, 
+                                                    Batched spectrograms are smoothed by averaging up to the time resolution,
                                                     specified in seconds.
                                                     """,
                                              pconstraints=[
@@ -187,7 +187,7 @@ _base_ptemplates = {
                                              float, 
                                              nullable=True,
                                              help = """
-                                                    Batched spectrograms are smoothed by averaging up to the frequency resolution, 
+                                                    Batched spectrograms are smoothed by averaging up to the frequency resolution,
                                                     specified in Hz.
                                                     """,
                                              pconstraints=[
@@ -197,7 +197,7 @@ _base_ptemplates = {
                                              float, 
                                              nullable=True,
                                              help = """
-                                                    Batched spectrograms are stitched together until 
+                                                    Batched spectrograms are stitched together until
                                                     the time range, in seconds, is surpassed.
                                                     """,
                                              pconstraints=[
@@ -206,7 +206,7 @@ _base_ptemplates = {
     PNames.BATCH_SIZE:             PTemplate(PNames.BATCH_SIZE,             
                                              int,   
                                              help = """
-                                                    SDR data is collected in batches of this size, specified 
+                                                    SDR data is collected in batches of this size, specified
                                                     in seconds.
                                                     """,
                                              pconstraints=[
@@ -215,8 +215,8 @@ _base_ptemplates = {
     PNames.SAMPLES_PER_STEP:       PTemplate(PNames.SAMPLES_PER_STEP,       
                                              int,   
                                              help = """
-                                                    The number of samples taken at each center frequency in the sweep. 
-                                                    This may vary slightly from what is specified due to the nature of 
+                                                    The number of samples taken at each center frequency in the sweep.
+                                                    This may vary slightly from what is specified due to the nature of
                                                     GNU Radio runtime.
                                                     """,
                                              pconstraints=[
