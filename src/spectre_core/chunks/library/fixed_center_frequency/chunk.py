@@ -13,75 +13,20 @@ from astropy.io.fits.hdu.hdulist import HDUList
 
 from spectre_core.chunks.chunk_register import register_chunk
 from spectre_core.spectrograms.spectrogram import Spectrogram
-from spectre_core.parameter_store import CaptureTypes, PNames
+from spectre_core.parameter_store import CaptureTypes
 from spectre_core.chunks.base import (
-    SPECTREChunk, 
+    BaseChunk, 
     ChunkFile
 )
 
 @register_chunk(CaptureTypes.FIXED_CENTER_FREQUENCY)
-class Chunk(SPECTREChunk):
+class Chunk(BaseChunk):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs) 
         
         self.add_file(BinChunk(self.chunk_parent_path, self.chunk_name))
         self.add_file(FitsChunk(self.chunk_parent_path, self.chunk_name))
         self.add_file(HdrChunk(self.chunk_parent_path, self.chunk_name))
-
-
-    def build_spectrogram(self) -> Spectrogram:
-        """Create a spectrogram by performing a Short Time FFT on the IQ samples for this chunk."""
-        iq_data = self.read_file("bin")
-        millisecond_correction = self.read_file("hdr")
-
-        # units conversion
-        microsecond_correction = millisecond_correction * 1e3
-
-        times, frequencies, dynamic_spectra = self.__do_STFFT(iq_data)
-
-        # explicitly type cast data arrays to 32-bit floats
-        times = np.array(times, dtype = 'float32')
-        frequencies = np.array(frequencies, dtype = 'float32')
-        dynamic_spectra = np.array(dynamic_spectra, dtype = 'float32')
-
-        return Spectrogram(dynamic_spectra, 
-                           times, 
-                           frequencies, 
-                           self.tag, 
-                           chunk_start_time = self.chunk_start_time, 
-                           microsecond_correction = microsecond_correction,
-                           spectrum_type = "amplitude")
-
-
-    def __do_STFFT(self, 
-                   iq_data: np.array) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """For reference: https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.ShortTimeFFT.html"""
-
-        # set p0=0, since by convention in the STFFT docs, p=0 corresponds to the slice centred at t=0
-        p0=0
-
-        # set p1 to the index of the first slice where the "midpoint" of the window is still inside the signal
-        num_samples = len(iq_data)
-        p1 = self.SFT.upper_border_begin(num_samples)[1]
-        
-        # compute a ShortTimeFFT on the IQ samples
-        complex_spectra = self.SFT.stft(iq_data, 
-                                        p0 = p0, 
-                                        p1 = p1) 
-        
-        # compute the magnitude of each spectral component
-        dynamic_spectra = np.abs(complex_spectra)
-
-
-        # assign a physical time to each spectrum
-        times = self.SFT.t(num_samples, 
-                           p0 = 0, 
-                           p1 = p1)
-
-        # assign physical frequencies to each spectral component
-        frequencies = self.SFT.f + self.capture_config.get_parameter_value(PNames.CENTER_FREQUENCY) 
-
-        return times, frequencies, dynamic_spectra
 
 
 class BinChunk(ChunkFile):

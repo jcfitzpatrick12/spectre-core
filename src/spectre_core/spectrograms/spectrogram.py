@@ -69,6 +69,9 @@ class Spectrogram:
         self._dynamic_spectra_as_dBb: Optional[np.ndarray] = None # cache
 
         # assigned times and frequencies
+        if times[0] != 0:
+            raise ValueError(f"The first spectrum must correspond to t=0 [s]")
+        
         self._times = times
         self._datetimes: Optional[list[datetime]] = None # cache
         self._frequencies = frequencies

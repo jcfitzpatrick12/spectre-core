@@ -5,6 +5,7 @@
 import numpy as np
 from datetime import datetime, timedelta
 from typing import Optional
+from math import floor
 
 from spectre_core.spectrograms.array_operations import find_closest_index
 from spectre_core.spectrograms.spectrogram import Spectrogram
@@ -122,17 +123,16 @@ def time_chop(input_spectrogram: Spectrogram,
     # chop the spectrogram 
     transformed_dynamic_spectra = input_spectrogram.dynamic_spectra[:, start_index:end_index+1]
 
-    # chop the times array
-    transformed_times = input_spectrogram.times[start_index:end_index+1]
-    #translate the chopped times array to start at zero
-    transformed_times -= transformed_times[0]
-
     # compute the new start datetime following the time chop
     transformed_start_datetime = input_spectrogram.datetimes[start_index]
-    # parse the chunk start time (as string)
+    # compute the microsecond correction, and chunk start time
     transformed_chunk_start_time = datetime.strftime(transformed_start_datetime, DEFAULT_DATETIME_FORMAT)
-    # and compute the microsecond correction
     transformed_microsecond_correction = transformed_start_datetime.microsecond
+
+    # chop the times array
+    transformed_times = input_spectrogram.times[start_index:end_index+1]
+    # assign the first spectrum to t=0 [s]
+    transformed_times -= transformed_times[0]
 
     return Spectrogram(transformed_dynamic_spectra, 
                        transformed_times, 
@@ -144,32 +144,43 @@ def time_chop(input_spectrogram: Spectrogram,
 
 
 def time_average(input_spectrogram: Spectrogram, 
-                 average_over: int) -> Spectrogram:
-    
+                 resolution: Optional[float] = None,
+                 average_over: Optional[int] = None) -> Spectrogram:
+
     # spectre does not currently support averaging of non-datetime assigned spectrograms
     if input_spectrogram.chunk_start_time is None:
         raise ValueError(f"Input spectrogram is missing chunk start time. Averaging is not yet supported for non-datetime assigned spectrograms")
     
-    # if the user has requested no averaging, just return the same instance unchanged
+    # if nothing is specified, do nothing
+    if (resolution is None) and (average_over is None):
+        average_over = 1
+
+    if not (resolution is not None) ^ (average_over is not None):
+        raise ValueError(f"Exactly one of 'resolution' or 'average_over' "
+                         f"must be specified.")
+    
+    # if the resolution is specified, compute the appropriate number of spectrums to average over
+    # and recall the same function
+    if resolution is not None:
+        average_over = max(1, floor(resolution / input_spectrogram.time_resolution))
+        return time_average(input_spectrogram, average_over=average_over)
+    
+    # No averaging is required, if we have to average over every one spectrum
     if average_over == 1:
         return input_spectrogram
 
     # average the dynamic spectra array
-    transformed_dynamic_spectra = _average_array(input_spectrogram.dynamic_spectra, average_over, axis=1)
-    # average the times array s.t. the ith averaged spectrum is assigned the 
-    transformed_times = _average_array(input_spectrogram.times, average_over)
+    transformed_dynamic_spectra = _average_array(input_spectrogram.dynamic_spectra, 
+                                                 average_over, 
+                                                 axis=1)
 
-    # We need to assign timestamps to the averaged spectrums in the spectrograms. The natural way to do this
-    # is to assign the i'th averaged spectrogram to the i'th averaged time stamp. From this,
-    # we then need to compute the chunk start time to assig to the first averaged spectrum,
-    # and update the microsecond correction.
+    # We need to assign timestamps to the averaged spectrums in the spectrograms. 
+    # The natural way to do this is to assign the i'th averaged spectrogram 
+    # to the i'th averaged time
+    transformed_times = _average_array(input_spectrogram.times, average_over)
     
-    # define the initial spectrum as the spectrum at time index 0 in the spectrogram
-    # then, averaged_t0 is the seconds elapsed between the input intial spectrum and the averaged intial spectrum
-    averaged_t0 = float(transformed_times[0])
-    # compute the updated chunk start time and the updated microsecond correction based on averaged_t0
-    corrected_start_datetime = input_spectrogram.datetimes[0] + timedelta(seconds = averaged_t0)
-    # then, compute the transformed chunk start time and microsecond correction
+    # find the new chunk start time, which we will assign to the first spectrum after averaging
+    corrected_start_datetime = input_spectrogram.datetimes[0] + timedelta(seconds = float(transformed_times[0]))
     transformed_chunk_start_time = corrected_start_datetime.strftime(DEFAULT_DATETIME_FORMAT)
     transformed_microsecond_correction = corrected_start_datetime.microsecond
 
@@ -183,17 +194,36 @@ def time_average(input_spectrogram: Spectrogram,
                        microsecond_correction = transformed_microsecond_correction,
                        spectrum_type = input_spectrogram.spectrum_type)
 
+
+
 def frequency_average(input_spectrogram: Spectrogram, 
-                      average_over: int) -> Spectrogram:
+                      resolution: Optional[float] = None,
+                      average_over: Optional[int] = None) -> Spectrogram:
     
-    # if the user has requested no averaging, just return the same instance unchanged
+    # if nothing is specified, do nothing
+    if (resolution is None) and (average_over is None):
+        average_over = 1
+
+    if not (resolution is not None) ^ (average_over is not None):
+        raise ValueError(f"Exactly one of 'resolution' or 'average_over' "
+                         f"must be specified.")
+    
+    # if the resolution is specified, compute the appropriate number of spectrums to average over
+    # and recall the same function
+    if resolution is not None:
+        average_over = max(1, floor(resolution / input_spectrogram.frequency_resolution))
+        return frequency_average(input_spectrogram, average_over=average_over)
+    
+    # No averaging is required, if we have to average over every one spectrum
     if average_over == 1:
         return input_spectrogram
-
+    
     # We need to assign physical frequencies to the averaged spectrums in the spectrograms.
     # is to assign the i'th averaged spectral component to the i'th averaged frequency.
     # average the dynamic spectra array
-    transformed_dynamic_spectra = _average_array(input_spectrogram.dynamic_spectra, average_over, axis=0)
+    transformed_dynamic_spectra = _average_array(input_spectrogram.dynamic_spectra, 
+                                                 average_over, 
+                                                 axis=0)
     transformed_frequencies = _average_array(input_spectrogram.frequencies, average_over)
 
     return Spectrogram(transformed_dynamic_spectra, 
@@ -212,6 +242,7 @@ def _time_elapsed(datetimes: np.ndarray) -> np.ndarray:
     elapsed_time = [(dt - base_time).total_seconds() for dt in datetimes]
     # Convert the list of seconds to a NumPy array of type float32
     return np.array(elapsed_time, dtype=np.float32)
+
 
 # we assume that the spectrogram list is ORDERED chronologically
 # we assume there is no time overlap in any of the spectrograms in the list
@@ -254,14 +285,11 @@ def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
         start_index = end_index
 
     transformed_times = _time_elapsed(conc_datetimes)
-    
-    transformed_microsecond_correction = conc_datetimes[0].microsecond
 
     return Spectrogram(transformed_dynamic_spectra, 
                        transformed_times, 
                        reference_spectrogram.frequencies, 
                        reference_spectrogram.tag, 
                        chunk_start_time = reference_spectrogram.chunk_start_time,
-                       microsecond_correction = transformed_microsecond_correction,
+                       microsecond_correction = reference_spectrogram.microsecond_correction,
                        spectrum_type = reference_spectrogram.spectrum_type) 
-

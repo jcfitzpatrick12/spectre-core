@@ -88,12 +88,12 @@ class _AnalyticalFactory:
                         num_spectrums: int,
                         capture_config: CaptureConfig) -> Spectrogram:
         # Extract necessary parameters from the capture configuration.
-        window_size   = capture_config.get_parameter_value(PNames.WINDOW_SIZE)
-        sample_rate   = capture_config.get_parameter_value(PNames.SAMPLE_RATE)
-        amplitude     = capture_config.get_parameter_value(PNames.AMPLITUDE)
-        frequency     = capture_config.get_parameter_value(PNames.FREQUENCY)
-        window_hop    = capture_config.get_parameter_value(PNames.WINDOW_HOP)
-
+        window_size      = capture_config.get_parameter_value(PNames.WINDOW_SIZE)
+        sample_rate      = capture_config.get_parameter_value(PNames.SAMPLE_RATE)
+        amplitude        = capture_config.get_parameter_value(PNames.AMPLITUDE)
+        frequency        = capture_config.get_parameter_value(PNames.FREQUENCY)
+        window_hop       = capture_config.get_parameter_value(PNames.WINDOW_HOP)
+        center_frequency = capture_config.get_parameter_value(PNames.CENTER_FREQUENCY)
         # Calculate derived parameters a (sampling rate ratio) and p (sampled periods).
         a = int(sample_rate / frequency)
         p = int(window_size / a)
@@ -115,7 +115,7 @@ class _AnalyticalFactory:
         times = np.arange(num_spectrums) * window_hop * sampling_interval
 
         # compute the frequency array.
-        frequencies = np.fft.fftshift(np.fft.fftfreq(window_size, sampling_interval))
+        frequencies = np.fft.fftshift(np.fft.fftfreq(window_size, sampling_interval)) + center_frequency
 
         # Return the spectrogram.
         return Spectrogram(analytical_dynamic_spectra,
@@ -152,11 +152,10 @@ class _AnalyticalFactory:
 
         # Compute time array
         num_samples_per_sweep = sum(num_samples_per_step)
-        midpoint_sample = sum(num_samples_per_step) // 2
         sampling_interval = 1 / samp_rate
         # compute the sample index we are "assigning" to each spectrum
         # and multiply by the sampling interval to get the equivalent physical time
-        times = np.array([ midpoint_sample + (i * num_samples_per_sweep) for i in range(num_spectrums) ]) * sampling_interval
+        times = np.array([(i * num_samples_per_sweep) for i in range(num_spectrums) ]) * sampling_interval
 
         # Compute the frequency array
         baseband_frequencies = np.fft.fftshift(np.fft.fftfreq(window_size, sampling_interval))

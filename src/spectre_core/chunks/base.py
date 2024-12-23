@@ -3,10 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from datetime import datetime
-from abc import abstractmethod
 from typing import Optional
-
-from scipy.signal import ShortTimeFFT, get_window
 
 from spectre_core.file_handlers.base import BaseFileHandler
 from spectre_core.paths import get_chunks_dir_path
@@ -121,42 +118,3 @@ class BaseChunk:
             return False
 
 
-class SPECTREChunk(BaseChunk):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._capture_config = CaptureConfig(self._tag)
-        self._SFT = None # cache
-
-
-    @abstractmethod
-    def build_spectrogram(self) -> Spectrogram:
-        """Create a spectrogram object derived from chunk files for this chunk."""
-        pass
-
-
-    @property
-    def capture_config(self) -> CaptureConfig:
-        return self._capture_config
-    
-
-    @property
-    def SFT(self) -> ShortTimeFFT:
-        """Only instantiate the ShortTimeFFT if it is required."""
-        if self._SFT is None:
-            self._SFT = self.__make_SFT_instance()
-        return self._SFT
-    
-
-    def __make_SFT_instance(self) -> ShortTimeFFT:
-        sample_rate   = self.capture_config.get_parameter_value(PNames.SAMPLE_RATE)
-        window_hop    = self.capture_config.get_parameter_value(PNames.WINDOW_HOP)
-        window_type   = self.capture_config.get_parameter_value(PNames.WINDOW_TYPE)
-        window_size   = self.capture_config.get_parameter_value(PNames.WINDOW_SIZE)
-        window = get_window(window_type, 
-                            window_size)
-        
-        return ShortTimeFFT(window, 
-                            window_hop,
-                            sample_rate, 
-                            fft_mode = "centered")

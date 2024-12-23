@@ -7,7 +7,7 @@ _LOGGER = getLogger(__name__)
 
 from typing import Optional
 from abc import ABC, abstractmethod
-from math import floor
+from scipy.signal import ShortTimeFFT, get_window
 
 from watchdog.events import (
     FileSystemEventHandler, 
@@ -17,12 +17,23 @@ from watchdog.events import (
 from spectre_core.chunks.factory import get_chunk_from_tag
 from spectre_core.capture_config import CaptureConfig
 from spectre_core.parameter_store import PNames
+from spectre_core.chunks.base import BaseChunk
 from spectre_core.spectrograms.spectrogram import Spectrogram
 from spectre_core.spectrograms.transform import join_spectrograms
-from spectre_core.spectrograms.transform import (
-    time_average, 
-    frequency_average
-)
+
+
+def make_sft_instance(capture_config: CaptureConfig
+) -> ShortTimeFFT:
+    sample_rate   = capture_config.get_parameter_value(PNames.SAMPLE_RATE)
+    window_hop    = capture_config.get_parameter_value(PNames.WINDOW_HOP)
+    window_type   = capture_config.get_parameter_value(PNames.WINDOW_TYPE)
+    window_size   = capture_config.get_parameter_value(PNames.WINDOW_SIZE)
+    window = get_window(window_type, 
+                        window_size)
+    return ShortTimeFFT(window, 
+                        window_hop,
+                        sample_rate, 
+                        fft_mode = "centered")
 
 
 class BaseEventHandler(ABC, FileSystemEventHandler):
@@ -30,23 +41,21 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
                  tag: str):
         self._tag = tag
 
-        self._Chunk = get_chunk_from_tag(tag)
+        # the tag tells us 'what type' of data is stored in the files for each chunk
+        self._Chunk: BaseChunk = get_chunk_from_tag(tag)
+        # load the capture config corresponding to the tag
+        self._capture_config   = CaptureConfig(tag)
 
-        self._capture_config = CaptureConfig(tag)
-
+        # post processing is triggered by files with this extension
         self._watch_extension = self._capture_config.get_parameter_value(PNames.WATCH_EXTENSION)
-        if self._watch_extension is None:
-            raise KeyError("The watch extension has not been specified in the capture config")
 
-        # attribute to store the next file to be processed 
-        # (specifically, the absolute file path of the file)
+        # store the next file to be processed (specifically, the absolute file path of the file)
         self._queued_file: Optional[str] = None
 
-        # spectrogram cache stores spectrograms in memory
-        # such that they can be periodically written to files
-        # according to the joining time.
-        self._spectrogram: Optional[Spectrogram] = None
-        
+        # store batched spectrograms as they are created into a cache
+        # which is flushed periodically according to a user defined 
+        # time range
+        self._cached_spectrogram: Optional[Spectrogram] = None
 
 
     @abstractmethod
@@ -56,7 +65,6 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         
         To be implemented by derived classes.
         """
-
 
     def on_created(self, 
                    event: FileCreatedEvent):
@@ -83,57 +91,35 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
                     _LOGGER.error(f"An error has occured while processing {self._queued_file}",
                                   exc_info=True)
                      # flush any internally stored spectrogram on error to avoid lost data
-                    self._flush_spectrogram()
+                    self._flush_cache()
                     # re-raise the exception to the main thread
                     raise
             
             # Queue the current file for processing next
             _LOGGER.info(f"Queueing {absolute_file_path} for post processing")
             self._queued_file = absolute_file_path
-
-
-    def _average_in_time(self, 
-                         spectrogram: Spectrogram) -> Spectrogram:
-        _LOGGER.info("Averaging spectrogram in time")
-        time_resolution = self._capture_config.get_parameter_value(PNames.TIME_RESOLUTION)
-        # if the resolution has not been specified return as is
-        if time_resolution is None:
-            return spectrogram
-        average_over = floor(time_resolution/spectrogram.time_resolution) if time_resolution > spectrogram.time_resolution else 1
-        return time_average(spectrogram, average_over)
-    
-    
-    def _average_in_frequency(self, 
-                              spectrogram: Spectrogram) -> Spectrogram:
-        _LOGGER.info("Averaging spectrogram in frequency")
-        frequency_resolution = self._capture_config.get_parameter_value(PNames.FREQUENCY_RESOLUTION)
-        # if the resolution has not been specified, return as is
-        if frequency_resolution is None:
-            return spectrogram
-        average_over = floor(frequency_resolution/spectrogram.frequency_resolution) if frequency_resolution > spectrogram.frequency_resolution else 1
-        return frequency_average(spectrogram, average_over)
     
 
-    def _join_spectrogram(self, 
-                          spectrogram: Spectrogram) -> None:
+    def _cache_spectrogram(self, 
+                           spectrogram: Spectrogram) -> None:
         _LOGGER.info("Joining spectrogram")
 
-        if self._spectrogram is None:
-            self._spectrogram = spectrogram
+        if self._cached_spectrogram is None:
+            self._cached_spectrogram = spectrogram
         else:
-            self._spectrogram = join_spectrograms([self._spectrogram, spectrogram])
+            self._cached_spectrogram = join_spectrograms([self._cached_spectrogram, spectrogram])
 
         # if the time range is not specified
-        time_range = self._capture_config.get_parameter_value(PNames.TIME_RANGE)
-        if time_range is None:
-            self._flush_spectrogram()
-        elif self._spectrogram.time_range >= time_range:
-            self._flush_spectrogram()
+        time_range = self._capture_config.get_parameter_value(PNames.TIME_RANGE) or self._capture_config.get_parameter_value(PNames.BATCH_SIZE)
+  
+        if self._cached_spectrogram.time_range >= time_range:
+            self._flush_cache()
     
 
-    def _flush_spectrogram(self) -> None:
-        if self._spectrogram:
-            _LOGGER.info(f"Flushing spectrogram to file with chunk start time {self._spectrogram.chunk_start_time}")
-            self._spectrogram.save()
+    def _flush_cache(self) -> None:
+        if self._cached_spectrogram:
+            _LOGGER.info(f"Flushing spectrogram to file with chunk start time "
+                         f"'{self._cached_spectrogram.chunk_start_time}'")
+            self._cached_spectrogram.save()
             _LOGGER.info("Flush successful, resetting spectrogram cache")
-            self._spectrogram = None # reset the cache
+            self._cached_spectrogram = None # reset the cache
