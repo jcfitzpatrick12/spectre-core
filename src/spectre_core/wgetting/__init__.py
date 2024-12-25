@@ -2,8 +2,8 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from ._callisto import download_callisto_data
+from ._callisto import download_callisto_data, CALLISTO_INSTRUMENT_CODES
 
 __all__ = [
-    "download_callisto_data"
+    "download_callisto_data", "CALLISTO_INSTRUMENT_CODES"
 ]
