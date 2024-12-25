@@ -6,8 +6,9 @@
 from .library._fixed_center_frequency import _EventHandler
 from .library._swept_center_frequency import _EventHandler
 
+from ._factory import get_event_handler_from_tag
 from ._post_processor import PostProcessor
 
 __all__ = [
-    "PostProcessor"
+    "PostProcessor", "get_event_handler_from_tag"
 ]

@@ -5,7 +5,7 @@
 from dataclasses import dataclass
 
 from spectre_core._file_io import JsonHandler
-from spectre_core.paths import get_configs_dir_path
+from spectre_core.config import get_configs_dir_path
 from spectre_core.exceptions import InvalidTagError
 from ._parameters import (
     Parameter, 

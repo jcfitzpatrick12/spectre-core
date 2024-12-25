@@ -25,7 +25,7 @@ from gnuradio import spectre
 from gnuradio import analog
 
 from spectre_core.capture_configs import Parameters, PNames
-from spectre_core.paths import get_chunks_dir_path
+from spectre_core.config import get_chunks_dir_path
 from ._base import capture
 
 

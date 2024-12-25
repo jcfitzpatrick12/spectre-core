@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from math import floor
 
-from spectre_core.time_formats import DEFAULT_DATETIME_FORMAT
+from spectre_core.config import TimeFormats
 from ._array_operations import find_closest_index, average_array
 from ._spectrogram import Spectrogram
 
@@ -58,7 +58,7 @@ def frequency_chop(input_spectrogram: Spectrogram,
 def time_chop(input_spectrogram: Spectrogram, 
               start_time: str, 
               end_time: str, 
-              time_format: str = DEFAULT_DATETIME_FORMAT) -> Optional[Spectrogram]:
+              time_format: str = TimeFormats.DATETIME) -> Optional[Spectrogram]:
     
     # parse the strings as datetimes
     start_datetime = datetime.strptime(start_time, time_format)
@@ -85,7 +85,7 @@ def time_chop(input_spectrogram: Spectrogram,
     # compute the new start datetime following the time chop
     transformed_start_datetime = input_spectrogram.datetimes[start_index]
     # compute the microsecond correction, and chunk start time
-    transformed_chunk_start_time = datetime.strftime(transformed_start_datetime, DEFAULT_DATETIME_FORMAT)
+    transformed_chunk_start_time = datetime.strftime(transformed_start_datetime, TimeFormats.DATETIME)
     transformed_microsecond_correction = transformed_start_datetime.microsecond
 
     # chop the times array
@@ -140,7 +140,7 @@ def time_average(input_spectrogram: Spectrogram,
     
     # find the new chunk start time, which we will assign to the first spectrum after averaging
     corrected_start_datetime = input_spectrogram.datetimes[0] + timedelta(seconds = float(transformed_times[0]))
-    transformed_chunk_start_time = corrected_start_datetime.strftime(DEFAULT_DATETIME_FORMAT)
+    transformed_chunk_start_time = corrected_start_datetime.strftime(TimeFormats.DATETIME)
     transformed_microsecond_correction = corrected_start_datetime.microsecond
 
     # finally, translate the averaged time seconds to begin at t=0 [s]

@@ -9,7 +9,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
 from spectre_core.spectrograms import TimeTypes
-from ._base import BasePanel, XAxisTypes
+from ._base import BasePanel
 from ._format import PanelFormat, DEFAULT_FORMAT
 from ._panels import PanelNames
 

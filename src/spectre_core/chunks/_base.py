@@ -6,8 +6,7 @@ from datetime import datetime
 from typing import Optional
 
 from spectre_core._file_io import BaseFileHandler
-from spectre_core.paths import get_chunks_dir_path
-from spectre_core.time_formats import DEFAULT_DATETIME_FORMAT
+from spectre_core.config import get_chunks_dir_path, TimeFormats
 from spectre_core.exceptions import ChunkFileNotFoundError
 
 class ChunkFile(BaseFileHandler):
@@ -37,7 +36,7 @@ class ChunkFile(BaseFileHandler):
     @property
     def chunk_start_datetime(self) -> datetime:
         if self._chunk_start_datetime is None:
-            self._chunk_start_datetime = datetime.strptime(self.chunk_start_time, DEFAULT_DATETIME_FORMAT)
+            self._chunk_start_datetime = datetime.strptime(self.chunk_start_time, TimeFormats.DATETIME)
         return self._chunk_start_datetime
     
 
@@ -69,7 +68,7 @@ class BaseChunk:
     @property
     def chunk_start_datetime(self) -> datetime:
         if self._chunk_start_datetime is None:
-            self._chunk_start_datetime = datetime.strptime(self.chunk_start_time, DEFAULT_DATETIME_FORMAT)
+            self._chunk_start_datetime = datetime.strptime(self.chunk_start_time, TimeFormats.DATETIME)
         return self._chunk_start_datetime
 
 

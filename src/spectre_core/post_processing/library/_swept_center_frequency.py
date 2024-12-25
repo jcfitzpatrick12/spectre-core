@@ -14,7 +14,7 @@ import numpy as np
 from scipy.signal import ShortTimeFFT
 
 from spectre_core.spectrograms import Spectrogram, time_average, frequency_average
-from spectre_core.time_formats import DEFAULT_DATETIME_FORMAT
+from spectre_core.config import TimeFormats
 from spectre_core.capture_configs import CaptureConfig, PNames, CaptureModes
 from spectre_core.chunks import BaseChunk
 from spectre_core.chunks import SweepMetadata
@@ -200,7 +200,7 @@ def _correct_timing(chunk_start_datetime: datetime,
     sample_interval = (1 / sample_rate)
     elapsed_time = num_samples_prepended * sample_interval
     corrected_datetime = chunk_start_datetime + timedelta(milliseconds = millisecond_correction) - timedelta(seconds = float(elapsed_time))
-    return corrected_datetime.strftime(DEFAULT_DATETIME_FORMAT), corrected_datetime.microsecond * 1e-3
+    return corrected_datetime.strftime(TimeFormats.DATETIME), corrected_datetime.microsecond * 1e-3
 
 
 def _prepend_num_samples(carryover_num_samples: np.ndarray,

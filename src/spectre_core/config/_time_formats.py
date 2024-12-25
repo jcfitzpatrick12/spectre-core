@@ -6,6 +6,10 @@
 Package-wide default datetime formats.
 """
 
-DEFAULT_TIME_FORMAT = "%H:%M:%S"
-DEFAULT_DATE_FORMAT = "%Y-%m-%d"
-DEFAULT_DATETIME_FORMAT = f"{DEFAULT_DATE_FORMAT}T{DEFAULT_TIME_FORMAT}"
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class TimeFormats:
+    TIME     = "%H:%M:%S"
+    DATE     = "%Y-%m-%d"
+    DATETIME = f"{TIME}T{DATE}"

@@ -12,8 +12,7 @@ import numpy as np
 from astropy.io import fits
 
 from spectre_core.capture_configs import CaptureConfig, PNames
-from spectre_core.time_formats import DEFAULT_DATETIME_FORMAT
-from spectre_core.paths import get_chunks_dir_path
+from spectre_core.config import get_chunks_dir_path, TimeFormats
 from ._array_operations import (
     find_closest_index,
     normalise_peak_intensity,
@@ -166,7 +165,7 @@ class Spectrogram:
     @property
     def chunk_start_datetime(self) -> datetime:
         if self._chunk_start_datetime is None:
-            self._chunk_start_datetime = datetime.strptime(self.chunk_start_time, DEFAULT_DATETIME_FORMAT)
+            self._chunk_start_datetime = datetime.strptime(self.chunk_start_time, TimeFormats.DATETIME)
         return self._chunk_start_datetime
 
 
@@ -228,12 +227,12 @@ class Spectrogram:
     
     
     def _update_background_indices_from_interval(self) -> None:
-        start_background = datetime.strptime(self._start_background, DEFAULT_DATETIME_FORMAT)
+        start_background = datetime.strptime(self._start_background, TimeFormats.DATETIME)
         self._start_background_index = find_closest_index(start_background, 
                                                           self.datetimes, 
                                                           enforce_strict_bounds=True)
         
-        end_background = datetime.strptime(self._end_background, DEFAULT_DATETIME_FORMAT)
+        end_background = datetime.strptime(self._end_background, TimeFormats.DATETIME)
         self._end_background_index = find_closest_index(end_background, 
                                                         self.datetimes, 
                                                         enforce_strict_bounds=True)
@@ -288,7 +287,7 @@ class Spectrogram:
         # exactly to one of the times assigned to each spectrogram. So, we compute the nearest achievable,
         # and return it from the function as output too.
         if isinstance(at_time, str):
-            at_time = datetime.strptime(at_time, DEFAULT_DATETIME_FORMAT)
+            at_time = datetime.strptime(at_time, TimeFormats.DATETIME)
             index_of_cut = find_closest_index(at_time, 
                                               self.datetimes, 
                                               enforce_strict_bounds = True)

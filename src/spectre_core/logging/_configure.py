@@ -6,14 +6,14 @@ import os
 import logging
 from datetime import datetime
 
-from spectre_core.time_formats import DEFAULT_DATETIME_FORMAT
+from spectre_core.config import TimeFormats
 from ._log_handlers import LogHandler
 
 def configure_root_logger(process_type: str, 
                           level: int = logging.INFO
 ) -> LogHandler:
     system_datetime = datetime.now()
-    datetime_stamp = system_datetime.strftime(DEFAULT_DATETIME_FORMAT)
+    datetime_stamp = system_datetime.strftime(TimeFormats.DATETIME)
     pid = os.getpid()
     log_handler = LogHandler(datetime_stamp, pid, process_type)
     log_handler.make_parent_path()

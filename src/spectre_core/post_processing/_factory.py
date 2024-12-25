@@ -17,7 +17,7 @@ def _get_event_handler(event_handler_key: str) -> BaseEventHandler:
     return EventHandler
 
 
-def _get_event_handler_from_tag(tag: str) -> BaseEventHandler:
+def get_event_handler_from_tag(tag: str) -> BaseEventHandler:
     capture_config = CaptureConfig(tag)
     event_handler_key = capture_config.get_parameter_value(PNames.EVENT_HANDLER_KEY)
     return _get_event_handler(event_handler_key)

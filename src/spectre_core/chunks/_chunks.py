@@ -12,8 +12,7 @@ import warnings
 from datetime import datetime
 
 from spectre_core.spectrograms import Spectrogram, time_chop, join_spectrograms
-from spectre_core.paths import get_chunks_dir_path
-from spectre_core.time_formats import DEFAULT_DATETIME_FORMAT
+from spectre_core.config import get_chunks_dir_path, TimeFormats
 from spectre_core.exceptions import (
     SpectrogramNotFoundError,
     ChunkNotFoundError
@@ -159,8 +158,8 @@ class Chunks:
                                    start_time: str, 
                                    end_time: str) -> Spectrogram:
         # Convert input strings to datetime objects
-        start_datetime = datetime.strptime(start_time, DEFAULT_DATETIME_FORMAT)
-        end_datetime = datetime.strptime(end_time, DEFAULT_DATETIME_FORMAT)
+        start_datetime = datetime.strptime(start_time, TimeFormats.DATETIME)
+        end_datetime = datetime.strptime(end_time, TimeFormats.DATETIME)
 
         if start_datetime.day != end_datetime.day:
             warning_message = "Joining spectrograms across multiple days"

@@ -9,8 +9,7 @@ import gzip
 from datetime import datetime
 from typing import Optional
 
-from spectre_core.paths import get_spectre_data_dir_path, get_chunks_dir_path
-from spectre_core.time_formats import DEFAULT_DATETIME_FORMAT
+from spectre_core.config import get_spectre_data_dir_path, get_chunks_dir_path, TimeFormats
 
 CALLISTO_INSTRUMENT_CODES = [
     "ALASKA-ANCHORAGE",
@@ -73,7 +72,7 @@ _temp_dir = os.path.join(get_spectre_data_dir_path(), "temp")
 
 def _get_chunk_name(station: str, date: str, time: str, instrument_code: str) -> str:
     dt = datetime.strptime(f"{date}T{time}", '%Y%m%dT%H%M%S')
-    formatted_time = dt.strftime(DEFAULT_DATETIME_FORMAT)
+    formatted_time = dt.strftime(TimeFormats.DATETIME)
     return f"{formatted_time}_callisto-{station.lower()}-{instrument_code}.fits"
 
 
@@ -94,7 +93,7 @@ def _get_chunk_path(gz_path: str) -> str:
     station, date, time, instrument_code = _get_chunk_components(gz_path)
     fits_chunk_name = _get_chunk_name(station, date, time, instrument_code)
     chunk_start_time = fits_chunk_name.split('_')[0]
-    chunk_start_datetime = datetime.strptime(chunk_start_time, DEFAULT_DATETIME_FORMAT)
+    chunk_start_datetime = datetime.strptime(chunk_start_time, TimeFormats.DATETIME)
     chunk_parent_path = get_chunks_dir_path(year = chunk_start_datetime.year,
                                             month = chunk_start_datetime.month,
                                             day = chunk_start_datetime.day)
