@@ -12,4 +12,4 @@ from dataclasses import dataclass
 class TimeFormats:
     TIME     = "%H:%M:%S"
     DATE     = "%Y-%m-%d"
-    DATETIME = f"{TIME}T{DATE}"
+    DATETIME = f"{DATE}T{TIME}"
