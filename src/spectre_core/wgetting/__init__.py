@@ -2,10 +2,8 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from ._format import PanelFormat
-from ._panels import Panels
-from ._panel_stack import PanelStack
+from ._callisto import download_callisto_data
 
 __all__ = [
-    "PanelFormat", "Panels", "PanelStack"
+    "download_callisto_data"
 ]

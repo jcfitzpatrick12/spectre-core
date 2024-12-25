@@ -2,41 +2,35 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import os
-from importlib import import_module
+"""
+SPECTRE data paths.
+"""
 
-SPECTRE_DATA_DIR_PATH = os.environ.get("SPECTRE_DATA_DIR_PATH")
-if SPECTRE_DATA_DIR_PATH is None:
+import os
+
+_SPECTRE_DATA_DIR_PATH = os.environ.get("SPECTRE_DATA_DIR_PATH")
+if _SPECTRE_DATA_DIR_PATH is None:
     raise ValueError("The environment variable SPECTRE_DATA_DIR_PATH has not been set")
 
 _CHUNKS_DIR_PATH = os.environ.get("SPECTRE_CHUNKS_DIR_PATH", 
-                                  os.path.join(SPECTRE_DATA_DIR_PATH, 'chunks'))
+                                  os.path.join(_SPECTRE_DATA_DIR_PATH, 'chunks'))
 os.makedirs(_CHUNKS_DIR_PATH, 
             exist_ok=True)
 
 _LOGS_DIR_PATH = os.environ.get("SPECTRE_LOGS_DIR_PATH",
-                               os.path.join(SPECTRE_DATA_DIR_PATH, 'logs'))
+                               os.path.join(_SPECTRE_DATA_DIR_PATH, 'logs'))
 os.makedirs(_LOGS_DIR_PATH, 
             exist_ok=True)
 
 _CONFIGS_DIR_PATH = os.environ.get("SPECTRE_CONFIGS_DIR_PATH",
-                                  os.path.join(SPECTRE_DATA_DIR_PATH, "configs"))
+                                  os.path.join(_SPECTRE_DATA_DIR_PATH, "configs"))
 os.makedirs(_CONFIGS_DIR_PATH, 
             exist_ok=True)
 
 
-def import_target_modules(caller_file: str, # __file__ in the calling context for the library
-                          caller_name: str, # __name__ in the calling context for the library
-                          target_module: str # the module we are looking to dynamically import
-) -> None: 
-    # fetch the directory path for the __init__.py in the library directory
-    library_dir_path = os.path.dirname(caller_file)
-    # list all subdirectories in the library directory
-    subdirs = [x.name for x in os.scandir(library_dir_path) if x.is_dir() and (x.name != "__pycache__")]
-    # for each subdirectory, try and import the target module
-    for subdir in subdirs:
-        full_module_name = f"{caller_name}.{subdir}.{target_module}"
-        import_module(full_module_name)
+def get_spectre_data_dir_path(
+) -> str:
+    return _SPECTRE_DATA_DIR_PATH
 
 
 def _get_date_based_dir_path(base_dir: str, year: int = None, 
