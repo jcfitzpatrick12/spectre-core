@@ -194,7 +194,7 @@ class PNames:
 #
 # All stored base ptemplates
 #
-_ptemplates = {
+_base_ptemplates = {
     PNames.CENTER_FREQUENCY:       PTemplate(PNames.CENTER_FREQUENCY,       
                                              float, 
                                              help = """
@@ -440,11 +440,11 @@ _ptemplates = {
 }
 
 T = TypeVar('T')
-def get_ptemplate(
+def get_base_ptemplate(
     parameter_name: str,
 ) -> PTemplate:
     """Create a fresh deep copy of a pre-defined ptemplate"""
-    if parameter_name not in _ptemplates:
+    if parameter_name not in _base_ptemplates:
         raise KeyError(f"No ptemplate found for the parameter name '{parameter_name}'. "
-                       f"Expected one of {list(_ptemplates.keys())}")
-    return deepcopy( _ptemplates[parameter_name] )
+                       f"Expected one of {list(_base_ptemplates.keys())}")
+    return deepcopy( _base_ptemplates[parameter_name] )

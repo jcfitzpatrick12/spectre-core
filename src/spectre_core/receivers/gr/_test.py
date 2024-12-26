@@ -50,8 +50,12 @@ class _cosine_signal_1(gr.top_block):
                                                                      tag, 
                                                                      batch_size, 
                                                                      samp_rate)
-        self.blocks_throttle_0_1 = blocks.throttle(gr.sizeof_float*1, samp_rate,True)
-        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_float*1, samp_rate,True)
+        self.blocks_throttle_0_1 = blocks.throttle(gr.sizeof_float*1, 
+                                                   samp_rate,
+                                                   True)
+        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_float*1, 
+                                                 samp_rate,
+                                                 True)
         self.blocks_null_source_1 = blocks.null_source(gr.sizeof_float*1)
         self.blocks_float_to_complex_1 = blocks.float_to_complex(1)
         self.analog_sig_source_x_0 = analog.sig_source_f(samp_rate, 
@@ -70,6 +74,7 @@ class _cosine_signal_1(gr.top_block):
         self.connect((self.blocks_null_source_1, 0), (self.blocks_throttle_0_1, 0))
         self.connect((self.blocks_throttle_0, 0), (self.blocks_float_to_complex_1, 0))
         self.connect((self.blocks_throttle_0_1, 0), (self.blocks_float_to_complex_1, 1))
+
 
 class _tagged_staircase(gr.top_block):
     def __init__(self, 
@@ -101,8 +106,7 @@ class _tagged_staircase(gr.top_block):
                                                                      samp_rate, 
                                                                      True,
                                                                      'rx_freq',
-                                                                     0
-                                                                     )
+                                                                     0) # zero means the center frequency is unset
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate, True)
 
 

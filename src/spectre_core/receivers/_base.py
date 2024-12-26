@@ -10,7 +10,7 @@ from spectre_core.exceptions import ModeNotFoundError
 from ._spec_names import SpecNames
 from spectre_core.capture_configs import (
     CaptureTemplate, CaptureModes, Parameters, Bound, PValidators, PNames,
-    get_capture_template, get_ptemplate, OneOf, CaptureConfig
+    get_base_capture_template, get_base_ptemplate, OneOf, CaptureConfig
 )
 
 class BaseReceiver(ABC):
@@ -19,7 +19,7 @@ class BaseReceiver(ABC):
                  mode: Optional[str] = None):
         self._name = name
 
-        self._specs: dict[str, Number] = {}
+        self._specs: dict[str, Number | list[Number]] = {}
         self._add_specs()
         
         self._capture_methods: dict[str, Callable] = {}
@@ -144,11 +144,11 @@ class BaseReceiver(ABC):
 
 
     def get_spec(self, 
-                 spec_name: str) -> Number:
+                 spec_name: str) -> Number | list[Number]:
         if spec_name not in self.specs:
             raise KeyError(f"Spec not found with name '{spec_name}' "
                            f"for the receiver '{self.name}'")
-        return self.specs.get(spec_name)
+        return self.specs[spec_name]
 
 
     def start_capture(self, 
@@ -183,20 +183,14 @@ class BaseReceiver(ABC):
 class SDRPlayReceiver(BaseReceiver):
     def _get_pvalidator_fixed_center_frequency(self) -> Callable:
         def pvalidator(parameters: Parameters):
-            PValidators.nyquist_criterion(parameters)
-            PValidators.window(parameters)
+            PValidators.fixed_center_frequency(parameters)
         return pvalidator
+
 
     def _get_pvalidator_swept_center_frequency(self) -> None:
         def pvalidator(parameters: Parameters):
-            PValidators.nyquist_criterion(parameters)
-            PValidators.window(parameters)
-            PValidators.non_overlapping_steps(parameters)
-            PValidators.num_steps_per_sweep(parameters)
-            PValidators.num_samples_per_step(parameters)
-            PValidators.sweep_interval(parameters)
-            PValidators.step_interval(parameters, 
-                                      self.get_spec(SpecNames.API_RETUNING_LATENCY) )
+            PValidators.swept_center_frequency(parameters,
+                                               self.get_spec(SpecNames.API_RETUNING_LATENCY))
         return pvalidator
 
 
@@ -204,10 +198,10 @@ class SDRPlayReceiver(BaseReceiver):
         #
         # Create the base template
         #
-        capture_template = get_capture_template( CaptureModes.FIXED_CENTER_FREQUENCY )
-        capture_template.add_ptemplate( get_ptemplate(PNames.BANDWIDTH) )
-        capture_template.add_ptemplate( get_ptemplate(PNames.IF_GAIN) )
-        capture_template.add_ptemplate( get_ptemplate(PNames.RF_GAIN) )
+        capture_template = get_base_capture_template( CaptureModes.FIXED_CENTER_FREQUENCY )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.BANDWIDTH) )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.IF_GAIN) )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.RF_GAIN) )
 
         #
         # Update the defaults
@@ -217,8 +211,8 @@ class SDRPlayReceiver(BaseReceiver):
             (PNames.CENTER_FREQUENCY,      95800000),
             (PNames.SAMPLE_RATE,           600000),
             (PNames.BANDWIDTH,             600000),
-            (PNames.WINDOW_HOP,            256),
-            (PNames.WINDOW_SIZE,           512),
+            (PNames.WINDOW_HOP,            512),
+            (PNames.WINDOW_SIZE,           1024),
             (PNames.WINDOW_TYPE,           "blackman"),
             (PNames.RF_GAIN,               -30),
             (PNames.IF_GAIN,               -30)
@@ -276,10 +270,10 @@ class SDRPlayReceiver(BaseReceiver):
         #
         # Create the base template
         #
-        capture_template = get_capture_template( CaptureModes.SWEPT_CENTER_FREQUENCY )
-        capture_template.add_ptemplate( get_ptemplate(PNames.BANDWIDTH) )
-        capture_template.add_ptemplate( get_ptemplate(PNames.IF_GAIN) )
-        capture_template.add_ptemplate( get_ptemplate(PNames.RF_GAIN) )
+        capture_template = get_base_capture_template( CaptureModes.SWEPT_CENTER_FREQUENCY )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.BANDWIDTH) )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.IF_GAIN) )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.RF_GAIN) )
 
 
         #
@@ -293,8 +287,8 @@ class SDRPlayReceiver(BaseReceiver):
             (PNames.FREQUENCY_STEP,        1536000),
             (PNames.SAMPLE_RATE,           1536000),
             (PNames.BANDWIDTH,             1536000),
-            (PNames.WINDOW_HOP,            256),
-            (PNames.WINDOW_SIZE,           512),
+            (PNames.WINDOW_HOP,            512),
+            (PNames.WINDOW_SIZE,           1024),
             (PNames.WINDOW_TYPE,           "blackman"),
             (PNames.RF_GAIN,               -30),
             (PNames.IF_GAIN,               -30)

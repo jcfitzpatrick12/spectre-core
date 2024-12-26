@@ -10,6 +10,7 @@ from math import floor
 from scipy.signal import get_window
 from numbers import Number
 from warnings import warn
+from typing import Optional
 
 from ._parameters import Parameters
 from ._ptemplates import PNames
@@ -136,6 +137,28 @@ def _validate_step_interval(
         _LOGGER.warning(warning_message)
 
 
+def _validate_fixed_center_frequency_parameters(
+    parameters: Parameters
+) -> None:
+    _validate_nyquist_criterion(parameters)
+    _validate_window(parameters)
+
+
+def _validate_swept_center_frequency_parameters(
+    parameters: Parameters,
+    api_retuning_latency: Optional[Number] = None,
+) -> None:
+    _validate_nyquist_criterion(parameters)
+    _validate_window(parameters)
+    _validate_non_overlapping_steps(parameters)
+    _validate_num_steps_per_sweep(parameters)
+    _validate_num_samples_per_step(parameters)
+    _validate_sweep_interval(parameters)
+    
+    if api_retuning_latency is not None:
+        _validate_step_interval(parameters, api_retuning_latency)
+    
+
 @dataclass(frozen=True)
 class PValidators:
     window                 = _validate_window
@@ -146,3 +169,5 @@ class PValidators:
     num_samples_per_step   = _validate_num_samples_per_step
     sweep_interval         = _validate_sweep_interval
     step_interval          = _validate_step_interval
+    fixed_center_frequency = _validate_fixed_center_frequency_parameters
+    swept_center_frequency = _validate_swept_center_frequency_parameters

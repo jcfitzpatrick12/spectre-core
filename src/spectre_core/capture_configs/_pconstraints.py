@@ -55,8 +55,9 @@ class Bound(PConstraint):
 class OneOf(PConstraint):
     """Constrain a parameter to one of a set of defined options."""
 
-    def __init__(self, options: list[Any]):
+    def __init__(self, options: list[Any] = None):
         self._options = options
+
 
     def constrain(self, value: Any) -> None:
         if value not in self._options:

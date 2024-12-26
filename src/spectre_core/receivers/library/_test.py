@@ -7,7 +7,7 @@ from typing import Optional, Callable
 
 from spectre_core.capture_configs import (
     CaptureTemplate, CaptureModes, Parameters, Bound, PValidators, PNames,
-    get_capture_template, make_capture_template, get_ptemplate
+    get_base_capture_template, make_base_capture_template, get_base_ptemplate
 )
 from ..gr._test import CaptureMethods
 from .._spec_names import SpecNames
@@ -56,9 +56,9 @@ class _Receiver(BaseReceiver):
         #
         # Create the base template
         #
-        capture_template = get_capture_template( CaptureModes.FIXED_CENTER_FREQUENCY )
-        capture_template.add_ptemplate( get_ptemplate(PNames.AMPLITUDE) )
-        capture_template.add_ptemplate( get_ptemplate(PNames.FREQUENCY) )
+        capture_template = get_base_capture_template( CaptureModes.FIXED_CENTER_FREQUENCY )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.AMPLITUDE) )
+        capture_template.add_ptemplate( get_base_ptemplate(PNames.FREQUENCY) )
 
         #
         # Update the defaults
@@ -113,7 +113,7 @@ class _Receiver(BaseReceiver):
         #
         # Make the base template
         #
-        capture_template = make_capture_template(
+        capture_template = make_base_capture_template(
                 PNames.TIME_RESOLUTION,
                 PNames.FREQUENCY_RESOLUTION,
                 PNames.TIME_RANGE,
@@ -151,6 +151,9 @@ class _Receiver(BaseReceiver):
             (PNames.WINDOW_HOP,            512),
             (PNames.WINDOW_SIZE,           512),
             (PNames.WINDOW_TYPE,           "boxcar"),
+            (PNames.EVENT_HANDLER_KEY,     CaptureModes.SWEPT_CENTER_FREQUENCY),
+            (PNames.CHUNK_KEY,             CaptureModes.SWEPT_CENTER_FREQUENCY),
+            (PNames.WATCH_EXTENSION,       "bin")
         )
 
 
@@ -162,32 +165,31 @@ class _Receiver(BaseReceiver):
             PNames.TIME_RANGE,
             PNames.FREQUENCY_RESOLUTION,
             PNames.WINDOW_TYPE,
-            PNames.INSTRUMENT
+            PNames.EVENT_HANDLER_KEY,
+            PNames.CHUNK_KEY,
+            PNames.WATCH_EXTENSION
         )
 
         return capture_template
     
     
     def __get_pvalidator_cosine_signal_1(self) -> Callable:
-
         def pvalidator(parameters: Parameters):
+            PValidators.window(parameters)
+
             sample_rate          = parameters.get_parameter_value(PNames.SAMPLE_RATE)
             frequency            = parameters.get_parameter_value(PNames.FREQUENCY)
             window_size          = parameters.get_parameter_value(PNames.WINDOW_SIZE)
 
-            PValidators.window(parameters)
-
             # check that the sample rate is an integer multiple of the underlying signal frequency
             if sample_rate % frequency != 0:
                 raise ValueError("The sampling rate must be some integer multiple of frequency")
-
 
             a = sample_rate/frequency
             if a < 2:
                 raise ValueError((f"The ratio of sampling rate over frequency must be greater than two. "
                                 f"Got {a}"))
             
-
             # analytical requirement
             # if p is the number of sampled cycles, we can find that p = window_size / a
             # the number of sampled cycles must be a positive natural number.
@@ -195,17 +197,18 @@ class _Receiver(BaseReceiver):
             if window_size % a != 0:
                 raise ValueError((f"The number of sampled cycles must be a positive natural number. "
                                   f"Computed that p={p}"))
-            
         return pvalidator
 
 
     def __get_pvalidator_tagged_staircase(self) -> None:
         def pvalidator(parameters: Parameters):
+            PValidators.window(parameters)
+
             freq_step            = parameters.get_parameter_value(PNames.FREQUENCY_STEP)
             sample_rate          = parameters.get_parameter_value(PNames.SAMPLE_RATE)
             min_samples_per_step = parameters.get_parameter_value(PNames.MIN_SAMPLES_PER_STEP)
             max_samples_per_step = parameters.get_parameter_value(PNames.MAX_SAMPLES_PER_STEP)
-            
+
             if freq_step != sample_rate:
                 raise ValueError(f"The frequency step must be equal to the sampling rate")
             

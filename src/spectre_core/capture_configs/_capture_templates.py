@@ -11,7 +11,7 @@ from ._pconstraints import PConstraint
 from ._ptemplates import (
     PTemplate, 
     PNames,
-    get_ptemplate
+    get_base_ptemplate
 )
 
 class CaptureTemplate:
@@ -117,11 +117,11 @@ class CaptureTemplate:
         return {ptemplate.name: ptemplate.to_dict() for ptemplate in self}
 
 
-def make_capture_template(*parameter_names: str):
-    """Make a basic capture template, composed of base ptemplates."""
+def make_base_capture_template(*parameter_names: str):
+    """Make a capture template, composed entirely of base ptemplates."""
     capture_template = CaptureTemplate()
     for name in parameter_names:
-        capture_template.add_ptemplate( get_ptemplate(name) )
+        capture_template.add_ptemplate( get_base_ptemplate(name) )
     return capture_template
 
 
@@ -135,7 +135,7 @@ class CaptureModes:
 def _make_fixed_frequency_capture_template(
 ) -> CaptureTemplate:
     """The absolute minimum required parameters for any fixed frequency capture template."""
-    capture_template = make_capture_template(
+    capture_template = make_base_capture_template(
         PNames.BATCH_SIZE,
         PNames.CENTER_FREQUENCY,
         PNames.CHUNK_KEY,
@@ -171,7 +171,7 @@ def _make_fixed_frequency_capture_template(
 def _make_swept_frequency_capture_template(
 ) -> CaptureTemplate:
     """The absolute minimum required parameters for any swept frequency capture template."""
-    capture_template = make_capture_template(
+    capture_template = make_base_capture_template(
         PNames.BATCH_SIZE,
         PNames.CHUNK_KEY,
         PNames.EVENT_HANDLER_KEY,
@@ -207,16 +207,16 @@ def _make_swept_frequency_capture_template(
     return capture_template
 
 
-_capture_templates = {
+_base_capture_templates = {
     CaptureModes.FIXED_CENTER_FREQUENCY: _make_fixed_frequency_capture_template(),
     CaptureModes.SWEPT_CENTER_FREQUENCY: _make_swept_frequency_capture_template()
 }
 
-def get_capture_template(
+def get_base_capture_template(
        capture_mode: str
 ) -> CaptureTemplate:
     """Create a fresh deep copy of a pre-defined capture template"""
-    if capture_mode not in _capture_templates:
+    if capture_mode not in _base_capture_templates:
         raise KeyError(f"No capture template found for the capture mode '{capture_mode}'. "
-                       f"Expected one of {list(_capture_templates.keys())}")
-    return deepcopy( _capture_templates[capture_mode] )
+                       f"Expected one of {list(_base_capture_templates.keys())}")
+    return deepcopy( _base_capture_templates[capture_mode] )

@@ -20,14 +20,12 @@ from functools import partial
 from dataclasses import dataclass
 
 from gnuradio import gr
-from gnuradio import blocks
 from gnuradio import spectre
 from gnuradio import sdrplay3
 
 from spectre_core.capture_configs import Parameters, PNames
 from spectre_core.config import get_chunks_dir_path
 from ._base import capture
-
 
 class _fixed_center_frequency(gr.top_block):
     def __init__(self, 
@@ -52,8 +50,7 @@ class _fixed_center_frequency(gr.top_block):
         self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_chunks_dir_path(), 
                                                                      tag, 
                                                                      batch_size, 
-                                                                     sample_rate, 
-                                                                     is_sweeping)
+                                                                     sample_rate)
         self.sdrplay3_rsp1a_0 = sdrplay3.rsp1a(
             '',
             stream_args=sdrplay3.stream_args(
@@ -103,7 +100,6 @@ class _swept_center_frequency(gr.top_block):
         if_gain          = parameters.get_parameter_value(PNames.IF_GAIN)
         rf_gain          = parameters.get_parameter_value(PNames.RF_GAIN)
         batch_size       = parameters.get_parameter_value(PNames.BATCH_SIZE)
-        is_sweeping      = True
 
 
         ##################################################
@@ -119,7 +115,7 @@ class _swept_center_frequency(gr.top_block):
                                                                      tag, 
                                                                      batch_size, 
                                                                      sample_rate, 
-                                                                     is_sweeping, 
+                                                                     True, 
                                                                      'freq', 
                                                                      min_frequency)
         self.sdrplay3_rsp1a_0 = sdrplay3.rsp1a(
