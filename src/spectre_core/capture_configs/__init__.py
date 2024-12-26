@@ -6,7 +6,6 @@
 Capture configuration files.
 """
 
-from ._pnames       import PNames
 from ._pvalidators  import PValidators
 from ._capture_config import CaptureConfig
 from ._parameters   import (
@@ -19,7 +18,7 @@ from ._pconstraints import (
     PConstraint, PConstraints, Bound, OneOf
 )
 from ._ptemplates   import (
-    PTemplate, get_ptemplate
+    PTemplate, get_ptemplate, PNames
 )
 
 __all__ = [

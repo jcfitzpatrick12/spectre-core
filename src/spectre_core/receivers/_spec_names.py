@@ -13,6 +13,7 @@ class SpecNames:
     SAMPLE_RATE_UPPER_BOUND : str = "sample_rate_upper_bound"
     BANDWIDTH_LOWER_BOUND   : str = "bandwidth_lower_bound"
     BANDWIDTH_UPPER_BOUND   : str = "bandwidth_upper_bound"
+    BANDWIDTH_OPTIONS       : str = "bandwidth_options"
     DEFINED_BANDWIDTHS      : str = "defined_bandwidths"
     IF_GAIN_UPPER_BOUND     : str = "if_gain_upper_bound"
     RF_GAIN_UPPER_BOUND     : str = "rf_gain_upper_bound"

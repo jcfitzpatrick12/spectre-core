@@ -7,10 +7,10 @@ from typing import Any
 from dataclasses import dataclass
 
 from ._parameters import Parameter, Parameters
+from ._pconstraints import PConstraint
 from ._ptemplates import (
     PTemplate, 
-    PConstraint, 
-    PNames, 
+    PNames,
     get_ptemplate
 )
 
@@ -134,8 +134,8 @@ class CaptureModes:
 
 def _make_fixed_frequency_capture_template(
 ) -> CaptureTemplate:
-    """Base capture template for fixed center frequency capture"""
-    return make_capture_template(
+    """The absolute minimum required parameters for any fixed frequency capture template."""
+    capture_template = make_capture_template(
         PNames.BATCH_SIZE,
         PNames.CENTER_FREQUENCY,
         PNames.CHUNK_KEY,
@@ -156,12 +156,22 @@ def _make_fixed_frequency_capture_template(
         PNames.WINDOW_SIZE,
         PNames.WINDOW_TYPE,
     )
-
+    capture_template.set_defaults(
+            (PNames.EVENT_HANDLER_KEY,     CaptureModes.FIXED_CENTER_FREQUENCY),
+            (PNames.CHUNK_KEY,             CaptureModes.FIXED_CENTER_FREQUENCY),
+            (PNames.WATCH_EXTENSION,       "bin")
+    )
+    capture_template.enforce_defaults(
+        PNames.EVENT_HANDLER_KEY,
+        PNames.CHUNK_KEY,
+        PNames.WATCH_EXTENSION
+    )
+    return capture_template
 
 def _make_swept_frequency_capture_template(
 ) -> CaptureTemplate:
-    """Base capture template for swept center frequency capture"""
-    return make_capture_template(
+    """The absolute minimum required parameters for any swept frequency capture template."""
+    capture_template = make_capture_template(
         PNames.BATCH_SIZE,
         PNames.CHUNK_KEY,
         PNames.EVENT_HANDLER_KEY,
@@ -184,6 +194,18 @@ def _make_swept_frequency_capture_template(
         PNames.WINDOW_HOP,
         PNames.WINDOW_SIZE,
         PNames.WINDOW_TYPE)
+    capture_template.set_defaults(
+            (PNames.EVENT_HANDLER_KEY,     CaptureModes.SWEPT_CENTER_FREQUENCY),
+            (PNames.CHUNK_KEY,             CaptureModes.SWEPT_CENTER_FREQUENCY),
+            (PNames.WATCH_EXTENSION,       "bin")
+    )
+    capture_template.enforce_defaults(
+        PNames.EVENT_HANDLER_KEY,
+        PNames.CHUNK_KEY,
+        PNames.WATCH_EXTENSION
+    )
+    return capture_template
+
 
 _capture_templates = {
     CaptureModes.FIXED_CENTER_FREQUENCY: _make_fixed_frequency_capture_template(),

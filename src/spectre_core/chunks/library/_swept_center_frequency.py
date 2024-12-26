@@ -58,7 +58,6 @@ class HdrChunk(ChunkFile):
         num_samples = self._get_num_samples(hdr_contents)
         self._validate_frequencies_and_samples(center_frequencies, 
                                                num_samples)
-        
         return millisecond_correction, SweepMetadata(center_frequencies, num_samples)
         
 

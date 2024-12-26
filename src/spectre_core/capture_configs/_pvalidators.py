@@ -12,7 +12,7 @@ from numbers import Number
 from warnings import warn
 
 from ._parameters import Parameters
-from ._pnames import PNames
+from ._ptemplates import PNames
 
 
 def _validate_window(
@@ -138,9 +138,11 @@ def _validate_step_interval(
 
 @dataclass(frozen=True)
 class PValidators:
-    window                = _validate_window
-    nyquist_criterio      = _validate_nyquist_criterion
-    step_interval         = _validate_step_interval
-    non_overlapping_steps = _validate_non_overlapping_steps
-    num_steps_per_sweep   = _validate_num_steps_per_sweep
-    num_samples_per_step  = _validate_num_samples_per_step
+    window                 = _validate_window
+    nyquist_criterion      = _validate_nyquist_criterion
+    step_interval          = _validate_step_interval
+    non_overlapping_steps  = _validate_non_overlapping_steps
+    num_steps_per_sweep    = _validate_num_steps_per_sweep
+    num_samples_per_step   = _validate_num_samples_per_step
+    sweep_interval         = _validate_sweep_interval
+    step_interval          = _validate_step_interval

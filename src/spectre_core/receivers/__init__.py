@@ -4,6 +4,7 @@
 
 # register decorators take effect on import
 from .library._test import _Receiver
+from .library._rsp1a import _Receiver
 
 from ._base import BaseReceiver
 from ._factory import get_receiver

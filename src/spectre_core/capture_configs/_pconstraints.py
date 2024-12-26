@@ -4,7 +4,7 @@
 
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from typing import TypeVar, Optional, Any, List
+from typing import TypeVar, Optional, Any
 from numbers import Number
 
 T = TypeVar('T')
@@ -20,7 +20,6 @@ class PConstraint(ABC):
     def __format__(self, format_spec: str = "") -> str:
         attrs = ", ".join(f"{key}={value!r}" for key, value in vars(self).items())
         return f"{self.__class__.__name__}({attrs})"
-
 
 class Bound(PConstraint):
     """Constrain a parameter value to a specific range."""
@@ -56,7 +55,7 @@ class Bound(PConstraint):
 class OneOf(PConstraint):
     """Constrain a parameter to one of a set of defined options."""
 
-    def __init__(self, options: List[Any]):
+    def __init__(self, options: list[Any]):
         self._options = options
 
     def constrain(self, value: Any) -> None:

@@ -6,17 +6,9 @@ from dataclasses import dataclass
 from typing import Optional, Callable
 
 from spectre_core.capture_configs import (
-    CaptureTemplate,
-    CaptureModes,
-    Parameters,
-    Bound, 
-    PValidators, 
-    PNames,
-    get_capture_template,
-    make_capture_template,
-    get_ptemplate
+    CaptureTemplate, CaptureModes, Parameters, Bound, PValidators, PNames,
+    get_capture_template, make_capture_template, get_ptemplate
 )
-
 from ..gr._test import CaptureMethods
 from .._spec_names import SpecNames
 from .._base import BaseReceiver
@@ -36,36 +28,28 @@ class _Receiver(BaseReceiver):
                  mode: Optional[str]):
         super().__init__(name,
                          mode)
+        
 
-
-    def _init_capture_methods(self) -> None:
-        self.add_capture_method( Modes.COSINE_SIGNAL_1 , self.__get_capture_method_cosine_signal_1() )
-        self.add_capture_method( Modes.TAGGED_STAIRCASE, self.__get_capture_method_tagged_staircase())
-    
-
-    def _init_pvalidators(self) -> None:
-        self.add_pvalidator( Modes.COSINE_SIGNAL_1 , self.__get_pvalidator_cosine_signal_1()  )
-        self.add_pvalidator( Modes.TAGGED_STAIRCASE, self.__get_pvalidator_tagged_staircase() )
-
-
-    def _init_capture_templates(self) -> None:
-        self.add_capture_template( Modes.COSINE_SIGNAL_1 , self.__get_capture_template_cosine_signal_1()  )
-        self.add_capture_template( Modes.TAGGED_STAIRCASE, self.__get_capture_template_tagged_staircase() )
-    
-    
-    def _init_specs(self) -> None:
+    def _add_specs(self) -> None:
         self.add_spec( SpecNames.SAMPLE_RATE_LOWER_BOUND, 64000  )
         self.add_spec( SpecNames.SAMPLE_RATE_UPPER_BOUND, 640000 )
         self.add_spec( SpecNames.FREQUENCY_LOWER_BOUND  , 16000  )
         self.add_spec( SpecNames.FREQUENCY_UPPER_BOUND  , 160000 )
 
 
-    def __get_capture_method_cosine_signal_1(self) -> Callable:
-        return CaptureMethods.cosine_signal_1
+    def _add_capture_methods(self) -> None:
+        self.add_capture_method( Modes.COSINE_SIGNAL_1 , CaptureMethods.cosine_signal_1 )
+        self.add_capture_method( Modes.TAGGED_STAIRCASE, CaptureMethods.tagged_staircase)
     
 
-    def __get_capture_method_tagged_staircase(self) -> Callable:
-        return CaptureMethods.tagged_staircase
+    def _add_pvalidators(self) -> None:
+        self.add_pvalidator( Modes.COSINE_SIGNAL_1 , self.__get_pvalidator_cosine_signal_1()  )
+        self.add_pvalidator( Modes.TAGGED_STAIRCASE, self.__get_pvalidator_tagged_staircase() )
+
+
+    def _add_capture_templates(self) -> None:
+        self.add_capture_template( Modes.COSINE_SIGNAL_1 , self.__get_capture_template_cosine_signal_1()  )
+        self.add_capture_template( Modes.TAGGED_STAIRCASE, self.__get_capture_template_tagged_staircase() )
         
 
     def __get_capture_template_cosine_signal_1(self) -> CaptureTemplate:
@@ -87,24 +71,17 @@ class _Receiver(BaseReceiver):
             (PNames.SAMPLE_RATE,           128000),
             (PNames.WINDOW_HOP,            512),
             (PNames.WINDOW_SIZE,           512),
-            (PNames.WINDOW_TYPE,           "boxcar"),
-            (PNames.EVENT_HANDLER_KEY,     CaptureModes.FIXED_CENTER_FREQUENCY),
-            (PNames.CHUNK_KEY,             CaptureModes.FIXED_CENTER_FREQUENCY),
-            (PNames.WATCH_EXTENSION,       "bin")
+            (PNames.WINDOW_TYPE,           "boxcar")
         )
 
         #
         # Enforce defaults
         #
         capture_template.enforce_defaults(
-            PNames.CENTER_FREQUENCY,
             PNames.TIME_RESOLUTION,
             PNames.TIME_RANGE,
             PNames.FREQUENCY_RESOLUTION,
-            PNames.WINDOW_TYPE,
-            PNames.EVENT_HANDLER_KEY,
-            PNames.CHUNK_KEY,
-            PNames.WATCH_EXTENSION
+            PNames.WINDOW_TYPE
         )
 
 
@@ -166,14 +143,11 @@ class _Receiver(BaseReceiver):
         #
         capture_template.set_defaults(
             (PNames.BATCH_SIZE,            3.0),
-            (PNames.CHUNK_KEY,             CaptureModes.SWEPT_CENTER_FREQUENCY),
-            (PNames.EVENT_HANDLER_KEY,     CaptureModes.SWEPT_CENTER_FREQUENCY),
             (PNames.FREQUENCY_STEP,        128000),
             (PNames.MAX_SAMPLES_PER_STEP,  5000),
             (PNames.MIN_SAMPLES_PER_STEP,  4000),
             (PNames.SAMPLE_RATE,           128000),
             (PNames.STEP_INCREMENT,        200),
-            (PNames.WATCH_EXTENSION,       "bin"),
             (PNames.WINDOW_HOP,            512),
             (PNames.WINDOW_SIZE,           512),
             (PNames.WINDOW_TYPE,           "boxcar"),
@@ -188,9 +162,6 @@ class _Receiver(BaseReceiver):
             PNames.TIME_RANGE,
             PNames.FREQUENCY_RESOLUTION,
             PNames.WINDOW_TYPE,
-            PNames.EVENT_HANDLER_KEY,
-            PNames.CHUNK_KEY,
-            PNames.WATCH_EXTENSION,
             PNames.INSTRUMENT
         )
 
@@ -199,7 +170,7 @@ class _Receiver(BaseReceiver):
     
     def __get_pvalidator_cosine_signal_1(self) -> Callable:
 
-        def pvalidator_cosine_signal_1(parameters: Parameters):
+        def pvalidator(parameters: Parameters):
             sample_rate          = parameters.get_parameter_value(PNames.SAMPLE_RATE)
             frequency            = parameters.get_parameter_value(PNames.FREQUENCY)
             window_size          = parameters.get_parameter_value(PNames.WINDOW_SIZE)
@@ -225,12 +196,11 @@ class _Receiver(BaseReceiver):
                 raise ValueError((f"The number of sampled cycles must be a positive natural number. "
                                   f"Computed that p={p}"))
             
-        return pvalidator_cosine_signal_1
+        return pvalidator
 
 
     def __get_pvalidator_tagged_staircase(self) -> None:
-
-        def pvalidator_tagged_staircase(parameters: Parameters):
+        def pvalidator(parameters: Parameters):
             freq_step            = parameters.get_parameter_value(PNames.FREQUENCY_STEP)
             sample_rate          = parameters.get_parameter_value(PNames.SAMPLE_RATE)
             min_samples_per_step = parameters.get_parameter_value(PNames.MIN_SAMPLES_PER_STEP)
@@ -244,5 +214,5 @@ class _Receiver(BaseReceiver):
                 raise ValueError((f"Minimum samples per step cannot be greater than the maximum samples per step. "
                                 f"Got {min_samples_per_step}, which is greater than {max_samples_per_step}"))
             
-        return pvalidator_tagged_staircase
+        return pvalidator
         
