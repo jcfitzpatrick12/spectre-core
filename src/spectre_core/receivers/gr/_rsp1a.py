@@ -13,7 +13,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 #
-# Test receiver top blocks
+# RSP1A receiver top blocks
 #
 
 from functools import partial
@@ -31,7 +31,7 @@ class _fixed_center_frequency(gr.top_block):
     def __init__(self, 
                  tag: str,
                  parameters: Parameters):
-        gr.top_block.__init__(self, "fixed-center-frequency", catch_exceptions=True)
+        gr.top_block.__init__(self, catch_exceptions=True)
 
         ##################################################
         # Unpack capture config
@@ -42,7 +42,7 @@ class _fixed_center_frequency(gr.top_block):
         bandwidth   = parameters.get_parameter_value(PNames.BANDWIDTH)
         if_gain     = parameters.get_parameter_value(PNames.IF_GAIN)
         rf_gain     = parameters.get_parameter_value(PNames.RF_GAIN)
-        is_sweeping = False
+        
 
         ##################################################
         # Blocks
@@ -86,7 +86,7 @@ class _swept_center_frequency(gr.top_block):
     def __init__(self, 
                  tag: str,
                  parameters: Parameters):
-        gr.top_block.__init__(self, "sweep", catch_exceptions=True)
+        gr.top_block.__init__(self, catch_exceptions=True)
 
         ##################################################
         # Unpack capture config
@@ -155,4 +155,4 @@ class _swept_center_frequency(gr.top_block):
 @dataclass(frozen=True)
 class CaptureMethods:
     fixed_center_frequency  = partial(capture, top_block_cls=_fixed_center_frequency)
-    _swept_center_frequency = partial(capture, top_block_cls=_swept_center_frequency)
+    swept_center_frequency  = partial(capture, top_block_cls=_swept_center_frequency)

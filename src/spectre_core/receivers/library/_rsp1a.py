@@ -11,7 +11,7 @@ from spectre_core.capture_configs import (
 )
 from ..gr._rsp1a import CaptureMethods
 from .._spec_names import SpecNames
-from .._base import SDRPlayReceiver
+from ._sdrplay_receiver import SDRPlayReceiver
 from .._register import register_receiver
 
 @dataclass
@@ -44,7 +44,7 @@ class _Receiver(SDRPlayReceiver):
         self.add_capture_method(Modes.FIXED_CENTER_FREQUENCY, 
                                 CaptureMethods.fixed_center_frequency)
         self.add_capture_method(Modes.SWEPT_CENTER_FREQUENCY,
-                                CaptureMethods._swept_center_frequency)
+                                CaptureMethods.swept_center_frequency)
     
 
     def _add_capture_templates(self):
@@ -55,7 +55,7 @@ class _Receiver(SDRPlayReceiver):
         
     
     def _add_pvalidators(self):
-        self.add_pvalidator(CaptureModes.FIXED_CENTER_FREQUENCY,
+        self.add_pvalidator(Modes.FIXED_CENTER_FREQUENCY,
                             self._get_pvalidator_fixed_center_frequency())
-        self.add_pvalidator(CaptureModes.SWEPT_CENTER_FREQUENCY,
+        self.add_pvalidator(Modes.SWEPT_CENTER_FREQUENCY,
                             self._get_pvalidator_swept_center_frequency())

@@ -33,7 +33,7 @@ class _cosine_signal_1(gr.top_block):
     def __init__(self, 
                  tag: str,
                  parameters: Parameters):
-        gr.top_block.__init__(self, "cosine-signal-1", catch_exceptions=True)
+        gr.top_block.__init__(self, catch_exceptions=True)
 
         ##################################################
         # Unpack capture config
@@ -80,7 +80,7 @@ class _tagged_staircase(gr.top_block):
     def __init__(self, 
                  tag: str,
                  parameters: Parameters):
-        gr.top_block.__init__(self, "tagged-staircase", catch_exceptions=True)
+        gr.top_block.__init__(self, catch_exceptions=True)
 
         ##################################################
         # Unpack capture config
