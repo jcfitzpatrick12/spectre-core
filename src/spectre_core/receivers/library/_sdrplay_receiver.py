@@ -113,10 +113,10 @@ class SDRPlayReceiver(BaseReceiver):
         # Update the defaults
         #
         capture_template.set_defaults(
-            (PNames.BATCH_SIZE,            3.0),
-            (PNames.MIN_FREQUENCY,         90000000),
-            (PNames.MAX_FREQUENCY,         110000000),
-            (PNames.SAMPLES_PER_STEP,      300000),
+            (PNames.BATCH_SIZE,            4.0),
+            (PNames.MIN_FREQUENCY,         95000000),
+            (PNames.MAX_FREQUENCY,         100000000),
+            (PNames.SAMPLES_PER_STEP,      80000),
             (PNames.FREQUENCY_STEP,        1536000),
             (PNames.SAMPLE_RATE,           1536000),
             (PNames.BANDWIDTH,             1536000),
