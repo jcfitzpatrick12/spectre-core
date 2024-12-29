@@ -131,10 +131,8 @@ def _validate_step_interval(
 
     step_interval = samples_per_step * 1/ sample_rate # [s]
     if step_interval < api_latency:
-        warning_message = (f"The computed step interval of {step_interval} [s] is of the order of empirically "
-                           f"derived api latency {api_latency} [s]; you may experience undefined behaviour!")
-        warn(warning_message)
-        _LOGGER.warning(warning_message)
+        raise ValueError(f"The computed step interval of {step_interval} [s] is of the order of empirically "
+                         f"derived api latency {api_latency} [s]; you may experience undefined behaviour!")
 
 
 def _validate_fixed_center_frequency_parameters(
