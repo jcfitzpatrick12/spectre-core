@@ -48,7 +48,7 @@ class _Receiver(SDRPlayReceiver):
         self.add_capture_method(Modes.TUNER_2_FIXED_CENTER_FREQUENCY, 
                                 CaptureMethods.tuner_2_fixed_center_frequency)
         self.add_capture_method(Modes.TUNER_1_SWEPT_CENTER_FREQUENCY, 
-                                CaptureMethods.tuner_1_fixed_center_frequency)
+                                CaptureMethods.tuner_1_swept_center_frequency)
     
 
     def _add_capture_templates(self):
