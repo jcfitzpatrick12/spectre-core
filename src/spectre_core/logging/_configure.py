@@ -16,7 +16,7 @@ def configure_root_logger(process_type: str,
     datetime_stamp = system_datetime.strftime(TimeFormats.DATETIME)
     pid = os.getpid()
     log_handler = LogHandler(datetime_stamp, pid, process_type)
-    log_handler.make_parent_path()
+    log_handler.make_parent_dir_path()
 
     # configure the root logger
     logger = logging.getLogger()
