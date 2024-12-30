@@ -66,8 +66,8 @@ class LogHandlers:
                  year: Optional[int] = None, 
                  month: Optional[int] = None, 
                  day: Optional[int] = None):
-        self._log_handler_map: dict[str, LogHandler] = OrderedDict()
         self._process_type = process_type
+        self._log_handler_map: dict[str, LogHandler] = OrderedDict()
         self.set_date(year, month, day)
 
 
