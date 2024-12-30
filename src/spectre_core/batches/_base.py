@@ -52,10 +52,10 @@ class BaseBatch:
     only in their file extension.
     """
     def __init__(self, 
-                 tag: str,
-                 start_time: str):
-        self._tag: str = tag
+                 start_time: str,
+                 tag: str):
         self._start_time = start_time
+        self._tag: str = tag
         self._batch_files: dict[str, BatchFile] = {}
         self._start_datetime = datetime.strptime(self.start_time, TimeFormats.DATETIME)
         self._parent_dir_path = get_batches_dir_path(year  = self.start_datetime.year,

@@ -103,7 +103,7 @@ class Batches:
             batch_name, _ = os.path.splitext(batch_file_name)
             start_time, tag = batch_name.split("_", 1)
             if tag == self._tag:
-                self._batch_map[start_time] = self._Batch(tag, start_time)
+                self._batch_map[start_time] = self._Batch(start_time, tag)
         
         self._batch_map = OrderedDict(sorted(self._batch_map.items()))
 

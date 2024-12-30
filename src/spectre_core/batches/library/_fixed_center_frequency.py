@@ -20,9 +20,9 @@ from .._base import BaseBatch, BatchFile
 @register_batch(CaptureModes.FIXED_CENTER_FREQUENCY)
 class FixedCenterFrequencyBatch(BaseBatch):
     def __init__(self,
-                 tag: str,
-                 start_time: str):
-        super().__init__(tag, start_time) 
+                 start_time: str,
+                 tag: str):
+        super().__init__(start_time, tag) 
         self.add_file( BinFile(self.parent_dir_path, self.name) )
         self.add_file( HdrFile(self.parent_dir_path, self.name) )
         self.add_file( FitsFile(self.parent_dir_path, self.name))

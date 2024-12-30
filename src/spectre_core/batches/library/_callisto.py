@@ -18,8 +18,10 @@ from .._base import BaseBatch, BatchFile
 
 @register_batch('callisto')
 class CallistoBatch(BaseBatch):
-    def __init__(self, batch_start_time: str, tag: str):
-        super().__init__(batch_start_time, tag) 
+    def __init__(self,
+                 start_time: str,
+                 tag: str):
+        super().__init__(start_time, tag) 
         self.add_file( FitsFile(self.parent_dir_path, self.name) )
 
 

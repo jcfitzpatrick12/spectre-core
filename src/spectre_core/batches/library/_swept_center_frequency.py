@@ -37,10 +37,10 @@ class SweepMetadata:
 
 @register_batch(CaptureModes.SWEPT_CENTER_FREQUENCY)
 class SweptCenterFrequencyBatch(BaseBatch):
-    def __init__(self, 
-                 tag: str, 
-                 start_time: str):
-        super().__init__(tag, start_time)
+    def __init__(self,
+                 start_time: str,
+                 tag: str):
+        super().__init__(start_time, tag) 
         self.add_file( HdrFile(self.parent_dir_path, self.name) )
         # reuse the binary and fits batch from the fixed center frequency case.
         self.add_file( BinFile(self.parent_dir_path, self.name) )
