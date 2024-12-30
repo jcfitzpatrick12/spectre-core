@@ -118,17 +118,17 @@ class Batches:
         yield from self.batch_list
 
 
-    def _get_batch_by_start_time(self, 
-                                 start_time: str) -> BaseBatch:
+    def _get_from_start_time(self, 
+                             start_time: str) -> BaseBatch:
         """Get the batch according to the input start time."""
         try:
-            return self.batch_map[start_time]
+            return self._batch_map[start_time]
         except KeyError:
             raise BatchNotFoundError(f"Batch with start time {start_time} could not be found within {self.batches_dir_path}")
 
 
-    def _get_batch_by_index(self, 
-                            index: int) -> BaseBatch:
+    def _get_from_index(self, 
+                        index: int) -> BaseBatch:
         """Get the batch according to its index, where the batches are ordered in time."""
         num_batches = len(self.batch_list)
         if num_batches == 0:
@@ -139,9 +139,9 @@ class Batches:
 
     def __getitem__(self, subscript: str | int):
         if isinstance(subscript, str):
-            return self._get_batch_by_start_time(subscript)
+            return self._get_from_start_time(subscript)
         elif isinstance(subscript, int):
-            return self._get_batch_by_index(subscript)
+            return self._get_from_index(subscript)
     
 
     def num_batch_files(self, 
