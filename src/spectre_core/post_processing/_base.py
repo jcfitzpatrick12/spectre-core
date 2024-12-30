@@ -112,8 +112,8 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
 
     def _flush_cache(self) -> None:
         if self._cached_spectrogram:
-            _LOGGER.info(f"Flushing spectrogram to file with batch start time "
-                         f"'{self._cached_spectrogram.batch_start_time}'")
+            _LOGGER.info(f"Flushing spectrogram to file with start time "
+                         f"'{self._cached_spectrogram.start_time}'")
             self._cached_spectrogram.save()
             _LOGGER.info("Flush successful, resetting spectrogram cache")
             self._cached_spectrogram = None # reset the cache
