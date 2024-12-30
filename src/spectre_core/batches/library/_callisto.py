@@ -11,43 +11,45 @@ from astropy.io.fits.hdu.image import PrimaryHDU
 from astropy.io.fits.hdu.table import BinTableHDU
 from astropy.io.fits.hdu.hdulist import HDUList
 
-from spectre_core.spectrograms import Spectrogram
-from .._register import register_chunk
-from .._base import BaseChunk, ChunkFile
+from spectre_core.spectrograms import Spectrogram, SpectrumTypes
+from .._register import register_batch
+from .._base import BaseBatch, BatchFile
 
 
-@register_chunk('callisto')
-class _Chunk(BaseChunk):
-    def __init__(self, chunk_start_time: str, tag: str):
-        super().__init__(chunk_start_time, tag) 
-        self.add_file(FitsChunk(self.chunk_parent_path, self.chunk_name))
+@register_batch('callisto')
+class CallistoBatch(BaseBatch):
+    def __init__(self, batch_start_time: str, tag: str):
+        super().__init__(batch_start_time, tag) 
+        self.add_file( FitsFile(self.parent_dir_path, self.name) )
 
 
-class FitsChunk(ChunkFile):
-    def __init__(self, chunk_parent_path: str, chunk_name: str):
-        super().__init__(chunk_parent_path, chunk_name, "fits")
+class FitsFile(BatchFile):
+    def __init__(self, 
+                 parent_dir_path: str, 
+                 base_file_name: str):
+        super().__init__(parent_dir_path, base_file_name, "fits")
 
 
     def read(self) -> Spectrogram:
         with fits.open(self.file_path, mode='readonly') as hdulist:
-            primary_hdu = self._get_primary_hdu(hdulist)
-            dynamic_spectra = self._get_dynamic_spectra(primary_hdu)
+            primary_hdu            = self._get_primary_hdu(hdulist)
+            dynamic_spectra        = self._get_dynamic_spectra(primary_hdu)
             microsecond_correction = self._get_microsecond_correction(primary_hdu)
-            bintable_hdu = self._get_bintable_hdu(hdulist)
-            times, frequencies = self._get_time_and_frequency(bintable_hdu)
-            spectrum_type = self._get_spectrum_type(primary_hdu)
+            bintable_hdu           = self._get_bintable_hdu(hdulist)
+            times, frequencies     = self._get_time_and_frequency(bintable_hdu)
+            spectrum_type          = self._get_spectrum_type(primary_hdu)
 
-            if spectrum_type == "digits":
+            if spectrum_type == SpectrumTypes.DIGITS:
                 dynamic_spectra_linearised = self._convert_units_to_linearised(dynamic_spectra)
                 return Spectrogram(dynamic_spectra_linearised[::-1, :], # reverse the spectra along the frequency axis
                         times, 
                         frequencies[::-1], # sort the frequencies in ascending order
                         self.tag, 
-                        chunk_start_time=self.chunk_start_time, 
+                        batch_start_time=self.start_time, 
                         microsecond_correction = microsecond_correction,
                         spectrum_type = spectrum_type)
             else:
-                raise NotImplementedError(f"SPECTRE does not currently support spectrum type with BUNITS {spectrum_type}")
+                raise NotImplementedError(f"SPECTRE does not currently support spectrum type with BUNITS '{spectrum_type}'")
 
 
     @property
@@ -55,7 +57,7 @@ class FitsChunk(ChunkFile):
         with fits.open(self.file_path, mode='readonly') as hdulist:
             bintable_data = hdulist[1].data
             times = bintable_data['TIME'][0]
-            return [self.chunk_start_datetime + timedelta(seconds=t) for t in times]        
+            return [self.start_datetime + timedelta(seconds=t) for t in times]        
 
 
     def _get_primary_hdu(self, hdulist: HDUList) -> PrimaryHDU:

@@ -26,9 +26,9 @@ def _validate_window(
     
     window_interval = window_size*(1 / sample_rate)
     if window_interval > batch_size:
-        raise ValueError((f"The windowing interval must be strictly less than the chunk size. "
+        raise ValueError((f"The windowing interval must be strictly less than the batch size. "
                           f"Computed the windowing interval to be {window_interval} [s], "
-                          f"but the chunk size is {batch_size} [s]"))
+                          f"but the batch size is {batch_size} [s]"))
     
     try:
         _ = get_window(window_type, window_size)
@@ -90,9 +90,9 @@ def _validate_sweep_interval(
     num_samples_per_sweep = num_steps_per_sweep * samples_per_step
     sweep_interval = num_samples_per_sweep * 1/sample_rate
     if sweep_interval > batch_size:
-        raise ValueError((f"Sweep interval must be less than the chunk size. "
+        raise ValueError((f"Sweep interval must be less than the batch size. "
                           f"The computed sweep interval is {sweep_interval} [s], "
-                          f"but the given chunk size is {batch_size} [s]"))
+                          f"but the given batch size is {batch_size} [s]"))
     
 
 def _validate_num_samples_per_step(

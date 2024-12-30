@@ -25,7 +25,7 @@ from gnuradio import spectre
 from gnuradio import analog
 
 from spectre_core.capture_configs import Parameters, PNames
-from spectre_core.config import get_chunks_dir_path
+from spectre_core.config import get_batches_dir_path
 from ._base import capture
 
 
@@ -46,7 +46,7 @@ class _cosine_signal_1(gr.top_block):
         ##################################################
         # Blocks
         ##################################################
-        self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_chunks_dir_path(), 
+        self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_batches_dir_path(), 
                                                                      tag, 
                                                                      batch_size, 
                                                                      samp_rate)
@@ -100,7 +100,7 @@ class _tagged_staircase(gr.top_block):
                                                                    frequency_step,
                                                                    step_increment, 
                                                                    samp_rate)
-        self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_chunks_dir_path(),
+        self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_batches_dir_path(),
                                                                      tag, 
                                                                      batch_size, 
                                                                      samp_rate, 

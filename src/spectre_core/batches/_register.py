@@ -3,13 +3,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 #  Global dictionaries to hold the mappings
-chunk_map = {}
+batch_map = {}
 
-# classes decorated with @register_chunk([CHUNK_KEY])
-# will be added to chunk_map
-def register_chunk(chunk_key: str):
+# classes decorated with @register_batch([BATCH_KEY])
+# will be added to batch_map
+def register_batch(batch_key: str):
     def decorator(cls):
-        chunk_map[chunk_key] = cls
+        batch_map[batch_key] = cls
         return cls
     return decorator
 

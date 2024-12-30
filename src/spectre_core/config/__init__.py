@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from ._paths import (
-    get_spectre_data_dir_path, get_chunks_dir_path, get_configs_dir_path, get_logs_dir_path
+    get_spectre_data_dir_path, get_batches_dir_path, get_configs_dir_path, get_logs_dir_path
 )
 from ._time_formats import (
     TimeFormats
@@ -11,7 +11,7 @@ from ._time_formats import (
 
 __all__ = [
     "get_spectre_data_dir_path",
-    "get_chunks_dir_path",
+    "get_batches_dir_path",
     "get_configs_dir_path",
     "get_logs_dir_path",
     "DEFAULT_DATE_FORMAT",

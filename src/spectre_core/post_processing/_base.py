@@ -12,7 +12,7 @@ from scipy.signal import ShortTimeFFT, get_window
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 
 from spectre_core.capture_configs import CaptureConfig, PNames
-from spectre_core.chunks import BaseChunk, get_chunk_from_tag
+from spectre_core.batches import BaseBatch, get_batch_cls_from_tag
 from spectre_core.spectrograms import Spectrogram, join_spectrograms
 
 
@@ -35,8 +35,8 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
                  tag: str):
         self._tag = tag
 
-        # the tag tells us 'what type' of data is stored in the files for each chunk
-        self._Chunk: BaseChunk = get_chunk_from_tag(tag)
+        # the tag tells us 'what type' of data is stored in the files for each batch
+        self._Batch = get_batch_cls_from_tag(tag)
         # load the capture config corresponding to the tag
         self._capture_config   = CaptureConfig(tag)
 
@@ -112,8 +112,8 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
 
     def _flush_cache(self) -> None:
         if self._cached_spectrogram:
-            _LOGGER.info(f"Flushing spectrogram to file with chunk start time "
-                         f"'{self._cached_spectrogram.chunk_start_time}'")
+            _LOGGER.info(f"Flushing spectrogram to file with batch start time "
+                         f"'{self._cached_spectrogram.batch_start_time}'")
             self._cached_spectrogram.save()
             _LOGGER.info("Flush successful, resetting spectrogram cache")
             self._cached_spectrogram = None # reset the cache

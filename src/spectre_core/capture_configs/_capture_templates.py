@@ -138,7 +138,7 @@ def _make_fixed_frequency_capture_template(
     capture_template = make_base_capture_template(
         PNames.BATCH_SIZE,
         PNames.CENTER_FREQUENCY,
-        PNames.CHUNK_KEY,
+        PNames.BATCH_KEY,
         PNames.EVENT_HANDLER_KEY,
         PNames.FREQUENCY_RESOLUTION,
         PNames.INSTRUMENT,
@@ -158,12 +158,12 @@ def _make_fixed_frequency_capture_template(
     )
     capture_template.set_defaults(
             (PNames.EVENT_HANDLER_KEY,     CaptureModes.FIXED_CENTER_FREQUENCY),
-            (PNames.CHUNK_KEY,             CaptureModes.FIXED_CENTER_FREQUENCY),
+            (PNames.BATCH_KEY,             CaptureModes.FIXED_CENTER_FREQUENCY),
             (PNames.WATCH_EXTENSION,       "bin")
     )
     capture_template.enforce_defaults(
         PNames.EVENT_HANDLER_KEY,
-        PNames.CHUNK_KEY,
+        PNames.BATCH_KEY,
         PNames.WATCH_EXTENSION
     )
     return capture_template
@@ -173,7 +173,7 @@ def _make_swept_frequency_capture_template(
     """The absolute minimum required parameters for any swept frequency capture template."""
     capture_template = make_base_capture_template(
         PNames.BATCH_SIZE,
-        PNames.CHUNK_KEY,
+        PNames.BATCH_KEY,
         PNames.EVENT_HANDLER_KEY,
         PNames.FREQUENCY_RESOLUTION,
         PNames.FREQUENCY_STEP,
@@ -196,12 +196,12 @@ def _make_swept_frequency_capture_template(
         PNames.WINDOW_TYPE)
     capture_template.set_defaults(
             (PNames.EVENT_HANDLER_KEY,     CaptureModes.SWEPT_CENTER_FREQUENCY),
-            (PNames.CHUNK_KEY,             CaptureModes.SWEPT_CENTER_FREQUENCY),
+            (PNames.BATCH_KEY,             CaptureModes.SWEPT_CENTER_FREQUENCY),
             (PNames.WATCH_EXTENSION,       "bin")
     )
     capture_template.enforce_defaults(
         PNames.EVENT_HANDLER_KEY,
-        PNames.CHUNK_KEY,
+        PNames.BATCH_KEY,
         PNames.WATCH_EXTENSION
     )
     return capture_template

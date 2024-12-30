@@ -50,7 +50,7 @@ def frequency_chop(input_spectrogram: Spectrogram,
                        input_spectrogram.times,
                        transformed_frequencies,
                        input_spectrogram.tag,
-                       chunk_start_time = input_spectrogram.chunk_start_time,
+                       start_time = input_spectrogram.start_time,
                        microsecond_correction = input_spectrogram.microsecond_correction,
                        spectrum_type = input_spectrogram.spectrum_type)
 
@@ -84,8 +84,8 @@ def time_chop(input_spectrogram: Spectrogram,
 
     # compute the new start datetime following the time chop
     transformed_start_datetime = input_spectrogram.datetimes[start_index]
-    # compute the microsecond correction, and chunk start time
-    transformed_chunk_start_time = datetime.strftime(transformed_start_datetime, TimeFormats.DATETIME)
+    # compute the microsecond correction, and batch start time
+    transformed_start_time = datetime.strftime(transformed_start_datetime, TimeFormats.DATETIME)
     transformed_microsecond_correction = transformed_start_datetime.microsecond
 
     # chop the times array
@@ -97,7 +97,7 @@ def time_chop(input_spectrogram: Spectrogram,
                        transformed_times, 
                        input_spectrogram.frequencies, 
                        input_spectrogram.tag, 
-                       chunk_start_time = transformed_chunk_start_time,
+                       start_time = transformed_start_time,
                        microsecond_correction = transformed_microsecond_correction,
                        spectrum_type = input_spectrogram.spectrum_type)
 
@@ -107,8 +107,8 @@ def time_average(input_spectrogram: Spectrogram,
                  average_over: Optional[int] = None) -> Spectrogram:
 
     # spectre does not currently support averaging of non-datetime assigned spectrograms
-    if input_spectrogram.chunk_start_time is None:
-        raise ValueError(f"Input spectrogram is missing chunk start time. Averaging is not yet supported for non-datetime assigned spectrograms")
+    if input_spectrogram.start_time is None:
+        raise ValueError(f"Input spectrogram is missing batch start time. Averaging is not yet supported for non-datetime assigned spectrograms")
     
     # if nothing is specified, do nothing
     if (resolution is None) and (average_over is None):
@@ -138,9 +138,9 @@ def time_average(input_spectrogram: Spectrogram,
     # to the i'th averaged time
     transformed_times = average_array(input_spectrogram.times, average_over)
     
-    # find the new chunk start time, which we will assign to the first spectrum after averaging
+    # find the new batch start time, which we will assign to the first spectrum after averaging
     corrected_start_datetime = input_spectrogram.datetimes[0] + timedelta(seconds = float(transformed_times[0]))
-    transformed_chunk_start_time = corrected_start_datetime.strftime(TimeFormats.DATETIME)
+    transformed_start_time = corrected_start_datetime.strftime(TimeFormats.DATETIME)
     transformed_microsecond_correction = corrected_start_datetime.microsecond
 
     # finally, translate the averaged time seconds to begin at t=0 [s]
@@ -149,7 +149,7 @@ def time_average(input_spectrogram: Spectrogram,
                        transformed_times, 
                        input_spectrogram.frequencies, 
                        input_spectrogram.tag,
-                       chunk_start_time = transformed_chunk_start_time,
+                       start_time = transformed_start_time,
                        microsecond_correction = transformed_microsecond_correction,
                        spectrum_type = input_spectrogram.spectrum_type)
 
@@ -189,7 +189,7 @@ def frequency_average(input_spectrogram: Spectrogram,
                        input_spectrogram.times, 
                        transformed_frequencies, 
                        input_spectrogram.tag,
-                       chunk_start_time = input_spectrogram.chunk_start_time, 
+                       start_time = input_spectrogram.start_time, 
                        microsecond_correction = input_spectrogram.microsecond_correction,
                        spectrum_type = input_spectrogram.spectrum_type)
 
@@ -224,8 +224,8 @@ def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
             raise ValueError(f"All tags must be equal for each spectrogram in the input list!")
         if spectrogram.spectrum_type != reference_spectrogram.spectrum_type:
             raise ValueError(f"All units must be equal for each spectrogram in the input list!")
-        if spectrogram.chunk_start_time is None:
-            raise ValueError(f"All spectrograms must have chunk_start_time set. Received {spectrogram.chunk_start_time}")
+        if spectrogram.start_time is None:
+            raise ValueError(f"All spectrograms must have start_time set. Received {spectrogram.start_time}")
 
 
     # build a list of the time array of each spectrogram in the list
@@ -249,6 +249,6 @@ def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
                        transformed_times, 
                        reference_spectrogram.frequencies, 
                        reference_spectrogram.tag, 
-                       chunk_start_time = reference_spectrogram.chunk_start_time,
+                       start_time = reference_spectrogram.start_time,
                        microsecond_correction = reference_spectrogram.microsecond_correction,
                        spectrum_type = reference_spectrogram.spectrum_type) 

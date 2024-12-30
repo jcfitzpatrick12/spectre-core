@@ -178,7 +178,7 @@ class PNames:
     WINDOW_SIZE             : str = "window_size"
     EVENT_HANDLER_KEY       : str = "event_handler_key"
     WATCH_EXTENSION         : str = "watch_extension"
-    CHUNK_KEY               : str = "chunk_key"
+    BATCH_KEY               : str = "batch_key"
     SAMPLES_PER_STEP        : str = "samples_per_step"
     MIN_SAMPLES_PER_STEP    : str = "min_samples_per_step"
     MAX_SAMPLES_PER_STEP    : str = "max_samples_per_step"
@@ -271,10 +271,10 @@ _base_ptemplates = {
                                                     Identifies which post-processing functions to invoke
                                                     on newly created files.
                                                     """),
-    PNames.CHUNK_KEY:              PTemplate(PNames.CHUNK_KEY,              
+    PNames.BATCH_KEY:              PTemplate(PNames.BATCH_KEY,              
                                              str,
                                              help = """
-                                                    Identifies the type of data is stored in each chunk.
+                                                    Identifies the type of data is stored in each batch.
                                                     """,
                                              ),
     PNames.WINDOW_SIZE:            PTemplate(PNames.WINDOW_SIZE,            

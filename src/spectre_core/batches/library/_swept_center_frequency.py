@@ -9,14 +9,14 @@ import numpy as np
 
 from spectre_core.exceptions import InvalidSweepMetadataError
 from spectre_core.capture_configs import CaptureModes
-from ._fixed_center_frequency import BinChunk, FitsChunk
-from .._register import register_chunk
-from .._base import BaseChunk, ChunkFile
+from ._fixed_center_frequency import BinFile, FitsFile
+from .._register import register_batch
+from .._base import BaseBatch, BatchFile
 
 
 @dataclass
 class SweepMetadata:
-    """Wrapper for metadata required to assign center frequencies to each IQ sample in the chunk.
+    """Wrapper for metadata required to assign center frequencies to each IQ sample in the batch.
     
     center_frequencies is an ordered list containing all the center frequencies that the IQ samples
     were collected at. Typically, these will be ordered in "steps", where each step corresponds to
@@ -25,10 +25,8 @@ class SweepMetadata:
     (freq_0, freq_1, ..., freq_M, freq_0, freq_1, ..., freq_M, ...), freq_0 < freq_1 < ... < freq_M
 
     The n'th element of the num_samples list, tells us how many samples were collected at the n'th
-    element of center_frequencies:
-chunks.library.fixed_center_frequency.chunk import (
-    BinChunk, FitsChunk
-)
+    element of center_frequencies.
+
     Number of samples: (num_samples_at_freq_0, num_samples_at_freq_1, ...)
 
     Both these lists together allow us to map for each IQ sample, the center frequency it was collected at.
@@ -37,19 +35,23 @@ chunks.library.fixed_center_frequency.chunk import (
     num_samples: np.ndarray
 
 
-@register_chunk(CaptureModes.SWEPT_CENTER_FREQUENCY)
-class _Chunk(BaseChunk):
-    def __init__(self, chunk_start_time, tag):
-        super().__init__(chunk_start_time, tag)
-
-        self.add_file(BinChunk(self.chunk_parent_path, self.chunk_name))
-        self.add_file(FitsChunk(self.chunk_parent_path, self.chunk_name))
-        self.add_file(HdrChunk(self.chunk_parent_path, self.chunk_name))
-
+@register_batch(CaptureModes.SWEPT_CENTER_FREQUENCY)
+class SweptCenterFrequencyBatch(BaseBatch):
+    def __init__(self, 
+                 tag: str, 
+                 start_time: str):
+        super().__init__(tag, start_time)
+        self.add_file( HdrFile(self.parent_dir_path, self.name) )
+        # reuse the binary and fits batch from the fixed center frequency case.
+        self.add_file( BinFile(self.parent_dir_path, self.name) )
+        self.add_file( FitsFile(self.parent_dir_path, self.name))
+        
     
-class HdrChunk(ChunkFile):
-    def __init__(self, chunk_parent_path: str, chunk_name: str):
-        super().__init__(chunk_parent_path, chunk_name, "hdr")
+class HdrFile(BatchFile):
+    def __init__(self, 
+                 parent_dir_path: str, 
+                 base_file_name: str):
+        super().__init__(parent_dir_path, base_file_name, "hdr")
 
     def read(self) -> Tuple[int, SweepMetadata]:
         hdr_contents = self._read_file_contents()

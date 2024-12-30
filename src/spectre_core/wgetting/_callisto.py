@@ -9,7 +9,7 @@ import gzip
 from datetime import datetime
 from typing import Optional
 
-from spectre_core.config import get_spectre_data_dir_path, get_chunks_dir_path, TimeFormats
+from spectre_core.config import get_spectre_data_dir_path, get_batches_dir_path, TimeFormats
 
 CALLISTO_INSTRUMENT_CODES = [
     "ALASKA-ANCHORAGE",
@@ -70,13 +70,13 @@ CALLISTO_INSTRUMENT_CODES = [
 _temp_dir = os.path.join(get_spectre_data_dir_path(), "temp")
 
 
-def _get_chunk_name(station: str, date: str, time: str, instrument_code: str) -> str:
+def _get_batch_name(station: str, date: str, time: str, instrument_code: str) -> str:
     dt = datetime.strptime(f"{date}T{time}", '%Y%m%dT%H%M%S')
     formatted_time = dt.strftime(TimeFormats.DATETIME)
     return f"{formatted_time}_callisto-{station.lower()}-{instrument_code}.fits"
 
 
-def _get_chunk_components(gz_path: str):
+def _get_batch_components(gz_path: str):
     file_name = os.path.basename(gz_path)
     if not file_name.endswith(".fit.gz"):
         raise ValueError(f"Unexpected file extension in {file_name}. Expected .fit.gz")
@@ -89,29 +89,29 @@ def _get_chunk_components(gz_path: str):
     return parts
 
 
-def _get_chunk_path(gz_path: str) -> str:
-    station, date, time, instrument_code = _get_chunk_components(gz_path)
-    fits_chunk_name = _get_chunk_name(station, date, time, instrument_code)
-    chunk_start_time = fits_chunk_name.split('_')[0]
-    chunk_start_datetime = datetime.strptime(chunk_start_time, TimeFormats.DATETIME)
-    chunk_parent_path = get_chunks_dir_path(year = chunk_start_datetime.year,
-                                            month = chunk_start_datetime.month,
-                                            day = chunk_start_datetime.day)
-    if not os.path.exists(chunk_parent_path):
-        os.makedirs(chunk_parent_path)
-    return os.path.join(chunk_parent_path, fits_chunk_name)
+def _get_batch_path(gz_path: str) -> str:
+    station, date, time, instrument_code = _get_batch_components(gz_path)
+    fits_batch_name = _get_batch_name(station, date, time, instrument_code)
+    batch_start_time = fits_batch_name.split('_')[0]
+    batch_start_datetime = datetime.strptime(batch_start_time, TimeFormats.DATETIME)
+    batch_parent_path = get_batches_dir_path(year = batch_start_datetime.year,
+                                            month = batch_start_datetime.month,
+                                            day = batch_start_datetime.day)
+    if not os.path.exists(batch_parent_path):
+        os.makedirs(batch_parent_path)
+    return os.path.join(batch_parent_path, fits_batch_name)
 
 
-def _unzip_file_to_chunks(gz_path: str):
-    fits_path = _get_chunk_path(gz_path)
+def _unzip_file_to_batches(gz_path: str):
+    fits_path = _get_batch_path(gz_path)
     with gzip.open(gz_path, 'rb') as f_in, open(fits_path, 'wb') as f_out:
         shutil.copyfileobj(f_in, f_out)
 
 
-def _unzip_to_chunks():
+def _unzip_to_batches():
     for entry in os.scandir(_temp_dir):
         if entry.is_file() and entry.name.endswith('.gz'):
-            _unzip_file_to_chunks(entry.path)
+            _unzip_file_to_batches(entry.path)
             os.remove(entry.path)
 
 
@@ -151,5 +151,5 @@ def download_callisto_data(instrument_code: Optional[str],
         raise ValueError(f"No match found for '{instrument_code}'. Expected one of {CALLISTO_INSTRUMENT_CODES}")
 
     _wget_callisto_data(instrument_code, year, month, day)
-    _unzip_to_chunks()
+    _unzip_to_batches()
     shutil.rmtree(_temp_dir)
