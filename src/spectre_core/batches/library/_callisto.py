@@ -17,7 +17,7 @@ from .._base import BaseBatch, BatchFile
 
 
 @register_batch('callisto')
-class CallistoBatch(BaseBatch):
+class _Batch(BaseBatch):
     def __init__(self,
                  start_time: str,
                  tag: str):

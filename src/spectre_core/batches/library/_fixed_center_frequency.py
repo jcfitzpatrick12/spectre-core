@@ -18,7 +18,7 @@ from .._base import BaseBatch, BatchFile
 
 
 @register_batch(CaptureModes.FIXED_CENTER_FREQUENCY)
-class FixedCenterFrequencyBatch(BaseBatch):
+class _Batch(BaseBatch):
     def __init__(self,
                  start_time: str,
                  tag: str):

@@ -36,7 +36,7 @@ class SweepMetadata:
 
 
 @register_batch(CaptureModes.SWEPT_CENTER_FREQUENCY)
-class SweptCenterFrequencyBatch(BaseBatch):
+class _Batch(BaseBatch):
     def __init__(self,
                  start_time: str,
                  tag: str):
