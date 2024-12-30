@@ -66,13 +66,13 @@ class Batches:
     @property
     def batch_list(self) -> list[BaseBatch]:
         """A list of all the batch instances."""
-        return  sorted(list(self._batch_map.values()))
+        return  list(self._batch_map.values())
     
 
     @property
     def start_times(self) -> list[str]:
         """The start times of each batch."""
-        return sorted(list(self._batch_map.keys()))
+        return list(self._batch_map.keys())
 
 
     @property
