@@ -96,10 +96,10 @@ class FitsFile(BatchFile):
         return Spectrogram(dynamic_spectra, 
                            times, 
                            frequencies, 
-                           self.tag, 
-                           batch_start_time=self.start_time, 
-                           microsecond_correction=microsecond_correction,
-                           spectrum_type = spectrum_type)
+                           self.tag,
+                           self.start_time,
+                           microsecond_correction,
+                           spectrum_type)
 
 
     def _get_primary_hdu(self, hdulist: HDUList) -> PrimaryHDU:

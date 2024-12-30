@@ -47,9 +47,9 @@ class FitsFile(BatchFile):
                         times, 
                         frequencies[::-1], # sort the frequencies in ascending order
                         self.tag, 
-                        batch_start_time=self.start_time, 
-                        microsecond_correction = microsecond_correction,
-                        spectrum_type = spectrum_type)
+                        self.start_time, 
+                        microsecond_correction,
+                        spectrum_type)
             else:
                 raise NotImplementedError(f"SPECTRE does not currently support spectrum type with BUNITS '{spectrum_type}'")
 
