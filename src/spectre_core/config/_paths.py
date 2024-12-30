@@ -12,9 +12,9 @@ _SPECTRE_DATA_DIR_PATH = os.environ.get("SPECTRE_DATA_DIR_PATH")
 if _SPECTRE_DATA_DIR_PATH is None:
     raise ValueError("The environment variable SPECTRE_DATA_DIR_PATH has not been set")
 
-_CHUNKS_DIR_PATH = os.environ.get("SPECTRE_CHUNKS_DIR_PATH", 
-                                  os.path.join(_SPECTRE_DATA_DIR_PATH, 'chunks'))
-os.makedirs(_CHUNKS_DIR_PATH, 
+_BATCHES_DIR_PATH = os.environ.get("SPECTRE_BATCHES_DIR_PATH", 
+                                  os.path.join(_SPECTRE_DATA_DIR_PATH, 'batches'))
+os.makedirs(_BATCHES_DIR_PATH, 
             exist_ok=True)
 
 _LOGS_DIR_PATH = os.environ.get("SPECTRE_LOGS_DIR_PATH",
@@ -52,11 +52,11 @@ def _get_date_based_dir_path(base_dir: str, year: int = None,
     return os.path.join(base_dir, *date_dir_components)
 
 
-def get_chunks_dir_path(year: int = None, 
+def get_batches_dir_path(year: int = None, 
                         month: int = None, 
                         day: int = None
 ) -> str:
-    return _get_date_based_dir_path(_CHUNKS_DIR_PATH, 
+    return _get_date_based_dir_path(_BATCHES_DIR_PATH, 
                                     year, 
                                     month, 
                                     day)

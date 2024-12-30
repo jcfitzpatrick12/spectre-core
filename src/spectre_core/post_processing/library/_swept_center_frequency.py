@@ -16,8 +16,8 @@ from scipy.signal import ShortTimeFFT
 from spectre_core.spectrograms import Spectrogram, time_average, frequency_average
 from spectre_core.config import TimeFormats
 from spectre_core.capture_configs import CaptureConfig, PNames, CaptureModes
-from spectre_core.chunks import BaseChunk
-from spectre_core.chunks import SweepMetadata
+from spectre_core.batches import BaseBatch
+from spectre_core.batches import SweepMetadata
 from spectre_core.exceptions import InvalidSweepMetadataError
 from .._base import BaseEventHandler, make_sft_instance
 from .._register import register_event_handler
@@ -99,12 +99,12 @@ def _fill_stepped_dynamic_spectra(stepped_dynamic_spectra: np.ndarray,
 
 def _compute_num_max_slices_in_step(sft: ShortTimeFFT,
                                     num_samples: np.ndarray) -> int:
-    """Compute the maximum number of slices over all steps, in all sweeps over the chunk."""
+    """Compute the maximum number of slices over all steps, in all sweeps over the batch."""
     return sft.upper_border_begin(np.max(num_samples))[1]
 
 
 def _compute_num_full_sweeps(center_frequencies: np.ndarray) -> int:
-    """Compute the total number of full sweeps over the chunk.
+    """Compute the total number of full sweeps over the batch.
 
     Since the number of each samples in each step is variable, we only know a sweep is complete
     when there is a sweep after it. So we can define the total number of *full* sweeps as the number of 
@@ -192,23 +192,23 @@ def _do_stfft(iq_data: np.ndarray,
     return times, frequencies, dynamic_spectra
 
 
-def _correct_timing(chunk_start_datetime: datetime,
+def _correct_timing(batch_start_datetime: datetime,
                     millisecond_correction: int,
                     num_samples_prepended: int,
                     sample_rate: int):
-    """Correct the start time for this chunk based on the number of samples we prepended reconstructing the initial sweep."""
+    """Correct the start time for this batch based on the number of samples we prepended reconstructing the initial sweep."""
     sample_interval = (1 / sample_rate)
     elapsed_time = num_samples_prepended * sample_interval
-    corrected_datetime = chunk_start_datetime + timedelta(milliseconds = millisecond_correction) - timedelta(seconds = float(elapsed_time))
+    corrected_datetime = batch_start_datetime + timedelta(milliseconds = millisecond_correction) - timedelta(seconds = float(elapsed_time))
     return corrected_datetime.strftime(TimeFormats.DATETIME), corrected_datetime.microsecond * 1e-3
 
 
 def _prepend_num_samples(carryover_num_samples: np.ndarray,
                          num_samples: np.ndarray,
-                         final_step_spans_two_chunks: bool) -> np.ndarray:
-    """Prepend the number of samples from the final sweep of the previous chunk."""
-    if final_step_spans_two_chunks:
-        # ensure the number of samples from the final step in the previous chunk are accounted for
+                         final_step_spans_two_batches: bool) -> np.ndarray:
+    """Prepend the number of samples from the final sweep of the previous batch."""
+    if final_step_spans_two_batches:
+        # ensure the number of samples from the final step in the previous batch are accounted for
         num_samples[0] += carryover_num_samples[-1]
         # and truncate as required
         carryover_num_samples = carryover_num_samples[:-1]
@@ -217,11 +217,11 @@ def _prepend_num_samples(carryover_num_samples: np.ndarray,
 
 def _prepend_center_frequencies(carryover_center_frequencies: np.ndarray,
                                 center_frequencies: np.ndarray,
-                                final_step_spans_two_chunks: bool)-> np.ndarray:
-    """Prepend the center frequencies from the final sweep of the previous chunk."""
-    # in the case that the sweep has bled across chunks,
+                                final_step_spans_two_batches: bool)-> np.ndarray:
+    """Prepend the center frequencies from the final sweep of the previous batch."""
+    # in the case that the sweep has bled across batches,
     # do not permit identical neighbours in the center frequency array
-    if final_step_spans_two_chunks:
+    if final_step_spans_two_batches:
         # truncate the final frequency to prepend (as it already exists in the array we are appending to in this case)
         carryover_center_frequencies = carryover_center_frequencies[:-1]
     return np.concatenate((carryover_center_frequencies, center_frequencies))
@@ -229,16 +229,16 @@ def _prepend_center_frequencies(carryover_center_frequencies: np.ndarray,
 
 def _prepend_iq_data(carryover_iq_data: np.ndarray,
                      iq_data: np.ndarray) -> np.ndarray:
-    """Prepend the IQ samples from the final sweep of the previous chunk."""
+    """Prepend the IQ samples from the final sweep of the previous batch."""
     return np.concatenate((carryover_iq_data, iq_data))
 
 
-def _get_final_sweep(previous_chunk: BaseChunk
+def _get_final_sweep(previous_batch: BaseBatch
 ) -> Tuple[np.ndarray, SweepMetadata]:
-    """Get data from the final sweep of the previous chunk."""
-    # unpack the data from the previous chunk
-    previous_iq_data = previous_chunk.read_file("bin")
-    _, previous_sweep_metadata = previous_chunk.read_file("hdr")
+    """Get data from the final sweep of the previous batch."""
+    # unpack the data from the previous batch
+    previous_iq_data = previous_batch.read_file("bin")
+    _, previous_sweep_metadata = previous_batch.read_file("hdr")
     # find the step index from the last sweep
     # [0] since the return of np.where is a 1 element Tuple, 
     # containing a list of step indices corresponding to the smallest center frequencies
@@ -258,56 +258,56 @@ def _get_final_sweep(previous_chunk: BaseChunk
     return final_sweep_iq_data, SweepMetadata(final_center_frequencies, final_num_samples)
 
 
-def _reconstruct_initial_sweep(previous_chunk: BaseChunk,
+def _reconstruct_initial_sweep(previous_batch: BaseBatch,
                                iq_data: np.ndarray,
                                sweep_metadata: SweepMetadata) -> Tuple[np.ndarray, SweepMetadata, int]:
-    """Reconstruct the initial sweep of the current chunk, using data from the previous chunk."""
+    """Reconstruct the initial sweep of the current batch, using data from the previous batch."""
 
-    # carryover the final sweep of the previous chunk, and prepend that data to the current chunk data
-    carryover_iq_data, carryover_sweep_metadata = _get_final_sweep(previous_chunk)
+    # carryover the final sweep of the previous batch, and prepend that data to the current batch data
+    carryover_iq_data, carryover_sweep_metadata = _get_final_sweep(previous_batch)
 
-    # prepend the iq data that was carried over from the previous chunk
+    # prepend the iq data that was carried over from the previous batch
     iq_data = _prepend_iq_data(carryover_iq_data,
                                iq_data)
     
-    # prepend the sweep metadata from the previous chunk
-    final_step_spans_two_chunks = carryover_sweep_metadata.center_frequencies[-1] == sweep_metadata.center_frequencies[0]
+    # prepend the sweep metadata from the previous batch
+    final_step_spans_two_batches = carryover_sweep_metadata.center_frequencies[-1] == sweep_metadata.center_frequencies[0]
     center_frequencies = _prepend_center_frequencies(carryover_sweep_metadata.center_frequencies,
                                                      sweep_metadata.center_frequencies,
-                                                     final_step_spans_two_chunks)
+                                                     final_step_spans_two_batches)
     num_samples = _prepend_num_samples(carryover_sweep_metadata.num_samples,
                                        sweep_metadata.num_samples,
-                                       final_step_spans_two_chunks)
+                                       final_step_spans_two_batches)
     
     # keep track of how many samples we prepended (required to adjust timing later)
     num_samples_prepended = np.sum(carryover_sweep_metadata.num_samples)
     return iq_data, SweepMetadata(center_frequencies, num_samples), num_samples_prepended
 
 
-def _build_spectrogram(chunk: BaseChunk,
+def _build_spectrogram(batch: BaseBatch,
                        capture_config: CaptureConfig,
-                       previous_chunk: Optional[BaseChunk] = None) -> Spectrogram:
-    """Create a spectrogram by performing a Short Time FFT on the (swept) IQ samples for this chunk."""
-    iq_data = chunk.read_file("bin")
-    millisecond_correction, sweep_metadata = chunk.read_file("hdr")
+                       previous_batch: Optional[BaseBatch] = None) -> Spectrogram:
+    """Create a spectrogram by performing a Short Time FFT on the (swept) IQ samples for this batch."""
+    iq_data = batch.read_file("bin")
+    millisecond_correction, sweep_metadata = batch.read_file("hdr")
 
-    # if a previous chunk has been specified, this indicates that the initial sweep spans
+    # if a previous batch has been specified, this indicates that the initial sweep spans
     # between two adjacent batched files. 
-    if previous_chunk:
-        # If this is the case, first reconstruct the initial sweep of the current chunk
-        # by prepending the final sweep of the previous chunk
-        iq_data, sweep_metadata, num_samples_prepended = _reconstruct_initial_sweep(previous_chunk,
+    if previous_batch:
+        # If this is the case, first reconstruct the initial sweep of the current batch
+        # by prepending the final sweep of the previous batch
+        iq_data, sweep_metadata, num_samples_prepended = _reconstruct_initial_sweep(previous_batch,
                                                                                     iq_data,
                                                                                     sweep_metadata)
-        # since we have prepended extra samples, we need to correct the chunk start time
+        # since we have prepended extra samples, we need to correct the batch start time
         # appropriately
-        chunk_start_time, millisecond_correction = _correct_timing(chunk.chunk_start_datetime,
-                                                                   millisecond_correction,
-                                                                   num_samples_prepended,
-                                                                   capture_config.get_parameter_value(PNames.SAMPLE_RATE))
+        start_time, millisecond_correction = _correct_timing(batch.start_datetime,
+                                                             millisecond_correction,
+                                                             num_samples_prepended,
+                                                             capture_config.get_parameter_value(PNames.SAMPLE_RATE))
     # otherwise, no action is required
     else:
-        chunk_start_time = chunk.chunk_start_time
+        start_time = batch.start_time
 
     microsecond_correction = millisecond_correction * 1e3
 
@@ -318,8 +318,8 @@ def _build_spectrogram(chunk: BaseChunk,
     return Spectrogram(dynamic_spectra,
                        times,
                        frequencies,
-                       chunk.tag,
-                       chunk_start_time,
+                       batch.tag,
+                       start_time,
                        microsecond_correction,
                        spectrum_type = "amplitude")
 
@@ -329,10 +329,10 @@ class _EventHandler(BaseEventHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # the previous chunk is stored in order to fetch the
+        # the previous batch is stored in order to fetch the
         # data from the "final sweep" which was ignored during
         # processing.
-        self._previous_chunk: BaseChunk = None 
+        self._previous_batch: BaseBatch = None 
         
 
     def process(self, 
@@ -341,8 +341,8 @@ class _EventHandler(BaseEventHandler):
         file_name = os.path.basename(absolute_file_path)
         # discard the extension
         base_file_name, _ = os.path.splitext(file_name)
-        chunk_start_time, tag = base_file_name.split('_')
-        chunk = self._Chunk(chunk_start_time, tag)
+        batch_start_time, tag = base_file_name.split('_')
+        batch = self._Batch(batch_start_time, tag)
 
         # ensure that the file which has been created has the expected tag
         if tag != self._tag:
@@ -350,9 +350,9 @@ class _EventHandler(BaseEventHandler):
                                f"but a file has been created with tag '{tag}'")
 
         _LOGGER.info("Creating spectrogram")
-        spectrogram = _build_spectrogram(chunk,
+        spectrogram = _build_spectrogram(batch,
                                         self._capture_config,
-                                        previous_chunk = self._previous_chunk)
+                                        previous_batch = self._previous_batch)
 
         spectrogram = time_average(spectrogram,
                                    resolution = self._capture_config.get_parameter_value(PNames.TIME_RESOLUTION))
@@ -362,21 +362,21 @@ class _EventHandler(BaseEventHandler):
 
         self._cache_spectrogram(spectrogram)
 
-        # if the previous chunk has not yet been set, it means we are processing the first chunk
-        # so we don't need to handle the previous chunk
-        if self._previous_chunk is None:
+        # if the previous batch has not yet been set, it means we are processing the first batch
+        # so we don't need to handle the previous batch
+        if self._previous_batch is None:
             # instead, only set it for the next time this method is called
-            self._previous_chunk = chunk
+            self._previous_batch = batch
             
-        # otherwise the previous chunk is defined (and by this point has already been processed)
+        # otherwise the previous batch is defined (and by this point has already been processed)
         else:
-            bin_chunk = self._previous_chunk.get_file('bin')
-            _LOGGER.info(f"Deleting {bin_chunk.file_path}")
-            bin_chunk.delete()
+            bin_file = self._previous_batch.get_file('bin')
+            _LOGGER.info(f"Deleting {bin_file.file_path}")
+            bin_file.delete()
 
-            hdr_chunk = self._previous_chunk.get_file('hdr')
-            _LOGGER.info(f"Deleting {hdr_chunk.file_path}")
-            hdr_chunk.delete()
+            hdr_file = self._previous_batch.get_file('hdr')
+            _LOGGER.info(f"Deleting {hdr_file.file_path}")
+            hdr_file.delete()
 
-            # and reassign the current chunk to be used as the previous chunk at the next call of this method
-            self._previous_chunk = chunk
+            # and reassign the current batch to be used as the previous batch at the next call of this method
+            self._previous_batch = batch

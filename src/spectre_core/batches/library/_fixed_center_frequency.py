@@ -13,22 +13,26 @@ from astropy.io.fits.hdu.hdulist import HDUList
 
 from spectre_core.spectrograms import Spectrogram
 from spectre_core.capture_configs import CaptureModes
-from .._register import register_chunk
-from .._base import BaseChunk, ChunkFile
-
-@register_chunk(CaptureModes.FIXED_CENTER_FREQUENCY)
-class _Chunk(BaseChunk):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs) 
-        
-        self.add_file(BinChunk(self.chunk_parent_path, self.chunk_name))
-        self.add_file(FitsChunk(self.chunk_parent_path, self.chunk_name))
-        self.add_file(HdrChunk(self.chunk_parent_path, self.chunk_name))
+from .._register import register_batch
+from .._base import BaseBatch, BatchFile
 
 
-class BinChunk(ChunkFile):
-    def __init__(self, chunk_parent_path: str, chunk_name: str):
-        super().__init__(chunk_parent_path, chunk_name, "bin")
+@register_batch(CaptureModes.FIXED_CENTER_FREQUENCY)
+class _Batch(BaseBatch):
+    def __init__(self,
+                 start_time: str,
+                 tag: str):
+        super().__init__(start_time, tag) 
+        self.add_file( BinFile(self.parent_dir_path, self.name) )
+        self.add_file( HdrFile(self.parent_dir_path, self.name) )
+        self.add_file( FitsFile(self.parent_dir_path, self.name))
+
+
+class BinFile(BatchFile):
+    def __init__(self, 
+                 parent_dir_path: str, 
+                 base_file_name: str):
+        super().__init__(parent_dir_path, base_file_name, "bin")
 
     def read(self) -> np.ndarray:
         with open(self.file_path, "rb") as fh:
@@ -36,9 +40,11 @@ class BinChunk(ChunkFile):
 
 
   
-class HdrChunk(ChunkFile):
-    def __init__(self, chunk_parent_path: str, chunk_name: str):
-        super().__init__(chunk_parent_path, chunk_name, "hdr")
+class HdrFile(BatchFile):
+    def __init__(self, 
+                 parent_dir_path: str, 
+                 base_file_name: str):
+        super().__init__(parent_dir_path, base_file_name, "hdr")
 
 
     def read(self) -> int:
@@ -63,11 +69,11 @@ class HdrChunk(ChunkFile):
         return int(millisecond_correction_as_float)
         
 
-
-
-class FitsChunk(ChunkFile):
-    def __init__(self, chunk_parent_path: str, chunk_name: str):
-        super().__init__(chunk_parent_path, chunk_name, "fits")
+class FitsFile(BatchFile):
+    def __init__(self, 
+                 parent_dir_path: str, 
+                 base_file_name: str):
+        super().__init__(parent_dir_path, base_file_name, "fits")
 
 
     @property
@@ -75,25 +81,25 @@ class FitsChunk(ChunkFile):
         with fits.open(self.file_path, mode='readonly') as hdulist:
             bintable_data = hdulist[1].data
             times = bintable_data['TIME'][0]
-            return [self.chunk_start_datetime + timedelta(seconds=t) for t in times]
+            return [self.start_datetime + timedelta(seconds=t) for t in times]
         
 
     def read(self) -> Spectrogram:
         with fits.open(self.file_path, mode='readonly') as hdulist:
-            primary_hdu = self._get_primary_hdu(hdulist)
-            dynamic_spectra = self._get_dynamic_spectra(primary_hdu)
-            spectrum_type = self._get_spectrum_type(primary_hdu)
+            primary_hdu            = self._get_primary_hdu(hdulist)
+            dynamic_spectra        = self._get_dynamic_spectra(primary_hdu)
+            spectrum_type          = self._get_spectrum_type(primary_hdu)
             microsecond_correction = self._get_microsecond_correction(primary_hdu)
-            bintable_hdu = self._get_bintable_hdu(hdulist)
-            times, frequencies = self._get_time_and_frequency(bintable_hdu)
+            bintable_hdu           = self._get_bintable_hdu(hdulist)
+            times, frequencies     = self._get_time_and_frequency(bintable_hdu)
 
         return Spectrogram(dynamic_spectra, 
                            times, 
                            frequencies, 
-                           self.tag, 
-                           chunk_start_time=self.chunk_start_time, 
-                           microsecond_correction=microsecond_correction,
-                           spectrum_type = spectrum_type)
+                           self.tag,
+                           self.start_time,
+                           microsecond_correction,
+                           spectrum_type)
 
 
     def _get_primary_hdu(self, hdulist: HDUList) -> PrimaryHDU:

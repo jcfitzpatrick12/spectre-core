@@ -47,14 +47,11 @@ class Parameters:
 
     def add_parameter(self, 
                       name: str,
-                      value: Optional[T] = None,
-                      force: bool = False) -> None:
+                      value: Optional[T] = None) -> None:
         """Add a new parameter."""
-        if name in self._parameters and not force:
+        if name in self._parameters:
             raise ValueError(f"Cannot add a parameter with name '{name}', "
-                             f"since a parameter already exists with that name. "
-                             f"You can overrride this functionality with 'force', "
-                             f"to overwrite the existing parameter.")
+                             f"since a parameter already exists with that name. ")
         self._parameters[name] = Parameter(name, value)
 
 

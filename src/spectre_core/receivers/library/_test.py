@@ -123,7 +123,7 @@ class _Receiver(BaseReceiver):
                 PNames.WINDOW_HOP,
                 PNames.WINDOW_SIZE,
                 PNames.EVENT_HANDLER_KEY,
-                PNames.CHUNK_KEY,
+                PNames.BATCH_KEY,
                 PNames.WATCH_EXTENSION,
                 PNames.MIN_SAMPLES_PER_STEP,
                 PNames.MAX_SAMPLES_PER_STEP,
@@ -152,7 +152,7 @@ class _Receiver(BaseReceiver):
             (PNames.WINDOW_SIZE,           512),
             (PNames.WINDOW_TYPE,           "boxcar"),
             (PNames.EVENT_HANDLER_KEY,     CaptureModes.SWEPT_CENTER_FREQUENCY),
-            (PNames.CHUNK_KEY,             CaptureModes.SWEPT_CENTER_FREQUENCY),
+            (PNames.BATCH_KEY,             CaptureModes.SWEPT_CENTER_FREQUENCY),
             (PNames.WATCH_EXTENSION,       "bin")
         )
 
@@ -166,7 +166,7 @@ class _Receiver(BaseReceiver):
             PNames.FREQUENCY_RESOLUTION,
             PNames.WINDOW_TYPE,
             PNames.EVENT_HANDLER_KEY,
-            PNames.CHUNK_KEY,
+            PNames.BATCH_KEY,
             PNames.WATCH_EXTENSION
         )
 

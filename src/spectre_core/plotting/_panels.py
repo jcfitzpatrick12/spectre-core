@@ -170,7 +170,7 @@ class _SpectrogramPanel(BaseTimeSeriesPanel):
 
 
     def draw(self):
-        dynamic_spectra = self._spectrogram.dynamic_spectra_as_dBb if self._dBb else self._spectrogram.dynamic_spectra
+        dynamic_spectra = self._spectrogram.dynamic_spectra_dBb if self._dBb else self._spectrogram.dynamic_spectra
 
         norm = LogNorm(vmin=np.nanmin(dynamic_spectra[dynamic_spectra > 0]), 
                        vmax=np.nanmax(dynamic_spectra)) if self._log_norm else None

@@ -10,10 +10,10 @@ from typing import Any, Optional
 
 class BaseFileHandler(ABC):
     def __init__(self, 
-                 parent_path: str, 
+                 parent_dir_path: str, 
                  base_file_name: str, 
                  extension: Optional[str] = None):
-        self._parent_path = parent_path
+        self._parent_dir_path = parent_dir_path
         self._base_file_name = base_file_name
         self._extension = extension
 
@@ -24,8 +24,8 @@ class BaseFileHandler(ABC):
  
 
     @property
-    def parent_path(self) -> str:
-        return self._parent_path
+    def parent_dir_path(self) -> str:
+        return self._parent_dir_path
     
 
     @property
@@ -45,7 +45,7 @@ class BaseFileHandler(ABC):
 
     @property
     def file_path(self) -> str:
-        return os.path.join(self._parent_path, self.file_name)
+        return os.path.join(self._parent_dir_path, self.file_name)
     
     
     @property
@@ -53,8 +53,8 @@ class BaseFileHandler(ABC):
         return os.path.exists(self.file_path) 
 
 
-    def make_parent_path(self) -> None:
-        os.makedirs(self.parent_path, exist_ok=True) 
+    def make_parent_dir_path(self) -> None:
+        os.makedirs(self.parent_dir_path, exist_ok=True) 
     
 
     def delete(self,
@@ -71,13 +71,13 @@ class BaseFileHandler(ABC):
 
 class JsonHandler(BaseFileHandler):
     def __init__(self, 
-                 parent_path: str, 
+                 parent_dir_path: str, 
                  base_file_name: str,
                  extension: str = "json",
                  **kwargs):
         
         self._dict = None # cache
-        super().__init__(parent_path, 
+        super().__init__(parent_dir_path, 
                          base_file_name, 
                          extension,
                          **kwargs)
@@ -91,7 +91,7 @@ class JsonHandler(BaseFileHandler):
     def save(self, 
              d: dict, 
              force: bool = False) -> None:
-        self.make_parent_path()
+        self.make_parent_dir_path()
 
         if self.exists:
             if force:
@@ -113,11 +113,11 @@ class JsonHandler(BaseFileHandler):
 
 class TextHandler(BaseFileHandler):
     def __init__(self, 
-                 parent_path: str,
+                 parent_dir_path: str,
                  base_file_name: str, 
                  extension: str = "txt",
                  **kwargs):
-        super().__init__(parent_path,
+        super().__init__(parent_dir_path,
                          base_file_name,
                          extension, 
                          **kwargs)

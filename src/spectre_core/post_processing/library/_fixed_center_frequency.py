@@ -11,7 +11,7 @@ from typing import Tuple
 import os
 
 from spectre_core.capture_configs import CaptureConfig, PNames, CaptureModes
-from spectre_core.chunks import BaseChunk
+from spectre_core.batches import BaseBatch
 from spectre_core.spectrograms import Spectrogram, time_average, frequency_average
 from .._base import BaseEventHandler, make_sft_instance
 from .._register import register_event_handler
@@ -51,13 +51,13 @@ def _do_stfft(iq_data: np.array,
     return times, frequencies, dynamic_spectra
 
 
-def _build_spectrogram(chunk: BaseChunk,
+def _build_spectrogram(batch: BaseBatch,
                        capture_config: CaptureConfig) -> Spectrogram:
-    """Create a spectrogram by performing a Short Time FFT on the IQ samples for this chunk."""
+    """Create a spectrogram by performing a Short Time FFT on the IQ samples for this batch."""
 
-    # read the data from the chunk
-    millisecond_correction = chunk.read_file("hdr")
-    iq_data = chunk.read_file("bin")
+    # read the data from the batch
+    millisecond_correction = batch.read_file("hdr")
+    iq_data = batch.read_file("bin")
 
     # units conversion
     microsecond_correction = millisecond_correction * 1e3
@@ -70,12 +70,12 @@ def _build_spectrogram(chunk: BaseChunk,
     frequencies = np.array(frequencies, dtype = 'float32')
     dynamic_spectra = np.array(dynamic_spectra, dtype = 'float32')
 
-    return Spectrogram(dynamic_spectra, 
-                       times, 
-                       frequencies, 
-                       chunk.tag, 
-                       chunk_start_time = chunk.chunk_start_time, 
-                       microsecond_correction = microsecond_correction,
+    return Spectrogram(dynamic_spectra,
+                       times,
+                       frequencies,
+                       batch.tag,
+                       batch.start_time,
+                       microsecond_correction,
                        spectrum_type = "amplitude")
 
 
@@ -89,13 +89,13 @@ class _EventHandler(BaseEventHandler):
         _LOGGER.info(f"Processing: {absolute_file_path}")
         file_name = os.path.basename(absolute_file_path)
         base_file_name, _ = os.path.splitext(file_name)
-        chunk_start_time, tag = base_file_name.split('_')
+        batch_start_time, tag = base_file_name.split('_')
 
-        # create an instance of the current chunk being processed
-        chunk = self._Chunk(chunk_start_time, tag)
+        # create an instance of the current batch being processed
+        batch = self._Batch(batch_start_time, tag)
 
         _LOGGER.info("Creating spectrogram")
-        spectrogram = _build_spectrogram(chunk,
+        spectrogram = _build_spectrogram(batch,
                                         self._capture_config)
 
         spectrogram = time_average(spectrogram,
@@ -106,10 +106,10 @@ class _EventHandler(BaseEventHandler):
         
         self._cache_spectrogram(spectrogram)
 
-        bin_chunk = chunk.get_file('bin')
-        _LOGGER.info(f"Deleting {bin_chunk.file_path}")
-        bin_chunk.delete()
+        bin_file = batch.get_file('bin')
+        _LOGGER.info(f"Deleting {bin_file.file_path}")
+        bin_file.delete()
 
-        hdr_chunk = chunk.get_file('hdr')
-        _LOGGER.info(f"Deleting {hdr_chunk.file_path}")
-        hdr_chunk.delete()
+        hdr_file = batch.get_file('hdr')
+        _LOGGER.info(f"Deleting {hdr_file.file_path}")
+        hdr_file.delete()
