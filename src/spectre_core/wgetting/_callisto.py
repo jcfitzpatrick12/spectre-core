@@ -128,11 +128,7 @@ def _wget_callisto_data(instrument_code: str,
         '-P', _temp_dir,
         base_url
     ]
-
-    try:
-        subprocess.run(command, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"An error occurred: {e}")
+    subprocess.run(command, check=True)
 
 
 def download_callisto_data(instrument_code: Optional[str], 

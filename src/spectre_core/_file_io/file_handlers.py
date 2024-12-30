@@ -50,7 +50,6 @@ class BaseFileHandler(ABC):
     
     @property
     def exists(self) -> bool:
-        print(self.file_path)
         return os.path.exists(self.file_path) 
 
 
