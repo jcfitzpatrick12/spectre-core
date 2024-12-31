@@ -188,7 +188,7 @@ def _time_elapsed(datetimes: np.ndarray) -> np.ndarray:
     return np.array(elapsed_time, dtype=np.float32)
 
 
-# we assume that the spectrogram list is ORDERED chronologically
+# we assume that the spectrogram list is ordered chronologically
 # we assume there is no time overlap in any of the spectrograms in the list
 def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
 
@@ -209,9 +209,8 @@ def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
             raise ValueError(f"All tags must be equal for each spectrogram in the input list!")
         if spectrogram.spectrum_type != reference_spectrogram.spectrum_type:
             raise ValueError(f"All units must be equal for each spectrogram in the input list!")
-        if spectrogram.start_time is None:
-            raise ValueError(f"All spectrograms must have start_time set. Received {spectrogram.start_time}")
-
+        if not spectrogram.start_datetime_is_set:
+            raise ValueError(f"All spectrograms must have their start datetime set.")
 
     # build a list of the time array of each spectrogram in the list
     conc_datetimes = np.concatenate([s.datetimes for s in spectrograms])
