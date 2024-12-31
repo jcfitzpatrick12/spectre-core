@@ -165,6 +165,12 @@ class Spectrogram:
     
 
     @property
+    def start_datetime_is_set(self) -> bool:
+        """Returns true if the start datetime for the spectrogram has been set."""
+        return (self._start_datetime is not None)
+    
+    
+    @property
     def start_datetime(self) -> datetime:
         """The datetime assigned to the first spectrum in the dynamic spectra."""
         if self._start_datetime is None:
@@ -173,13 +179,12 @@ class Spectrogram:
     
     
     @property
-    def start_time(self) -> str:
-        """The datetime assigned to the first spectrum in the dynamic spectra, formatted as a string up to second precision.
-        
-        Use the 'start_datetime' attribute for the full precision available.
-        """
+    def start_time(self,
+                   precise: bool = True) -> str:
+        """The datetime assigned to the first spectrum in the dynamic spectra, formatted as a string"""
+        if precise:
+            return datetime.strftime(self.start_datetime, TimeFormats.PRECISE_DATETIME)
         return datetime.strftime(self.start_datetime, TimeFormats.DATETIME)
-    
     
     @property
     def datetimes(self) -> list[datetime]:
@@ -276,13 +281,7 @@ class Spectrogram:
 
     def save(self) -> None:
         """Save the spectrogram as a fits file."""
-        batch_parent_path = get_batches_dir_path(year  = self.start_datetime.year,
-                                                 month = self.start_datetime.month,
-                                                 day   = self.start_datetime.day)
-        file_name = f"{self.start_time}_{self._tag}.fits"
-        write_path = os.path.join(batch_parent_path, 
-                                  file_name)
-        _save_spectrogram(write_path, self)
+        _save_spectrogram(self)
     
 
     def integrate_over_frequency(self, 
@@ -405,9 +404,18 @@ def _seconds_of_day(dt: datetime) -> float:
 
 
 # Function to create a FITS file with the specified structure
-def _save_spectrogram(write_path: str, 
-                      spectrogram: Spectrogram) -> None:
+def _save_spectrogram(spectrogram: Spectrogram) -> None:
     
+    # making the write path
+    batch_parent_path = get_batches_dir_path(year  = spectrogram.start_datetime.year,
+                                             month = spectrogram.start_datetime.month,
+                                             day   = spectrogram.start_datetime.day)
+    # file name formatted as a batch file
+    file_name = f"{spectrogram.start_time}_{spectrogram.tag}.fits"
+    write_path = os.path.join(batch_parent_path, 
+                                file_name)
+    
+    # get optional metadata from the capture config
     capture_config = CaptureConfig(spectrogram.tag)
     ORIGIN    = capture_config.get_parameter_value(PNames.ORIGIN)
     INSTRUME  = capture_config.get_parameter_value(PNames.INSTRUMENT)
