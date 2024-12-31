@@ -180,8 +180,8 @@ class Spectrogram:
     
     @property
     def start_time(self,
-                   precise: bool = True) -> str:
-        """The datetime assigned to the first spectrum in the dynamic spectra, formatted as a string"""
+                   precise: bool = False) -> str:
+        """The datetime assigned to the first spectrum in the dynamic spectra, formatted as a string."""
         if precise:
             return datetime.strftime(self.start_datetime, TimeFormats.PRECISE_DATETIME)
         return datetime.strftime(self.start_datetime, TimeFormats.DATETIME)
