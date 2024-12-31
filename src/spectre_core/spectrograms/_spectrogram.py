@@ -185,7 +185,7 @@ class Spectrogram:
     def datetimes(self) -> list[datetime]:
         """The datetimes associated with each spectrum in the dynamic spectra."""
         if self._datetimes is None:
-            self._datetimes = [self.start_datetime + timedelta(seconds=(t)) for t in self._times]
+            self._datetimes = [self.start_datetime + timedelta( seconds=(float(t)) ) for t in self._times]
         return self._datetimes
     
 
