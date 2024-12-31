@@ -110,11 +110,7 @@ class FitsFile(BatchFile):
 
 
     def _get_spectrum_type(self, primary_hdu: PrimaryHDU) -> str:
-        return primary_hdu.header.get['BUNIT']
-    
-    
-    def _get_spectrum_type(self, primary_hdu: PrimaryHDU) -> str:
-        return primary_hdu.header.get['BUNIT']
+        return primary_hdu.header['BUNIT']
 
 
     def _get_spectrogram_start_datetime(self, primary_hdu: PrimaryHDU) -> datetime:
