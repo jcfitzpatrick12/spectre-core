@@ -7,6 +7,7 @@ _LOGGER = getLogger(__name__)
 
 import numpy as np
 from typing import Tuple
+from datetime import timedelta
 
 import os
 
@@ -59,9 +60,6 @@ def _build_spectrogram(batch: BaseBatch,
     millisecond_correction = batch.read_file("hdr")
     iq_data = batch.read_file("bin")
 
-    # units conversion
-    microsecond_correction = millisecond_correction * 1e3
-
     times, frequencies, dynamic_spectra = _do_stfft(iq_data,
                                                     capture_config)
 
@@ -70,12 +68,14 @@ def _build_spectrogram(batch: BaseBatch,
     frequencies = np.array(frequencies, dtype = 'float32')
     dynamic_spectra = np.array(dynamic_spectra, dtype = 'float32')
 
+    # compute the start datetime for the spectrogram by adding the millisecond component to the batch start time
+    spectrogram_start_datetime = batch.start_datetime + timedelta(milliseconds=millisecond_correction)
     return Spectrogram(dynamic_spectra,
                        times,
                        frequencies,
                        batch.tag,
                        batch.start_time,
-                       microsecond_correction,
+                       spectrogram_start_datetime,
                        spectrum_type = "amplitude")
 
 

@@ -93,11 +93,13 @@ class FitsFile(BatchFile):
             bintable_hdu           = self._get_bintable_hdu(hdulist)
             times, frequencies     = self._get_time_and_frequency(bintable_hdu)
 
+        # correct the start datetime of the batch by adding the microsecond component
+        corrected_start_datetime = datetime.strptime(self.start_datetime) + timedelta(microseconds=microsecond_correction)
         return Spectrogram(dynamic_spectra, 
                            times, 
                            frequencies, 
                            self.tag,
-                           self.start_time,
+                           corrected_start_datetime,
                            microsecond_correction,
                            spectrum_type)
 

@@ -10,6 +10,6 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TimeFormats:
-    TIME     = "%H:%M:%S"
     DATE     = "%Y-%m-%d"
+    TIME     = "%H:%M:%S"
     DATETIME = f"{DATE}T{TIME}"

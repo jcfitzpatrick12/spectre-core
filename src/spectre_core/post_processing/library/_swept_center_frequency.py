@@ -199,8 +199,7 @@ def _correct_timing(batch_start_datetime: datetime,
     """Correct the start time for this batch based on the number of samples we prepended reconstructing the initial sweep."""
     sample_interval = (1 / sample_rate)
     elapsed_time = num_samples_prepended * sample_interval
-    corrected_datetime = batch_start_datetime + timedelta(milliseconds = millisecond_correction) - timedelta(seconds = float(elapsed_time))
-    return corrected_datetime.strftime(TimeFormats.DATETIME), corrected_datetime.microsecond * 1e-3
+    return batch_start_datetime + timedelta(milliseconds = millisecond_correction) - timedelta(seconds = float(elapsed_time))
 
 
 def _prepend_num_samples(carryover_num_samples: np.ndarray,
@@ -299,17 +298,16 @@ def _build_spectrogram(batch: BaseBatch,
         iq_data, sweep_metadata, num_samples_prepended = _reconstruct_initial_sweep(previous_batch,
                                                                                     iq_data,
                                                                                     sweep_metadata)
-        # since we have prepended extra samples, we need to correct the batch start time
-        # appropriately
-        start_time, millisecond_correction = _correct_timing(batch.start_datetime,
-                                                             millisecond_correction,
-                                                             num_samples_prepended,
-                                                             capture_config.get_parameter_value(PNames.SAMPLE_RATE))
-    # otherwise, no action is required
+        # since we have prepended extra samples, we need to correct the batch start time appropriately
+        spectrogram_start_datetime = _correct_timing(batch.start_datetime,
+                                                     millisecond_correction,
+                                                     num_samples_prepended,
+                                                     capture_config.get_parameter_value(PNames.SAMPLE_RATE))
+    
     else:
-        start_time = batch.start_time
+        # compute the start datetime for the spectrogram by adding the millisecond component to the batch start time
+        spectrogram_start_datetime = batch.start_datetime + timedelta(milliseconds=millisecond_correction)
 
-    microsecond_correction = millisecond_correction * 1e3
 
     times, frequencies, dynamic_spectra = _do_stfft(iq_data, 
                                                     sweep_metadata,
@@ -319,8 +317,7 @@ def _build_spectrogram(batch: BaseBatch,
                        times,
                        frequencies,
                        batch.tag,
-                       start_time,
-                       microsecond_correction,
+                       spectrogram_start_datetime,
                        spectrum_type = "amplitude")
 
 
