@@ -95,8 +95,8 @@ def time_average(input_spectrogram: Spectrogram,
                  average_over: Optional[int] = None) -> Spectrogram:
 
     # spectre does not currently support averaging of non-datetime assigned spectrograms
-    if input_spectrogram.start_time is None:
-        raise ValueError(f"Input spectrogram is missing batch start time. Averaging is not yet supported for non-datetime assigned spectrograms")
+    if not input_spectrogram.start_datetime_is_set:
+        raise NotImplementedError(f"Time averaging is not yet supported for spectrograms without an assigned datetime.")
     
     # if nothing is specified, do nothing
     if (resolution is None) and (average_over is None):
@@ -118,8 +118,8 @@ def time_average(input_spectrogram: Spectrogram,
 
     # average the dynamic spectra array
     transformed_dynamic_spectra = average_array(input_spectrogram.dynamic_spectra, 
-                                                 average_over, 
-                                                 axis=1)
+                                                average_over, 
+                                                axis=1)
 
     # We need to assign timestamps to the averaged spectrums in the spectrograms. 
     # The natural way to do this is to assign the i'th averaged spectrogram 

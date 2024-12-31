@@ -178,13 +178,13 @@ class Spectrogram:
         return self._start_datetime
     
     
-    @property
-    def start_time(self,
-                   precise: bool = False) -> str:
+    def format_start_time(self,
+                          precise: bool = False) -> str:
         """The datetime assigned to the first spectrum in the dynamic spectra, formatted as a string."""
         if precise:
             return datetime.strftime(self.start_datetime, TimeFormats.PRECISE_DATETIME)
         return datetime.strftime(self.start_datetime, TimeFormats.DATETIME)
+    
     
     @property
     def datetimes(self) -> list[datetime]:
@@ -411,7 +411,7 @@ def _save_spectrogram(spectrogram: Spectrogram) -> None:
                                              month = spectrogram.start_datetime.month,
                                              day   = spectrogram.start_datetime.day)
     # file name formatted as a batch file
-    file_name = f"{spectrogram.start_time}_{spectrogram.tag}.fits"
+    file_name = f"{spectrogram.format_start_time()}_{spectrogram.tag}.fits"
     write_path = os.path.join(batch_parent_path, 
                                 file_name)
     
