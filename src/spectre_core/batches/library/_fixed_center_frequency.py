@@ -11,6 +11,7 @@ from astropy.io.fits.hdu.image import PrimaryHDU
 from astropy.io.fits.hdu.table import BinTableHDU
 from astropy.io.fits.hdu.hdulist import HDUList
 
+from spectre_core.config import TimeFormats
 from spectre_core.spectrograms import Spectrogram
 from spectre_core.capture_configs import CaptureModes
 from .._register import register_batch
@@ -116,7 +117,7 @@ class FitsFile(BatchFile):
     def _get_spectrogram_start_datetime(self, primary_hdu: PrimaryHDU) -> datetime:
         date_obs = primary_hdu.header['DATE-OBS']
         time_obs = primary_hdu.header['TIME-OBS']
-        return datetime.strptime(f"{date_obs}T{time_obs}", "%Y-%m-%dT%H:%M:%S.%f")
+        return datetime.strptime(f"{date_obs}T{time_obs}", TimeFormats.PRECISE_DATETIME)
 
 
     def _get_bintable_hdu(self, hdulist: HDUList) -> BinTableHDU:
