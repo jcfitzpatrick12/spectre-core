@@ -12,12 +12,6 @@ from spectre_core.exceptions import ModeNotFoundError
 from ._spectrogram import Spectrogram
 from ._array_operations import is_close
 
-__all__ = [
-    "get_analytical_spectrogram",
-    "validate_analytically",
-    "TestResults"
-]
-
 @dataclass
 class TestResults:
     # Whether the times array matches analytically 
