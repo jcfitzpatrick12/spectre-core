@@ -233,5 +233,5 @@ def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
                        transformed_times, 
                        reference_spectrogram.frequencies, 
                        reference_spectrogram.tag, 
-                       start_time = reference_spectrogram.start_datetime,
-                       spectrum_type = reference_spectrogram.spectrum_type) 
+                       reference_spectrogram.start_datetime,
+                       reference_spectrogram.spectrum_type) 
