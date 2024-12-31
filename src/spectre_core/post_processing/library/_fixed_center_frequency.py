@@ -74,7 +74,6 @@ def _build_spectrogram(batch: BaseBatch,
                        times,
                        frequencies,
                        batch.tag,
-                       batch.start_time,
                        spectrogram_start_datetime,
                        spectrum_type = "amplitude")
 
