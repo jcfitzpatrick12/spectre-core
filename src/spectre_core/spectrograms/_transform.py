@@ -11,13 +11,6 @@ from spectre_core.config import TimeFormats
 from ._array_operations import find_closest_index, average_array
 from ._spectrogram import Spectrogram
 
-__all__ = [
-    "frequency_chop",
-    "time_chop",
-    "frequency_average",
-    "time_average",
-    "join_spectrograms"
-]
 
 def frequency_chop(input_spectrogram: Spectrogram, 
                    start_frequency: float | int, 
@@ -50,9 +43,8 @@ def frequency_chop(input_spectrogram: Spectrogram,
                        input_spectrogram.times,
                        transformed_frequencies,
                        input_spectrogram.tag,
-                       start_time = input_spectrogram.start_time,
-                       microsecond_correction = input_spectrogram.microsecond_correction,
-                       spectrum_type = input_spectrogram.spectrum_type)
+                       input_spectrogram.start_datetime,
+                       input_spectrogram.spectrum_type)
 
 
 def time_chop(input_spectrogram: Spectrogram, 
@@ -84,9 +76,6 @@ def time_chop(input_spectrogram: Spectrogram,
 
     # compute the new start datetime following the time chop
     transformed_start_datetime = input_spectrogram.datetimes[start_index]
-    # compute the microsecond correction, and batch start time
-    transformed_start_time = datetime.strftime(transformed_start_datetime, TimeFormats.DATETIME)
-    transformed_microsecond_correction = transformed_start_datetime.microsecond
 
     # chop the times array
     transformed_times = input_spectrogram.times[start_index:end_index+1]
@@ -97,8 +86,7 @@ def time_chop(input_spectrogram: Spectrogram,
                        transformed_times, 
                        input_spectrogram.frequencies, 
                        input_spectrogram.tag, 
-                       start_time = transformed_start_time,
-                       microsecond_correction = transformed_microsecond_correction,
+                       start_time = transformed_start_datetime,
                        spectrum_type = input_spectrogram.spectrum_type)
 
 
@@ -139,19 +127,17 @@ def time_average(input_spectrogram: Spectrogram,
     transformed_times = average_array(input_spectrogram.times, average_over)
     
     # find the new batch start time, which we will assign to the first spectrum after averaging
-    corrected_start_datetime = input_spectrogram.datetimes[0] + timedelta(seconds = float(transformed_times[0]))
-    transformed_start_time = corrected_start_datetime.strftime(TimeFormats.DATETIME)
-    transformed_microsecond_correction = corrected_start_datetime.microsecond
+    transformed_start_datetime = input_spectrogram.datetimes[0] + timedelta(seconds = float(transformed_times[0]))
 
     # finally, translate the averaged time seconds to begin at t=0 [s]
     transformed_times -= transformed_times[0]
+    
     return Spectrogram(transformed_dynamic_spectra, 
                        transformed_times, 
                        input_spectrogram.frequencies, 
                        input_spectrogram.tag,
-                       start_time = transformed_start_time,
-                       microsecond_correction = transformed_microsecond_correction,
-                       spectrum_type = input_spectrogram.spectrum_type)
+                       transformed_start_datetime,
+                       input_spectrogram.spectrum_type)
 
 
 
@@ -189,9 +175,8 @@ def frequency_average(input_spectrogram: Spectrogram,
                        input_spectrogram.times, 
                        transformed_frequencies, 
                        input_spectrogram.tag,
-                       start_time = input_spectrogram.start_time, 
-                       microsecond_correction = input_spectrogram.microsecond_correction,
-                       spectrum_type = input_spectrogram.spectrum_type)
+                       input_spectrogram.start_datetime,
+                       input_spectrogram.spectrum_type)
 
 
 def _time_elapsed(datetimes: np.ndarray) -> np.ndarray:
@@ -249,6 +234,5 @@ def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
                        transformed_times, 
                        reference_spectrogram.frequencies, 
                        reference_spectrogram.tag, 
-                       start_time = reference_spectrogram.start_time,
-                       microsecond_correction = reference_spectrogram.microsecond_correction,
+                       start_time = reference_spectrogram.start_datetime,
                        spectrum_type = reference_spectrogram.spectrum_type) 
