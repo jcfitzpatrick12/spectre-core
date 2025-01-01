@@ -28,13 +28,7 @@ class BatchFile(BaseFileHandler):
     def start_time(self) -> str:
         """The start time of the batch file, up to seconds precision."""
         return self._start_time
-    
 
-    @property
-    def tag(self) -> str:
-        """The tag identifier for the batch file."""
-        return self._tag
-    
 
     @property
     def start_datetime(self) -> datetime:
@@ -42,6 +36,12 @@ class BatchFile(BaseFileHandler):
         if self._start_datetime is None:
             self._start_datetime = datetime.strptime(self.start_time, TimeFormats.DATETIME)
         return self._start_datetime
+    
+
+    @property
+    def tag(self) -> str:
+        """The tag identifier for the batch file."""
+        return self._tag
     
 
 

@@ -10,6 +10,8 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TimeFormats:
-    TIME     = "%H:%M:%S"
-    DATE     = "%Y-%m-%d"
-    DATETIME = f"{DATE}T{TIME}"
+    DATE             = "%Y-%m-%d"
+    TIME             = "%H:%M:%S"
+    PRECISE_TIME     = "%H:%M:%S.%f"
+    DATETIME         = f"{DATE}T{TIME}"
+    PRECISE_DATETIME = f"{DATE}T{PRECISE_TIME}"

@@ -21,13 +21,6 @@ from ._array_operations import (
     subtract_background,
 )
 
-__all__ = [
-    "FrequencyCut",
-    "TimeCut",
-    "TimeTypes",
-    "SpectrumTypes",
-    "Spectrogram"
-]
 
 @dataclass
 class FrequencyCut:
@@ -73,8 +66,7 @@ class Spectrogram:
                  times: np.ndarray, 
                  frequencies: np.ndarray, 
                  tag: str,
-                 start_time: Optional[str] = None, 
-                 microsecond_correction: int = 0, 
+                 start_datetime: Optional[datetime] = None, 
                  spectrum_type: Optional[str] = None): 
         
         # dynamic spectra
@@ -93,9 +85,7 @@ class Spectrogram:
         self._spectrum_type = spectrum_type
         
         # datetime information 
-        self._start_time = start_time
-        self._microsecond_correction = microsecond_correction
-        self._start_datetime: Optional[datetime] = None # cache
+        self._start_datetime = start_datetime
         self._datetimes: Optional[list[datetime]] = None # cache
         
         # background metadata     
@@ -175,40 +165,32 @@ class Spectrogram:
     
 
     @property
-    def start_time(self) -> str:
-        """The datetime (as a string) assigned to the first spectrum in the dynamic spectra.
-        
-        The start time is only up to seconds precision. The true start time can be computed
-        by adding the 'microsecond_correction' attribute.
-        """
-        if self._start_time is None:
-            raise AttributeError(f"A start time has not been set.")
-        return self._start_time
+    def start_datetime_is_set(self) -> bool:
+        """Returns true if the start datetime for the spectrogram has been set."""
+        return (self._start_datetime is not None)
     
-
+    
     @property
     def start_datetime(self) -> datetime:
-        """The datetime assigned to the first spectrum in the dynamic spectra.
-        
-        The datetime is only up to seconds precision (since it is derived from the 'start_time' attribute).
-        The true start datetime can be computed by adding 'microsecond_correction' attribute.
-        """
+        """The datetime assigned to the first spectrum in the dynamic spectra."""
         if self._start_datetime is None:
-            self._start_datetime = datetime.strptime(self.start_time, TimeFormats.DATETIME)
+            raise AttributeError(f"A start time has not been set.")
         return self._start_datetime
-
-
-    @property
-    def microsecond_correction(self) -> int:
-        """The microsecond component of the start time assigned to the first spectrum in the dynamic spectra."""
-        return self._microsecond_correction
+    
+    
+    def format_start_time(self,
+                          precise: bool = False) -> str:
+        """The datetime assigned to the first spectrum in the dynamic spectra, formatted as a string."""
+        if precise:
+            return datetime.strftime(self.start_datetime, TimeFormats.PRECISE_DATETIME)
+        return datetime.strftime(self.start_datetime, TimeFormats.DATETIME)
     
     
     @property
     def datetimes(self) -> list[datetime]:
-        """The datetimes associated with each spectrum in the dynamic spectra, taking into account the microsecond correction."""
+        """The datetimes associated with each spectrum in the dynamic spectra."""
         if self._datetimes is None:
-            self._datetimes = [self.start_datetime + timedelta(seconds=(t + self.microsecond_correction*1e-6)) for t in self._times]
+            self._datetimes = [self.start_datetime + timedelta( seconds=(float(t)) ) for t in self._times]
         return self._datetimes
     
 
@@ -274,14 +256,13 @@ class Spectrogram:
     
     def _update_background_indices_from_interval(self) -> None:
         start_background = datetime.strptime(self._start_background, TimeFormats.DATETIME)
+        end_background   = datetime.strptime(self._end_background, TimeFormats.DATETIME)
         self._start_background_index = find_closest_index(start_background, 
                                                           self.datetimes, 
                                                           enforce_strict_bounds=True)
-        
-        end_background = datetime.strptime(self._end_background, TimeFormats.DATETIME)
-        self._end_background_index = find_closest_index(end_background, 
-                                                        self.datetimes, 
-                                                        enforce_strict_bounds=True)
+        self._end_background_index   = find_closest_index(end_background, 
+                                                          self.datetimes, 
+                                                          enforce_strict_bounds=True)
 
 
     def _check_shapes(self) -> None:
@@ -300,13 +281,7 @@ class Spectrogram:
 
     def save(self) -> None:
         """Save the spectrogram as a fits file."""
-        batch_parent_path = get_batches_dir_path(year  = self.start_datetime.year,
-                                                month = self.start_datetime.month,
-                                                day   = self.start_datetime.day)
-        file_name = f"{self.start_time}_{self._tag}.fits"
-        write_path = os.path.join(batch_parent_path, 
-                                  file_name)
-        _save_spectrogram(write_path, self)
+        _save_spectrogram(self)
     
 
     def integrate_over_frequency(self, 
@@ -429,9 +404,18 @@ def _seconds_of_day(dt: datetime) -> float:
 
 
 # Function to create a FITS file with the specified structure
-def _save_spectrogram(write_path: str, 
-                      spectrogram: Spectrogram) -> None:
+def _save_spectrogram(spectrogram: Spectrogram) -> None:
     
+    # making the write path
+    batch_parent_path = get_batches_dir_path(year  = spectrogram.start_datetime.year,
+                                             month = spectrogram.start_datetime.month,
+                                             day   = spectrogram.start_datetime.day)
+    # file name formatted as a batch file
+    file_name = f"{spectrogram.format_start_time()}_{spectrogram.tag}.fits"
+    write_path = os.path.join(batch_parent_path, 
+                                file_name)
+    
+    # get optional metadata from the capture config
     capture_config = CaptureConfig(spectrogram.tag)
     ORIGIN    = capture_config.get_parameter_value(PNames.ORIGIN)
     INSTRUME  = capture_config.get_parameter_value(PNames.INSTRUMENT)

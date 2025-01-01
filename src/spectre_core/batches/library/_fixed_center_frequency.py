@@ -11,6 +11,7 @@ from astropy.io.fits.hdu.image import PrimaryHDU
 from astropy.io.fits.hdu.table import BinTableHDU
 from astropy.io.fits.hdu.hdulist import HDUList
 
+from spectre_core.config import TimeFormats
 from spectre_core.spectrograms import Spectrogram
 from spectre_core.capture_configs import CaptureModes
 from .._register import register_batch
@@ -86,19 +87,18 @@ class FitsFile(BatchFile):
 
     def read(self) -> Spectrogram:
         with fits.open(self.file_path, mode='readonly') as hdulist:
-            primary_hdu            = self._get_primary_hdu(hdulist)
-            dynamic_spectra        = self._get_dynamic_spectra(primary_hdu)
-            spectrum_type          = self._get_spectrum_type(primary_hdu)
-            microsecond_correction = self._get_microsecond_correction(primary_hdu)
-            bintable_hdu           = self._get_bintable_hdu(hdulist)
-            times, frequencies     = self._get_time_and_frequency(bintable_hdu)
+            primary_hdu                = self._get_primary_hdu(hdulist)
+            dynamic_spectra            = self._get_dynamic_spectra(primary_hdu)
+            spectrum_type              = self._get_spectrum_type(primary_hdu)
+            spectrogram_start_datetime = self._get_spectrogram_start_datetime(primary_hdu)
+            bintable_hdu               = self._get_bintable_hdu(hdulist)
+            times, frequencies         = self._get_time_and_frequency(bintable_hdu)
 
         return Spectrogram(dynamic_spectra, 
                            times, 
                            frequencies, 
                            self.tag,
-                           self.start_time,
-                           microsecond_correction,
+                           spectrogram_start_datetime,
                            spectrum_type)
 
 
@@ -111,14 +111,13 @@ class FitsFile(BatchFile):
 
 
     def _get_spectrum_type(self, primary_hdu: PrimaryHDU) -> str:
-        return primary_hdu.header.get('BUNIT', None)
+        return primary_hdu.header['BUNIT']
 
 
-    def _get_microsecond_correction(self, primary_hdu: PrimaryHDU) -> int:
-        date_obs = primary_hdu.header.get('DATE-OBS', None)
-        time_obs = primary_hdu.header.get('TIME-OBS', None)
-        datetime_obs = datetime.strptime(f"{date_obs}T{time_obs}", "%Y-%m-%dT%H:%M:%S.%f")
-        return datetime_obs.microsecond
+    def _get_spectrogram_start_datetime(self, primary_hdu: PrimaryHDU) -> datetime:
+        date_obs = primary_hdu.header['DATE-OBS']
+        time_obs = primary_hdu.header['TIME-OBS']
+        return datetime.strptime(f"{date_obs}T{time_obs}", TimeFormats.PRECISE_DATETIME)
 
 
     def _get_bintable_hdu(self, hdulist: HDUList) -> BinTableHDU:
