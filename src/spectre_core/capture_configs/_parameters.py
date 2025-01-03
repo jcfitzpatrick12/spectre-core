@@ -105,7 +105,9 @@ class Parameters:
         return {p.name: p.value for p in self}
     
 
-def _parse_string_parameter(string_parameter: str) -> list[str]:
+def _parse_string_parameter(
+    string_parameter: str
+) -> list[str]:
     """Parse string of the form `a=b`; into a list of the form `[a, b]`
 
     Arguments:
@@ -126,7 +128,9 @@ def _parse_string_parameter(string_parameter: str) -> list[str]:
     return string_parameter.split('=', 1)
     
     
-def parse_string_parameters(string_parameters: list[str]) -> dict[str, str]:
+def parse_string_parameters(
+    string_parameters: list[str]
+) -> dict[str, str]:
     """Parses a list of strings of the form `a=b`; into a dictionary mapping each `a` to each `b`
 
     Arguments:
@@ -142,7 +146,9 @@ def parse_string_parameters(string_parameters: list[str]) -> dict[str, str]:
     return d
     
 
-def make_parameters(d: dict[str, Any]) -> Parameters:
+def make_parameters(
+    d: dict[str, Any]
+) -> Parameters:
     """Create a `Parameters` instance from the given dictionary.
 
     Args:

@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Optional, TypeVar, Type, Any, Generic, Callable
+from typing import Optional, TypeVar, Any, Generic, Callable
 from copy import deepcopy
 from textwrap import dedent
 from dataclasses import dataclass
@@ -36,13 +36,7 @@ class PTemplate(Generic[VT]):
             enforce_default -- Whether we force that the value must be that specified by `default`. (default: {False})
             help -- A helpful description of what the parameter is, and the value it stores. (default: {None})
             pconstraints -- Custom constraints to be applied to the value of the parameter. (default: {None})
-
-        Raises:
-            TypeError: _description_
         """
-        if not callable(ptype):
-            raise TypeError("'ptype' must be callable.")
-
         self._name = name
         self._ptype = ptype
         self._default = default
@@ -102,6 +96,11 @@ class PTemplate(Generic[VT]):
     
     def add_pconstraint(self,
                         pconstraint: PConstraint) -> None:
+        """Add a parameter constraint to this template.
+
+        Arguments:
+            pconstraint -- An instance of `PTemplate` compatable with the `ptype`.
+        """
         self._pconstraints.append(pconstraint)
 
 
@@ -197,10 +196,12 @@ class PTemplate(Generic[VT]):
 
 
     def to_dict(self) -> dict[str, str]:
-        """Convert this parameter template to a dictionary.
-        
+        """
+        Convert this parameter template to a dictionary representation.
+
         Returns:
-            A dictionary representation of this parameter template with string formatted values.
+            A dictionary representation of this parameter template, 
+            where all values are string-formatted for ease of serialisation.
         """
         d = {
             "name": self._name,
