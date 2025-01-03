@@ -22,7 +22,7 @@ class _CaptureConfigKeys:
     
     Attributes:
         RECEIVER_NAME -- The name of the receiver to be used for capture.
-        RECEIVER_MODE -- The operating mode of the receiver.
+        RECEIVER_MODE -- The operating mode of the receiver to be used for capture.
         PARAMETERS    -- The user-configured parameters provided to the receiver at the time of capture.
         
     """
@@ -34,7 +34,7 @@ class _CaptureConfigKeys:
 class CaptureConfig(JsonHandler):
     """Simple IO interface for a capture configuration file under a particular tag"""
     def __init__(self,
-                 tag: str):
+                 tag: str) -> None:
         """Initialise an instance of `CaptureConfig`.
 
         Arguments:
@@ -73,7 +73,7 @@ class CaptureConfig(JsonHandler):
 
     @property
     def receiver_mode(self) -> str:
-        """The operating mode for the receiver."""
+        """The operating mode for the receiver to be used for capture."""
         d = self.read()
         return d[_CaptureConfigKeys.RECEIVER_MODE]
     
@@ -87,13 +87,13 @@ class CaptureConfig(JsonHandler):
 
     def get_parameter(self, 
                       name: str) -> Parameter:
-        """Get a `Parameter` stored by the capture config.
+        """Get a parameter stored by the capture config.
 
         Arguments:
             name -- The name of the parameter.
 
         Returns:
-            A `Parameter` with `name` and `value` retrieved from the capture
+            A `Parameter`instance with `name` and `value` retrieved from the capture
             configuration file.
         """
         return self.parameters.get_parameter(name)
@@ -117,11 +117,11 @@ class CaptureConfig(JsonHandler):
                         receiver_mode: str,
                         parameters: Parameters,
                         force: bool = False):
-        """Write parameters to a capture configuration file.
+        """Write the input parameters to a capture configuration file.
 
         Arguments:
             receiver_name -- The name of the receiver to be used for capture.
-            receiver_mode -- The operating mode for the receiver.
+            receiver_mode -- The operating mode for the receiver to be used for capture.
             parameters -- The user-configured parameters provided to the receiver at the time of capture.
 
         Keyword Arguments:

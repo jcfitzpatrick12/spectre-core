@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Optional, TypeVar, Any
+from typing import Optional, TypeVar, Type, Any, Generic, Callable
 from copy import deepcopy
 from textwrap import dedent
 from dataclasses import dataclass
@@ -10,23 +10,38 @@ from dataclasses import dataclass
 from ._pconstraints import PConstraint, PConstraints
 from ._parameters import Parameter
 
-T = TypeVar('T')
+VT = TypeVar('VT')
 
-class PTemplate:
-    """A parameter template. 
-    
-    Constrain the value and type that a parameter can take.
+class PTemplate(Generic[VT]):
+    """A parameter template. Constrains the value and type that a capture configuration parameter
+    with a given name can take.
     """
     def __init__(self,
                  name: str,
-                 ptype: T,
-                 default: Optional[T] = None,
+                 ptype: Callable[[Any], VT],
+                 default: Optional[VT] = None,
                  nullable: bool = False,
-                 enforce_default: Optional[bool] = False,
+                 enforce_default: bool = False,
                  help: Optional[str] = None,
                  pconstraints: Optional[list[PConstraint]] = None):
+        """Initialise an instance of `PTemplate`, and create a parameter template.
+
+        Arguments:
+            name -- The name of the parameter.
+            ptype -- The required type of the parameter value.
+
+        Keyword Arguments:
+            default -- The parameter value if not explictly specified. (default: {None})
+            nullable -- Whether the value of the parameter can be `None` (default: {False})
+            enforce_default -- Whether we force that the value must be that specified by `default`. (default: {False})
+            help -- A helpful description of what the parameter is, and the value it stores. (default: {None})
+            pconstraints -- Custom constraints to be applied to the value of the parameter. (default: {None})
+
+        Raises:
+            TypeError: _description_
+        """
         if not callable(ptype):
-            raise TypeError("ptype must be callable.")
+            raise TypeError("'ptype' must be callable.")
 
         self._name = name
         self._ptype = ptype
@@ -44,44 +59,44 @@ class PTemplate:
     
 
     @property
-    def ptype(self) -> T:
-        """The parameter type."""
+    def ptype(self) -> Callable[[object], VT]:
+        """The required type of the parameter. The value must be castable as this type."""
         return self._ptype
     
 
     @property
-    def default(self) -> Optional[T]:
-        """The value of the parameter, if the value is unspecified."""
+    def default(self) -> Optional[VT]:
+        """The parameter value if not explictly specified."""
         return self._default
     
 
     @default.setter
-    def default(self, value: T) -> None:
-        """Update the default of a ptemplate"""
+    def default(self, value: VT) -> None:
+        """Update the `default` of this parameter template."""
         self._default = value
 
 
     @property
     def nullable(self) -> bool:
-        """Whether the value of the parameter is allowed to be of None type."""
+        """Whether the value of the parameter can be `None`."""
         return self._nullable
     
 
     @property
     def enforce_default(self) -> bool:
-        """Whether the provided default value is enforced."""
+        """Whether we force that the value must be that specified by `default`."""
         return self._enforce_default
     
 
     @enforce_default.setter
     def enforce_default(self, value: bool) -> None:
-        """Set whether the provided default value is enforced."""
+        """Update whether we should `enforce_default` for this parameter template."""
         self._enforce_default = value
     
 
     @property
     def help(self) -> str:
-        """A description of what the parameter is, and the value it stores."""
+        """A helpful description of what the parameter is, and the value it stores."""
         return self._help
     
     
@@ -91,8 +106,18 @@ class PTemplate:
 
 
     def _cast(self, 
-              value: Any) -> T:
-        """Cast the input value to the ptype of this template"""
+              value: Any) -> VT:
+        """Cast the input value to the `ptype` for this parameter template.
+
+        Arguments:
+            value -- The value to be type casted.
+
+        Raises:
+            ValueError: If there is any trouble casting `value` as the `ptype` for this parameter template.
+
+        Returns:
+            The input value cast as `ptype` for this parameter template.
+        """
         try:
             return self._ptype(value)
         except (TypeError, ValueError) as e:
@@ -100,8 +125,19 @@ class PTemplate:
 
 
     def _constrain(self, 
-                   value: T) -> T:
-        """Constrain the input value according to constraints of the template."""
+                   value: VT) -> VT:
+        """Constrain the input value according to constraints of the template.
+
+        Arguments:
+            value -- The value to be constrained.
+
+        Raises:
+            ValueError: If a custom `PConstraint` fails for the input value, and raises a `ValueError`.
+            RuntimeError: If some other error occured at runtime while constraining the input value.
+
+        Returns:
+            The input value unchanged, if it passes validation according to parameter template constraints.
+        """
 
         if self._enforce_default and value != self._default:
             raise ValueError(f"The default value of '{self._default}' "
@@ -120,8 +156,18 @@ class PTemplate:
 
 
     def apply_template(self, 
-                       value: Optional[Any]) -> T:
-        """Cast the value and constrain it according to this ptemplate."""
+                       value: Optional[Any]) -> Optional[VT]:
+        """Cast a value and validate it according to this parameter template.
+
+        Arguments:
+            value -- The input value.
+
+        Raises:
+            ValueError: If value is `None`, no `default` is specified and the parameter is not allowed to be `None`.
+
+        Returns:
+            The input value type cast and validated according to the parameter template.
+        """
         if value is None:
             if self._default is not None:
                 value = self._default
@@ -132,32 +178,45 @@ class PTemplate:
             else:
                 return None
         
-        value = self._cast(value)
-        value = self._constrain(value)
-        return value
+        return self._constrain( self._cast(value) )
 
 
     def make_parameter(self, 
                        value: Optional[Any] = None) -> Parameter:
+        """
+        Create a `Parameter` object based on this template and the provided value.
+        
+        Args:
+            value -- The provided value for the parameter.
+
+        Returns:
+            Parameter: A `Parameter` object, validated according to this template.
+        """
         value = self.apply_template(value)
         return Parameter(self._name, value)
 
 
-    def to_dict(self) -> dict:
-        """Convert the template to a dictionary representation."""
-        return {
+    def to_dict(self) -> dict[str, str]:
+        """Convert this parameter template to a dictionary.
+        
+        Returns:
+            A dictionary representation of this parameter template with string formatted values.
+        """
+        d = {
             "name": self._name,
-            "type": str(self._ptype),
+            "type": self._ptype,
             "default": self._default,
             "enforce_default": self._enforce_default,
             "help": self._help,
-            "constraints": [f"{constraint}" for constraint in self._pconstraints]
+            "pconstraints": [f"{constraint}" for constraint in self._pconstraints]
         }
+        return {k: f"{v}" for k,v in d.items()}
+        
     
 
 @dataclass(frozen=True)
 class PNames:
-    """A centralised store of default parameter template names"""
+    """A centralised store of parameter template names"""
     CENTER_FREQUENCY        : str = "center_frequency"
     MIN_FREQUENCY           : str = "min_frequency"
     MAX_FREQUENCY           : str = "max_frequency"
@@ -168,7 +227,6 @@ class PNames:
     IF_GAIN                 : str = "if_gain"
     RF_GAIN                 : str = "rf_gain"
     AMPLITUDE               : str = "amplitude"
-    FREQUENCY               : str = "frequency"
     TIME_RESOLUTION         : str = "time_resolution"
     FREQUENCY_RESOLUTION    : str = "frequency_resolution"
     TIME_RANGE              : str = "time_range"
@@ -191,10 +249,12 @@ class PNames:
     OBS_LON                 : str = "obs_lon"
     OBS_ALT                 : str = "obs_alt"
 
-#
-# All stored base ptemplates
-#
-_base_ptemplates = {
+# ------------------------------------------------------------------------------------------ #
+# `_base_ptemplates` holds all shared base parameter templates. They are 'base' templates, 
+# in the sense that they should be configured according to specific use-cases. For example, 
+# `default` values should be set, and `pconstraints` added according to specific SDR specs.
+# ------------------------------------------------------------------------------------------ # 
+_base_ptemplates: dict[str, PTemplate] = {
     PNames.CENTER_FREQUENCY:       PTemplate(PNames.CENTER_FREQUENCY,       
                                              float, 
                                              help = """
@@ -439,12 +499,25 @@ _base_ptemplates = {
                                            
 }
 
-T = TypeVar('T')
+
 def get_base_ptemplate(
     parameter_name: str,
 ) -> PTemplate:
-    """Create a fresh deep copy of a pre-defined ptemplate"""
+    """Get a pre-defined base parameter template, to be configured according to the specific use case.
+
+    Arguments:
+        parameter_name -- The parameter name for the template.
+
+    Raises:
+        KeyError: If there is no base parameter template corresponding to the input name.
+
+    Returns:
+        A deep copy of the corresponding base parameter template, if it exists.
+    """
     if parameter_name not in _base_ptemplates:
         raise KeyError(f"No ptemplate found for the parameter name '{parameter_name}'. "
                        f"Expected one of {list(_base_ptemplates.keys())}")
+    # A deep copy is required as each receiver instance may mutate the original instance
+    # according to its particular use case. Copying preserves the original instance,
+    # enabling reuse.
     return deepcopy( _base_ptemplates[parameter_name] )

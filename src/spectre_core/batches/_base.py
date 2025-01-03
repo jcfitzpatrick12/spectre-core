@@ -26,7 +26,7 @@ class BatchFile(BaseFileHandler[T]):
     def __init__(self, 
                  batch_parent_dir_path: str, 
                  batch_name: str, 
-                 extension: str):
+                 extension: str) -> None:
         """Initialise a `BatchFile` instance.
 
         Arguments:
@@ -79,7 +79,7 @@ class BaseBatch(ABC):
     """
     def __init__(self, 
                  start_time: str,
-                 tag: str):
+                 tag: str) -> None:
         """Initialise a `BaseBatch` instance.
 
         Arguments:

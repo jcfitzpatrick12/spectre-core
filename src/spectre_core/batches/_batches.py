@@ -26,7 +26,7 @@ class Batches(Generic[T]):
                  batch_cls: Type[T],
                  year: Optional[int] = None, 
                  month: Optional[int] = None, 
-                 day: Optional[int] = None):
+                 day: Optional[int] = None) -> None:
         """Initialise a `Batches` instance.
 
         Arguments:

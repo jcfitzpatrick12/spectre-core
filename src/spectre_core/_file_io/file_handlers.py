@@ -26,7 +26,7 @@ class BaseFileHandler(ABC, Generic[T]):
                  parent_dir_path: str, 
                  base_file_name: str, 
                  extension: Optional[str] = None,
-                 no_cache: bool = False):
+                 no_cache: bool = False) -> None:
         """Initialise a file handler instance.
 
         Arguments:
@@ -165,7 +165,7 @@ class JsonHandler(BaseFileHandler[dict[str, Any]]):
                  parent_dir_path: str, 
                  base_file_name: str,
                  extension: str = "json",
-                 **kwargs):
+                 **kwargs) -> None:
         super().__init__(parent_dir_path, 
                          base_file_name, 
                          extension,
@@ -211,7 +211,7 @@ class TextHandler(BaseFileHandler[str]):
                  parent_dir_path: str,
                  base_file_name: str, 
                  extension: str = "txt",
-                 **kwargs):
+                 **kwargs) -> None:
         super().__init__(parent_dir_path,
                          base_file_name,
                          extension, 
