@@ -158,7 +158,7 @@ def _make_fixed_frequency_capture_template(
     )
     capture_template.set_defaults(
             (PNames.EVENT_HANDLER_KEY,     CaptureModes.FIXED_CENTER_FREQUENCY),
-            (PNames.BATCH_KEY,             CaptureModes.FIXED_CENTER_FREQUENCY),
+            (PNames.BATCH_KEY,             "spectre"),
             (PNames.WATCH_EXTENSION,       "bin")
     )
     capture_template.enforce_defaults(
@@ -196,7 +196,7 @@ def _make_swept_frequency_capture_template(
         PNames.WINDOW_TYPE)
     capture_template.set_defaults(
             (PNames.EVENT_HANDLER_KEY,     CaptureModes.SWEPT_CENTER_FREQUENCY),
-            (PNames.BATCH_KEY,             CaptureModes.SWEPT_CENTER_FREQUENCY),
+            (PNames.BATCH_KEY,             "spectre"),
             (PNames.WATCH_EXTENSION,       "bin")
     )
     capture_template.enforce_defaults(

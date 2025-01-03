@@ -3,36 +3,57 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TypeVar
+from abc import ABC, abstractmethod
 
 from spectre_core._file_io import BaseFileHandler
 from spectre_core.config import get_batches_dir_path, TimeFormats
-from spectre_core.exceptions import BatchFileNotFoundError
+from spectre_core.spectrograms import Spectrogram
 
 
-class BatchFile(BaseFileHandler):
-    """A specific file in a given batch, uniquely identified in the batch by the file extension."""
+T = TypeVar('T')
+
+class BatchFile(BaseFileHandler[T]):
+    """Abstract base class for files belonging to a batch, identified by their file extension.
+
+    Batch file names must conform to the following structure:
+
+        `<start time>_<tag>.<extension>`
+
+    Here, `<start time>_<tag>` is referred to as the batch name. Files with the same batch name 
+    belong to the same batch. Subclass this as needed based on `BaseFileHandler` requirements.
+    """
     def __init__(self, 
                  batch_parent_dir_path: str, 
                  batch_name: str, 
                  extension: str):
+        """Initialise a `BatchFile` instance.
+
+        Arguments:
+            batch_parent_dir_path -- Parent directory of the batch.
+            batch_name -- Base file name, composed of the batch start time and tag.
+            extension -- File extension.
+        """
+        # no cache, as batch files should always be static in content when reading
         super().__init__(batch_parent_dir_path, 
                          batch_name, 
-                         extension)
+                         extension,
+                         no_cache=False)
         self._start_time, self._tag = batch_name.split("_")
-        # computed if required
+        # the start datetime is lazily computed, if it is required.
         self._start_datetime: Optional[datetime] = None
-        
-        
+   
+   
     @property
     def start_time(self) -> str:
-        """The start time of the batch file, up to seconds precision."""
+        """The start time of the batch, formatted as a string up to seconds precision."""
         return self._start_time
 
 
     @property
     def start_datetime(self) -> datetime:
-        """The datetime of the batch file, up to seconds precision."""
+        """The start time of the batch, parsed as a datetime up to seconds precision."""
+        # the start datetime is lazily computed, if it is required.
         if self._start_datetime is None:
             self._start_datetime = datetime.strptime(self.start_time, TimeFormats.DATETIME)
         return self._start_datetime
@@ -40,45 +61,61 @@ class BatchFile(BaseFileHandler):
 
     @property
     def tag(self) -> str:
-        """The tag identifier for the batch file."""
+        """The batch name tag."""
         return self._tag
-    
+         
+ 
+class BaseBatch(ABC):
+    """Abstract base class representing a group of data files for a common time interval.
 
+    All files in a batch share a base file name and differ only by their extension. 
+    `BaseBatch` subclasses define the expected data for each file extension and provide 
+    an API for accessing their contents using `BatchFile` subclasses.
 
-class BaseBatch:
-    """A group of one or more files which share a common start time and a tag identifier.
-    
-    All files belonging to the same batch will share a batch name, and differ
-    only in their file extension.
+    Derived classes must:
+    - Implement the `spectrogram_file` abstract property, as all batches in SPECTRE 
+    must include a `BatchFile` subclass containing spectrogram data.
+    - Expose `BatchFile` instances directly as attributes.
     """
     def __init__(self, 
                  start_time: str,
                  tag: str):
+        """Initialise a `BaseBatch` instance.
+
+        Arguments:
+            start_time -- Start time of the batch as a string with seconds precision.
+            tag -- The batch name tag.
+        """
         self._start_time = start_time
         self._tag: str = tag
-        self._batch_files: dict[str, BatchFile] = {}
         self._start_datetime = datetime.strptime(self.start_time, TimeFormats.DATETIME)
         self._parent_dir_path = get_batches_dir_path(year  = self.start_datetime.year,
                                                      month = self.start_datetime.month,
                                                      day   = self.start_datetime.day)
-
-
+            
+    
+    @property
+    @abstractmethod
+    def spectrogram_file(self) -> BatchFile:
+        """The batch file which contains spectrogram data."""
+ 
+    
     @property
     def start_time(self) -> str:
-        """The start time of the batch, up to seconds precision."""
+        """The start time of the batch, formatted as a string up to seconds precision."""
         return self._start_time
 
 
     @property
-    def tag(self) -> str:
-        """The tag identifier of for the batch."""
-        return self._tag
-      
-
-    @property
     def start_datetime(self) -> datetime:
-        """The datetime of the batch file, up to seconds precision."""
+        """The start time of the batch, parsed as a datetime up to seconds precision."""
         return self._start_datetime
+    
+    
+    @property
+    def tag(self) -> str:
+        """The batch name tag."""
+        return self._tag
     
 
     @property
@@ -89,58 +126,15 @@ class BaseBatch:
 
     @property
     def name(self) -> str:
-        """The name of the batch."""
+        """Return the base file name shared by all files in the batch, 
+        composed of the start time and tag identifier."""
         return f"{self._start_time}_{self._tag}"
     
     
-    @property
-    def extensions(self) -> list[str]:
-        """All defined file extensions for the batch."""
-        return list(self._batch_files.keys())
-    
-    @property
-    def batch_files(self) -> dict[str, BatchFile]:
-        """Map each file extension in the batch to the corresponding batch file instance."""
-        return self._batch_files
-    
-    
-    def add_file(self, batch_file: BatchFile) -> None:
-        """Add an instance of a batch file to the batch."""
-        self._batch_files[batch_file.extension] = batch_file
-    
+    def read_spectrogram(self) -> Spectrogram:
+        """Read and return the spectrogram data stored in the batch.
 
-    def get_file(self, extension: str) -> BatchFile:
-        """Get a batch file instance from the batch, according to the file extension."""
-        try:
-            return self._batch_files[extension]
-        except KeyError:
-            raise BatchFileNotFoundError(f"No batch file found with extension '{extension}'")
-
-
-    def read_file(self, extension: str):
-        """Read a file from the batch, according to the file extension."""
-        batch_file = self.get_file(extension)
-        return batch_file.read()
-
-
-    def delete_file(self, extension: str) -> None:
-        """Delete a file from the batch, according to the file extension."""
-        batch_file = self.get_file(extension)
-        try:
-            batch_file.delete()
-        except FileNotFoundError as e:
-            raise BatchFileNotFoundError(str(e))
-
-
-    def has_file(self, extension: str) -> bool:
-        """Return true if a file exists in the batch with the input file extension."""
-        try:
-            # only return true if both
-            # -> the batch has the extension defined
-            # -> the file with that extension exists in the batch parent directory
-            batch_file = self.get_file(extension)
-            return batch_file.exists
-        except BatchFileNotFoundError:
-            return False
-
-
+        Returns:
+            This method retrieves the spectrogram using the `spectrogram_file` property.
+        """
+        return self.spectrogram_file.read()

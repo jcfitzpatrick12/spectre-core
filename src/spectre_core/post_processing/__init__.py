@@ -2,13 +2,16 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# event handler class decorators take effect on import
-from .library._fixed_center_frequency import _EventHandler
-from .library._swept_center_frequency import _EventHandler
+# register decorators take effect on import.
+# we do not expose them publically, and instead the classes and instances
+# should be retrieved through the appropriate factory functions.
+from .plugins._fixed_center_frequency import FixedEventHandler
+from .plugins._swept_center_frequency import SweptEventHandler
 
-from ._factory import get_event_handler_cls_from_tag
+from ._factory import get_event_handler, get_event_handler_cls_from_tag
 from ._post_processor import PostProcessor
 
 __all__ = [
-    "PostProcessor", "get_event_handler_cls_from_tag"
+    "FixedEventHandler", "SweptEventHandler", "PostProcessor", 
+    "get_event_handler", "get_event_handler_cls_from_tag"
 ]

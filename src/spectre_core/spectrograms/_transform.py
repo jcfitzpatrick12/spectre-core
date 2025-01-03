@@ -14,13 +14,13 @@ from ._spectrogram import Spectrogram
 
 def frequency_chop(input_spectrogram: Spectrogram, 
                    start_frequency: float | int, 
-                   end_frequency: float | int) -> Optional[Spectrogram]:
+                   end_frequency: float | int) -> Spectrogram:
     
     is_entirely_below_frequency_range = (start_frequency < input_spectrogram.frequencies[0] and end_frequency < input_spectrogram.frequencies[0])
     is_entirely_above_frequency_range = (start_frequency > input_spectrogram.frequencies[-1] and end_frequency > input_spectrogram.frequencies[-1])
     # if the requested frequency range is out of bounds for the spectrogram return None
     if is_entirely_below_frequency_range or is_entirely_above_frequency_range:
-        return None
+        raise ValueError(f"The requested frequency interval is entirely out of range of the input spectrogram.")
     
     #find the index of the nearest matching frequency bins in the spectrogram
     start_index = find_closest_index(start_frequency, input_spectrogram.frequencies)
@@ -50,7 +50,7 @@ def frequency_chop(input_spectrogram: Spectrogram,
 def time_chop(input_spectrogram: Spectrogram, 
               start_time: str, 
               end_time: str, 
-              time_format: str = TimeFormats.DATETIME) -> Optional[Spectrogram]:
+              time_format: str = TimeFormats.DATETIME) -> Spectrogram:
     
     # parse the strings as datetimes
     start_datetime = datetime.strptime(start_time, time_format)
@@ -60,7 +60,7 @@ def time_chop(input_spectrogram: Spectrogram,
     is_entirely_below_time_range = (start_datetime < input_spectrogram.datetimes[0] and end_datetime < input_spectrogram.datetimes[0])
     is_entirely_above_time_range = (start_datetime > input_spectrogram.datetimes[-1] and end_datetime > input_spectrogram.datetimes[-1])
     if is_entirely_below_time_range or is_entirely_above_time_range:
-        return None
+        raise ValueError(f"Requested time interval is entirely out of range of the input spectrogram.")
     
     start_index = find_closest_index(start_datetime, input_spectrogram.datetimes)
     end_index = find_closest_index(end_datetime, input_spectrogram.datetimes)
@@ -86,8 +86,8 @@ def time_chop(input_spectrogram: Spectrogram,
                        transformed_times, 
                        input_spectrogram.frequencies, 
                        input_spectrogram.tag, 
-                       start_time = transformed_start_datetime,
-                       spectrum_type = input_spectrogram.spectrum_type)
+                       transformed_start_datetime,
+                       input_spectrogram.spectrum_type)
 
 
 def time_average(input_spectrogram: Spectrogram, 

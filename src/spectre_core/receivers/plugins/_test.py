@@ -9,7 +9,7 @@ from spectre_core.capture_configs import (
     CaptureTemplate, CaptureModes, Parameters, Bound, PValidators, PNames,
     get_base_capture_template, make_base_capture_template, get_base_ptemplate
 )
-from ..gr._test import CaptureMethods
+from .gr._test import CaptureMethods
 from .._spec_names import SpecNames
 from .._base import BaseReceiver
 from .._register import register_receiver
@@ -22,7 +22,7 @@ class Modes:
 
 
 @register_receiver("test")
-class _Receiver(BaseReceiver):
+class Test(BaseReceiver):
     def __init__(self, 
                  name: str,
                  mode: Optional[str]):

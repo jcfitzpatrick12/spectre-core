@@ -7,13 +7,14 @@ SPECTRE data paths.
 """
 
 import os
+from typing import Optional
 
 _SPECTRE_DATA_DIR_PATH = os.environ.get("SPECTRE_DATA_DIR_PATH")
 if _SPECTRE_DATA_DIR_PATH is None:
     raise ValueError("The environment variable SPECTRE_DATA_DIR_PATH has not been set")
 
 _BATCHES_DIR_PATH = os.environ.get("SPECTRE_BATCHES_DIR_PATH", 
-                                  os.path.join(_SPECTRE_DATA_DIR_PATH, 'batches'))
+                                   os.path.join(_SPECTRE_DATA_DIR_PATH, 'batches'))
 os.makedirs(_BATCHES_DIR_PATH, 
             exist_ok=True)
 
@@ -33,8 +34,9 @@ def get_spectre_data_dir_path(
     return _SPECTRE_DATA_DIR_PATH
 
 
-def _get_date_based_dir_path(base_dir: str, year: int = None, 
-                             month: int = None, day: int = None
+def _get_date_based_dir_path(
+    base_dir: str, year: int = None, 
+    month: int = None, day: int = None
 ) -> str:
     if day and not (year and month):
         raise ValueError("A day requires both a month and a year")
@@ -52,9 +54,10 @@ def _get_date_based_dir_path(base_dir: str, year: int = None,
     return os.path.join(base_dir, *date_dir_components)
 
 
-def get_batches_dir_path(year: int = None, 
-                        month: int = None, 
-                        day: int = None
+def get_batches_dir_path(
+    year: Optional[int] = None, 
+    month: Optional[int] = None, 
+    day: Optional[int] = None
 ) -> str:
     return _get_date_based_dir_path(_BATCHES_DIR_PATH, 
                                     year, 
@@ -62,9 +65,10 @@ def get_batches_dir_path(year: int = None,
                                     day)
 
 
-def get_logs_dir_path(year: int = None, 
-                      month: int = None, 
-                      day: int = None
+def get_logs_dir_path(
+    year: Optional[int] = None, 
+    month: Optional[int] = None, 
+    day: Optional[int] = None
 ) -> str:
     return _get_date_based_dir_path(_LOGS_DIR_PATH, 
                                     year, 

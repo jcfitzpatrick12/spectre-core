@@ -2,9 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""
-Capture configuration files.
-"""
+"""Capture configuration files."""
 
 from ._pvalidators  import PValidators
 from ._capture_config import CaptureConfig
@@ -22,8 +20,7 @@ from ._ptemplates   import (
 )
 
 __all__ = [
-    "Parameter", "Parameters", "parse_string_parameters", "make_parameters",
-    "PConstraint", "PConstraints", "Bound", "OneOf", "PNames", "PTemplate",
-    "get_base_ptemplate", "PValidators", "CaptureConfig", "CaptureTemplate",
-    "CaptureModes",  "get_base_capture_template", "make_base_capture_template"
+    "PValidators", "CaptureConfig", "Parameter", "Parameters", "parse_string_parameters", "make_parameters",
+    "CaptureTemplate", "CaptureModes", "get_base_capture_template", "make_base_capture_template",
+    "PConstraint", "PConstraints", "Bound", "OneOf", "PTemplate", "PNames", "get_base_ptemplate"
 ]

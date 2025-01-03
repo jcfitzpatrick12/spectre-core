@@ -4,12 +4,11 @@
 
 from typing import Optional
 from dataclasses import dataclass
-from functools import partial
 
 from spectre_core.capture_configs import (
     CaptureModes
 )
-from ..gr._rspduo import CaptureMethods
+from .gr._rspduo import CaptureMethods
 from .._spec_names import SpecNames
 from ._sdrplay_receiver import SDRPlayReceiver
 from .._register import register_receiver
@@ -22,7 +21,7 @@ class Modes:
 
 
 @register_receiver("rspduo")
-class _Receiver(SDRPlayReceiver):
+class RSPduo(SDRPlayReceiver):
     def __init__(self, 
                  name: str,
                  mode: Optional[str]):

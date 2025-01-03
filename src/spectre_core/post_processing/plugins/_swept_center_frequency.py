@@ -310,7 +310,7 @@ def _build_spectrogram(batch: BaseBatch,
 
 
 @register_event_handler(CaptureModes.SWEPT_CENTER_FREQUENCY)
-class _EventHandler(BaseEventHandler):
+class SweptEventHandler(BaseEventHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

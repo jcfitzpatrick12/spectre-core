@@ -2,14 +2,28 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-#  Global dictionaries to hold the mappings
-batch_map = {}
+from typing import Type, Callable, Literal
 
-# classes decorated with @register_batch([BATCH_KEY])
-# will be added to batch_map
-def register_batch(batch_key: str):
-    def decorator(cls):
+from ._base import BaseBatch
+from .plugins._batch_keys import BatchKeys
+
+# Map populated at runtime via the `register_batch` decorator.
+batch_map: dict[BatchKeys, Type[BaseBatch]] = {}
+
+def register_batch(
+    batch_key: Literal[BatchKeys.IQ_STREAM, BatchKeys.CALLISTO]
+) -> Callable:
+    """Decorator to formally register a `Batch` plugin class under a defined `BatchKey`.
+    
+    Arguments:
+        batch_key -- The key to register the `Batch` class under.
+
+    Returns:
+        A decorator that registers a `Batch` plugin class under the given `batch_key`.
+    """
+    def decorator(cls: Type[BaseBatch]):
+        if batch_key in batch_map:
+            raise ValueError(f"Batch {batch_key} is already registered!")
         batch_map[batch_key] = cls
         return cls
     return decorator
-

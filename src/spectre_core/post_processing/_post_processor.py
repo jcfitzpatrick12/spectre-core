@@ -8,7 +8,7 @@ _LOGGER = getLogger(__name__)
 from watchdog.observers import Observer
 from watchdog.events import FileCreatedEvent
 
-from ._factory import get_event_handler_cls_from_tag
+from ._factory import get_event_handler
 from spectre_core.config import get_batches_dir_path
 
 class PostProcessor:
@@ -16,9 +16,7 @@ class PostProcessor:
                  tag: str):
         
         self._observer = Observer()
-
-        EventHandler = get_event_handler_cls_from_tag(tag)
-        self._event_handler = EventHandler(tag)
+        self._event_handler = get_event_handler(tag)
 
 
     def start(self):

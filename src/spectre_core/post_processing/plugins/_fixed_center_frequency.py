@@ -12,7 +12,7 @@ from datetime import timedelta
 import os
 
 from spectre_core.capture_configs import CaptureConfig, PNames, CaptureModes
-from spectre_core.batches import BaseBatch
+from spectre_core.batches import SPECTREBatch
 from spectre_core.spectrograms import Spectrogram, time_average, frequency_average
 from .._base import BaseEventHandler, make_sft_instance
 from .._register import register_event_handler
@@ -52,15 +52,15 @@ def _do_stfft(iq_data: np.array,
     return times, frequencies, dynamic_spectra
 
 
-def _build_spectrogram(batch: BaseBatch,
+def _build_spectrogram(batch: SPECTREBatch,
                        capture_config: CaptureConfig) -> Spectrogram:
     """Create a spectrogram by performing a Short Time FFT on the IQ samples for this batch."""
 
     # read the data from the batch
-    millisecond_correction = batch.read_file("hdr")
-    iq_data = batch.read_file("bin")
+    iq_metadata = batch.hdr_file.read()
+    iq_samples  = batch.bin_file.read()
 
-    times, frequencies, dynamic_spectra = _do_stfft(iq_data,
+    times, frequencies, dynamic_spectra = _do_stfft(iq_samples,
                                                     capture_config)
 
     # explicitly type cast data arrays to 32-bit floats
@@ -69,7 +69,7 @@ def _build_spectrogram(batch: BaseBatch,
     dynamic_spectra = np.array(dynamic_spectra, dtype = 'float32')
 
     # compute the start datetime for the spectrogram by adding the millisecond component to the batch start time
-    spectrogram_start_datetime = batch.start_datetime + timedelta(milliseconds=millisecond_correction)
+    spectrogram_start_datetime = batch.start_datetime + timedelta(milliseconds=iq_metadata.millisecond_correction)
     return Spectrogram(dynamic_spectra,
                        times,
                        frequencies,
@@ -79,7 +79,7 @@ def _build_spectrogram(batch: BaseBatch,
 
 
 @register_event_handler(CaptureModes.FIXED_CENTER_FREQUENCY)
-class _EventHandler(BaseEventHandler):
+class FixedEventHandler(BaseEventHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -90,8 +90,7 @@ class _EventHandler(BaseEventHandler):
         base_file_name, _ = os.path.splitext(file_name)
         batch_start_time, tag = base_file_name.split('_')
 
-        # create an instance of the current batch being processed
-        batch = self._Batch(batch_start_time, tag)
+        batch = SPECTREBatch(batch_start_time, tag)
 
         _LOGGER.info("Creating spectrogram")
         spectrogram = _build_spectrogram(batch,
