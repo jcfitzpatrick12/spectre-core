@@ -10,7 +10,7 @@ from matplotlib.axes import Axes
 
 from spectre_core.spectrograms import TimeTypes
 from ._base import BasePanel
-from ._format import PanelFormat, DEFAULT_FORMAT
+from ._format import PanelFormat
 from ._panels import PanelNames
 
 
@@ -24,8 +24,8 @@ def _is_spectrogram_panel(panel: BasePanel) -> bool:
 
 class PanelStack:
     def __init__(self, 
-                 panel_format: PanelFormat = DEFAULT_FORMAT,
-                 time_type: str = TimeTypes.SECONDS,
+                 panel_format: PanelFormat = PanelFormat(),
+                 time_type: TimeTypes = TimeTypes.RELATIVE,
                  figsize: Tuple[int, int] = (10, 10)):
         self._panel_format = panel_format
         self._time_type = time_type
@@ -38,13 +38,13 @@ class PanelStack:
 
 
     @property
-    def time_type(self) -> str:
+    def time_type(self) -> TimeTypes:
         return self._time_type
 
 
     @property
     def panels(self) -> list[BasePanel]:
-        return sorted(self._panels, key=lambda panel: panel.x_axis_type)
+        return sorted(self._panels, key=lambda panel: panel.xaxis_type)
 
 
     @property
@@ -83,7 +83,6 @@ class PanelStack:
 
     def _init_plot_style(self) -> None:
         plt.style.use(self._panel_format.style)
-
         plt.rc('font'  , size=self._panel_format.small_size)
         plt.rc('axes'  , titlesize=self._panel_format.medium_size, 
                          labelsize=self._panel_format.medium_size)

@@ -6,6 +6,7 @@ from typing import Optional
 from warnings import warn
 from datetime import datetime, timedelta
 from dataclasses import dataclass
+from enum import Enum
 import os
 
 import numpy as np
@@ -40,23 +41,21 @@ class TimeCut:
     spectrum_type: str
 
 
-@dataclass(frozen=True)
-class TimeTypes:
+class TimeTypes(Enum):
     """Container to hold the different types of time we can assign to each spectrum in the dynamic spectra.
     
-    'SECONDS' is equivalent to 'seconds elapsed since the first spectrum'.
+    'RELATIVE' is equivalent to 'elapsed time from the first spectrum'.
     'DATETIMES' is equivalent to 'the datetime associated with each spectrum'.
     """
-    SECONDS  : str = "seconds"
-    DATETIMES: str = "datetimes"
+    RELATIVE   = "relative"
+    DATETIMES  = "datetimes"
     
 
-@dataclass(frozen=True)
-class SpectrumTypes:
+class SpectrumUnits(Enum):
     """A container for defined units of dynamic spectra."""
-    AMPLITUDE: str = "amplitude"
-    POWER    : str = "power"
-    DIGITS   : str = "digits"
+    AMPLITUDE = "amplitude"
+    POWER     = "power"
+    DIGITS    = "digits"
 
 
 class Spectrogram:

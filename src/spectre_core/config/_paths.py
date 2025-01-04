@@ -25,8 +25,8 @@ import os
 from typing import Optional
 
 
-_SPECTRE_DATA_DIR_PATH = os.environ.get("SPECTRE_DATA_DIR_PATH")
-if _SPECTRE_DATA_DIR_PATH is None:
+_SPECTRE_DATA_DIR_PATH = os.environ.get("SPECTRE_DATA_DIR_PATH", "NOTSET")
+if _SPECTRE_DATA_DIR_PATH is "NOTSET":
     raise ValueError("The environment variable SPECTRE_DATA_DIR_PATH has not been set")
 
 _BATCHES_DIR_PATH = os.environ.get("SPECTRE_BATCHES_DIR_PATH", 
@@ -55,8 +55,10 @@ def get_spectre_data_dir_path(
 
 
 def _get_date_based_dir_path(
-    base_dir: str, year: int = None, 
-    month: int = None, day: int = None
+    base_dir: str, 
+    year: Optional[int] = None, 
+    month: Optional[int] = None, 
+    day: Optional[int] = None
 ) -> str:
     """Append a date-based directory onto the base directory.
 

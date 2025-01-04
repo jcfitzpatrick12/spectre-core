@@ -4,7 +4,7 @@
 
 from typing import Optional
 from datetime import datetime
-from dataclasses import dataclass
+from enum import Enum
 from warnings import warn
 
 from matplotlib.colors import LogNorm
@@ -12,14 +12,7 @@ import numpy as np
 
 from spectre_core.spectrograms import Spectrogram, FrequencyCut, TimeCut
 from ._base import BasePanel, BaseSpectrumPanel, BaseTimeSeriesPanel
-
-
-@dataclass(frozen=True)
-class PanelNames:
-    SPECTROGRAM            : str = "spectrogram"
-    FREQUENCY_CUTS         : str = "frequency_cuts"
-    TIME_CUTS              : str = "time_cuts"
-    INTEGRAL_OVER_FREQUENCY: str = "integral_over_frequency"
+from ._panel_names import PanelNames
 
 
 class _FrequencyCutsPanel(BaseSpectrumPanel):

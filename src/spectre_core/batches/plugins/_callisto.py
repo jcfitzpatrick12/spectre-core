@@ -12,7 +12,7 @@ from astropy.io.fits.hdu.image import PrimaryHDU
 from astropy.io.fits.hdu.table import BinTableHDU
 from astropy.io.fits.hdu.hdulist import HDUList
 
-from spectre_core.spectrograms import Spectrogram, SpectrumTypes
+from spectre_core.spectrograms import Spectrogram, SpectrumUnits
 from ._batch_keys import BatchKeys
 from .._base import BaseBatch, BatchFile
 from .._register import register_batch
@@ -55,9 +55,11 @@ class _FitsFile(BatchFile[Spectrogram]):
             bintable_hdu               = self._get_bintable_hdu(hdulist)
             times                      = self._get_times(bintable_hdu)
             frequencies                = self._get_frequencies(bintable_hdu)
-            spectrum_type              = self._get_bunit(primary_hdu)
+            bunit                      = self._get_bunit(primary_hdu)
 
-            if spectrum_type == SpectrumTypes.DIGITS:
+            # bunit is interpreted as a SpectrumUnits
+            spectrum_type = SpectrumUnits(bunit)
+            if spectrum_type == SpectrumUnits.DIGITS:
                 dynamic_spectra_linearised = self._convert_units_to_linearised(dynamic_spectra)
                 return Spectrogram(dynamic_spectra_linearised[::-1, :], # reverse the spectra along the frequency axis
                                    times, 
