@@ -38,9 +38,8 @@ class _BinFile(BatchFile[npt.NDArray[np.complex64]]):
                  batch_name: str) -> None:
         """Initialise a `_BinFile` instance.
 
-        Arguments:
-            parent_dir_path -- The parent directory for the batch.
-            base_file_name -- The batch name.
+        :param batch_parent_dir_path: The parent directory for the batch.
+        :param batch_name: The batch name.
         """
         super().__init__(batch_parent_dir_path, batch_name, _BatchExtensions.BIN)
 
@@ -48,8 +47,7 @@ class _BinFile(BatchFile[npt.NDArray[np.complex64]]):
     def _read(self) -> npt.NDArray[np.complex64]:
         """Reads the binary file and returns the stored complex IQ samples.
 
-        Returns:
-            The raw 32-bit floats in the binary file, interpreted as 64-bit complex IQ samples.
+        :return: The raw 32-bit floats in the binary file, interpreted as 64-bit complex IQ samples.
         """
         with open(self.file_path, "rb") as fh:
             return np.fromfile(fh, dtype=np.complex64)
@@ -69,6 +67,10 @@ class IQMetadata:
     num_samples: Optional[npt.NDArray[np.int32]] = None
     
     def is_frequency_tagged(self) -> bool:
+        """Check if the IQ metadata contains frequency tagging information.
+
+        :return: True if frequency tagging information is present; False otherwise.
+        """
         return (self.center_frequencies is not None) and (self.num_samples is not None)
     
 
@@ -93,9 +95,8 @@ class _HdrFile(BatchFile[IQMetadata]):
                  base_file_name: str) -> None:
         """Initialise a `_HdrFile` instance.
 
-        Arguments:
-            parent_dir_path -- The parent directory for the batch.
-            base_file_name -- The batch name.
+        :param parent_dir_path: The parent directory for the batch.
+        :param base_file_name: The batch name.
         """
         super().__init__(parent_dir_path, base_file_name, _BatchExtensions.HDR)
 
@@ -103,9 +104,8 @@ class _HdrFile(BatchFile[IQMetadata]):
     def _read(self) -> IQMetadata:
         """Parses the binary contents of the `.hdr` file to extract IQ sample metadata.
 
-        Returns:
-            IQMetadata: An instance containing the parsed metadata, including the millisecond correction 
-            and, if applicable, frequency tagging details.
+        :return: An instance of `IQMetadata` containing the parsed metadata, including the millisecond correction 
+                and, if applicable, frequency tagging details.
         """
         hdr_contents           = self._extract_raw_contents()
         millisecond_correction = self._get_millisecond_correction(hdr_contents)
@@ -178,15 +178,17 @@ class _FitsFile(BatchFile[Spectrogram]):
                  base_file_name: str) -> None:
         """Initialise a `_FitsFile` instance.
 
-        Arguments:
-            parent_dir_path -- The parent directory for the batch.
-            base_file_name -- The batch name.
+        :param parent_dir_path: The parent directory for the batch.
+        :param base_file_name: The batch name.
         """
         super().__init__(parent_dir_path, base_file_name, _BatchExtensions.FITS)
            
 
     def _read(self) -> Spectrogram:
-        """Read the FITS file and create a spectrogram."""
+        """Read the FITS file and create a spectrogram.
+
+        :return: A `Spectrogram` instance containing the parsed FITS file data.
+        """
         with fits.open(self.file_path, mode='readonly') as hdulist:
             primary_hdu                = self._get_primary_hdu(hdulist)
             dynamic_spectra            = self._get_dynamic_spectra(primary_hdu)
@@ -259,11 +261,10 @@ class IQStreamBatch(BaseBatch):
     def __init__(self,
                  start_time: str,
                  tag: str) -> None:
-        """Initialise a `IQStreamBatch` instance.
+        """Initialise a `IQStreamBatch` instance.   
 
-        Arguments:
-            start_time -- The start time of the batch.
-            tag -- The batch name tag.
+        :param start_time: The start time of the batch.
+        :param tag: The batch name tag.
         """
         super().__init__(start_time, tag) 
         self._fits_file = _FitsFile(self.parent_dir_path, self.name)

@@ -13,6 +13,11 @@ class Parameter(Generic[VT]):
     def __init__(self, 
                  name: PNames,
                  value: Optional[VT] = None):
+        """Initialise a `Parameter` instance.
+
+        :param name: The name of the parameter.
+        :param value: The value of the parameter. Defaults to None.
+        """
         self._name = name
         self._value: Optional[VT] = value
 
@@ -31,15 +36,17 @@ class Parameter(Generic[VT]):
     
     @value.setter
     def value(self, v: Optional[VT]) -> None:
-        """Update the parameter value."""
+        """Update the parameter value.
+
+        :param v: The new value to set for the parameter.
+        """
         self._value = v
 
 
 class Parameters:
     """A managed collection of parameters."""
     def __init__(self) -> None:
-        """Initialise a `Parameters` instance.
-        """
+        """Initialise a `Parameters` instance."""
         self._parameters: dict[PNames, Parameter] = {}
     
     
@@ -54,12 +61,9 @@ class Parameters:
                       value: Optional[VT]) -> None:
         """Add a `Parameter` instance to this `Parameters` instance with the input name and value.
 
-        Arguments:
-            name -- The name of the parameter.
-            value -- The value of the parameter.
-
-        Raises:
-            KeyError: If a parameter already exists under the input name.
+        :param name: The name of the parameter.
+        :param value: The value of the parameter.
+        :raises KeyError: If a parameter already exists under the input name.
         """
         if name in self._parameters:
             raise KeyError(f"Cannot add a parameter with name '{name}', "
@@ -71,14 +75,9 @@ class Parameters:
                       name: PNames) -> Parameter:
         """Get the stored `Parameter` instance corresponding to the input name.
 
-        Arguments:
-            name -- The name of the parameter.
-
-        Raises:
-            KeyError: If a parameter with the input name does not exist.
-
-        Returns:
-            A `Parameter` instance with the input name, if it exists.
+        :param name: The name of the parameter.
+        :raises KeyError: If a parameter with the input name does not exist.
+        :return: A `Parameter` instance with the input name, if it exists.
         """
         if name not in self._parameters:
             raise KeyError(f"Parameter with name '{name}' does not exist. "
@@ -90,11 +89,8 @@ class Parameters:
                             name: PNames) -> Optional[VT]:
         """Get the value of the parameter with the corresponding name.
 
-        Arguments:
-            name -- The name of the parameter
-
-        Returns:
-            The value of the parameter with the input name.
+        :param name: The name of the parameter.
+        :return: The value of the parameter with the input name.
         """
         return self.get_parameter(name).value
     
@@ -105,23 +101,21 @@ class Parameters:
 
     
     def to_dict(self) -> dict[str, Optional[Any]]:
-        """Convert the `Parameters` instance to an equivalent dictionary representation."""
+        """Convert the `Parameters` instance to an equivalent dictionary representation.
+
+        :return: A dictionary representation of the stored parameters.
+        """
         return {p.name.value: p.value for p in self}
     
 
 def _parse_string_parameter(
     string_parameter: str
 ) -> list[str]:
-    """Parse string of the form `a=b`; into a list of the form `[a, b]`
+    """Parse string of the form `a=b` into a list of the form `[a, b]`.
 
-    Arguments:
-        string_parameter -- A string representation of a capture configuration parameter.
-
-    Raises:
-        ValueError: If the input parameter is not of the form `a=b`
-
-    Returns:
-        The parsed components of the input string parameter, using the `=` character as a seperator.
+    :param string_parameter: A string representation of a capture configuration parameter.
+    :raises ValueError: If the input parameter is not of the form `a=b`.
+    :return: The parsed components of the input string parameter, using the `=` character as a separator.
     """
     if not string_parameter or '=' not in string_parameter:
         raise ValueError(f"Invalid format: '{string_parameter}'. Expected 'KEY=VALUE'.")
@@ -135,13 +129,10 @@ def _parse_string_parameter(
 def parse_string_parameters(
     string_parameters: list[str]
 ) -> dict[str, str]:
-    """Parses a list of strings of the form `a=b`; into a dictionary mapping each `a` to each `b`
+    """Parses a list of strings of the form `a=b` into a dictionary mapping each `a` to each `b`.
 
-    Arguments:
-        string_parameters -- A list of strings, where each element is of the form `a=b`
-
-    Returns:
-        A dictionary mapping each `a` to each `b`, after parsing each element.
+    :param string_parameters: A list of strings, where each element is of the form `a=b`.
+    :return: A dictionary mapping each `a` to each `b`, after parsing each element.
     """
     d = {}
     for string_parameter in string_parameters:
@@ -155,11 +146,8 @@ def make_parameters(
 ) -> Parameters:
     """Create a `Parameters` instance from the given dictionary.
 
-    Args:
-        d -- A dictionary where keys represent parameter names and values represent their corresponding values.
-
-    Returns:
-        An instance of `Parameters` with each key-value pair in `d` added as a parameter..
+    :param d: A dictionary where keys represent parameter names and values represent their corresponding values.
+    :return: An instance of `Parameters` with each key-value pair in `d` added as a parameter.
     """
     parameters = Parameters()
     for k, v in d.items():

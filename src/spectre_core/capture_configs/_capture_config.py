@@ -21,11 +21,9 @@ class _CaptureConfigKeys:
     
     The values corresponding to each key are defined below:
     
-    Attributes:
-        RECEIVER_NAME -- The name of the receiver to be used for capture.
-        RECEIVER_MODE -- The operating mode of the receiver to be used for capture.
-        PARAMETERS    -- The user-configured parameters provided to the receiver at the time of capture.
-        
+    RECEIVER_NAME -- The name of the receiver to be used for capture.
+    RECEIVER_MODE -- The operating mode of the receiver to be used for capture.
+    PARAMETERS    -- The user-configured parameters provided to the receiver at the time of capture.
     """
     RECEIVER_NAME = "receiver_name"
     RECEIVER_MODE = "receiver_mode"
@@ -38,8 +36,7 @@ class CaptureConfig(JsonHandler):
                  tag: str) -> None:
         """Initialise an instance of `CaptureConfig`.
 
-        Arguments:
-            tag -- The tag identifier for the capture configuration file.
+        :param tag: The tag identifier for the capture configuration file.
         """
         self._validate_tag(tag)
         self._tag = tag
@@ -90,12 +87,9 @@ class CaptureConfig(JsonHandler):
                       name: PNames) -> Parameter:
         """Get a parameter stored by the capture config.
 
-        Arguments:
-            name -- The name of the parameter.
-
-        Returns:
-            A `Parameter`instance with `name` and `value` retrieved from the capture
-            configuration file.
+        :param name: The name of the parameter.
+        :return: A `Parameter` instance with `name` and `value` retrieved from the capture
+                configuration file.
         """
         return self.parameters.get_parameter(name)
     
@@ -104,11 +98,8 @@ class CaptureConfig(JsonHandler):
                             name: PNames) -> Optional[Parameter]:
         """Get the value of a parameter stored by the capture config.
 
-        Arguments:
-            name -- The name of the parameter.
-
-        Returns:
-            The value of the parameter corresponding to `name`.
+        :param name: The name of the parameter.
+        :return: The value of the parameter corresponding to `name`.
         """
         return self.parameters.get_parameter_value(name)
 
@@ -120,13 +111,10 @@ class CaptureConfig(JsonHandler):
                         force: bool = False):
         """Write the input parameters to a capture configuration file.
 
-        Arguments:
-            receiver_name -- The name of the receiver to be used for capture.
-            receiver_mode -- The operating mode for the receiver to be used for capture.
-            parameters -- The user-configured parameters provided to the receiver at the time of capture.
-
-        Keyword Arguments:
-            force -- If true, force the write if the file already exists in the file system. (default: {False})
+        :param receiver_name: The name of the receiver to be used for capture.
+        :param receiver_mode: The operating mode for the receiver to be used for capture.
+        :param parameters: The user-configured parameters provided to the receiver at the time of capture.
+        :param force: If true, force the write if the file already exists in the file system. Defaults to False.
         """
         d = {
             _CaptureConfigKeys.RECEIVER_MODE: receiver_mode,

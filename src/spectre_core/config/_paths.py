@@ -49,8 +49,7 @@ def get_spectre_data_dir_path(
 ) -> str:
     """The default ancestral path for all `spectre` file system data.
 
-    Returns:
-        The value stored by the `SPECTRE_DATA_DIR_PATH` environment variable.
+    :return: The value stored by the `SPECTRE_DATA_DIR_PATH` environment variable.
     """
     return _SPECTRE_DATA_DIR_PATH
 
@@ -61,23 +60,13 @@ def _get_date_based_dir_path(
 ) -> str:
     """Append a date-based directory onto the base directory.
 
-    Arguments:
-        base_dir -- The base directory to have the date directory appended to.
-
-    Keyword Arguments:
-        year -- Numeric year. (default: {None})
-        month -- Numeric month. (default: {None})
-        day -- Numeric day. (default: {None})
-
-    Raises:
-        ValueError: If a day is specified without the year or month.
-        ValueError: If a month is specified with the year.
-
-    Returns:
-        If no date information is specified, returns `base_dir` unchanged.
-        If the year is specified, returns `base_dir` / `year`.
-        If the year and month is specified, returns `base_dir` / `year` / `month`
-        If all of year month and day are specified, returns: `base_dir` / `year` / `month` / `day`
+    :param base_dir: The base directory to have the date directory appended to.
+    :param year: Numeric year. Defaults to None.
+    :param month: Numeric month. Defaults to None.
+    :param day: Numeric day. Defaults to None.
+    :raises ValueError: If a day is specified without the year or month.
+    :raises ValueError: If a month is specified without the year.
+    :return: The base directory with optional year, month, and day subdirectories appended.
     """
     if day and not (year and month):
         raise ValueError("A day requires both a month and a year")
@@ -101,16 +90,12 @@ def get_batches_dir_path(
     day: Optional[int] = None
 ) -> str:
     """The directory in the file system containing the batched data files. Optionally, append
-    a date based directory to the end of the path.
+    a date-based directory to the end of the path.
 
-    Keyword Arguments:
-        year -- The numeric year. (default: {None})
-        month -- The numeric month. (default: {None})
-        day -- The numeric day. (default: {None})
-
-    Returns:
-        If defined, the value stored by the `SPECTRE_BATCHES_DIR_PATH` environment variable.
-        Otherwise, defaults to `SPECTRE_DATA_DIR_PATH` / `batches`.
+    :param year: The numeric year. Defaults to None.
+    :param month: The numeric month. Defaults to None.
+    :param day: The numeric day. Defaults to None.
+    :return: The directory path for batched data files, optionally with a date-based subdirectory.
     """
     return _get_date_based_dir_path(_BATCHES_DIR_PATH, 
                                     year, 
@@ -124,16 +109,12 @@ def get_logs_dir_path(
     day: Optional[int] = None
 ) -> str:
     """The directory in the file system containing the log files generated at runtime. Optionally, append
-    a date based directory to the end of the path.
+    a date-based directory to the end of the path.
 
-    Keyword Arguments:
-        year -- The numeric year. (default: {None})
-        month -- The numeric month. (default: {None})
-        day -- The numeric day. (default: {None})
-
-    Returns:
-        If defined, the value stored by the `SPECTRE_LOGS_DIR_PATH` environment variable.
-        Otherwise, defaults to `SPECTRE_DATA_DIR_PATH` / `logs`.
+    :param year: The numeric year. Defaults to None.
+    :param month: The numeric month. Defaults to None.
+    :param day: The numeric day. Defaults to None.
+    :return: The directory path for log files, optionally with a date-based subdirectory.
     """
     return _get_date_based_dir_path(_LOGS_DIR_PATH, 
                                     year, 
@@ -145,8 +126,6 @@ def get_configs_dir_path(
 ) -> str:
     """The directory in the file system containing the capture configuration files.
 
-    Returns:
-        If defined, the value stored by the `SPECTRE_CONFIGS_DIR_PATH` environment variable.
-        Otherwise, defaults to `SPECTRE_DATA_DIR_PATH` / `configs`.
+    :return: The directory path for configuration files.
     """
     return _CONFIGS_DIR_PATH

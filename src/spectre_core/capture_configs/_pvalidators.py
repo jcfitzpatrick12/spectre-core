@@ -29,12 +29,9 @@ def _validate_window(
 ) -> None:
     """Ensure that the capture configuration file describes a valid window.
 
-    Arguments:
-        parameters -- The parameters to be validated.
-
-    Raises:
-        ValueError: If the window interval is greater than the batch size.
-        ValueError: If a window cannot be fetched via the `get_window` SciPy function.
+    :param parameters: The parameters to be validated.
+    :raises ValueError: If the window interval is greater than the batch size.
+    :raises ValueError: If a window cannot be fetched via the `get_window` SciPy function.
     """
     window_size = cast(int, parameters.get_parameter_value(PNames.WINDOW_SIZE))
     sample_rate = cast(int, parameters.get_parameter_value(PNames.SAMPLE_RATE))
@@ -59,11 +56,8 @@ def _validate_nyquist_criterion(
 ) -> None:
     """Ensure that the Nyquist criterion is satisfied.
 
-    Arguments:
-        parameters -- The parameters to be validated.
-
-    Raises:
-        ValueError: If the sample rate is less than the bandwidth.
+    :param parameters: The parameters to be validated.
+    :raises ValueError: If the sample rate is less than the bandwidth.
     """
     sample_rate = cast(int, parameters.get_parameter_value(PNames.SAMPLE_RATE))
     bandwidth   = cast(float, parameters.get_parameter_value(PNames.BANDWIDTH))
@@ -77,9 +71,15 @@ def _validate_nyquist_criterion(
 def _compute_num_steps_per_sweep(min_freq: float, 
                                  max_freq: float,
                                  freq_step: float) -> int:
-    """Compute the number of steps in one frequency sweep. We assume the center frequency starts at
-    `min_freq`, and increments in steps of `freq_step` until the next step would take it greater than
-    `max_freq`.
+    """Compute the number of steps in one frequency sweep.
+
+    The center frequency starts at `min_freq` and increments in steps of `freq_step` 
+    until the next step would exceed `max_freq`.
+
+    :param min_freq: The minimum frequency of the sweep.
+    :param max_freq: The maximum frequency of the sweep.
+    :param freq_step: The frequency step size.
+    :return: The number of steps in one frequency sweep.
     """
     return floor((max_freq - min_freq) / freq_step)
 
@@ -89,11 +89,8 @@ def _validate_num_steps_per_sweep(
 ) -> None:
     """Ensure that there are at least two steps in frequency per sweep.
 
-    Arguments:
-        parameters -- The parameters to be validated.
-
-    Raises:
-        ValueError: If the number of steps per sweep is less than or equal to one.
+    :param parameters: The parameters to be validated.
+    :raises ValueError: If the number of steps per sweep is less than or equal to one.
     """
     min_freq    = cast(float, parameters.get_parameter_value(PNames.MIN_FREQUENCY))
     max_freq    = cast(float, parameters.get_parameter_value(PNames.MAX_FREQUENCY))
@@ -110,14 +107,10 @@ def _validate_num_steps_per_sweep(
 def _validate_sweep_interval(
         parameters: Parameters
 ) -> None: 
-    """Ensure that the sweep interval (the time elapsed over one sweep) is greater than the batch size.
-    Effectively, we make sure we have more than one total frequency sweep per batched file.
+    """Ensure that the sweep interval is greater than the batch size.
 
-    Arguments:
-        parameters -- The parameters to be validated.
-
-    Raises:
-        ValueError: If the time elapsed for one sweep is greater than the batch size.
+    :param parameters: The parameters to be validated.
+    :raises ValueError: If the sweep interval is greater than the batch size.
     """
     min_freq         = cast(float, parameters.get_parameter_value(PNames.MIN_FREQUENCY))
     max_freq         = cast(float, parameters.get_parameter_value(PNames.MAX_FREQUENCY))
@@ -140,14 +133,10 @@ def _validate_sweep_interval(
 def _validate_num_samples_per_step(
         parameters: Parameters
 ) -> None:
-    """Ensure that the number of samples per step is greater than the window size. This is so that the 
-    ShortTimeFFT is well-defined for the samples of each step in the sweep.
+    """Ensure that the number of samples per step is greater than the window size.
 
-    Arguments:
-        parameters -- The parameters to be validated.
-
-    Raises:
-        ValueError: If the window size is greater than the number of samples per step.
+    :param parameters: The parameters to be validated.
+    :raises ValueError: If the window size is greater than the number of samples per step.
     """
     window_size      = cast(int, parameters.get_parameter_value(PNames.WINDOW_SIZE))
     samples_per_step = cast(int, parameters.get_parameter_value(PNames.SAMPLES_PER_STEP))
@@ -161,14 +150,10 @@ def _validate_num_samples_per_step(
 def _validate_non_overlapping_steps(
         parameters: Parameters
 ) -> None:
-    """Ensure that on performing the ShortTimeFFT, the generated stepped spectrogram are non-overlapping
-    in the frequency domain.
+    """Ensure that the stepped spectrograms are non-overlapping in the frequency domain.
 
-    Arguments:
-        parameters -- The parameters to be validated.
-
-    Raises:
-        NotImplementedError: If the stepped spectrogram generated would be overlapping in the frequency domain.
+    :param parameters: The parameters to be validated.
+    :raises NotImplementedError: If the spectrograms overlap in the frequency domain.
     """
     
     freq_step   = cast(float, parameters.get_parameter_value(PNames.FREQUENCY_STEP))
@@ -184,16 +169,12 @@ def _validate_step_interval(
         parameters: Parameters,
         api_retuning_latency: float
 ) -> None:
-    """Ensure that time elapsed collecting samples at some fixed frequency is greater than the empirically derived
-    API retuning latency. This is to prevent undefined behaviour resulting from trying to retune the center frequency
-    faster than the receivers API can handle.
+    """Ensure that the time elapsed collecting samples at a fixed frequency is greater 
+    than the empirically derived API retuning latency.
 
-    Arguments:
-        parameters -- The parameters to be validated.
-        api_retuning_latency -- The empirically derived API retuning latency.
-
-    Raises:
-        ValueError: If the time elapsed for some step in the sweep is less than the API retuning latency.
+    :param parameters: The parameters to be validated.
+    :param api_retuning_latency: The empirically derived API retuning latency.
+    :raises ValueError: If the time elapsed for a step is less than the API retuning latency.
     """
     samples_per_step = cast(int, parameters.get_parameter_value(PNames.SAMPLES_PER_STEP))
     sample_rate      = cast(int, parameters.get_parameter_value(PNames.SAMPLE_RATE))
@@ -207,11 +188,9 @@ def _validate_step_interval(
 def _validate_fixed_center_frequency_parameters(
     parameters: Parameters
 ) -> None:
-    """Apply a group of validators designed specifically for capture config parameters describing fixed center
-    frequency capture.
+    """Apply validators for capture configuration parameters describing fixed center frequency capture.
 
-    Arguments:
-        parameters -- The parameters to be validated.
+    :param parameters: The parameters to be validated.
     """
     _validate_nyquist_criterion(parameters)
     _validate_window(parameters)
@@ -221,11 +200,10 @@ def _validate_swept_center_frequency_parameters(
     parameters: Parameters,
     api_retuning_latency: Optional[float] = None,
 ) -> None:
-    """Apply a group of validators designed specifically for capture config parameters describing swept center
-    frequency capture.
+    """Apply validators for capture configuration parameters describing swept center frequency capture.
 
-    Arguments:
-        parameters -- The parameters to be validated.
+    :param parameters: The parameters to be validated.
+    :param api_retuning_latency: The empirically derived API retuning latency. Defaults to None.
     """
     _validate_nyquist_criterion(parameters)
     _validate_window(parameters)

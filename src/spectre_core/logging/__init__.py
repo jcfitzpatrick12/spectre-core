@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 
-"""Package logging configurations."""
+"""`spectre` logging configurations."""
 
 from ._process_types import ProcessTypes
 from ._decorators import log_call

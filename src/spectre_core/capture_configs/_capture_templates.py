@@ -31,15 +31,19 @@ class CaptureTemplate:
                       ptemplate: PTemplate) -> None:
         """Add a parameter template to the capture template.
 
-        Arguments:
-            ptemplate -- Describes a required parameter for this capture template.
+        :param ptemplate: Describes a required parameter for this capture template.
         """
         self._ptemplates[ptemplate.name] = ptemplate
 
 
     def get_ptemplate(self,
                       parameter_name: PNames) -> PTemplate:
-        """Get the parameter template corresponding to the parameter with the name `parameter_name`."""
+        """Get the parameter template corresponding to the parameter with the name `parameter_name`.
+
+        :param parameter_name: The name of the parameter.
+        :return: The corresponding `PTemplate` instance.
+        :raises ValueError: If the parameter name is not found in the template.
+        """
         if parameter_name not in self._ptemplates:
             raise ValueError(f"Parameter with name '{parameter_name}' is not found in the template. "
                              f"Expected one of {self.name_list}")   
@@ -74,19 +78,13 @@ class CaptureTemplate:
     def apply_template(self,
                        parameters: Parameters) -> Parameters:
         """Apply the capture template to the input parameters and return anew.
-        
-        Specifically, 
-        - Missing parameters are replaced by the defaults as per the 
-        stored parameter templates)
-        - Each respective parameter template is applied to the corresponding parameter 
-        to ensure types and constraints are satisfied.
 
-        Arguments:
-            parameters -- The parameters to apply this capture template to.
+        Missing parameters are replaced by defaults as per the stored parameter templates.
+        Each parameter template is applied to the corresponding parameter to ensure types
+        and constraints are satisfied.
 
-        Returns:
-            A `Parameters` instance compliant with this template, in accordance with the stored
-            parameter templates.
+        :param parameters: The parameters to apply this capture template to.
+        :return: A `Parameters` instance compliant with this template.
         """
         self.__fill_missing_with_defaults(parameters)
         self.__apply_parameter_templates(parameters)
@@ -103,9 +101,8 @@ class CaptureTemplate:
                     default: Any) -> None:
         """Set the default of an existing parameter template.
 
-        Arguments:
-            parameter_name -- The name of the parameter template to be updated.
-            default -- The new default value.
+        :param parameter_name: The name of the parameter template to be updated.
+        :param default: The new default value.
         """
         self.get_ptemplate(parameter_name).default = default
 
@@ -113,12 +110,8 @@ class CaptureTemplate:
     def set_defaults(self, 
                      *ptuples: tuple[PNames, Any]) -> None:
         """Update the defaults of multiple parameter templates.
-        
-        Each of `ptuples` should be of the form: 
-        - (`parameter_name`, `new_default`)
-        
-        which will update the default of the parameter template with name 
-        `parameter_name` to `new_default`.
+
+        :param ptuples: Tuples of the form (`parameter_name`, `new_default`) to update defaults.
         """
         for (parameter_name, default) in ptuples:
             self.set_default(parameter_name, default)
@@ -128,8 +121,7 @@ class CaptureTemplate:
                         parameter_name: PNames) -> None:
         """Set the `enforce_default` attribute of an existing parameter template to True.
 
-        Arguments:
-            parameter_name -- The name of the parameter template to have its `default` value enforced.
+        :param parameter_name: The name of the parameter template to enforce its default value.
         """
         self.get_ptemplate(parameter_name).enforce_default = True
 
@@ -137,9 +129,8 @@ class CaptureTemplate:
     def enforce_defaults(self, 
                          *parameter_names: PNames) -> None:
         """Set the `enforce_default` attribute of multiple existing parameter templates to True.
-        
-        Arguments:
-            parameter_name -- The name of the parameter templates to have their `default` values enforced.
+
+        :param parameter_names: The names of the parameter templates to enforce their default values.
         """
         for name in parameter_names:
             self.enforce_default(name)
@@ -148,13 +139,10 @@ class CaptureTemplate:
     def add_pconstraint(self,
                         parameter_name: PNames,
                         pconstraints: list[PConstraint]) -> None:
-        """Add one or more `PConstraint` instance to an existing parameter template.
-        
-        Notably, the `pconstraints` are added in addition to those which already exist.
+        """Add one or more `PConstraint` instances to an existing parameter template.
 
-        Arguments:
-            parameter_name -- The parameter template to add the `PConstraint` instances to.
-            pconstraints -- The list of `PConstraint` instances to be added to the parameter template.
+        :param parameter_name: The name of the parameter template to add constraints to.
+        :param pconstraints: A list of `PConstraint` instances to be added.
         """
         for pconstraint in pconstraints:
             self.get_ptemplate(parameter_name).add_pconstraint(pconstraint)
@@ -163,9 +151,8 @@ class CaptureTemplate:
     def to_dict(self) -> dict[str, dict[str, str]]:
         """Convert the current instance to an equivalent dictionary representation.
 
-        Returns:
-            A dictionary representation of this capture template, 
-            where all values are string-formatted for ease of serialisation.
+        :return: A dictionary representation of this capture template, where all values
+        are string-formatted for ease of serialisation.
         """
         return {ptemplate.name.value: ptemplate.to_dict() for ptemplate in self}
     
@@ -174,9 +161,8 @@ class CaptureTemplate:
 def make_base_capture_template(*pnames: PNames):
     """Make a capture template composed entirely of base `PTemplate` instances.
 
-    Returns:
-        A capture template composed entirely of base parameter templates, to be configured
-        according to the specific use-case.
+    :param pnames: The names of parameters to include in the capture template.
+    :return: A capture template composed of base parameter templates.
     """
     capture_template = CaptureTemplate()
     for pname in pnames:
@@ -270,14 +256,9 @@ def get_base_capture_template(
 ) -> CaptureTemplate:
     """Get a pre-defined capture template, to be configured according to the specific use case.
 
-    Arguments:
-        capture_mode -- The mode used to register the
-
-    Raises:
-        KeyError: _description_
-
-    Returns:
-        _description_
+    :param capture_mode: The mode used to retrieve the capture template.
+    :return: A `CaptureTemplate` instance for the specified mode.
+    :raises KeyError: If no capture template is found for the given mode.
     """
     if capture_mode not in _base_capture_templates:
         raise KeyError(f"No capture template found for the capture mode '{capture_mode}'. "

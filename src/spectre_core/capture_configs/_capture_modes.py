@@ -9,7 +9,7 @@ class CaptureModes(Enum):
     
     Each of `CaptureModes` has an associated base capture template, which can be fetched using: 
     
-    `spectre_core.capture_configs.get_base_capture_template`
+    `get_base_capture_template`
     
     All base capture templates must be registered by one of `CaptureModes`. To introduce a new
     base capture template, you need to create a new `CaptureModes` constant.

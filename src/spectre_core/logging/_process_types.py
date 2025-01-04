@@ -7,9 +7,8 @@ from enum import Enum
 class ProcessTypes(Enum):
     """Defines the origin of processes in `spectre`.
 
-    Attributes:
-        USER -- Represents a process initiated by the user.
-        WORKER -- Represents a process created internally by `spectre`.
+    USER -- Represents a process initiated directly by the user.
+    WORKER -- Represents a process created internally by `spectre`.
     """
     USER   = "user"
     WORKER = "worker"

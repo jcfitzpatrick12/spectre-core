@@ -29,14 +29,11 @@ class Batches(Generic[T]):
                  day: Optional[int] = None) -> None:
         """Initialise a `Batches` instance.
 
-        Arguments:
-            tag -- The batch name tag.
-            batch_cls -- The `Batch` class used to read data files tagged by `tag`.
-
-        Keyword Arguments:
-            year -- Isolate batch files under a numeric year. (default: {None})
-            month -- Isolate batch files under a numeric month. (default: {None})
-            day -- Isolate batch files under a numeric day. (default: {None})
+        :param tag: The batch name tag.
+        :param batch_cls: The `Batch` class used to read data files tagged by `tag`.
+        :param year: Filter batch files under a numeric year. Defaults to None.
+        :param month: Filter batch files under a numeric month. Defaults to None.
+        :param day: Filter batch files under a numeric day. Defaults to None.
         """
         self._tag = tag
         self._batch_cls = batch_cls
@@ -106,10 +103,9 @@ class Batches(Generic[T]):
         """Reset `batches_dir_path` according to the numeric date, and refresh the list
         of available batches.
 
-        Arguments:
-            year -- The numeric year.
-            month -- The numeric month of the year.
-            day -- The numeric day of the month.
+        :param year: The numeric year.
+        :param month: The numeric month of the year.
+        :param day: The numeric day of the month.
         """
         self._year = year
         self._month = month
@@ -181,15 +177,10 @@ class Batches(Generic[T]):
         """
         Retrieve a spectrogram spanning the specified time range.
 
-        Args:
-            start_time -- The start time of the range (inclusive).
-            end_time -- The end time of the range (inclusive).
-
-        Raises:
-            SpectrogramNotFoundError: If no spectrogram data is available within the specified time range.
-
-        Returns:
-            A spectrogram created by combining data from all matching batches.
+        :param start_time: The start time of the range (inclusive).
+        :param end_time: The end time of the range (inclusive).
+        :raises SpectrogramNotFoundError: If no spectrogram data is available within the specified time range.
+        :return: A spectrogram created by combining data from all matching batches.
         """
         # Convert input strings to datetime objects
         start_datetime = datetime.strptime(start_time, TimeFormats.DATETIME)

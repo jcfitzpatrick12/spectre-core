@@ -14,12 +14,9 @@ def register_batch(
     batch_key: Literal[BatchKeys.IQ_STREAM, BatchKeys.CALLISTO]
 ) -> Callable:
     """Decorator to formally register a `Batch` plugin class under a defined `BatchKey`.
-    
-    Arguments:
-        batch_key -- The key to register the `Batch` class under.
 
-    Returns:
-        A decorator that registers a `Batch` plugin class under the given `batch_key`.
+    :param batch_key: The key to register the `Batch` class under.
+    :return: A decorator that registers a `Batch` plugin class under the given `batch_key`.
     """
     def decorator(cls: Type[BaseBatch]):
         if batch_key in batch_map:

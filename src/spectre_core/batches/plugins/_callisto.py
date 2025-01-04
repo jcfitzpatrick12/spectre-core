@@ -31,9 +31,8 @@ class _FitsFile(BatchFile[Spectrogram]):
                  base_file_name: str) -> None:
         """Initialise a `_FitsFile` instance.
 
-        Arguments:
-            parent_dir_path -- The parent directory for the batch.
-            base_file_name -- The batch name.
+        :param parent_dir_path: The parent directory for the batch.
+        :param base_file_name: The batch name.
         """
         super().__init__(parent_dir_path, 
                          base_file_name, 
@@ -46,11 +45,8 @@ class _FitsFile(BatchFile[Spectrogram]):
         Reverses the spectra along the frequency axis and converts units to linearised 
         values if necessary. Infers the spectrum type from the `BUNIT` header.
 
-        Raises:
-            NotImplementedError: If the `BUNIT` header value represents an unsupported spectrum type.
-
-        Returns:
-            Spectrogram: An instance containing the parsed FITS file data.
+        :raises NotImplementedError: If the `BUNIT` header value represents an unsupported spectrum type.
+        :return: A `Spectrogram` instance containing the parsed FITS file data.
         """
         with fits.open(self.file_path, mode='readonly') as hdulist:
             primary_hdu                = self._get_primary_hdu(hdulist)
@@ -101,11 +97,8 @@ class _FitsFile(BatchFile[Spectrogram]):
         Applies a transformation based on ADC specifications to convert raw values 
         to dB and then to linearised units.
 
-        Args:
-            dynamic_spectra (np.ndarray): Raw spectrogram data in digit values.
-
-        Returns:
-            np.ndarray: Spectrogram data in linearised units.
+        :param dynamic_spectra: Raw dynamic spectra in digit values.
+        :return: The dynamic spectra with linearised units.
         """
         digits_floats = np.array(dynamic_spectra, dtype='float')
         # conversion as per ADC specs [see email from C. Monstein]
@@ -140,9 +133,8 @@ class CallistoBatch(BaseBatch):
                  tag: str) -> None:
         """Initialise a `CallistoBatch` instance.
 
-        Arguments:
-            start_time -- The start time of the batch.
-            tag -- The batch name tag.
+        :param start_time: The start time of the batch.
+        :param tag: The batch name tag.
         """
         super().__init__(start_time, tag) 
         self._fits_file = _FitsFile(self.parent_dir_path, self.name)

@@ -23,16 +23,17 @@ class BatchFile(BaseFileHandler[T]):
     Here, `<start time>_<tag>` is referred to as the batch name. Files with the same batch name 
     belong to the same batch. Subclass this as needed based on `BaseFileHandler` requirements.
     """
+    
+
     def __init__(self, 
                  batch_parent_dir_path: str, 
                  batch_name: str, 
                  extension: str) -> None:
         """Initialise a `BatchFile` instance.
 
-        Arguments:
-            batch_parent_dir_path -- Parent directory of the batch.
-            batch_name -- Base file name, composed of the batch start time and tag.
-            extension -- File extension.
+        :param batch_parent_dir_path: Parent directory of the batch.
+        :param batch_name: Base file name, composed of the batch start time and tag.
+        :param extension: File extension.
         """
         # no cache, as batch files should always be static in content when reading
         super().__init__(batch_parent_dir_path, 
@@ -82,9 +83,8 @@ class BaseBatch(ABC):
                  tag: str) -> None:
         """Initialise a `BaseBatch` instance.
 
-        Arguments:
-            start_time -- Start time of the batch as a string with seconds precision.
-            tag -- The batch name tag.
+        :param start_time: Start time of the batch as a string with seconds precision.
+        :param tag: The batch name tag.
         """
         self._start_time = start_time
         self._tag: str = tag
@@ -130,11 +130,10 @@ class BaseBatch(ABC):
         composed of the start time and tag identifier."""
         return f"{self._start_time}_{self._tag}"
     
-    
+
     def read_spectrogram(self) -> Spectrogram:
         """Read and return the spectrogram data stored in the batch.
 
-        Returns:
-            This method retrieves the spectrogram using the `spectrogram_file` property.
+        :return: The spectrogram stored by the batch `spectrogram_file`.
         """
         return self.spectrogram_file.read()

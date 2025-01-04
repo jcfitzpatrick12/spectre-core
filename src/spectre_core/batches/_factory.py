@@ -31,14 +31,9 @@ def get_batch_cls(
 ) -> Type[BaseBatch]:
     """Get a `Batch` plugin class.
 
-    Arguments:
-        batch_key -- The key used to register the `Batch` class.
-
-    Raises:
-        BatchNotFoundError: If an undefined `batch_key` is provided.
-
-    Returns:
-        The `Batch` corresponding to the input key.
+    :param batch_key: The key used to register the `Batch` class.
+    :raises BatchNotFoundError: If an undefined `batch_key` is provided.
+    :return: The `Batch` corresponding to the input key.
     """
     Batch = batch_map.get(batch_key)
     if Batch is None:

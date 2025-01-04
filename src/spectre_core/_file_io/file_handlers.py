@@ -27,16 +27,12 @@ class BaseFileHandler(ABC, Generic[T]):
                  base_file_name: str, 
                  extension: Optional[str] = None,
                  no_cache: bool = False) -> None:
-        """Initialise a file handler instance.
+        """Initialise a `BaseFileHandler` instance.
 
-        Arguments:
-            parent_dir_path -- The directory path where the file is located (absolute or relative).
-            base_file_name -- The name of the file without its extension.
-
-        Keyword Arguments:
-            extension -- The file extension (without the dot). If an empty string is provided, 
-                        it is treated as None. (default: None)
-            no_cache -- If True, bypasses the cache and reads the file directly on each call. (default: False)
+        :param parent_dir_path: The directory path where the file is located (absolute or relative).
+        :param base_file_name: The name of the file without its extension.
+        :param extension: The file extension (without the dot), defaults to None
+        :param no_cache: If True, bypasses the cache and reads the file directly on each call, defaults to False
         """
         self._data_cache: Optional[T] = None
         self._no_cache = no_cache
@@ -48,13 +44,12 @@ class BaseFileHandler(ABC, Generic[T]):
             extension = None
         self._extension       = extension
 
-        
+     
     @abstractmethod
     def _read(self) -> T:
         """The grunt work to return the file contents.
 
-        Returns:
-            The file contents.
+        :return: The file contents.
         """
         pass
     
@@ -87,8 +82,7 @@ class BaseFileHandler(ABC, Generic[T]):
     def file_name(self) -> str:
         """Generate the file name based on the base name and extension.
 
-        Returns:
-            The file name with the extension (including the dot), or the base name if no extension is set.
+        :return: The file name with the extension (including the dot), or the base name if no extension is set.
         """
         return self._base_file_name if (self._extension is None) else f"{self._base_file_name}.{self._extension}"
     
@@ -109,9 +103,8 @@ class BaseFileHandler(ABC, Generic[T]):
     def read(self) -> T:
         """Read the file contents, using caching if enabled.
 
-        Returns:
-            The file contents. If `no_cache` is True, reads directly from the file. 
-            Otherwise, uses the cache if available, or reads and caches the contents.
+        :return: The file contents. If `no_cache` is True, reads directly from the file. 
+        Otherwise, uses the cache if available, or reads and caches the contents.
         """
         # if the user has specified to ignore the cache, simply read the file.
         if self._no_cache:
@@ -134,11 +127,8 @@ class BaseFileHandler(ABC, Generic[T]):
                ignore_if_missing: bool = False) -> None:
         """Delete the file from the filesystem.
 
-        Keyword Arguments:
-            ignore_if_missing -- If True, skips deletion if the file does not exist. (default: False)
-
-        Raises:
-            FileNotFoundError: If the file is missing and `ignore_if_missing` is False.
+        :param ignore_if_missing: If True, skips deletion if the file does not exist, defaults to False
+        :raises FileNotFoundError: If the file is missing and `ignore_if_missing` is False.
         """
         if not self.exists and not ignore_if_missing:
             raise FileNotFoundError(f"{self.file_name} does not exist, and so cannot be deleted")
@@ -176,20 +166,15 @@ class JsonHandler(BaseFileHandler[dict[str, Any]]):
         with open(self.file_path, 'r') as f:
             return json.load(f)
         
-
+        
     def save(self, 
              d: dict[str, Any], 
              force: bool = False) -> None:
-        """Save a dictionary to a file in JSON format.
+        """_summary_
 
-        Arguments:
-            d -- The dictionary to save.
-
-        Keyword Arguments:
-            force -- If True, overwrites the file if it already exists. (default: False)
-
-        Raises:
-            FileExistsError: If the file exists and `force` is False.
+        :param d: The dictionary to save.
+        :param force: If True, overwrites the file if it already exists, defaults to False
+        :raises FileExistsError: If the file exists and `force` is False.
         """
         self.make_parent_dir_path()
 

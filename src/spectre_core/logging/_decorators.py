@@ -11,12 +11,9 @@ def log_call(func: Callable) -> Callable:
 
     Logs an informational message when the decorated function is called and logs 
     an error message if the function raises any exception.
-    
-    Arguments:
-        The function to be decorated.
 
-    Returns:
-        The decorated function with added logging behaviour.
+    :param func: The function to be decorated.
+    :return: The decorated function with added logging behaviour.
     """
     @wraps(func)
     def wrapper(*args, **kwargs):

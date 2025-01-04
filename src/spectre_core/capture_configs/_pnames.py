@@ -10,7 +10,7 @@ class PNames(Enum):
     Each of `PNames` has an associated base parameter template which can be fetched
     using:
     
-    `spectre_core.capture_configs.get_base_ptemplate`
+    `get_base_ptemplate`
     
     All parameters and parameter templates must take on some name in `PNames`.
     To introduce a new parameter/parameter template, you need to create a new `PNames`

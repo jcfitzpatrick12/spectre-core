@@ -24,18 +24,15 @@ class PTemplate(Generic[VT]):
                  enforce_default: bool = False,
                  help: Optional[str] = None,
                  pconstraints: Optional[list[PConstraint]] = None):
-        """Initialise an instance of `PTemplate`, and create a parameter template.
+        """Initialise an instance of `PTemplate` and create a parameter template.
 
-        Arguments:
-            name -- The name of the parameter.
-            ptype -- The required type of the parameter value.
-
-        Keyword Arguments:
-            default -- The parameter value if not explictly specified. (default: {None})
-            nullable -- Whether the value of the parameter can be `None` (default: {False})
-            enforce_default -- Whether we force that the value must be that specified by `default`. (default: {False})
-            help -- A helpful description of what the parameter is, and the value it stores. (default: {None})
-            pconstraints -- Custom constraints to be applied to the value of the parameter. (default: {None})
+        :param name: The name of the parameter.
+        :param ptype: The required type of the parameter value.
+        :param default: The parameter value if not explicitly specified. Defaults to None.
+        :param nullable: Whether the value of the parameter can be `None`. Defaults to False.
+        :param enforce_default: Whether the value must be that specified by `default`. Defaults to False.
+        :param help: A helpful description of what the parameter is and the value it stores. Defaults to None.
+        :param pconstraints: Custom constraints to be applied to the value of the parameter. Defaults to None.
         """
         self._name = name
         self._ptype = ptype
@@ -66,7 +63,10 @@ class PTemplate(Generic[VT]):
 
     @default.setter
     def default(self, value: VT) -> None:
-        """Update the `default` of this parameter template."""
+        """Update the `default` of this parameter template.
+
+        :param value: The new default value to set.
+        """
         self._default = self._cast(value)
 
 
@@ -84,7 +84,10 @@ class PTemplate(Generic[VT]):
 
     @enforce_default.setter
     def enforce_default(self, value: bool) -> None:
-        """Update whether we should `enforce_default` for this parameter template."""
+        """Update whether to `enforce_default` for this parameter template.
+
+        :param value: Whether to enforce the default value.
+        """
         self._enforce_default = value
     
 
@@ -98,8 +101,7 @@ class PTemplate(Generic[VT]):
                         pconstraint: PConstraint) -> None:
         """Add a parameter constraint to this template.
 
-        Arguments:
-            pconstraint -- An instance of `PTemplate` compatable with the `ptype`.
+        :param pconstraint: A `PConstraint` instance compatible with the `ptype`.
         """
         self._pconstraints.append(pconstraint)
 
@@ -108,14 +110,9 @@ class PTemplate(Generic[VT]):
               value: Any) -> VT:
         """Cast the input value to the `ptype` for this parameter template.
 
-        Arguments:
-            value -- The value to be type casted.
-
-        Raises:
-            ValueError: If there is any trouble casting `value` as the `ptype` for this parameter template.
-
-        Returns:
-            The input value cast as `ptype` for this parameter template.
+        :param value: The value to be type casted.
+        :raises ValueError: If there is any trouble casting `value` as the `ptype` for this parameter template.
+        :return: The input value cast as `ptype` for this parameter template.
         """
         try:
             return self._ptype(value)
@@ -127,17 +124,11 @@ class PTemplate(Generic[VT]):
                    value: VT) -> VT:
         """Constrain the input value according to constraints of the template.
 
-        Arguments:
-            value -- The value to be constrained.
-
-        Raises:
-            ValueError: If a custom `PConstraint` fails for the input value, and raises a `ValueError`.
-            RuntimeError: If some other error occured at runtime while constraining the input value.
-
-        Returns:
-            The input value unchanged, if it passes validation according to parameter template constraints.
+        :param value: The value to be constrained.
+        :raises ValueError: If a custom `PConstraint` fails for the input value.
+        :raises RuntimeError: If an unexpected error occurs during constraint validation.
+        :return: The input value unchanged if it passes validation.
         """
-
         if self._enforce_default and value != self._default:
             raise ValueError(f"The default value of '{self._default}' "
                              f"is required for the parameter '{self._name}'.")
@@ -158,14 +149,9 @@ class PTemplate(Generic[VT]):
                        value: Optional[Any]) -> Optional[VT]:
         """Cast a value and validate it according to this parameter template.
 
-        Arguments:
-            value -- The input value.
-
-        Raises:
-            ValueError: If value is `None`, no `default` is specified and the parameter is not allowed to be `None`.
-
-        Returns:
-            The input value type cast and validated according to the parameter template.
+        :param value: The input value.
+        :raises ValueError: If the value is `None`, no `default` is specified, and the parameter is not nullable.
+        :return: The input value type cast and validated according to the parameter template.
         """
         if value is None:
             if self._default is not None:
@@ -182,28 +168,19 @@ class PTemplate(Generic[VT]):
 
     def make_parameter(self, 
                        value: Optional[Any] = None) -> Parameter:
-        """
-        Create a `Parameter` object based on this template and the provided value.
-        
-        If `value` is `None`, a default parameter will be c
-        
-        Args:
-            value -- The provided value for the parameter.
+        """Create a `Parameter` object based on this template and the provided value.
 
-        Returns:
-            Parameter: A `Parameter` object, validated according to this template.
+        :param value: The provided value for the parameter. Defaults to None.
+        :return: A `Parameter` object validated according to this template.
         """
         value = self.apply_template(value)
         return Parameter(self._name, value)
 
 
     def to_dict(self) -> dict[str, str]:
-        """
-        Convert this parameter template to a dictionary representation.
+        """Convert this parameter template to a dictionary representation.
 
-        Returns:
-            A dictionary representation of this parameter template, 
-            where all values are string-formatted for ease of serialisation.
+        :return: A dictionary representation of this parameter template, where all values are string-formatted for ease of serialisation.
         """
         d = {
             "name": self._name,
@@ -473,14 +450,9 @@ def get_base_ptemplate(
 ) -> PTemplate:
     """Get a pre-defined base parameter template, to be configured according to the specific use case.
 
-    Arguments:
-        parameter_name -- The parameter name for the template.
-
-    Raises:
-        KeyError: If there is no base parameter template corresponding to the input name.
-
-    Returns:
-        A deep copy of the corresponding base parameter template, if it exists.
+    :param pname: The parameter name for the template.
+    :raises KeyError: If there is no base parameter template corresponding to the input name.
+    :return: A deep copy of the corresponding base parameter template, if it exists.
     """
     if pname not in _base_ptemplates:
         raise KeyError(f"No ptemplate found for the parameter name '{pname}'. "

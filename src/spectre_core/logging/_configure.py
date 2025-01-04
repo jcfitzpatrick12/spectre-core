@@ -5,7 +5,6 @@
 import os
 import logging
 from datetime import datetime
-from typing import Literal
 
 from spectre_core.config import TimeFormats
 from ._log_handlers import Log
@@ -13,22 +12,15 @@ from ._process_types import ProcessTypes
 
 
 def configure_root_logger(
-    process_type: Literal[ProcessTypes.USER, ProcessTypes.WORKER], 
+    process_type: ProcessTypes, 
     level: int = logging.INFO
 ) -> str:
     """Sets up the root logger to write log messages to a date-based log file.
 
-    Arguments:
-        process_type: Indicates whether the process is user-initiated or created internally 
-                      by `spectre`. Accepts values from `ProcessTypes`.
-    
-    Keyword Arguments:
-        level: The logging level, as defined in Python's `logging` module (default: logging.INFO).
-    
-    Returns:
-        str: The file path of the created log file.
+    :param process_type: Indicates the type of process, as defined by `ProcessTypes`.
+    :param level: The logging level, as defined in Python's `logging` module. Defaults to logging.INFO.
+    :return: The file path of the created log file.
     """
-
     # create a `spectre` log handler instance, to represent the log file.
     # get the star time of the log
     system_datetime = datetime.now()
@@ -37,9 +29,10 @@ def configure_root_logger(
     # extract the process identifier, and cast as a string
     pid = str( os.getpid() )
     
+    # create a file handler representing the log file
     log = Log(start_time, 
               pid, 
-              process_type.value)
+              process_type)
     log.make_parent_dir_path()
 
     # configure the root logger level and remove any existing handlers.
