@@ -4,23 +4,24 @@
 
 """Capture configuration files."""
 
+from ._pnames import PNames
+from ._capture_modes import CaptureModes
 from ._pvalidators  import PValidators
 from ._capture_config import CaptureConfig
+from ._ptemplates import PTemplate, get_base_ptemplate
 from ._parameters   import (
     Parameter, Parameters, parse_string_parameters, make_parameters
 )
 from ._capture_templates import (
-    CaptureTemplate, CaptureModes, get_base_capture_template, make_base_capture_template
+    CaptureTemplate, get_base_capture_template, make_base_capture_template
 )
 from ._pconstraints import (
     PConstraint, PConstraints, Bound, OneOf
 )
-from ._ptemplates   import (
-    PTemplate, PNames, get_base_ptemplate, 
-)
 
 __all__ = [
-    "PValidators", "CaptureConfig", "Parameter", "Parameters", "parse_string_parameters", "make_parameters",
-    "CaptureTemplate", "CaptureModes", "get_base_capture_template", "make_base_capture_template",
-    "PConstraint", "PConstraints", "Bound", "OneOf", "PTemplate", "PNames", "get_base_ptemplate"
+    "PTemplate", "PValidators", "CaptureConfig", "Parameter", "Parameters", "parse_string_parameters",
+    "make_parameters", "CaptureTemplate", "CaptureModes", "get_base_capture_template", "make_base_capture_template"
+    "PConstraint", "PConstraints", "Bound", "OneOf", "make_base_capture_template", "PNames",
+    "get_base_ptemplate"
 ]

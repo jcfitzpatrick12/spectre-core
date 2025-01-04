@@ -2,6 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+from typing import Callable
 from dataclasses import dataclass
 from math import floor
 from typing import Optional, cast
@@ -9,7 +10,7 @@ from typing import Optional, cast
 from scipy.signal import get_window
 
 from ._parameters import Parameters
-from ._ptemplates import PNames
+from ._pnames import PNames
 
 
 # ----------------------------------------------------------------------- # 
@@ -240,13 +241,12 @@ def _validate_swept_center_frequency_parameters(
 @dataclass(frozen=True)
 class PValidators:
     """Ready-made parameter validating functions."""
-    window                 = _validate_window
-    nyquist_criterion      = _validate_nyquist_criterion
-    step_interval          = _validate_step_interval
-    non_overlapping_steps  = _validate_non_overlapping_steps
-    num_steps_per_sweep    = _validate_num_steps_per_sweep
-    num_samples_per_step   = _validate_num_samples_per_step
-    sweep_interval         = _validate_sweep_interval
-    step_interval          = _validate_step_interval
-    fixed_center_frequency = _validate_fixed_center_frequency_parameters
-    swept_center_frequency = _validate_swept_center_frequency_parameters
+    window                : Callable[[Parameters], None]        = _validate_window
+    nyquist_criterion     : Callable[[Parameters], None]        = _validate_nyquist_criterion
+    non_overlapping_steps : Callable[[Parameters], None]        = _validate_non_overlapping_steps
+    num_steps_per_sweep   : Callable[[Parameters], None]        = _validate_num_steps_per_sweep
+    num_samples_per_step  : Callable[[Parameters], None]        = _validate_num_samples_per_step
+    sweep_interval        : Callable[[Parameters], None]        = _validate_sweep_interval
+    fixed_center_frequency: Callable[[Parameters], None]        = _validate_fixed_center_frequency_parameters
+    swept_center_frequency: Callable[[Parameters], None]        = _validate_swept_center_frequency_parameters
+    step_interval         : Callable[[Parameters, float], None] = _validate_step_interval

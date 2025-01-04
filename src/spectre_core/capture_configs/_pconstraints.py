@@ -4,7 +4,7 @@
 
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from typing import TypeVar, Optional, Any, Generic, Type
+from typing import TypeVar, Optional, Any, Generic
 
 VT = TypeVar('VT')
 

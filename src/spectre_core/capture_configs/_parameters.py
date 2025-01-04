@@ -4,19 +4,21 @@
 
 from typing import Any, Optional, TypeVar, Generic, Iterator
 
+from ._pnames import PNames
+
 VT = TypeVar('VT')
 
 class Parameter(Generic[VT]):
     """A simple container for a named value."""
     def __init__(self, 
-                 name: str,
+                 name: PNames,
                  value: Optional[VT] = None):
         self._name = name
         self._value: Optional[VT] = value
 
 
     @property
-    def name(self) -> str:
+    def name(self) -> PNames:
         """The parameter name."""
         return self._name
     
@@ -36,17 +38,19 @@ class Parameter(Generic[VT]):
 class Parameters:
     """A managed collection of parameters."""
     def __init__(self) -> None:
-        self._parameters: dict[str, Parameter] = {}
+        """Initialise a `Parameters` instance.
+        """
+        self._parameters: dict[PNames, Parameter] = {}
     
     
     @property
-    def name_list(self) -> list[str]:
+    def name_list(self) -> list[PNames]:
         """List the names of stored parameters."""
         return list(self._parameters.keys())
 
 
     def add_parameter(self, 
-                      name: str,
+                      name: PNames,
                       value: Optional[VT]) -> None:
         """Add a `Parameter` instance to this `Parameters` instance with the input name and value.
 
@@ -64,7 +68,7 @@ class Parameters:
 
 
     def get_parameter(self, 
-                      name: str) -> Parameter:
+                      name: PNames) -> Parameter:
         """Get the stored `Parameter` instance corresponding to the input name.
 
         Arguments:
@@ -83,7 +87,7 @@ class Parameters:
 
 
     def get_parameter_value(self,
-                            name: str) -> Optional[VT]:
+                            name: PNames) -> Optional[VT]:
         """Get the value of the parameter with the corresponding name.
 
         Arguments:
@@ -102,7 +106,7 @@ class Parameters:
     
     def to_dict(self) -> dict[str, Optional[Any]]:
         """Convert the `Parameters` instance to an equivalent dictionary representation."""
-        return {p.name: p.value for p in self}
+        return {p.name.value: p.value for p in self}
     
 
 def _parse_string_parameter(
@@ -159,5 +163,5 @@ def make_parameters(
     """
     parameters = Parameters()
     for k, v in d.items():
-        parameters.add_parameter(k, v)
+        parameters.add_parameter(PNames(k), v)
     return parameters

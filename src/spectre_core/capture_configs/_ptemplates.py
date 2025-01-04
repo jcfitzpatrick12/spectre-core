@@ -3,13 +3,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from typing import Optional, TypeVar, Any, Generic, Callable
-from copy import deepcopy
 from textwrap import dedent
-from dataclasses import dataclass
+from copy import deepcopy
 
+from ._pnames import PNames
 from ._pconstraints import PConstraint, PConstraints
 from ._parameters import Parameter
-
+    
 VT = TypeVar('VT')
 
 class PTemplate(Generic[VT]):
@@ -17,7 +17,7 @@ class PTemplate(Generic[VT]):
     with a given name can take.
     """
     def __init__(self,
-                 name: str,
+                 name: PNames,
                  ptype: Callable[[Any], VT],
                  default: Optional[VT] = None,
                  nullable: bool = False,
@@ -47,7 +47,7 @@ class PTemplate(Generic[VT]):
 
 
     @property
-    def name(self) -> str:
+    def name(self) -> PNames:
         """The name of the parameter."""
         return self._name
     
@@ -67,7 +67,7 @@ class PTemplate(Generic[VT]):
     @default.setter
     def default(self, value: VT) -> None:
         """Update the `default` of this parameter template."""
-        self._default = value
+        self._default = self._cast(value)
 
 
     @property
@@ -185,6 +185,8 @@ class PTemplate(Generic[VT]):
         """
         Create a `Parameter` object based on this template and the provided value.
         
+        If `value` is `None`, a default parameter will be c
+        
         Args:
             value -- The provided value for the parameter.
 
@@ -212,50 +214,15 @@ class PTemplate(Generic[VT]):
             "pconstraints": [f"{constraint}" for constraint in self._pconstraints]
         }
         return {k: f"{v}" for k,v in d.items()}
-        
-    
-
-@dataclass(frozen=True)
-class PNames:
-    """A centralised store of parameter template names"""
-    CENTER_FREQUENCY        : str = "center_frequency"
-    MIN_FREQUENCY           : str = "min_frequency"
-    MAX_FREQUENCY           : str = "max_frequency"
-    FREQUENCY_STEP          : str = "frequency_step"
-    FREQUENCY               : str = "frequency"
-    BANDWIDTH               : str = "bandwidth"
-    SAMPLE_RATE             : str = "sample_rate"
-    IF_GAIN                 : str = "if_gain"
-    RF_GAIN                 : str = "rf_gain"
-    AMPLITUDE               : str = "amplitude"
-    TIME_RESOLUTION         : str = "time_resolution"
-    FREQUENCY_RESOLUTION    : str = "frequency_resolution"
-    TIME_RANGE              : str = "time_range"
-    BATCH_SIZE              : str = "batch_size"
-    WINDOW_TYPE             : str = "window_type"
-    WINDOW_HOP              : str = "window_hop"
-    WINDOW_SIZE             : str = "window_size"
-    EVENT_HANDLER_KEY       : str = "event_handler_key"
-    WATCH_EXTENSION         : str = "watch_extension"
-    BATCH_KEY               : str = "batch_key"
-    SAMPLES_PER_STEP        : str = "samples_per_step"
-    MIN_SAMPLES_PER_STEP    : str = "min_samples_per_step"
-    MAX_SAMPLES_PER_STEP    : str = "max_samples_per_step"
-    STEP_INCREMENT          : str = "step_increment"
-    ORIGIN                  : str = "origin"
-    TELESCOPE               : str = "telescope"
-    INSTRUMENT              : str = "instrument"
-    OBJECT                  : str = "object"
-    OBS_LAT                 : str = "obs_lat"
-    OBS_LON                 : str = "obs_lon"
-    OBS_ALT                 : str = "obs_alt"
+ 
 
 # ------------------------------------------------------------------------------------------ #
 # `_base_ptemplates` holds all shared base parameter templates. They are 'base' templates, 
 # in the sense that they should be configured according to specific use-cases. For example, 
 # `default` values should be set, and `pconstraints` added according to specific SDR specs.
 # ------------------------------------------------------------------------------------------ # 
-_base_ptemplates: dict[str, PTemplate] = {
+
+_base_ptemplates: dict[PNames, PTemplate] = {
     PNames.CENTER_FREQUENCY:       PTemplate(PNames.CENTER_FREQUENCY,       
                                              float, 
                                              help = """
@@ -502,7 +469,7 @@ _base_ptemplates: dict[str, PTemplate] = {
 
 
 def get_base_ptemplate(
-    parameter_name: str,
+    pname: PNames,
 ) -> PTemplate:
     """Get a pre-defined base parameter template, to be configured according to the specific use case.
 
@@ -515,10 +482,10 @@ def get_base_ptemplate(
     Returns:
         A deep copy of the corresponding base parameter template, if it exists.
     """
-    if parameter_name not in _base_ptemplates:
-        raise KeyError(f"No ptemplate found for the parameter name '{parameter_name}'. "
+    if pname not in _base_ptemplates:
+        raise KeyError(f"No ptemplate found for the parameter name '{pname}'. "
                        f"Expected one of {list(_base_ptemplates.keys())}")
     # A deep copy is required as each receiver instance may mutate the original instance
     # according to its particular use case. Copying preserves the original instance,
     # enabling reuse.
-    return deepcopy( _base_ptemplates[parameter_name] )
+    return deepcopy( _base_ptemplates[pname] )
