@@ -8,9 +8,9 @@ File system path definitions.
 By default, `spectre` uses the required environment variable `os.environ.get("SPECTRE_DATA_DIR_PATH)`
 and creates three directories inside it:  
 
-- `batches` -- to hold the batched data files.
-- `logs` -- to log files generated at runtime.
-- `configs` -- to hold the capture configuration files.
+- `batches`: To hold the batched data files.
+- `logs`: To log files generated at runtime.
+- `configs`: To hold the capture configuration files.
 
 Each of these three directories can be customised using the optional environment variables
 

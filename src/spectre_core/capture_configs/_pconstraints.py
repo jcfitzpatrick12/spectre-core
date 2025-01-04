@@ -19,8 +19,7 @@ class PConstraint(ABC, Generic[VT]):
         """Apply a constraint to the input parameter. Implementations must raise a `ValueError` for
         if the input value fails the constraint.
 
-        Arguments:
-            value -- The value to be constrained.
+        :param value: The value to be constrained.
         """
         
 

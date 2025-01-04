@@ -17,14 +17,7 @@ from ._parameters import (
 
 @dataclass(frozen=True)
 class _CaptureConfigKeys:
-    """Defined JSON keys for capture configuration files.
-    
-    The values corresponding to each key are defined below:
-    
-    RECEIVER_NAME -- The name of the receiver to be used for capture.
-    RECEIVER_MODE -- The operating mode of the receiver to be used for capture.
-    PARAMETERS    -- The user-configured parameters provided to the receiver at the time of capture.
-    """
+    """Defined JSON keys for capture configuration files."""
     RECEIVER_NAME = "receiver_name"
     RECEIVER_MODE = "receiver_mode"
     PARAMETERS    = "parameters"
