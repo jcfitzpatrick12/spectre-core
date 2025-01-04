@@ -7,6 +7,17 @@ from typing import Callable
 from functools import wraps
 
 def log_call(func: Callable) -> Callable:
+    """Decorator to log the execution of a function.
+
+    Logs an informational message when the decorated function is called and logs 
+    an error message if the function raises any exception.
+    
+    Arguments:
+        The function to be decorated.
+
+    Returns:
+        The decorated function with added logging behaviour.
+    """
     @wraps(func)
     def wrapper(*args, **kwargs):
         logger = logging.getLogger(func.__module__)

@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Internal file handling."""
+"""Basic internal file handling capabilities."""
 
 from .file_handlers import (
     BaseFileHandler, JsonHandler, TextHandler,
