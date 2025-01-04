@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Literal
 
 from spectre_core.config import TimeFormats
-from ._log_handlers import LogHandler
+from ._log_handlers import Log
 from ._process_types import ProcessTypes
 
 
@@ -37,10 +37,10 @@ def configure_root_logger(
     # extract the process identifier, and cast as a string
     pid = str( os.getpid() )
     
-    log_handler = LogHandler(start_time, 
-                             pid, 
-                             process_type.value)
-    log_handler.make_parent_dir_path()
+    log = Log(start_time, 
+              pid, 
+              process_type.value)
+    log.make_parent_dir_path()
 
     # configure the root logger level and remove any existing handlers.
     logger = logging.getLogger()
@@ -49,11 +49,11 @@ def configure_root_logger(
         logger.removeHandler(handler)
         
     # Set up `logging` module specific file handler
-    file_handler = logging.FileHandler(log_handler.file_path)
+    file_handler = logging.FileHandler(log.file_path)
     file_handler.setLevel(level)
     formatter = logging.Formatter("[%(asctime)s] [%(levelname)8s] --- %(message)s (%(name)s:%(lineno)s)")
     file_handler.setFormatter(formatter)
     # and add it to the root logger
     logger.addHandler(file_handler)
 
-    return log_handler.file_path
+    return log.file_path
