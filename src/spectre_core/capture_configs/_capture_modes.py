@@ -5,6 +5,14 @@
 from enum import Enum
 
 class CaptureModes(Enum):
-    """A collection of capture modes, where each corresponds to a pre-defined base capture template."""
+    """A centralised store of capture modes.
+    
+    Each of `CaptureModes` has an associated base capture template, which can be fetched using: 
+    
+    `spectre_core.capture_configs.get_base_capture_template`
+    
+    All base capture templates must be registered by one of `CaptureModes`. To introduce a new
+    base capture template, you need to create a new `CaptureModes` constant.
+    """
     FIXED_CENTER_FREQUENCY = "fixed-center-frequency"
     SWEPT_CENTER_FREQUENCY = "swept-center-frequency"
