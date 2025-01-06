@@ -12,9 +12,9 @@ from .lib._rspduo import RSPduo
 from ._base import BaseReceiver
 from ._factory import get_receiver
 from ._register import list_all_receiver_names
-from ._spec_names import SpecNames
+from ._spec_names import SpecName
 
 __all__ = [
     "Test", "RSP1A", "RSPduo", "BaseReceiver", "get_receiver", 
-    "list_all_receiver_names", "SpecNames"
+    "list_all_receiver_names", "SpecName"
 ]

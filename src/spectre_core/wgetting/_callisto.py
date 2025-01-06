@@ -9,7 +9,7 @@ import gzip
 from datetime import datetime
 from typing import Optional
 
-from spectre_core.config import get_spectre_data_dir_path, get_batches_dir_path, TimeFormats
+from spectre_core.config import get_spectre_data_dir_path, get_batches_dir_path, TimeFormat
 
 CALLISTO_INSTRUMENT_CODES = [
     "ALASKA-ANCHORAGE",
@@ -72,7 +72,7 @@ _temp_dir = os.path.join(get_spectre_data_dir_path(), "temp")
 
 def _get_batch_name(station: str, date: str, time: str, instrument_code: str) -> str:
     dt = datetime.strptime(f"{date}T{time}", '%Y%m%dT%H%M%S')
-    formatted_time = dt.strftime(TimeFormats.DATETIME)
+    formatted_time = dt.strftime(TimeFormat.DATETIME)
     return f"{formatted_time}_callisto-{station.lower()}-{instrument_code}.fits"
 
 
@@ -93,7 +93,7 @@ def _get_batch_path(gz_path: str) -> str:
     station, date, time, instrument_code = _get_batch_components(gz_path)
     fits_batch_name = _get_batch_name(station, date, time, instrument_code)
     batch_start_time = fits_batch_name.split('_')[0]
-    batch_start_datetime = datetime.strptime(batch_start_time, TimeFormats.DATETIME)
+    batch_start_datetime = datetime.strptime(batch_start_time, TimeFormat.DATETIME)
     batch_parent_path = get_batches_dir_path(year = batch_start_datetime.year,
                                             month = batch_start_datetime.month,
                                             day = batch_start_datetime.day)

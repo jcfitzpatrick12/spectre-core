@@ -5,7 +5,7 @@
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
-class TimeFormats:
+class TimeFormat:
     """Package-wide datetime formats."""
     DATE              = "%Y-%m-%d"
     TIME              = "%H:%M:%S"

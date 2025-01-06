@@ -7,23 +7,23 @@ from typing import Callable, Optional
 from numbers import Number
 
 from spectre_core.capture_configs import (
-    CaptureTemplate, CaptureMode, Parameters, Bound, PValidators, PName,
+    CaptureTemplate, CaptureMode, Parameters, Bound, PValidator, PName,
     get_base_capture_template, get_base_ptemplate, OneOf, CaptureConfig
 )
 from .._base import BaseReceiver
-from .._spec_names import SpecNames
+from .._spec_names import SpecName
 
 class SDRPlayReceiver(BaseReceiver):
     def _get_pvalidator_fixed_center_frequency(self) -> Callable:
         def pvalidator(parameters: Parameters):
-            PValidators.fixed_center_frequency(parameters)
+            PValidator.fixed_center_frequency(parameters)
         return pvalidator
 
 
     def _get_pvalidator_swept_center_frequency(self) -> None:
         def pvalidator(parameters: Parameters):
-            PValidators.swept_center_frequency(parameters,
-                                               self.get_spec(SpecNames.API_RETUNING_LATENCY))
+            PValidator.swept_center_frequency(parameters,
+                                               self.get_spec(SpecName.API_RETUNING_LATENCY))
         return pvalidator
 
 
@@ -58,8 +58,8 @@ class SDRPlayReceiver(BaseReceiver):
             PName.CENTER_FREQUENCY,
             [
                 Bound(
-                    lower_bound=self.get_spec(SpecNames.FREQUENCY_LOWER_BOUND),
-                    upper_bound=self.get_spec(SpecNames.FREQUENCY_UPPER_BOUND)
+                    lower_bound=self.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
+                    upper_bound=self.get_spec(SpecName.FREQUENCY_UPPER_BOUND)
                 )
             ]
         )
@@ -67,8 +67,8 @@ class SDRPlayReceiver(BaseReceiver):
             PName.SAMPLE_RATE,
             [
                 Bound(
-                    lower_bound=self.get_spec(SpecNames.SAMPLE_RATE_LOWER_BOUND),
-                    upper_bound=self.get_spec(SpecNames.SAMPLE_RATE_UPPER_BOUND)
+                    lower_bound=self.get_spec(SpecName.SAMPLE_RATE_LOWER_BOUND),
+                    upper_bound=self.get_spec(SpecName.SAMPLE_RATE_UPPER_BOUND)
                 )
             ]
         )
@@ -76,7 +76,7 @@ class SDRPlayReceiver(BaseReceiver):
             PName.BANDWIDTH,
             [
                 OneOf(
-                    self.get_spec( SpecNames.BANDWIDTH_OPTIONS )
+                    self.get_spec( SpecName.BANDWIDTH_OPTIONS )
                 )
             ]
         )
@@ -84,7 +84,7 @@ class SDRPlayReceiver(BaseReceiver):
             PName.IF_GAIN,
             [
                 Bound(
-                    upper_bound=self.get_spec(SpecNames.IF_GAIN_UPPER_BOUND)
+                    upper_bound=self.get_spec(SpecName.IF_GAIN_UPPER_BOUND)
                 )
             ]
         )
@@ -92,7 +92,7 @@ class SDRPlayReceiver(BaseReceiver):
             PName.RF_GAIN,
             [
                 Bound(
-                    upper_bound=self.get_spec(SpecNames.RF_GAIN_UPPER_BOUND)
+                    upper_bound=self.get_spec(SpecName.RF_GAIN_UPPER_BOUND)
                 )
             ]
         )
@@ -135,8 +135,8 @@ class SDRPlayReceiver(BaseReceiver):
             PName.MIN_FREQUENCY,
             [
                 Bound(
-                    lower_bound=self.get_spec(SpecNames.FREQUENCY_LOWER_BOUND),
-                    upper_bound=self.get_spec(SpecNames.FREQUENCY_UPPER_BOUND)
+                    lower_bound=self.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
+                    upper_bound=self.get_spec(SpecName.FREQUENCY_UPPER_BOUND)
                 )
             ]
         )
@@ -144,8 +144,8 @@ class SDRPlayReceiver(BaseReceiver):
             PName.MAX_FREQUENCY,
             [
                 Bound(
-                    lower_bound=self.get_spec(SpecNames.FREQUENCY_LOWER_BOUND),
-                    upper_bound=self.get_spec(SpecNames.FREQUENCY_UPPER_BOUND)
+                    lower_bound=self.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
+                    upper_bound=self.get_spec(SpecName.FREQUENCY_UPPER_BOUND)
                 )
             ]
         )
@@ -153,8 +153,8 @@ class SDRPlayReceiver(BaseReceiver):
             PName.SAMPLE_RATE,
             [
                 Bound(
-                    lower_bound=self.get_spec(SpecNames.SAMPLE_RATE_LOWER_BOUND),
-                    upper_bound=self.get_spec(SpecNames.SAMPLE_RATE_UPPER_BOUND)
+                    lower_bound=self.get_spec(SpecName.SAMPLE_RATE_LOWER_BOUND),
+                    upper_bound=self.get_spec(SpecName.SAMPLE_RATE_UPPER_BOUND)
                 )
             ]
         )
@@ -162,7 +162,7 @@ class SDRPlayReceiver(BaseReceiver):
             PName.BANDWIDTH,
             [
                 OneOf(
-                    self.get_spec( SpecNames.BANDWIDTH_OPTIONS )
+                    self.get_spec( SpecName.BANDWIDTH_OPTIONS )
                 )
             ]
         )
@@ -170,7 +170,7 @@ class SDRPlayReceiver(BaseReceiver):
             PName.IF_GAIN,
             [
                 Bound(
-                    upper_bound=self.get_spec(SpecNames.IF_GAIN_UPPER_BOUND)
+                    upper_bound=self.get_spec(SpecName.IF_GAIN_UPPER_BOUND)
                 )
             ]
         )
@@ -178,7 +178,7 @@ class SDRPlayReceiver(BaseReceiver):
             PName.RF_GAIN,
             [
                 Bound(
-                    upper_bound=self.get_spec(SpecNames.RF_GAIN_UPPER_BOUND)
+                    upper_bound=self.get_spec(SpecName.RF_GAIN_UPPER_BOUND)
                 )
             ]
         )

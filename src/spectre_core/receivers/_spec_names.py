@@ -5,7 +5,7 @@
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
-class SpecNames:
+class SpecName:
     """A centralised store of specification names"""
     FREQUENCY_LOWER_BOUND   : str = "frequency_lower_bound"
     FREQUENCY_UPPER_BOUND   : str = "frequency_upper_bound"

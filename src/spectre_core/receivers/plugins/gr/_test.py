@@ -118,6 +118,6 @@ class _tagged_staircase(gr.top_block):
 
 
 @dataclass(frozen=True)
-class CaptureMethods:
+class CaptureMethod:
     cosine_signal_1  = partial(capture, top_block_cls=_cosine_signal_1)
     tagged_staircase = partial(capture, top_block_cls=_tagged_staircase)

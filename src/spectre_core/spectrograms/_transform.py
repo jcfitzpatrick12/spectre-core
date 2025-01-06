@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from math import floor
 
-from spectre_core.config import TimeFormats
+from spectre_core.config import TimeFormat
 from ._array_operations import find_closest_index, average_array
 from ._spectrogram import Spectrogram
 
@@ -50,7 +50,7 @@ def frequency_chop(input_spectrogram: Spectrogram,
 def time_chop(input_spectrogram: Spectrogram, 
               start_time: str, 
               end_time: str, 
-              time_format: str = TimeFormats.DATETIME) -> Spectrogram:
+              time_format: str = TimeFormat.DATETIME) -> Spectrogram:
     
     # parse the strings as datetimes
     start_datetime = datetime.strptime(start_time, time_format)

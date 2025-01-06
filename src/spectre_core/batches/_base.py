@@ -7,7 +7,7 @@ from typing import Optional, TypeVar
 from abc import ABC, abstractmethod
 
 from spectre_core._file_io import BaseFileHandler
-from spectre_core.config import get_batches_dir_path, TimeFormats
+from spectre_core.config import get_batches_dir_path, TimeFormat
 from spectre_core.spectrograms import Spectrogram
 
 
@@ -56,7 +56,7 @@ class BatchFile(BaseFileHandler[T]):
         """The start time of the batch, parsed as a datetime up to seconds precision."""
         # the start datetime is lazily computed, if it is required.
         if self._start_datetime is None:
-            self._start_datetime = datetime.strptime(self.start_time, TimeFormats.DATETIME)
+            self._start_datetime = datetime.strptime(self.start_time, TimeFormat.DATETIME)
         return self._start_datetime
     
 
@@ -88,7 +88,7 @@ class BaseBatch(ABC):
         """
         self._start_time = start_time
         self._tag: str = tag
-        self._start_datetime = datetime.strptime(self.start_time, TimeFormats.DATETIME)
+        self._start_datetime = datetime.strptime(self.start_time, TimeFormat.DATETIME)
         self._parent_dir_path = get_batches_dir_path(year  = self.start_datetime.year,
                                                      month = self.start_datetime.month,
                                                      day   = self.start_datetime.day)

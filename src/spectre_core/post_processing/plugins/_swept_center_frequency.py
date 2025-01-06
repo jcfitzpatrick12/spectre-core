@@ -14,7 +14,7 @@ import numpy as np
 from scipy.signal import ShortTimeFFT
 
 from spectre_core.spectrograms import Spectrogram, time_average, frequency_average
-from spectre_core.config import TimeFormats
+from spectre_core.config import TimeFormat
 from spectre_core.capture_configs import CaptureConfig, PName, CaptureMode
 from spectre_core.batches import BaseBatch
 from spectre_core.batches import SweepMetadata

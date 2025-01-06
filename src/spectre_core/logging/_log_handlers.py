@@ -11,7 +11,7 @@ from collections import OrderedDict
 from datetime import datetime
 
 from spectre_core._file_io import TextHandler
-from spectre_core.config import get_logs_dir_path, TimeFormats
+from spectre_core.config import get_logs_dir_path, TimeFormat
 from ._process_types import ProcessType
 
 class Log(TextHandler):
@@ -30,7 +30,7 @@ class Log(TextHandler):
         self._pid = pid
         self._process_type = process_type.value
 
-        dt = datetime.strptime(start_time, TimeFormats.DATETIME)
+        dt = datetime.strptime(start_time, TimeFormat.DATETIME)
         parent_path = get_logs_dir_path(dt.year, dt.month, dt.day)
         base_file_name = f"{start_time}_{pid}_{process_type}"
 

@@ -6,7 +6,7 @@
 
 from ._pnames import PName
 from ._capture_modes import CaptureMode
-from ._pvalidators  import PValidators
+from ._pvalidators  import PValidator
 from ._capture_config import CaptureConfig
 from ._ptemplates import PTemplate, get_base_ptemplate
 from ._parameters   import (
@@ -20,7 +20,7 @@ from ._pconstraints import (
 )
 
 __all__ = [
-    "PTemplate", "PValidators", "CaptureConfig", "Parameter", "Parameters", "parse_string_parameters",
+    "PTemplate", "PValidator", "CaptureConfig", "Parameter", "Parameters", "parse_string_parameters",
     "make_parameters", "CaptureTemplate", "CaptureMode", "get_base_capture_template", "make_base_capture_template"
     "PConstraint", "PConstraints", "Bound", "OneOf", "make_base_capture_template", "PName",
     "get_base_ptemplate"

@@ -221,7 +221,7 @@ class _tuner_1_swept_center_frequency(gr.top_block):
         
         
 @dataclass(frozen=True)
-class CaptureMethods:
+class CaptureMethod:
     tuner_1_fixed_center_frequency  = partial(capture, top_block_cls=_tuner_1_fixed_center_frequency)
     tuner_2_fixed_center_frequency  = partial(capture, top_block_cls=_tuner_2_fixed_center_frequency)
     tuner_1_swept_center_frequency  = partial(capture, top_block_cls=_tuner_1_swept_center_frequency)

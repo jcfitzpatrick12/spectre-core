@@ -217,7 +217,7 @@ def _validate_swept_center_frequency_parameters(
     
 
 @dataclass(frozen=True)
-class PValidators:
+class PValidator:
     """Ready-made parameter validating functions."""
     window                : Callable[[Parameters], None]        = _validate_window
     nyquist_criterion     : Callable[[Parameters], None]        = _validate_nyquist_criterion

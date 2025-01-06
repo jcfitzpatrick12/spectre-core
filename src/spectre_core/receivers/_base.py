@@ -7,9 +7,9 @@ from typing import Callable, Optional
 from numbers import Number
 
 from spectre_core.exceptions import ModeNotFoundError
-from ._spec_names import SpecNames
+from ._spec_names import SpecName
 from spectre_core.capture_configs import (
-    CaptureTemplate, CaptureMode, Parameters, Bound, PValidators, PName,
+    CaptureTemplate, CaptureMode, Parameters, Bound, PValidator, PName,
     get_base_capture_template, get_base_ptemplate, OneOf, CaptureConfig
 )
 

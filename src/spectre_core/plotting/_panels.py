@@ -220,7 +220,7 @@ class _SpectrogramPanel(BaseTimeSeriesPanel):
 
 
 @dataclass(frozen=True)
-class Panels:
+class Panel:
     TimeCuts                    = _TimeCutsPanel
     FrequencyCuts               = _FrequencyCutsPanel
     Spectrogram                 = _SpectrogramPanel

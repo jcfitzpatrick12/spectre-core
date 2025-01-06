@@ -6,7 +6,7 @@ import os
 import logging
 from datetime import datetime
 
-from spectre_core.config import TimeFormats
+from spectre_core.config import TimeFormat
 from ._log_handlers import Log
 from ._process_types import ProcessType
 
@@ -24,7 +24,7 @@ def configure_root_logger(
     # create a `spectre` log handler instance, to represent the log file.
     # get the star time of the log
     system_datetime = datetime.now()
-    start_time = system_datetime.strftime(TimeFormats.DATETIME)
+    start_time = system_datetime.strftime(TimeFormat.DATETIME)
     
     # extract the process identifier, and cast as a string
     pid = str( os.getpid() )

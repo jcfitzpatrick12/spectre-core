@@ -13,7 +13,7 @@ import numpy as np
 from astropy.io import fits
 
 from spectre_core.capture_configs import CaptureConfig, PName
-from spectre_core.config import get_batches_dir_path, TimeFormats
+from spectre_core.config import get_batches_dir_path, TimeFormat
 from ._array_operations import (
     find_closest_index,
     normalise_peak_intensity,
@@ -181,8 +181,8 @@ class Spectrogram:
                           precise: bool = False) -> str:
         """The datetime assigned to the first spectrum in the dynamic spectra, formatted as a string."""
         if precise:
-            return datetime.strftime(self.start_datetime, TimeFormats.PRECISE_DATETIME)
-        return datetime.strftime(self.start_datetime, TimeFormats.DATETIME)
+            return datetime.strftime(self.start_datetime, TimeFormat.PRECISE_DATETIME)
+        return datetime.strftime(self.start_datetime, TimeFormat.DATETIME)
     
     
     @property
@@ -254,8 +254,8 @@ class Spectrogram:
     
     
     def _update_background_indices_from_interval(self) -> None:
-        start_background = datetime.strptime(self._start_background, TimeFormats.DATETIME)
-        end_background   = datetime.strptime(self._end_background, TimeFormats.DATETIME)
+        start_background = datetime.strptime(self._start_background, TimeFormat.DATETIME)
+        end_background   = datetime.strptime(self._end_background, TimeFormat.DATETIME)
         self._start_background_index = find_closest_index(start_background, 
                                                           self.datetimes, 
                                                           enforce_strict_bounds=True)
@@ -310,7 +310,7 @@ class Spectrogram:
         """
 
         if isinstance(at_time, str):
-            at_time = datetime.strptime(at_time, TimeFormats.DATETIME)
+            at_time = datetime.strptime(at_time, TimeFormat.DATETIME)
             index_of_cut = find_closest_index(at_time, 
                                               self.datetimes, 
                                               enforce_strict_bounds = True)

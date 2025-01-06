@@ -208,7 +208,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     being processed.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_positive
+                                                 PConstraint.enforce_positive
                                                  ]),
     PName.MIN_FREQUENCY:          PTemplate(PName.MIN_FREQUENCY,          
                                              float, 
@@ -216,7 +216,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     The minimum center frequency, in Hz, for the frequency sweep.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_positive
+                                                 PConstraint.enforce_positive
                                                  ]),
     PName.MAX_FREQUENCY:          PTemplate(PName.MAX_FREQUENCY,          
                                              float, 
@@ -224,7 +224,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     The maximum center frequency, in Hz, for the frequency sweep.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_positive
+                                                 PConstraint.enforce_positive
                                                  ]),
     PName.FREQUENCY_STEP:         PTemplate(PName.FREQUENCY_STEP,         
                                              float, 
@@ -233,7 +233,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     for each step in the frequency sweep. 
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_positive
+                                                 PConstraint.enforce_positive
                                                  ]),
     PName.BANDWIDTH:              PTemplate(PName.BANDWIDTH,              
                                              float, 
@@ -242,7 +242,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     significant attenutation.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_positive
+                                                 PConstraint.enforce_positive
                                                  ]),
     PName.SAMPLE_RATE:            PTemplate(PName.SAMPLE_RATE,            
                                              int,   
@@ -250,7 +250,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     The number of samples per second in Hz.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_positive
+                                                 PConstraint.enforce_positive
                                                  ]),
     PName.IF_GAIN:                PTemplate(PName.IF_GAIN,                
                                              float, 
@@ -259,7 +259,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     Negative value indicates attenuation.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_negative
+                                                 PConstraint.enforce_negative
                                                  ]),
     PName.RF_GAIN:                PTemplate(PName.RF_GAIN,                
                                              float, 
@@ -268,7 +268,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     Negative value indicates attenuation.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_non_positive
+                                                 PConstraint.enforce_non_positive
                                                  ]),
     PName.EVENT_HANDLER_KEY:      PTemplate(PName.EVENT_HANDLER_KEY,      
                                              str,
@@ -289,8 +289,8 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     Short Time FFT.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_positive, 
-                                                 PConstraints.power_of_two
+                                                 PConstraint.enforce_positive, 
+                                                 PConstraint.power_of_two
                                                  ]),
     PName.WINDOW_HOP:             PTemplate(PName.WINDOW_HOP,             
                                              int,   
@@ -299,7 +299,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     when performing the Short Time FFT.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_positive
+                                                 PConstraint.enforce_positive
                                                  ]),
     PName.WINDOW_TYPE:            PTemplate(PName.WINDOW_TYPE,            
                                              str,
@@ -323,7 +323,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     specified in seconds.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_non_negative
+                                                 PConstraint.enforce_non_negative
                                                  ]),
     PName.FREQUENCY_RESOLUTION:   PTemplate(PName.FREQUENCY_RESOLUTION,   
                                              float, 
@@ -333,7 +333,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     specified in Hz.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_non_negative
+                                                 PConstraint.enforce_non_negative
                                                  ]),
     PName.TIME_RANGE:             PTemplate(PName.TIME_RANGE,             
                                              float, 
@@ -343,7 +343,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     the time range, in seconds, is surpassed.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_non_negative
+                                                 PConstraint.enforce_non_negative
                                                  ]),
     PName.BATCH_SIZE:             PTemplate(PName.BATCH_SIZE,             
                                              int,   
@@ -352,7 +352,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     in seconds.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_positive
+                                                 PConstraint.enforce_positive
                                                  ]),
     PName.SAMPLES_PER_STEP:       PTemplate(PName.SAMPLES_PER_STEP,       
                                              int,   
@@ -362,7 +362,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     GNU Radio runtime.
                                                     """,
                                              pconstraints=[
-                                                 PConstraints.enforce_positive
+                                                 PConstraint.enforce_positive
                                                  ]),
     PName.ORIGIN:                 PTemplate(PName.ORIGIN,
                                              str,
@@ -422,7 +422,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                   The number of samples in the shortest step of the staircase.
                                                   """,
                                              pconstraints=[
-                                                 PConstraints.enforce_positive
+                                                 PConstraint.enforce_positive
                                                  ]),
     PName.MAX_SAMPLES_PER_STEP:   PTemplate(PName.MAX_SAMPLES_PER_STEP,
                                              int,
@@ -430,7 +430,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                   The number of samples in the longest step of the staircase.
                                                   """,
                                             pconstraints=[
-                                                  PConstraints.enforce_positive
+                                                  PConstraint.enforce_positive
                                                   ]),
     PName.STEP_INCREMENT:         PTemplate(PName.STEP_INCREMENT,
                                              int,
@@ -438,7 +438,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                   The length by which each step in the staircase is incremented.
                                                   """,
                                              pconstraints=[
-                                                  PConstraints.enforce_positive,
+                                                  PConstraint.enforce_positive,
                                               ])
                                     
                                            

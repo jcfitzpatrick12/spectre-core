@@ -16,7 +16,7 @@ from ._parameters import (
 )
 
 @dataclass(frozen=True)
-class _CaptureConfigKeys:
+class _CaptureConfigKey:
     """Defined JSON keys for capture configuration files."""
     RECEIVER_NAME = "receiver_name"
     RECEIVER_MODE = "receiver_mode"
@@ -59,21 +59,21 @@ class CaptureConfig(JsonHandler):
     def receiver_name(self) -> str:
         """The name of the receiver to be used for capture."""
         d = self.read()
-        return d[_CaptureConfigKeys.RECEIVER_NAME]
+        return d[_CaptureConfigKey.RECEIVER_NAME]
     
 
     @property
     def receiver_mode(self) -> str:
         """The operating mode for the receiver to be used for capture."""
         d = self.read()
-        return d[_CaptureConfigKeys.RECEIVER_MODE]
+        return d[_CaptureConfigKey.RECEIVER_MODE]
     
 
     @property
     def parameters(self) -> Parameters:
         """The user-configured parameters provided to the receiver at the time of capture"""
         d = self.read()
-        return make_parameters( d[_CaptureConfigKeys.PARAMETERS] )
+        return make_parameters( d[_CaptureConfigKey.PARAMETERS] )
 
 
     def get_parameter(self, 
@@ -110,9 +110,9 @@ class CaptureConfig(JsonHandler):
         :param force: If true, force the write if the file already exists in the file system. Defaults to False.
         """
         d = {
-            _CaptureConfigKeys.RECEIVER_MODE: receiver_mode,
-            _CaptureConfigKeys.RECEIVER_NAME: receiver_name,
-            _CaptureConfigKeys.PARAMETERS   : parameters.to_dict()
+            _CaptureConfigKey.RECEIVER_MODE: receiver_mode,
+            _CaptureConfigKey.RECEIVER_NAME: receiver_name,
+            _CaptureConfigKey.PARAMETERS   : parameters.to_dict()
         }
         self.save(d,
                   force=force)

@@ -19,7 +19,7 @@ from .._register import register_batch
 
 
 @dataclass(frozen=True)
-class _BatchExtensions:
+class _BatchExtension:
     """Supported extensions for a `CallistoBatch`."""
     FITS: str = "fits"
     
@@ -36,7 +36,7 @@ class _FitsFile(BatchFile[Spectrogram]):
         """
         super().__init__(parent_dir_path, 
                          base_file_name, 
-                         _BatchExtensions.FITS)   
+                         _BatchExtension.FITS)   
         
         
     def _read(self) -> Spectrogram:

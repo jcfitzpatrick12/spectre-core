@@ -153,6 +153,6 @@ class _swept_center_frequency(gr.top_block):
 
 
 @dataclass(frozen=True)
-class CaptureMethods:
+class CaptureMethod:
     fixed_center_frequency  = partial(capture, top_block_cls=_fixed_center_frequency)
     swept_center_frequency  = partial(capture, top_block_cls=_swept_center_frequency)

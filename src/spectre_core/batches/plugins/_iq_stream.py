@@ -14,7 +14,7 @@ from astropy.io.fits.hdu.table import BinTableHDU
 from astropy.io.fits.hdu.hdulist import HDUList
 
 from spectre_core.exceptions import InvalidSweepMetadataError
-from spectre_core.config import TimeFormats
+from spectre_core.config import TimeFormat
 from spectre_core.spectrograms import Spectrogram
 from ._batch_keys import BatchKey
 from .._base import BaseBatch, BatchFile
@@ -22,7 +22,7 @@ from .._register import register_batch
 
 
 @dataclass(frozen=True)
-class _BatchExtensions:
+class _BatchExtension:
     """Supported extensions for a `IQStreamBatch`."""
     FITS: str = "fits"
     BIN : str = "bin"
@@ -41,7 +41,7 @@ class _BinFile(BatchFile[npt.NDArray[np.complex64]]):
         :param batch_parent_dir_path: The parent directory for the batch.
         :param batch_name: The batch name.
         """
-        super().__init__(batch_parent_dir_path, batch_name, _BatchExtensions.BIN)
+        super().__init__(batch_parent_dir_path, batch_name, _BatchExtension.BIN)
 
 
     def _read(self) -> npt.NDArray[np.complex64]:
@@ -98,7 +98,7 @@ class _HdrFile(BatchFile[IQMetadata]):
         :param parent_dir_path: The parent directory for the batch.
         :param base_file_name: The batch name.
         """
-        super().__init__(parent_dir_path, base_file_name, _BatchExtensions.HDR)
+        super().__init__(parent_dir_path, base_file_name, _BatchExtension.HDR)
 
 
     def _read(self) -> IQMetadata:
@@ -181,7 +181,7 @@ class _FitsFile(BatchFile[Spectrogram]):
         :param parent_dir_path: The parent directory for the batch.
         :param base_file_name: The batch name.
         """
-        super().__init__(parent_dir_path, base_file_name, _BatchExtensions.FITS)
+        super().__init__(parent_dir_path, base_file_name, _BatchExtension.FITS)
            
 
     def _read(self) -> Spectrogram:
@@ -231,7 +231,7 @@ class _FitsFile(BatchFile[Spectrogram]):
         """Get the start time of the spectrogram, up to the full precision available."""
         date_obs = primary_hdu.header['DATE-OBS']
         time_obs = primary_hdu.header['TIME-OBS']
-        return datetime.strptime(f"{date_obs}T{time_obs}", TimeFormats.PRECISE_DATETIME)
+        return datetime.strptime(f"{date_obs}T{time_obs}", TimeFormat.PRECISE_DATETIME)
 
 
     def _get_times(self, 

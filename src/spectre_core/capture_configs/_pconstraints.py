@@ -8,7 +8,7 @@ from typing import TypeVar, Optional, Any, Generic
 
 VT = TypeVar('VT')
 
-class PConstraint(ABC, Generic[VT]):
+class BasePConstraint(ABC, Generic[VT]):
     """An abstract base class for an arbitary parameter constraint.
     
     Derived classes must:
@@ -28,7 +28,7 @@ class PConstraint(ABC, Generic[VT]):
         return f"{self.__class__.__name__}({attrs})"
 
 
-class Bound(PConstraint[float | int]):
+class Bound(BasePConstraint[float | int]):
     """Bound a numeric parameter value to a some specified interval."""
     def __init__(self,
                  lower_bound: Optional[float | int] = None,
@@ -70,7 +70,7 @@ class Bound(PConstraint[float | int]):
                                  f"Got {value}.")
 
 
-class OneOf(PConstraint[Any]):
+class OneOf(BasePConstraint[Any]):
     """Constrain a parameter value to be one of a pre-defined list of options."""
 
     def __init__(self, options: Optional[list[Any]] = None) -> None:
@@ -92,7 +92,7 @@ class OneOf(PConstraint[Any]):
             raise ValueError(f"Value must be one of {self._options}. Got {value}.")
         
 
-class _PowerOfTwo(PConstraint[int]):
+class _PowerOfTwo(BasePConstraint[int]):
     """Constrain a numeric parameter value to be a power of two."""
     def constrain(self, value: int) -> None:
         """Constrain the input value to be a power of two.
@@ -105,7 +105,7 @@ class _PowerOfTwo(PConstraint[int]):
 
 
 @dataclass(frozen=True)
-class PConstraints:
+class PConstraint:
     """Ready-made `PConstraint` subclass instances for frequent use-cases."""
     power_of_two           = _PowerOfTwo()
     enforce_positive       = Bound(lower_bound=0, strict_lower=True)

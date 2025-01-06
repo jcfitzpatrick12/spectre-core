@@ -8,7 +8,7 @@ from collections import OrderedDict
 from datetime import datetime
 
 from spectre_core.exceptions import SpectrogramNotFoundError
-from spectre_core.config import TimeFormats
+from spectre_core.config import TimeFormat
 from spectre_core.spectrograms import Spectrogram, time_chop, join_spectrograms
 from spectre_core.config import get_batches_dir_path
 from spectre_core.exceptions import (
@@ -183,8 +183,8 @@ class Batches(Generic[T]):
         :return: A spectrogram created by combining data from all matching batches.
         """
         # Convert input strings to datetime objects
-        start_datetime = datetime.strptime(start_time, TimeFormats.DATETIME)
-        end_datetime   = datetime.strptime(end_time,   TimeFormats.DATETIME)
+        start_datetime = datetime.strptime(start_time, TimeFormat.DATETIME)
+        end_datetime   = datetime.strptime(end_time,   TimeFormat.DATETIME)
 
         spectrograms = []
         for batch in self:
