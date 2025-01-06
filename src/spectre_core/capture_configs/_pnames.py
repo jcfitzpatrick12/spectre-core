@@ -4,16 +4,16 @@
 
 from enum import Enum
 
-class PNames(Enum):
+class PName(Enum):
     """A centralised store of parameter names.
     
-    Each of `PNames` has an associated base parameter template which can be fetched
+    Each of `PName` has an associated base parameter template which can be fetched
     using:
     
     `get_base_ptemplate`
     
-    All parameters and parameter templates must take on some name in `PNames`.
-    To introduce a new parameter/parameter template, you need to create a new `PNames`
+    All parameters and parameter templates must take on some name in `PName`.
+    To introduce a new parameter/parameter template, you need to create a new `PName`
     constant.
     """
     CENTER_FREQUENCY     = "center_frequency"

@@ -8,24 +8,24 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 
-from spectre_core.spectrograms import TimeTypes
+from spectre_core.spectrograms import TimeType
 from ._base import BasePanel
 from ._format import PanelFormat
-from ._panels import PanelNames
+from ._panels import PanelName
 
 
 def _is_cuts_panel(panel: BasePanel) -> bool:
-    return (panel.name == PanelNames.FREQUENCY_CUTS or panel.name == PanelNames.TIME_CUTS)
+    return (panel.name == PanelName.FREQUENCY_CUTS or panel.name == PanelName.TIME_CUTS)
 
 
 def _is_spectrogram_panel(panel: BasePanel) -> bool:
-    return (panel.name == PanelNames.SPECTROGRAM)
+    return (panel.name == PanelName.SPECTROGRAM)
 
 
 class PanelStack:
     def __init__(self, 
                  panel_format: PanelFormat = PanelFormat(),
-                 time_type: TimeTypes = TimeTypes.RELATIVE,
+                 time_type: TimeType = TimeType.RELATIVE,
                  figsize: Tuple[int, int] = (10, 10)):
         self._panel_format = panel_format
         self._time_type = time_type
@@ -38,7 +38,7 @@ class PanelStack:
 
 
     @property
-    def time_type(self) -> TimeTypes:
+    def time_type(self) -> TimeType:
         return self._time_type
 
 

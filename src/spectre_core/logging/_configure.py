@@ -8,16 +8,16 @@ from datetime import datetime
 
 from spectre_core.config import TimeFormats
 from ._log_handlers import Log
-from ._process_types import ProcessTypes
+from ._process_types import ProcessType
 
 
 def configure_root_logger(
-    process_type: ProcessTypes, 
+    process_type: ProcessType, 
     level: int = logging.INFO
 ) -> str:
     """Sets up the root logger to write log messages to a date-based log file.
 
-    :param process_type: Indicates the type of process, as defined by `ProcessTypes`.
+    :param process_type: Indicates the type of process, as defined by `ProcessType`.
     :param level: The logging level, as defined in Python's `logging` module. Defaults to logging.INFO.
     :return: The file path of the created log file.
     """

@@ -4,7 +4,7 @@
 
 """IO operations on batched data files."""
 
-from .plugins._batch_keys import BatchKeys
+from .plugins._batch_keys import BatchKey
 
 # register decorators take effect on import
 from .plugins._iq_stream import IQStreamBatch, IQMetadata
@@ -16,6 +16,6 @@ from ._factory import get_batch_cls
 
 __all__ = [
     "IQStreamBatch", "IQMetadata", "CallistoBatch", "BaseBatch", "BatchFile", 
-    "Batches", "get_batch_cls", "BatchKeys"
+    "Batches", "get_batch_cls", "BatchKey"
 ]
 

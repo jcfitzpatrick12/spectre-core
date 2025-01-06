@@ -6,7 +6,7 @@ from ._analytical import (
     get_analytical_spectrogram, validate_analytically, TestResults
 )
 from ._spectrogram import (
-    Spectrogram, FrequencyCut, TimeCut, SpectrumUnits, TimeTypes
+    Spectrogram, FrequencyCut, TimeCut, SpectrumUnits, TimeType
 )
 from ._transform import (
     frequency_chop, time_chop, frequency_average, time_average, 
@@ -17,5 +17,5 @@ __all__ = [
     "get_analytical_spectrogram", "validate_analytically", "TestResults",
     "Spectrogram", "FrequencyCut", "TimeCut", "SpectrumUnits", "frequency_chop",
     "time_chop", "frequency_average","time_average", "join_spectrograms",
-    "TimeTypes"
+    "TimeType"
 ]

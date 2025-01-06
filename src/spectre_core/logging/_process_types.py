@@ -4,7 +4,7 @@
 
 from enum import Enum
 
-class ProcessTypes(Enum):
+class ProcessType(Enum):
     """Defines the origin of processes in `spectre`.
     
     A `USER` process is one initiated directly by the user. A `WORKER`

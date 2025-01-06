@@ -4,14 +4,14 @@
 
 from typing import Any, Optional, TypeVar, Generic, Iterator
 
-from ._pnames import PNames
+from ._pnames import PName
 
 VT = TypeVar('VT')
 
 class Parameter(Generic[VT]):
     """A simple container for a named value."""
     def __init__(self, 
-                 name: PNames,
+                 name: PName,
                  value: Optional[VT] = None):
         """Initialise a `Parameter` instance.
 
@@ -23,7 +23,7 @@ class Parameter(Generic[VT]):
 
 
     @property
-    def name(self) -> PNames:
+    def name(self) -> PName:
         """The parameter name."""
         return self._name
     
@@ -47,17 +47,17 @@ class Parameters:
     """A managed collection of parameters."""
     def __init__(self) -> None:
         """Initialise a `Parameters` instance."""
-        self._parameters: dict[PNames, Parameter] = {}
+        self._parameters: dict[PName, Parameter] = {}
     
     
     @property
-    def name_list(self) -> list[PNames]:
+    def name_list(self) -> list[PName]:
         """List the names of stored parameters."""
         return list(self._parameters.keys())
 
 
     def add_parameter(self, 
-                      name: PNames,
+                      name: PName,
                       value: Optional[VT]) -> None:
         """Add a `Parameter` instance to this `Parameters` instance with the input name and value.
 
@@ -72,7 +72,7 @@ class Parameters:
 
 
     def get_parameter(self, 
-                      name: PNames) -> Parameter:
+                      name: PName) -> Parameter:
         """Get the stored `Parameter` instance corresponding to the input name.
 
         :param name: The name of the parameter.
@@ -86,7 +86,7 @@ class Parameters:
 
 
     def get_parameter_value(self,
-                            name: PNames) -> Optional[VT]:
+                            name: PName) -> Optional[VT]:
         """Get the value of the parameter with the corresponding name.
 
         :param name: The name of the parameter.
@@ -151,5 +151,5 @@ def make_parameters(
     """
     parameters = Parameters()
     for k, v in d.items():
-        parameters.add_parameter(PNames(k), v)
+        parameters.add_parameter(PName(k), v)
     return parameters

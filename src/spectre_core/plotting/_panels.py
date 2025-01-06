@@ -12,7 +12,7 @@ import numpy as np
 
 from spectre_core.spectrograms import Spectrogram, FrequencyCut, TimeCut
 from ._base import BasePanel, BaseSpectrumPanel, BaseTimeSeriesPanel
-from ._panel_names import PanelNames
+from ._panel_names import PanelName
 
 
 class _FrequencyCutsPanel(BaseSpectrumPanel):
@@ -21,7 +21,7 @@ class _FrequencyCutsPanel(BaseSpectrumPanel):
                  *times: list[float | str],
                  dBb: bool = False,
                  peak_normalise: bool = False):
-        super().__init__(PanelNames.FREQUENCY_CUTS,
+        super().__init__(PanelName.FREQUENCY_CUTS,
                          spectrogram)
         self._times = times
         self._dBb = dBb
@@ -73,7 +73,7 @@ class _IntegralOverFrequencyPanel(BaseTimeSeriesPanel):
                  spectrogram: Spectrogram, 
                  peak_normalise: bool = False,
                  background_subtract: bool = False):
-        super().__init__(PanelNames.INTEGRAL_OVER_FREQUENCY,
+        super().__init__(PanelName.INTEGRAL_OVER_FREQUENCY,
                          spectrogram)
         self._peak_normalise = peak_normalise
         self._background_subtract = background_subtract
@@ -97,7 +97,7 @@ class _TimeCutsPanel(BaseTimeSeriesPanel):
                  dBb: bool = False,
                  peak_normalise: bool = False,
                  background_subtract: bool = False):
-        super().__init__(PanelNames.TIME_CUTS, 
+        super().__init__(PanelName.TIME_CUTS, 
                          spectrogram)
         self._frequencies = frequencies
         self._dBb = dBb
@@ -154,7 +154,7 @@ class _SpectrogramPanel(BaseTimeSeriesPanel):
                  dBb: bool = False,
                  vmin: float | None = -1,
                  vmax: float | None = 2):
-        super().__init__(PanelNames.SPECTROGRAM,
+        super().__init__(PanelName.SPECTROGRAM,
                          spectrogram)
         self._log_norm = log_norm
         self._dBb = dBb
@@ -197,9 +197,9 @@ class _SpectrogramPanel(BaseTimeSeriesPanel):
     
     
     def overlay_cuts(self, cuts_panel: BasePanel) -> None:
-        if cuts_panel.name == PanelNames.TIME_CUTS:
+        if cuts_panel.name == PanelName.TIME_CUTS:
             self._overlay_time_cuts(cuts_panel)
-        elif cuts_panel.name == PanelNames.FREQUENCY_CUTS:
+        elif cuts_panel.name == PanelName.FREQUENCY_CUTS:
             self._overlay_frequency_cuts(cuts_panel)
 
 

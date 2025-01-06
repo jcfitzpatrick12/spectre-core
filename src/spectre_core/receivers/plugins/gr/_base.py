@@ -8,7 +8,7 @@ import signal
 from gnuradio import gr
 from gnuradio import spectre
 
-from spectre_core.capture_configs import Parameters, PNames
+from spectre_core.capture_configs import Parameters, PName
 from spectre_core.config import get_batches_dir_path
 
 from spectre_core.capture_configs import Parameters

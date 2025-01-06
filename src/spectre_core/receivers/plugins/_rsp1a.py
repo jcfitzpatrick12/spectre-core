@@ -6,7 +6,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 from spectre_core.capture_configs import (
-    CaptureModes
+    CaptureMode
 )
 from .gr._rsp1a import CaptureMethods
 from .._spec_names import SpecNames
@@ -15,8 +15,8 @@ from .._register import register_receiver
 
 @dataclass
 class Modes:
-    FIXED_CENTER_FREQUENCY  = CaptureModes.FIXED_CENTER_FREQUENCY
-    SWEPT_CENTER_FREQUENCY  = CaptureModes.SWEPT_CENTER_FREQUENCY
+    FIXED_CENTER_FREQUENCY  = CaptureMode.FIXED_CENTER_FREQUENCY
+    SWEPT_CENTER_FREQUENCY  = CaptureMode.SWEPT_CENTER_FREQUENCY
 
 @register_receiver("rsp1a")
 class RSP1A(SDRPlayReceiver):

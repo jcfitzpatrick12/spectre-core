@@ -11,7 +11,7 @@ from datetime import timedelta
 
 import os
 
-from spectre_core.capture_configs import CaptureConfig, PNames, CaptureModes
+from spectre_core.capture_configs import CaptureConfig, PName, CaptureMode
 from spectre_core.batches import SPECTREBatch
 from spectre_core.spectrograms import Spectrogram, time_average, frequency_average
 from .._base import BaseEventHandler, make_sft_instance
@@ -47,7 +47,7 @@ def _do_stfft(iq_data: np.array,
                   p0 = p0, 
                   p1 = p1)
     # assign physical frequencies to each spectral component
-    frequencies = sft.f + capture_config.get_parameter_value(PNames.CENTER_FREQUENCY) 
+    frequencies = sft.f + capture_config.get_parameter_value(PName.CENTER_FREQUENCY) 
 
     return times, frequencies, dynamic_spectra
 
@@ -78,7 +78,7 @@ def _build_spectrogram(batch: SPECTREBatch,
                        spectrum_type = "amplitude")
 
 
-@register_event_handler(CaptureModes.FIXED_CENTER_FREQUENCY)
+@register_event_handler(CaptureMode.FIXED_CENTER_FREQUENCY)
 class FixedEventHandler(BaseEventHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -97,10 +97,10 @@ class FixedEventHandler(BaseEventHandler):
                                         self._capture_config)
 
         spectrogram = time_average(spectrogram,
-                                   resolution = self._capture_config.get_parameter_value(PNames.TIME_RESOLUTION))
+                                   resolution = self._capture_config.get_parameter_value(PName.TIME_RESOLUTION))
 
         spectrogram = frequency_average(spectrogram,
-                                        resolution = self._capture_config.get_parameter_value(PNames.FREQUENCY_RESOLUTION))
+                                        resolution = self._capture_config.get_parameter_value(PName.FREQUENCY_RESOLUTION))
         
         self._cache_spectrogram(spectrogram)
 

@@ -7,27 +7,27 @@ from typing import Literal, overload, Type
 from spectre_core.exceptions import BatchNotFoundError
 from ._base import BaseBatch
 from ._register import batch_map
-from .plugins._batch_keys import BatchKeys
+from .plugins._batch_keys import BatchKey
 from .plugins._callisto import CallistoBatch
 from .plugins._iq_stream import IQStreamBatch
 
 
 @overload
 def get_batch_cls(
-    batch_key: Literal[BatchKeys.CALLISTO],
+    batch_key: Literal[BatchKey.CALLISTO],
 ) -> Type[CallistoBatch]:
     ...
 
 
 @overload
 def get_batch_cls(
-    batch_key: Literal[BatchKeys.IQ_STREAM],
+    batch_key: Literal[BatchKey.IQ_STREAM],
 ) -> Type[IQStreamBatch]:
     ...
 
 
 def get_batch_cls(
-    batch_key: Literal[BatchKeys.CALLISTO, BatchKeys.IQ_STREAM]
+    batch_key: Literal[BatchKey.CALLISTO, BatchKey.IQ_STREAM]
 ) -> Type[BaseBatch]:
     """Get a `Batch` plugin class.
 

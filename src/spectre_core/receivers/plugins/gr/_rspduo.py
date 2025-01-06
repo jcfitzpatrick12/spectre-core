@@ -23,7 +23,7 @@ from gnuradio import gr
 from gnuradio import spectre
 from gnuradio import sdrplay3
 
-from spectre_core.capture_configs import Parameters, PNames
+from spectre_core.capture_configs import Parameters, PName
 from spectre_core.config import get_batches_dir_path
 from ._base import capture
 
@@ -38,12 +38,12 @@ class _tuner_1_fixed_center_frequency(gr.top_block):
         ##################################################
         # Unpack capture config
         ##################################################
-        sample_rate = parameters.get_parameter_value(PNames.SAMPLE_RATE)
-        batch_size  = parameters.get_parameter_value(PNames.BATCH_SIZE)
-        center_freq = parameters.get_parameter_value(PNames.CENTER_FREQUENCY)
-        bandwidth   = parameters.get_parameter_value(PNames.BANDWIDTH)
-        if_gain     = parameters.get_parameter_value(PNames.IF_GAIN)
-        rf_gain     = parameters.get_parameter_value(PNames.RF_GAIN)
+        sample_rate = parameters.get_parameter_value(PName.SAMPLE_RATE)
+        batch_size  = parameters.get_parameter_value(PName.BATCH_SIZE)
+        center_freq = parameters.get_parameter_value(PName.CENTER_FREQUENCY)
+        bandwidth   = parameters.get_parameter_value(PName.BANDWIDTH)
+        if_gain     = parameters.get_parameter_value(PName.IF_GAIN)
+        rf_gain     = parameters.get_parameter_value(PName.RF_GAIN)
 
         ##################################################
         # Blocks
@@ -97,12 +97,12 @@ class _tuner_2_fixed_center_frequency(gr.top_block):
         ##################################################
         # Unpack capture config
         ##################################################
-        sample_rate = parameters.get_parameter_value(PNames.SAMPLE_RATE)
-        batch_size  = parameters.get_parameter_value(PNames.BATCH_SIZE)
-        center_freq = parameters.get_parameter_value(PNames.CENTER_FREQUENCY)
-        bandwidth   = parameters.get_parameter_value(PNames.BANDWIDTH)
-        if_gain     = parameters.get_parameter_value(PNames.IF_GAIN)
-        rf_gain     = parameters.get_parameter_value(PNames.RF_GAIN)
+        sample_rate = parameters.get_parameter_value(PName.SAMPLE_RATE)
+        batch_size  = parameters.get_parameter_value(PName.BATCH_SIZE)
+        center_freq = parameters.get_parameter_value(PName.CENTER_FREQUENCY)
+        bandwidth   = parameters.get_parameter_value(PName.BANDWIDTH)
+        if_gain     = parameters.get_parameter_value(PName.IF_GAIN)
+        rf_gain     = parameters.get_parameter_value(PName.RF_GAIN)
 
         ##################################################
         # Blocks
@@ -156,15 +156,15 @@ class _tuner_1_swept_center_frequency(gr.top_block):
         ##################################################
         # Unpack capture config
         ##################################################
-        sample_rate      = parameters.get_parameter_value(PNames.SAMPLE_RATE)
-        bandwidth        = parameters.get_parameter_value(PNames.BANDWIDTH)
-        min_frequency    = parameters.get_parameter_value(PNames.MIN_FREQUENCY)
-        max_frequency    = parameters.get_parameter_value(PNames.MAX_FREQUENCY)
-        frequency_step   = parameters.get_parameter_value(PNames.FREQUENCY_STEP)
-        samples_per_step = parameters.get_parameter_value(PNames.SAMPLES_PER_STEP)
-        if_gain          = parameters.get_parameter_value(PNames.IF_GAIN)
-        rf_gain          = parameters.get_parameter_value(PNames.RF_GAIN)
-        batch_size       = parameters.get_parameter_value(PNames.BATCH_SIZE)
+        sample_rate      = parameters.get_parameter_value(PName.SAMPLE_RATE)
+        bandwidth        = parameters.get_parameter_value(PName.BANDWIDTH)
+        min_frequency    = parameters.get_parameter_value(PName.MIN_FREQUENCY)
+        max_frequency    = parameters.get_parameter_value(PName.MAX_FREQUENCY)
+        frequency_step   = parameters.get_parameter_value(PName.FREQUENCY_STEP)
+        samples_per_step = parameters.get_parameter_value(PName.SAMPLES_PER_STEP)
+        if_gain          = parameters.get_parameter_value(PName.IF_GAIN)
+        rf_gain          = parameters.get_parameter_value(PName.RF_GAIN)
+        batch_size       = parameters.get_parameter_value(PName.BATCH_SIZE)
 
         ##################################################
         # Blocks

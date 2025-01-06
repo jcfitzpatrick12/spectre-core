@@ -6,7 +6,7 @@ from typing import Optional, TypeVar, Any, Generic, Callable
 from textwrap import dedent
 from copy import deepcopy
 
-from ._pnames import PNames
+from ._pnames import PName
 from ._pconstraints import PConstraint, PConstraints
 from ._parameters import Parameter
     
@@ -17,7 +17,7 @@ class PTemplate(Generic[VT]):
     with a given name can take.
     """
     def __init__(self,
-                 name: PNames,
+                 name: PName,
                  ptype: Callable[[Any], VT],
                  default: Optional[VT] = None,
                  nullable: bool = False,
@@ -44,7 +44,7 @@ class PTemplate(Generic[VT]):
 
 
     @property
-    def name(self) -> PNames:
+    def name(self) -> PName:
         """The name of the parameter."""
         return self._name
     
@@ -199,8 +199,8 @@ class PTemplate(Generic[VT]):
 # `default` values should be set, and `pconstraints` added according to specific SDR specs.
 # ------------------------------------------------------------------------------------------ # 
 
-_base_ptemplates: dict[PNames, PTemplate] = {
-    PNames.CENTER_FREQUENCY:       PTemplate(PNames.CENTER_FREQUENCY,       
+_base_ptemplates: dict[PName, PTemplate] = {
+    PName.CENTER_FREQUENCY:       PTemplate(PName.CENTER_FREQUENCY,       
                                              float, 
                                              help = """
                                                     The center frequency of the SDR in Hz.
@@ -210,7 +210,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_positive
                                                  ]),
-    PNames.MIN_FREQUENCY:          PTemplate(PNames.MIN_FREQUENCY,          
+    PName.MIN_FREQUENCY:          PTemplate(PName.MIN_FREQUENCY,          
                                              float, 
                                              help = """
                                                     The minimum center frequency, in Hz, for the frequency sweep.
@@ -218,7 +218,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_positive
                                                  ]),
-    PNames.MAX_FREQUENCY:          PTemplate(PNames.MAX_FREQUENCY,          
+    PName.MAX_FREQUENCY:          PTemplate(PName.MAX_FREQUENCY,          
                                              float, 
                                              help = """
                                                     The maximum center frequency, in Hz, for the frequency sweep.
@@ -226,7 +226,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_positive
                                                  ]),
-    PNames.FREQUENCY_STEP:         PTemplate(PNames.FREQUENCY_STEP,         
+    PName.FREQUENCY_STEP:         PTemplate(PName.FREQUENCY_STEP,         
                                              float, 
                                              help = """
                                                     The amount, in Hz, by which the center frequency is incremented
@@ -235,7 +235,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_positive
                                                  ]),
-    PNames.BANDWIDTH:              PTemplate(PNames.BANDWIDTH,              
+    PName.BANDWIDTH:              PTemplate(PName.BANDWIDTH,              
                                              float, 
                                              help = """
                                                     The frequency range in Hz the signal will occupy without
@@ -244,7 +244,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_positive
                                                  ]),
-    PNames.SAMPLE_RATE:            PTemplate(PNames.SAMPLE_RATE,            
+    PName.SAMPLE_RATE:            PTemplate(PName.SAMPLE_RATE,            
                                              int,   
                                              help = """
                                                     The number of samples per second in Hz.
@@ -252,7 +252,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_positive
                                                  ]),
-    PNames.IF_GAIN:                PTemplate(PNames.IF_GAIN,                
+    PName.IF_GAIN:                PTemplate(PName.IF_GAIN,                
                                              float, 
                                              help = """
                                                     The intermediate frequency gain, in dB.
@@ -261,7 +261,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_negative
                                                  ]),
-    PNames.RF_GAIN:                PTemplate(PNames.RF_GAIN,                
+    PName.RF_GAIN:                PTemplate(PName.RF_GAIN,                
                                              float, 
                                              help = """
                                                     The radio frequency gain, in dB.
@@ -270,19 +270,19 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_non_positive
                                                  ]),
-    PNames.EVENT_HANDLER_KEY:      PTemplate(PNames.EVENT_HANDLER_KEY,      
+    PName.EVENT_HANDLER_KEY:      PTemplate(PName.EVENT_HANDLER_KEY,      
                                              str,
                                              help = """
                                                     Identifies which post-processing functions to invoke
                                                     on newly created files.
                                                     """),
-    PNames.BATCH_KEY:              PTemplate(PNames.BATCH_KEY,              
+    PName.BATCH_KEY:              PTemplate(PName.BATCH_KEY,              
                                              str,
                                              help = """
                                                     Identifies the type of data is stored in each batch.
                                                     """,
                                              ),
-    PNames.WINDOW_SIZE:            PTemplate(PNames.WINDOW_SIZE,            
+    PName.WINDOW_SIZE:            PTemplate(PName.WINDOW_SIZE,            
                                              int,  
                                              help = """
                                                     The size of the window, in samples, when performing the
@@ -292,7 +292,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                                  PConstraints.enforce_positive, 
                                                  PConstraints.power_of_two
                                                  ]),
-    PNames.WINDOW_HOP:             PTemplate(PNames.WINDOW_HOP,             
+    PName.WINDOW_HOP:             PTemplate(PName.WINDOW_HOP,             
                                              int,   
                                              help = """
                                                     How much the window is shifted, in samples, 
@@ -301,21 +301,21 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_positive
                                                  ]),
-    PNames.WINDOW_TYPE:            PTemplate(PNames.WINDOW_TYPE,            
+    PName.WINDOW_TYPE:            PTemplate(PName.WINDOW_TYPE,            
                                              str,
                                              help = """
                                                     The type of window applied when performing the Short
                                                     Time FFT.
                                                     """,
                                              ),
-    PNames.WATCH_EXTENSION:        PTemplate(PNames.WATCH_EXTENSION,        
+    PName.WATCH_EXTENSION:        PTemplate(PName.WATCH_EXTENSION,        
                                              str,
                                              help = """
                                                     Post-processing is triggered by newly created files with this extension.
                                                     Extensions are specified without the '.' character.
                                                     """,
                                              ),
-    PNames.TIME_RESOLUTION:        PTemplate(PNames.TIME_RESOLUTION,        
+    PName.TIME_RESOLUTION:        PTemplate(PName.TIME_RESOLUTION,        
                                              float, 
                                              nullable=True,
                                              help = """
@@ -325,7 +325,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_non_negative
                                                  ]),
-    PNames.FREQUENCY_RESOLUTION:   PTemplate(PNames.FREQUENCY_RESOLUTION,   
+    PName.FREQUENCY_RESOLUTION:   PTemplate(PName.FREQUENCY_RESOLUTION,   
                                              float, 
                                              nullable=True,
                                              help = """
@@ -335,7 +335,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_non_negative
                                                  ]),
-    PNames.TIME_RANGE:             PTemplate(PNames.TIME_RANGE,             
+    PName.TIME_RANGE:             PTemplate(PName.TIME_RANGE,             
                                              float, 
                                              nullable=True,
                                              help = """
@@ -345,7 +345,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_non_negative
                                                  ]),
-    PNames.BATCH_SIZE:             PTemplate(PNames.BATCH_SIZE,             
+    PName.BATCH_SIZE:             PTemplate(PName.BATCH_SIZE,             
                                              int,   
                                              help = """
                                                     SDR data is collected in batches of this size, specified
@@ -354,7 +354,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_positive
                                                  ]),
-    PNames.SAMPLES_PER_STEP:       PTemplate(PNames.SAMPLES_PER_STEP,       
+    PName.SAMPLES_PER_STEP:       PTemplate(PName.SAMPLES_PER_STEP,       
                                              int,   
                                              help = """
                                                     The number of samples taken at each center frequency in the sweep.
@@ -364,59 +364,59 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_positive
                                                  ]),
-    PNames.ORIGIN:                 PTemplate(PNames.ORIGIN,
+    PName.ORIGIN:                 PTemplate(PName.ORIGIN,
                                              str,
                                              nullable=True,
                                              help="""
                                                   Corresponds to the FITS keyword ORIGIN.
                                                   """),
-    PNames.TELESCOPE:              PTemplate(PNames.TELESCOPE,
+    PName.TELESCOPE:              PTemplate(PName.TELESCOPE,
                                              str,
                                              nullable=True,
                                              help="""
                                                   Corresponds to the FITS keyword TELESCOP.
                                                   """),
-    PNames.INSTRUMENT:             PTemplate(PNames.INSTRUMENT,
+    PName.INSTRUMENT:             PTemplate(PName.INSTRUMENT,
                                              str,
                                              nullable=True,
                                              help="""
                                                   Corresponds to the FITS keyword INSTRUME.
                                                   """),
-    PNames.OBJECT:                 PTemplate(PNames.OBJECT,
+    PName.OBJECT:                 PTemplate(PName.OBJECT,
                                              str,
                                              nullable=True,
                                              help="""
                                                   Corresponds to the FITS keyword OBJECT.
                                                   """),
-    PNames.OBS_LAT:                PTemplate(PNames.OBS_LAT,
+    PName.OBS_LAT:                PTemplate(PName.OBS_LAT,
                                              float,
                                              nullable=True,
                                              help="""
                                                   Corresponds to the FITS keyword OBS_LAT.
                                                   """),
-    PNames.OBS_LON:                PTemplate(PNames.OBS_LON,
+    PName.OBS_LON:                PTemplate(PName.OBS_LON,
                                              float,
                                              nullable=True,
                                              help="""
                                                   Corresponds to the FITS keyword OBS_LONG.
                                                   """),
-    PNames.OBS_ALT:                PTemplate(PNames.OBS_ALT,
+    PName.OBS_ALT:                PTemplate(PName.OBS_ALT,
                                              float,
                                              nullable=True,
                                              help="""
                                                   Corresponds to the FITS keyword OBS_ALT.
                                                   """),
-    PNames.AMPLITUDE:              PTemplate(PNames.AMPLITUDE,
+    PName.AMPLITUDE:              PTemplate(PName.AMPLITUDE,
                                              float,
                                              help="""
                                                   The amplitude of the signal.
                                                   """),
-    PNames.FREQUENCY:              PTemplate(PNames.FREQUENCY,
+    PName.FREQUENCY:              PTemplate(PName.FREQUENCY,
                                              float,
                                              help="""
                                                   The frequency of the signal, in Hz.
                                                   """),
-    PNames.MIN_SAMPLES_PER_STEP:   PTemplate(PNames.MIN_SAMPLES_PER_STEP,
+    PName.MIN_SAMPLES_PER_STEP:   PTemplate(PName.MIN_SAMPLES_PER_STEP,
                                              int,
                                              help="""
                                                   The number of samples in the shortest step of the staircase.
@@ -424,7 +424,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                              pconstraints=[
                                                  PConstraints.enforce_positive
                                                  ]),
-    PNames.MAX_SAMPLES_PER_STEP:   PTemplate(PNames.MAX_SAMPLES_PER_STEP,
+    PName.MAX_SAMPLES_PER_STEP:   PTemplate(PName.MAX_SAMPLES_PER_STEP,
                                              int,
                                              help="""
                                                   The number of samples in the longest step of the staircase.
@@ -432,7 +432,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
                                             pconstraints=[
                                                   PConstraints.enforce_positive
                                                   ]),
-    PNames.STEP_INCREMENT:         PTemplate(PNames.STEP_INCREMENT,
+    PName.STEP_INCREMENT:         PTemplate(PName.STEP_INCREMENT,
                                              int,
                                              help="""
                                                   The length by which each step in the staircase is incremented.
@@ -446,7 +446,7 @@ _base_ptemplates: dict[PNames, PTemplate] = {
 
 
 def get_base_ptemplate(
-    pname: PNames,
+    pname: PName,
 ) -> PTemplate:
     """Get a pre-defined base parameter template, to be configured according to the specific use case.
 

@@ -4,7 +4,7 @@
 
 from ._register import event_handler_map
 from spectre_core.post_processing._base import BaseEventHandler
-from spectre_core.capture_configs import CaptureConfig, PNames
+from spectre_core.capture_configs import CaptureConfig, PName
 from spectre_core.exceptions import EventHandlerNotFoundError
 
 
@@ -19,7 +19,7 @@ def _get_event_handler_cls_from_key(event_handler_key: str) -> BaseEventHandler:
 
 def get_event_handler_cls_from_tag(tag: str) -> BaseEventHandler:
     capture_config = CaptureConfig(tag)
-    event_handler_key = capture_config.get_parameter_value(PNames.EVENT_HANDLER_KEY)
+    event_handler_key = capture_config.get_parameter_value(PName.EVENT_HANDLER_KEY)
     return _get_event_handler_cls_from_key(event_handler_key)
 
 

@@ -4,7 +4,7 @@
 
 from enum import Enum
 
-class BatchKeys(Enum):  
+class BatchKey(Enum):  
     """Keys bound to `Batch` plugin classes."""
     IQ_STREAM  = "iq-stream"
     CALLISTO   = "callisto"

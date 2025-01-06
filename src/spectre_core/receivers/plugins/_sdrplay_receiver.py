@@ -7,7 +7,7 @@ from typing import Callable, Optional
 from numbers import Number
 
 from spectre_core.capture_configs import (
-    CaptureTemplate, CaptureModes, Parameters, Bound, PValidators, PNames,
+    CaptureTemplate, CaptureMode, Parameters, Bound, PValidators, PName,
     get_base_capture_template, get_base_ptemplate, OneOf, CaptureConfig
 )
 from .._base import BaseReceiver
@@ -31,31 +31,31 @@ class SDRPlayReceiver(BaseReceiver):
         #
         # Create the base template
         #
-        capture_template = get_base_capture_template( CaptureModes.FIXED_CENTER_FREQUENCY )
-        capture_template.add_ptemplate( get_base_ptemplate(PNames.BANDWIDTH) )
-        capture_template.add_ptemplate( get_base_ptemplate(PNames.IF_GAIN) )
-        capture_template.add_ptemplate( get_base_ptemplate(PNames.RF_GAIN) )
+        capture_template = get_base_capture_template( CaptureMode.FIXED_CENTER_FREQUENCY )
+        capture_template.add_ptemplate( get_base_ptemplate(PName.BANDWIDTH) )
+        capture_template.add_ptemplate( get_base_ptemplate(PName.IF_GAIN) )
+        capture_template.add_ptemplate( get_base_ptemplate(PName.RF_GAIN) )
 
         #
         # Update the defaults
         #
         capture_template.set_defaults(
-            (PNames.BATCH_SIZE,            3.0),
-            (PNames.CENTER_FREQUENCY,      95800000),
-            (PNames.SAMPLE_RATE,           600000),
-            (PNames.BANDWIDTH,             600000),
-            (PNames.WINDOW_HOP,            512),
-            (PNames.WINDOW_SIZE,           1024),
-            (PNames.WINDOW_TYPE,           "blackman"),
-            (PNames.RF_GAIN,               -30),
-            (PNames.IF_GAIN,               -30)
+            (PName.BATCH_SIZE,            3.0),
+            (PName.CENTER_FREQUENCY,      95800000),
+            (PName.SAMPLE_RATE,           600000),
+            (PName.BANDWIDTH,             600000),
+            (PName.WINDOW_HOP,            512),
+            (PName.WINDOW_SIZE,           1024),
+            (PName.WINDOW_TYPE,           "blackman"),
+            (PName.RF_GAIN,               -30),
+            (PName.IF_GAIN,               -30)
         )   
 
         #
         # Adding pconstraints
         #
         capture_template.add_pconstraint(
-            PNames.CENTER_FREQUENCY,
+            PName.CENTER_FREQUENCY,
             [
                 Bound(
                     lower_bound=self.get_spec(SpecNames.FREQUENCY_LOWER_BOUND),
@@ -64,7 +64,7 @@ class SDRPlayReceiver(BaseReceiver):
             ]
         )
         capture_template.add_pconstraint(
-            PNames.SAMPLE_RATE,
+            PName.SAMPLE_RATE,
             [
                 Bound(
                     lower_bound=self.get_spec(SpecNames.SAMPLE_RATE_LOWER_BOUND),
@@ -73,7 +73,7 @@ class SDRPlayReceiver(BaseReceiver):
             ]
         )
         capture_template.add_pconstraint(
-            PNames.BANDWIDTH,
+            PName.BANDWIDTH,
             [
                 OneOf(
                     self.get_spec( SpecNames.BANDWIDTH_OPTIONS )
@@ -81,7 +81,7 @@ class SDRPlayReceiver(BaseReceiver):
             ]
         )
         capture_template.add_pconstraint(
-            PNames.IF_GAIN,
+            PName.IF_GAIN,
             [
                 Bound(
                     upper_bound=self.get_spec(SpecNames.IF_GAIN_UPPER_BOUND)
@@ -89,7 +89,7 @@ class SDRPlayReceiver(BaseReceiver):
             ]
         )
         capture_template.add_pconstraint(
-            PNames.RF_GAIN,
+            PName.RF_GAIN,
             [
                 Bound(
                     upper_bound=self.get_spec(SpecNames.RF_GAIN_UPPER_BOUND)
@@ -103,28 +103,28 @@ class SDRPlayReceiver(BaseReceiver):
         #
         # Create the base template
         #
-        capture_template = get_base_capture_template( CaptureModes.SWEPT_CENTER_FREQUENCY )
-        capture_template.add_ptemplate( get_base_ptemplate(PNames.BANDWIDTH) )
-        capture_template.add_ptemplate( get_base_ptemplate(PNames.IF_GAIN) )
-        capture_template.add_ptemplate( get_base_ptemplate(PNames.RF_GAIN) )
+        capture_template = get_base_capture_template( CaptureMode.SWEPT_CENTER_FREQUENCY )
+        capture_template.add_ptemplate( get_base_ptemplate(PName.BANDWIDTH) )
+        capture_template.add_ptemplate( get_base_ptemplate(PName.IF_GAIN) )
+        capture_template.add_ptemplate( get_base_ptemplate(PName.RF_GAIN) )
 
 
         #
         # Update the defaults
         #
         capture_template.set_defaults(
-            (PNames.BATCH_SIZE,            4.0),
-            (PNames.MIN_FREQUENCY,         95000000),
-            (PNames.MAX_FREQUENCY,         100000000),
-            (PNames.SAMPLES_PER_STEP,      80000),
-            (PNames.FREQUENCY_STEP,        1536000),
-            (PNames.SAMPLE_RATE,           1536000),
-            (PNames.BANDWIDTH,             1536000),
-            (PNames.WINDOW_HOP,            512),
-            (PNames.WINDOW_SIZE,           1024),
-            (PNames.WINDOW_TYPE,           "blackman"),
-            (PNames.RF_GAIN,               -30),
-            (PNames.IF_GAIN,               -30)
+            (PName.BATCH_SIZE,            4.0),
+            (PName.MIN_FREQUENCY,         95000000),
+            (PName.MAX_FREQUENCY,         100000000),
+            (PName.SAMPLES_PER_STEP,      80000),
+            (PName.FREQUENCY_STEP,        1536000),
+            (PName.SAMPLE_RATE,           1536000),
+            (PName.BANDWIDTH,             1536000),
+            (PName.WINDOW_HOP,            512),
+            (PName.WINDOW_SIZE,           1024),
+            (PName.WINDOW_TYPE,           "blackman"),
+            (PName.RF_GAIN,               -30),
+            (PName.IF_GAIN,               -30)
         )   
 
 
@@ -132,7 +132,7 @@ class SDRPlayReceiver(BaseReceiver):
         # Adding pconstraints
         #
         capture_template.add_pconstraint(
-            PNames.MIN_FREQUENCY,
+            PName.MIN_FREQUENCY,
             [
                 Bound(
                     lower_bound=self.get_spec(SpecNames.FREQUENCY_LOWER_BOUND),
@@ -141,7 +141,7 @@ class SDRPlayReceiver(BaseReceiver):
             ]
         )
         capture_template.add_pconstraint(
-            PNames.MAX_FREQUENCY,
+            PName.MAX_FREQUENCY,
             [
                 Bound(
                     lower_bound=self.get_spec(SpecNames.FREQUENCY_LOWER_BOUND),
@@ -150,7 +150,7 @@ class SDRPlayReceiver(BaseReceiver):
             ]
         )
         capture_template.add_pconstraint(
-            PNames.SAMPLE_RATE,
+            PName.SAMPLE_RATE,
             [
                 Bound(
                     lower_bound=self.get_spec(SpecNames.SAMPLE_RATE_LOWER_BOUND),
@@ -159,7 +159,7 @@ class SDRPlayReceiver(BaseReceiver):
             ]
         )
         capture_template.add_pconstraint(
-            PNames.BANDWIDTH,
+            PName.BANDWIDTH,
             [
                 OneOf(
                     self.get_spec( SpecNames.BANDWIDTH_OPTIONS )
@@ -167,7 +167,7 @@ class SDRPlayReceiver(BaseReceiver):
             ]
         )
         capture_template.add_pconstraint(
-            PNames.IF_GAIN,
+            PName.IF_GAIN,
             [
                 Bound(
                     upper_bound=self.get_spec(SpecNames.IF_GAIN_UPPER_BOUND)
@@ -175,7 +175,7 @@ class SDRPlayReceiver(BaseReceiver):
             ]
         )
         capture_template.add_pconstraint(
-            PNames.RF_GAIN,
+            PName.RF_GAIN,
             [
                 Bound(
                     upper_bound=self.get_spec(SpecNames.RF_GAIN_UPPER_BOUND)

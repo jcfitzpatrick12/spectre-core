@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Optional, Callable
 
 from spectre_core.capture_configs import (
-    CaptureTemplate, CaptureModes, Parameters, Bound, PValidators, PNames,
+    CaptureTemplate, CaptureMode, Parameters, Bound, PValidators, PName,
     get_base_capture_template, make_base_capture_template, get_base_ptemplate
 )
 from .gr._test import CaptureMethods
@@ -56,32 +56,32 @@ class Test(BaseReceiver):
         #
         # Create the base template
         #
-        capture_template = get_base_capture_template( CaptureModes.FIXED_CENTER_FREQUENCY )
-        capture_template.add_ptemplate( get_base_ptemplate(PNames.AMPLITUDE) )
-        capture_template.add_ptemplate( get_base_ptemplate(PNames.FREQUENCY) )
+        capture_template = get_base_capture_template( CaptureMode.FIXED_CENTER_FREQUENCY )
+        capture_template.add_ptemplate( get_base_ptemplate(PName.AMPLITUDE) )
+        capture_template.add_ptemplate( get_base_ptemplate(PName.FREQUENCY) )
 
         #
         # Update the defaults
         #
         capture_template.set_defaults(
-            (PNames.BATCH_SIZE,            3.0),
-            (PNames.CENTER_FREQUENCY,      16000),
-            (PNames.AMPLITUDE,             2.0),
-            (PNames.FREQUENCY,             32000),
-            (PNames.SAMPLE_RATE,           128000),
-            (PNames.WINDOW_HOP,            512),
-            (PNames.WINDOW_SIZE,           512),
-            (PNames.WINDOW_TYPE,           "boxcar")
+            (PName.BATCH_SIZE,            3.0),
+            (PName.CENTER_FREQUENCY,      16000),
+            (PName.AMPLITUDE,             2.0),
+            (PName.FREQUENCY,             32000),
+            (PName.SAMPLE_RATE,           128000),
+            (PName.WINDOW_HOP,            512),
+            (PName.WINDOW_SIZE,           512),
+            (PName.WINDOW_TYPE,           "boxcar")
         )
 
         #
         # Enforce defaults
         #
         capture_template.enforce_defaults(
-            PNames.TIME_RESOLUTION,
-            PNames.TIME_RANGE,
-            PNames.FREQUENCY_RESOLUTION,
-            PNames.WINDOW_TYPE
+            PName.TIME_RESOLUTION,
+            PName.TIME_RANGE,
+            PName.FREQUENCY_RESOLUTION,
+            PName.WINDOW_TYPE
         )
 
 
@@ -89,7 +89,7 @@ class Test(BaseReceiver):
         # Adding pconstraints
         #
         capture_template.add_pconstraint(
-            PNames.SAMPLE_RATE,
+            PName.SAMPLE_RATE,
             [
                 Bound(
                     lower_bound=self.get_spec(SpecNames.SAMPLE_RATE_LOWER_BOUND),
@@ -98,7 +98,7 @@ class Test(BaseReceiver):
             ]
         )
         capture_template.add_pconstraint(
-            PNames.FREQUENCY,
+            PName.FREQUENCY,
             [
                 Bound(
                     lower_bound=self.get_spec(SpecNames.FREQUENCY_LOWER_BOUND),
@@ -114,46 +114,46 @@ class Test(BaseReceiver):
         # Make the base template
         #
         capture_template = make_base_capture_template(
-                PNames.TIME_RESOLUTION,
-                PNames.FREQUENCY_RESOLUTION,
-                PNames.TIME_RANGE,
-                PNames.SAMPLE_RATE,
-                PNames.BATCH_SIZE,
-                PNames.WINDOW_TYPE,
-                PNames.WINDOW_HOP,
-                PNames.WINDOW_SIZE,
-                PNames.EVENT_HANDLER_KEY,
-                PNames.BATCH_KEY,
-                PNames.WATCH_EXTENSION,
-                PNames.MIN_SAMPLES_PER_STEP,
-                PNames.MAX_SAMPLES_PER_STEP,
-                PNames.FREQUENCY_STEP,
-                PNames.STEP_INCREMENT,
-                PNames.OBS_ALT,
-                PNames.OBS_LAT,
-                PNames.OBS_LON,
-                PNames.OBJECT,
-                PNames.ORIGIN,
-                PNames.TELESCOPE,
-                PNames.INSTRUMENT
+                PName.TIME_RESOLUTION,
+                PName.FREQUENCY_RESOLUTION,
+                PName.TIME_RANGE,
+                PName.SAMPLE_RATE,
+                PName.BATCH_SIZE,
+                PName.WINDOW_TYPE,
+                PName.WINDOW_HOP,
+                PName.WINDOW_SIZE,
+                PName.EVENT_HANDLER_KEY,
+                PName.BATCH_KEY,
+                PName.WATCH_EXTENSION,
+                PName.MIN_SAMPLES_PER_STEP,
+                PName.MAX_SAMPLES_PER_STEP,
+                PName.FREQUENCY_STEP,
+                PName.STEP_INCREMENT,
+                PName.OBS_ALT,
+                PName.OBS_LAT,
+                PName.OBS_LON,
+                PName.OBJECT,
+                PName.ORIGIN,
+                PName.TELESCOPE,
+                PName.INSTRUMENT
         )
 
         #
         # Update the defaults
         #
         capture_template.set_defaults(
-            (PNames.BATCH_SIZE,            3.0),
-            (PNames.FREQUENCY_STEP,        128000),
-            (PNames.MAX_SAMPLES_PER_STEP,  5000),
-            (PNames.MIN_SAMPLES_PER_STEP,  4000),
-            (PNames.SAMPLE_RATE,           128000),
-            (PNames.STEP_INCREMENT,        200),
-            (PNames.WINDOW_HOP,            512),
-            (PNames.WINDOW_SIZE,           512),
-            (PNames.WINDOW_TYPE,           "boxcar"),
-            (PNames.EVENT_HANDLER_KEY,     CaptureModes.SWEPT_CENTER_FREQUENCY),
-            (PNames.BATCH_KEY,             CaptureModes.SWEPT_CENTER_FREQUENCY),
-            (PNames.WATCH_EXTENSION,       "bin")
+            (PName.BATCH_SIZE,            3.0),
+            (PName.FREQUENCY_STEP,        128000),
+            (PName.MAX_SAMPLES_PER_STEP,  5000),
+            (PName.MIN_SAMPLES_PER_STEP,  4000),
+            (PName.SAMPLE_RATE,           128000),
+            (PName.STEP_INCREMENT,        200),
+            (PName.WINDOW_HOP,            512),
+            (PName.WINDOW_SIZE,           512),
+            (PName.WINDOW_TYPE,           "boxcar"),
+            (PName.EVENT_HANDLER_KEY,     CaptureMode.SWEPT_CENTER_FREQUENCY),
+            (PName.BATCH_KEY,             CaptureMode.SWEPT_CENTER_FREQUENCY),
+            (PName.WATCH_EXTENSION,       "bin")
         )
 
 
@@ -161,13 +161,13 @@ class Test(BaseReceiver):
         # Enforce defaults
         #
         capture_template.enforce_defaults(
-            PNames.TIME_RESOLUTION,
-            PNames.TIME_RANGE,
-            PNames.FREQUENCY_RESOLUTION,
-            PNames.WINDOW_TYPE,
-            PNames.EVENT_HANDLER_KEY,
-            PNames.BATCH_KEY,
-            PNames.WATCH_EXTENSION
+            PName.TIME_RESOLUTION,
+            PName.TIME_RANGE,
+            PName.FREQUENCY_RESOLUTION,
+            PName.WINDOW_TYPE,
+            PName.EVENT_HANDLER_KEY,
+            PName.BATCH_KEY,
+            PName.WATCH_EXTENSION
         )
 
         return capture_template
@@ -177,9 +177,9 @@ class Test(BaseReceiver):
         def pvalidator(parameters: Parameters):
             PValidators.window(parameters)
 
-            sample_rate          = parameters.get_parameter_value(PNames.SAMPLE_RATE)
-            frequency            = parameters.get_parameter_value(PNames.FREQUENCY)
-            window_size          = parameters.get_parameter_value(PNames.WINDOW_SIZE)
+            sample_rate          = parameters.get_parameter_value(PName.SAMPLE_RATE)
+            frequency            = parameters.get_parameter_value(PName.FREQUENCY)
+            window_size          = parameters.get_parameter_value(PName.WINDOW_SIZE)
 
             # check that the sample rate is an integer multiple of the underlying signal frequency
             if sample_rate % frequency != 0:
@@ -204,10 +204,10 @@ class Test(BaseReceiver):
         def pvalidator(parameters: Parameters):
             PValidators.window(parameters)
 
-            freq_step            = parameters.get_parameter_value(PNames.FREQUENCY_STEP)
-            sample_rate          = parameters.get_parameter_value(PNames.SAMPLE_RATE)
-            min_samples_per_step = parameters.get_parameter_value(PNames.MIN_SAMPLES_PER_STEP)
-            max_samples_per_step = parameters.get_parameter_value(PNames.MAX_SAMPLES_PER_STEP)
+            freq_step            = parameters.get_parameter_value(PName.FREQUENCY_STEP)
+            sample_rate          = parameters.get_parameter_value(PName.SAMPLE_RATE)
+            min_samples_per_step = parameters.get_parameter_value(PName.MIN_SAMPLES_PER_STEP)
+            max_samples_per_step = parameters.get_parameter_value(PName.MAX_SAMPLES_PER_STEP)
 
             if freq_step != sample_rate:
                 raise ValueError(f"The frequency step must be equal to the sampling rate")

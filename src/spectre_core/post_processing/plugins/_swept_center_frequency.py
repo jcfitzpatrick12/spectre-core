@@ -15,7 +15,7 @@ from scipy.signal import ShortTimeFFT
 
 from spectre_core.spectrograms import Spectrogram, time_average, frequency_average
 from spectre_core.config import TimeFormats
-from spectre_core.capture_configs import CaptureConfig, PNames, CaptureModes
+from spectre_core.capture_configs import CaptureConfig, PName, CaptureMode
 from spectre_core.batches import BaseBatch
 from spectre_core.batches import SweepMetadata
 from spectre_core.exceptions import InvalidSweepMetadataError
@@ -146,11 +146,11 @@ def _do_stfft(iq_data: np.ndarray,
 
     sft = make_sft_instance(capture_config)
 
-    frequency_step = capture_config.get_parameter_value(PNames.FREQUENCY_STEP)
+    frequency_step = capture_config.get_parameter_value(PName.FREQUENCY_STEP)
     _validate_center_frequencies_ordering(sweep_metadata.center_frequencies,
                                           frequency_step)
 
-    window_size = capture_config.get_parameter_value(PNames.WINDOW_SIZE)
+    window_size = capture_config.get_parameter_value(PName.WINDOW_SIZE)
 
     num_steps_per_sweep = _compute_num_steps_per_sweep(sweep_metadata.center_frequencies)
     num_full_sweeps = _compute_num_full_sweeps(sweep_metadata.center_frequencies)
@@ -178,7 +178,7 @@ def _do_stfft(iq_data: np.ndarray,
                       sft.f,
                       window_size)
     
-    sample_rate = capture_config.get_parameter_value(PNames.SAMPLE_RATE)
+    sample_rate = capture_config.get_parameter_value(PName.SAMPLE_RATE)
     _fill_times(times,
                 sweep_metadata.num_samples,
                 sample_rate,
@@ -292,7 +292,7 @@ def _build_spectrogram(batch: BaseBatch,
                                                                                     sweep_metadata)
         
         # since we have prepended extra samples, we need to correct the spectrogram start time appropriately
-        elapsed_time = num_samples_prepended * (1 / capture_config.get_parameter_value(PNames.SAMPLE_RATE))
+        elapsed_time = num_samples_prepended * (1 / capture_config.get_parameter_value(PName.SAMPLE_RATE))
         spectrogram_start_datetime -= timedelta(seconds = float(elapsed_time))
     
 
@@ -309,7 +309,7 @@ def _build_spectrogram(batch: BaseBatch,
                        spectrum_type = "amplitude")
 
 
-@register_event_handler(CaptureModes.SWEPT_CENTER_FREQUENCY)
+@register_event_handler(CaptureMode.SWEPT_CENTER_FREQUENCY)
 class SweptEventHandler(BaseEventHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -340,10 +340,10 @@ class SweptEventHandler(BaseEventHandler):
                                         previous_batch = self._previous_batch)
 
         spectrogram = time_average(spectrogram,
-                                   resolution = self._capture_config.get_parameter_value(PNames.TIME_RESOLUTION))
+                                   resolution = self._capture_config.get_parameter_value(PName.TIME_RESOLUTION))
 
         spectrogram = frequency_average(spectrogram,
-                                        resolution = self._capture_config.get_parameter_value(PNames.FREQUENCY_RESOLUTION))
+                                        resolution = self._capture_config.get_parameter_value(PName.FREQUENCY_RESOLUTION))
 
         self._cache_spectrogram(spectrogram)
 

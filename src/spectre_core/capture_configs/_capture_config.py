@@ -8,7 +8,7 @@ from typing import Optional
 from spectre_core._file_io import JsonHandler
 from spectre_core.config import get_configs_dir_path
 from spectre_core.exceptions import InvalidTagError
-from ._ptemplates import PNames
+from ._ptemplates import PName
 from ._parameters import (
     Parameter, 
     Parameters,
@@ -77,7 +77,7 @@ class CaptureConfig(JsonHandler):
 
 
     def get_parameter(self, 
-                      name: PNames) -> Parameter:
+                      name: PName) -> Parameter:
         """Get a parameter stored by the capture config.
 
         :param name: The name of the parameter.
@@ -88,7 +88,7 @@ class CaptureConfig(JsonHandler):
     
 
     def get_parameter_value(self,
-                            name: PNames) -> Optional[Parameter]:
+                            name: PName) -> Optional[Parameter]:
         """Get the value of a parameter stored by the capture config.
 
         :param name: The name of the parameter.

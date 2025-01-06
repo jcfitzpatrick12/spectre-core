@@ -24,7 +24,7 @@ from gnuradio import blocks
 from gnuradio import spectre
 from gnuradio import analog
 
-from spectre_core.capture_configs import Parameters, PNames
+from spectre_core.capture_configs import Parameters, PName
 from spectre_core.config import get_batches_dir_path
 from ._base import capture
 
@@ -38,10 +38,10 @@ class _cosine_signal_1(gr.top_block):
         ##################################################
         # Unpack capture config
         ##################################################
-        samp_rate   = parameters.get_parameter_value(PNames.SAMPLE_RATE)
-        batch_size  = parameters.get_parameter_value(PNames.BATCH_SIZE)
-        frequency   = parameters.get_parameter_value(PNames.FREQUENCY)
-        amplitude   = parameters.get_parameter_value(PNames.AMPLITUDE)
+        samp_rate   = parameters.get_parameter_value(PName.SAMPLE_RATE)
+        batch_size  = parameters.get_parameter_value(PName.BATCH_SIZE)
+        frequency   = parameters.get_parameter_value(PName.FREQUENCY)
+        amplitude   = parameters.get_parameter_value(PName.AMPLITUDE)
 
         ##################################################
         # Blocks
@@ -85,12 +85,12 @@ class _tagged_staircase(gr.top_block):
         ##################################################
         # Unpack capture config
         ##################################################
-        step_increment       = parameters.get_parameter_value(PNames.STEP_INCREMENT)
-        samp_rate            = parameters.get_parameter_value(PNames.SAMPLE_RATE)
-        min_samples_per_step = parameters.get_parameter_value(PNames.MIN_SAMPLES_PER_STEP)
-        max_samples_per_step = parameters.get_parameter_value(PNames.MAX_SAMPLES_PER_STEP)
-        frequency_step       = parameters.get_parameter_value(PNames.FREQUENCY_STEP)
-        batch_size           = parameters.get_parameter_value(PNames.BATCH_SIZE)
+        step_increment       = parameters.get_parameter_value(PName.STEP_INCREMENT)
+        samp_rate            = parameters.get_parameter_value(PName.SAMPLE_RATE)
+        min_samples_per_step = parameters.get_parameter_value(PName.MIN_SAMPLES_PER_STEP)
+        max_samples_per_step = parameters.get_parameter_value(PName.MAX_SAMPLES_PER_STEP)
+        frequency_step       = parameters.get_parameter_value(PName.FREQUENCY_STEP)
+        batch_size           = parameters.get_parameter_value(PName.BATCH_SIZE)
 
         ##################################################
         # Blocks

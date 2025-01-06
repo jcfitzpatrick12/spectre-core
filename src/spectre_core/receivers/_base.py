@@ -9,7 +9,7 @@ from numbers import Number
 from spectre_core.exceptions import ModeNotFoundError
 from ._spec_names import SpecNames
 from spectre_core.capture_configs import (
-    CaptureTemplate, CaptureModes, Parameters, Bound, PValidators, PNames,
+    CaptureTemplate, CaptureMode, Parameters, Bound, PValidators, PName,
     get_base_capture_template, get_base_ptemplate, OneOf, CaptureConfig
 )
 

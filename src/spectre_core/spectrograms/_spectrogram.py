@@ -12,7 +12,7 @@ import os
 import numpy as np
 from astropy.io import fits
 
-from spectre_core.capture_configs import CaptureConfig, PNames
+from spectre_core.capture_configs import CaptureConfig, PName
 from spectre_core.config import get_batches_dir_path, TimeFormats
 from ._array_operations import (
     find_closest_index,
@@ -41,7 +41,7 @@ class TimeCut:
     spectrum_type: str
 
 
-class TimeTypes(Enum):
+class TimeType(Enum):
     """Container to hold the different types of time we can assign to each spectrum in the dynamic spectra.
     
     'RELATIVE' is equivalent to 'elapsed time from the first spectrum'.
@@ -232,9 +232,9 @@ class Spectrogram:
             # Suppress divide by zero and invalid value warnings for this block of code
             with np.errstate(divide='ignore'):
                 # Depending on the spectrum type, compute the dBb values differently
-                if self._spectrum_type == SpectrumTypes.AMPLITUDE or self._spectrum_type == SpectrumTypes.DIGITS:
+                if self._spectrum_type == SpectrumType.AMPLITUDE or self._spectrum_type == SpectrumType.DIGITS:
                     self._dynamic_spectra_dBb = 10 * np.log10(self._dynamic_spectra / background_spectra)
-                elif self._spectrum_type == SpectrumTypes.POWER:
+                elif self._spectrum_type == SpectrumType.POWER:
                     self._dynamic_spectra_dBb = 20 * np.log10(self._dynamic_spectra / background_spectra)
                 else:
                     raise NotImplementedError(f"{self.spectrum_type} unrecognised, uncertain decibel conversion!")
@@ -350,7 +350,7 @@ class Spectrogram:
                      dBb: bool = False,
                      peak_normalise = False, 
                      correct_background = False, 
-                     return_time_type: str = TimeTypes.SECONDS) -> TimeCut:
+                     return_time_type: str = TimeType.SECONDS) -> TimeCut:
         """Get a cut of the dynamic spectra at a particular frequency.
 
         It is important to note that the 'at_frequency' as specified at input may not correspond exactly
@@ -361,9 +361,9 @@ class Spectrogram:
                                           enforce_strict_bounds = True)
         frequency_of_cut = self.frequencies[index_of_cut]
 
-        if return_time_type == TimeTypes.DATETIMES:
+        if return_time_type == TimeType.DATETIMES:
             times = self.datetimes
-        elif return_time_type == TimeTypes.SECONDS:
+        elif return_time_type == TimeType.SECONDS:
             times = self.times
         else:
             raise ValueError(f"Invalid return_time_type. Got {return_time_type}, expected one of 'datetimes' or 'seconds'")
@@ -416,13 +416,13 @@ def _save_spectrogram(spectrogram: Spectrogram) -> None:
     
     # get optional metadata from the capture config
     capture_config = CaptureConfig(spectrogram.tag)
-    ORIGIN    = capture_config.get_parameter_value(PNames.ORIGIN)
-    INSTRUME  = capture_config.get_parameter_value(PNames.INSTRUMENT)
-    TELESCOP  = capture_config.get_parameter_value(PNames.TELESCOPE)
-    OBJECT    = capture_config.get_parameter_value(PNames.OBJECT)
-    OBS_ALT   = capture_config.get_parameter_value(PNames.OBS_ALT)
-    OBS_LAT   = capture_config.get_parameter_value(PNames.OBS_LAT)
-    OBS_LON   = capture_config.get_parameter_value(PNames.OBS_LON)
+    ORIGIN    = capture_config.get_parameter_value(PName.ORIGIN)
+    INSTRUME  = capture_config.get_parameter_value(PName.INSTRUMENT)
+    TELESCOP  = capture_config.get_parameter_value(PName.TELESCOPE)
+    OBJECT    = capture_config.get_parameter_value(PName.OBJECT)
+    OBS_ALT   = capture_config.get_parameter_value(PName.OBS_ALT)
+    OBS_LAT   = capture_config.get_parameter_value(PName.OBS_LAT)
+    OBS_LON   = capture_config.get_parameter_value(PName.OBS_LON)
     
     # Primary HDU with data
     primary_data = spectrogram.dynamic_spectra.astype(dtype=np.float32) 

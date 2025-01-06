@@ -16,7 +16,7 @@ from astropy.io.fits.hdu.hdulist import HDUList
 from spectre_core.exceptions import InvalidSweepMetadataError
 from spectre_core.config import TimeFormats
 from spectre_core.spectrograms import Spectrogram
-from ._batch_keys import BatchKeys
+from ._batch_keys import BatchKey
 from .._base import BaseBatch, BatchFile
 from .._register import register_batch
 
@@ -249,7 +249,7 @@ class _FitsFile(BatchFile[Spectrogram]):
         return frequencies_MHz * 1e6 # convert to Hz
     
  
-@register_batch(BatchKeys.IQ_STREAM)
+@register_batch(BatchKey.IQ_STREAM)
 class IQStreamBatch(BaseBatch):
     """A batch of data derived from a stream of IQ samples from some receiver.
     

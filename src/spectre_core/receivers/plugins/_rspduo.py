@@ -6,7 +6,7 @@ from typing import Optional
 from dataclasses import dataclass
 
 from spectre_core.capture_configs import (
-    CaptureModes
+    CaptureMode
 )
 from .gr._rspduo import CaptureMethods
 from .._spec_names import SpecNames
@@ -15,9 +15,9 @@ from .._register import register_receiver
 
 @dataclass
 class Modes:
-    TUNER_1_FIXED_CENTER_FREQUENCY  = f"tuner-1-{CaptureModes.FIXED_CENTER_FREQUENCY}"
-    TUNER_2_FIXED_CENTER_FREQUENCY  = f"tuner-2-{CaptureModes.FIXED_CENTER_FREQUENCY}"
-    TUNER_1_SWEPT_CENTER_FREQUENCY  = f"tuner-1-{CaptureModes.SWEPT_CENTER_FREQUENCY}"
+    TUNER_1_FIXED_CENTER_FREQUENCY  = f"tuner-1-{CaptureMode.FIXED_CENTER_FREQUENCY}"
+    TUNER_2_FIXED_CENTER_FREQUENCY  = f"tuner-2-{CaptureMode.FIXED_CENTER_FREQUENCY}"
+    TUNER_1_SWEPT_CENTER_FREQUENCY  = f"tuner-1-{CaptureMode.SWEPT_CENTER_FREQUENCY}"
 
 
 @register_receiver("rspduo")

@@ -4,7 +4,7 @@
 
 from enum import Enum
 
-class PanelNames(Enum):
+class PanelName(Enum):
     """Defined panel names, each with a corresponding fully implemented `BasePanel` subclass."""
     SPECTROGRAM             = "spectrogram"
     FREQUENCY_CUTS          = "frequency_cuts"

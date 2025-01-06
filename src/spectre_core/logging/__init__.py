@@ -5,12 +5,12 @@
 
 """`spectre` logging configurations."""
 
-from ._process_types import ProcessTypes
+from ._process_types import ProcessType
 from ._decorators import log_call
 from ._configure import configure_root_logger
 from ._log_handlers import Log, Logs
 
 
 __all__ = [
-    "log_call", "configure_root_logger", "Log", "Logs", "ProcessTypes"
+    "log_call", "configure_root_logger", "Log", "Logs", "ProcessType"
 ]

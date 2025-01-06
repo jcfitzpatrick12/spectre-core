@@ -10,7 +10,7 @@ from typing import Optional, cast
 from scipy.signal import get_window
 
 from ._parameters import Parameters
-from ._pnames import PNames
+from ._pnames import PName
 
 
 # ----------------------------------------------------------------------- # 
@@ -33,10 +33,10 @@ def _validate_window(
     :raises ValueError: If the window interval is greater than the batch size.
     :raises ValueError: If a window cannot be fetched via the `get_window` SciPy function.
     """
-    window_size = cast(int, parameters.get_parameter_value(PNames.WINDOW_SIZE))
-    sample_rate = cast(int, parameters.get_parameter_value(PNames.SAMPLE_RATE))
-    batch_size  = cast(int, parameters.get_parameter_value(PNames.BATCH_SIZE))
-    window_type = cast(str, parameters.get_parameter_value(PNames.WINDOW_TYPE))
+    window_size = cast(int, parameters.get_parameter_value(PName.WINDOW_SIZE))
+    sample_rate = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
+    batch_size  = cast(int, parameters.get_parameter_value(PName.BATCH_SIZE))
+    window_type = cast(str, parameters.get_parameter_value(PName.WINDOW_TYPE))
     
     window_interval = window_size*(1 / sample_rate)
     if window_interval > batch_size:
@@ -59,8 +59,8 @@ def _validate_nyquist_criterion(
     :param parameters: The parameters to be validated.
     :raises ValueError: If the sample rate is less than the bandwidth.
     """
-    sample_rate = cast(int, parameters.get_parameter_value(PNames.SAMPLE_RATE))
-    bandwidth   = cast(float, parameters.get_parameter_value(PNames.BANDWIDTH))
+    sample_rate = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
+    bandwidth   = cast(float, parameters.get_parameter_value(PName.BANDWIDTH))
 
     if sample_rate < bandwidth:
         raise ValueError((f"Nyquist criterion has not been satisfied. "
@@ -92,9 +92,9 @@ def _validate_num_steps_per_sweep(
     :param parameters: The parameters to be validated.
     :raises ValueError: If the number of steps per sweep is less than or equal to one.
     """
-    min_freq    = cast(float, parameters.get_parameter_value(PNames.MIN_FREQUENCY))
-    max_freq    = cast(float, parameters.get_parameter_value(PNames.MAX_FREQUENCY))
-    freq_step   = cast(float, parameters.get_parameter_value(PNames.FREQUENCY_STEP))
+    min_freq    = cast(float, parameters.get_parameter_value(PName.MIN_FREQUENCY))
+    max_freq    = cast(float, parameters.get_parameter_value(PName.MAX_FREQUENCY))
+    freq_step   = cast(float, parameters.get_parameter_value(PName.FREQUENCY_STEP))
 
     num_steps_per_sweep = _compute_num_steps_per_sweep(min_freq, 
                                                        max_freq, 
@@ -112,12 +112,12 @@ def _validate_sweep_interval(
     :param parameters: The parameters to be validated.
     :raises ValueError: If the sweep interval is greater than the batch size.
     """
-    min_freq         = cast(float, parameters.get_parameter_value(PNames.MIN_FREQUENCY))
-    max_freq         = cast(float, parameters.get_parameter_value(PNames.MAX_FREQUENCY))
-    freq_step        = cast(float, parameters.get_parameter_value(PNames.FREQUENCY_STEP))
-    samples_per_step = cast(int, parameters.get_parameter_value(PNames.SAMPLES_PER_STEP))
-    batch_size       = cast(int, parameters.get_parameter_value(PNames.BATCH_SIZE))
-    sample_rate      = cast(int, parameters.get_parameter_value(PNames.SAMPLE_RATE))
+    min_freq         = cast(float, parameters.get_parameter_value(PName.MIN_FREQUENCY))
+    max_freq         = cast(float, parameters.get_parameter_value(PName.MAX_FREQUENCY))
+    freq_step        = cast(float, parameters.get_parameter_value(PName.FREQUENCY_STEP))
+    samples_per_step = cast(int, parameters.get_parameter_value(PName.SAMPLES_PER_STEP))
+    batch_size       = cast(int, parameters.get_parameter_value(PName.BATCH_SIZE))
+    sample_rate      = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
 
     num_steps_per_sweep = _compute_num_steps_per_sweep(min_freq, 
                                                        max_freq, 
@@ -138,8 +138,8 @@ def _validate_num_samples_per_step(
     :param parameters: The parameters to be validated.
     :raises ValueError: If the window size is greater than the number of samples per step.
     """
-    window_size      = cast(int, parameters.get_parameter_value(PNames.WINDOW_SIZE))
-    samples_per_step = cast(int, parameters.get_parameter_value(PNames.SAMPLES_PER_STEP))
+    window_size      = cast(int, parameters.get_parameter_value(PName.WINDOW_SIZE))
+    samples_per_step = cast(int, parameters.get_parameter_value(PName.SAMPLES_PER_STEP))
 
     if window_size >= samples_per_step:
         raise ValueError((f"Window size must be strictly less than the number of samples per step. "
@@ -156,8 +156,8 @@ def _validate_non_overlapping_steps(
     :raises NotImplementedError: If the spectrograms overlap in the frequency domain.
     """
     
-    freq_step   = cast(float, parameters.get_parameter_value(PNames.FREQUENCY_STEP))
-    sample_rate = cast(int, parameters.get_parameter_value(PNames.SAMPLE_RATE))
+    freq_step   = cast(float, parameters.get_parameter_value(PName.FREQUENCY_STEP))
+    sample_rate = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
 
     if freq_step < sample_rate:
         raise NotImplementedError(f"SPECTRE does not yet support spectral steps overlapping in frequency. "
@@ -176,8 +176,8 @@ def _validate_step_interval(
     :param api_retuning_latency: The empirically derived API retuning latency.
     :raises ValueError: If the time elapsed for a step is less than the API retuning latency.
     """
-    samples_per_step = cast(int, parameters.get_parameter_value(PNames.SAMPLES_PER_STEP))
-    sample_rate      = cast(int, parameters.get_parameter_value(PNames.SAMPLE_RATE))
+    samples_per_step = cast(int, parameters.get_parameter_value(PName.SAMPLES_PER_STEP))
+    sample_rate      = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
 
     step_interval = samples_per_step * 1/ sample_rate # [s]
     if step_interval < api_retuning_latency:

@@ -11,16 +11,16 @@ from scipy.signal import ShortTimeFFT, get_window
 
 from watchdog.events import FileSystemEventHandler, FileCreatedEvent
 
-from spectre_core.capture_configs import CaptureConfig, PNames
+from spectre_core.capture_configs import CaptureConfig, PName
 from spectre_core.spectrograms import Spectrogram, join_spectrograms
 
 
 def make_sft_instance(capture_config: CaptureConfig
 ) -> ShortTimeFFT:
-    sample_rate   = capture_config.get_parameter_value(PNames.SAMPLE_RATE)
-    window_hop    = capture_config.get_parameter_value(PNames.WINDOW_HOP)
-    window_type   = capture_config.get_parameter_value(PNames.WINDOW_TYPE)
-    window_size   = capture_config.get_parameter_value(PNames.WINDOW_SIZE)
+    sample_rate   = capture_config.get_parameter_value(PName.SAMPLE_RATE)
+    window_hop    = capture_config.get_parameter_value(PName.WINDOW_HOP)
+    window_type   = capture_config.get_parameter_value(PName.WINDOW_TYPE)
+    window_size   = capture_config.get_parameter_value(PName.WINDOW_SIZE)
     window = get_window(window_type, 
                         window_size)
     return ShortTimeFFT(window, 
@@ -38,7 +38,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         self._capture_config   = CaptureConfig(tag)
 
         # post processing is triggered by files with this extension
-        self._watch_extension = self._capture_config.get_parameter_value(PNames.WATCH_EXTENSION)
+        self._watch_extension = self._capture_config.get_parameter_value(PName.WATCH_EXTENSION)
 
         # store the next file to be processed (specifically, the absolute file path of the file)
         self._queued_file: Optional[str] = None
@@ -101,7 +101,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
             self._cached_spectrogram = join_spectrograms([self._cached_spectrogram, spectrogram])
 
         # if the time range is not specified
-        time_range = self._capture_config.get_parameter_value(PNames.TIME_RANGE) or 0.0
+        time_range = self._capture_config.get_parameter_value(PName.TIME_RANGE) or 0.0
   
         if self._cached_spectrogram.time_range >= time_range:
             self._flush_cache()

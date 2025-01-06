@@ -13,15 +13,15 @@ import matplotlib.dates as mdates
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from spectre_core.spectrograms import Spectrogram, TimeTypes
+from spectre_core.spectrograms import Spectrogram, TimeType
 from ._format import PanelFormat
-from ._panel_names import PanelNames
+from ._panel_names import PanelName
 
 
-class XAxisTypes(Enum):
+class XAxisType(Enum):
     """Defined x-axis types for a stack of panels.
     
-    Axes are shared between panels with common `XAxisTypes`.
+    Axes are shared between panels with common `XAxisType`.
     """
     TIME      = "time"
     FREQUENCY = "frequency"
@@ -40,7 +40,7 @@ class BasePanel(ABC):
     - The `xaxis_type` property, which enables axes sharing between panels in a a `PanelStack`.
     """
     def __init__(self, 
-                 name: PanelNames,
+                 name: PanelName,
                  spectrogram: Spectrogram):
         """Initialise an instance of `BasePanel`.
 
@@ -52,7 +52,7 @@ class BasePanel(ABC):
 
         # attributes set by `PanelStack` during stacking.
         self._panel_format: Optional[PanelFormat] = None
-        self._time_type   : Optional[TimeTypes]   = None
+        self._time_type   : Optional[TimeType]   = None
         self._ax          : Optional[Axes]        = None
         self._fig         : Optional[Figure]      = None
         self._identifier  : Optional[str]         = None
@@ -74,7 +74,7 @@ class BasePanel(ABC):
 
     @property
     @abstractmethod
-    def xaxis_type(self) -> XAxisTypes:
+    def xaxis_type(self) -> XAxisType:
         """Define the x-axis type for the panel. Enables panels to share axes in a `PanelStack`."""
 
 
@@ -91,19 +91,19 @@ class BasePanel(ABC):
     
 
     @property
-    def time_type(self) -> TimeTypes:
+    def time_type(self) -> TimeType:
         """The time type of the spectrogram."""
         return self._time_type
     
 
     @time_type.setter
-    def time_type(self, value: TimeTypes) -> None:
+    def time_type(self, value: TimeType) -> None:
         """Specify the `TimeType` for the spectrogram to control how time is represented and annotated on the panel."""
         self._time_type = value
     
 
     @property
-    def name(self) -> PanelNames:
+    def name(self) -> PanelName:
         """The name of the panel."""
         return self._name
     
@@ -195,19 +195,19 @@ class BaseTimeSeriesPanel(BasePanel):
     Subclasses must implement any remaining abstract methods as described by `BasePanel`.
     """    
     @property
-    def xaxis_type(self) -> XAxisTypes.TIME:
-        return XAxisTypes.TIME
+    def xaxis_type(self) -> XAxisType.TIME:
+        return XAxisType.TIME
     
     
     @property
     def times(self):
         """The times assigned to each spectrum according to the `TimeType`."""
-        return self.spectrogram.times if self.time_type == TimeTypes.RELATIVE else self.spectrogram.datetimes
+        return self.spectrogram.times if self.time_type == TimeType.RELATIVE else self.spectrogram.datetimes
     
 
     def annotate_xaxis(self):
         """Annotate the x-axis according to the specified `TimeType`."""
-        if self.time_type == TimeTypes.RELATIVE:
+        if self.time_type == TimeType.RELATIVE:
             self.ax.set_xlabel('Time [s]')
         else:
             self.ax.set_xlabel('Time [UTC]')
@@ -221,8 +221,8 @@ class BaseSpectrumPanel(BasePanel):
     Subclasses must implement any remaining abstract methods as described by `BasePanel`.
     """   
     @property
-    def xaxis_type(self) -> XAxisTypes.FREQUENCY:
-        return XAxisTypes.FREQUENCY
+    def xaxis_type(self) -> XAxisType.FREQUENCY:
+        return XAxisType.FREQUENCY
     
     
     @property

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from spectre_core.capture_configs import CaptureConfig, PNames
+from spectre_core.capture_configs import CaptureConfig, PName
 from spectre_core.exceptions import ModeNotFoundError
 from ._spectrogram import Spectrogram
 from ._array_operations import is_close
@@ -85,12 +85,12 @@ class _AnalyticalFactory:
                         num_spectrums: int,
                         capture_config: CaptureConfig) -> Spectrogram:
         # Extract necessary parameters from the capture configuration.
-        window_size      = capture_config.get_parameter_value(PNames.WINDOW_SIZE)
-        sample_rate      = capture_config.get_parameter_value(PNames.SAMPLE_RATE)
-        amplitude        = capture_config.get_parameter_value(PNames.AMPLITUDE)
-        frequency        = capture_config.get_parameter_value(PNames.FREQUENCY)
-        window_hop       = capture_config.get_parameter_value(PNames.WINDOW_HOP)
-        center_frequency = capture_config.get_parameter_value(PNames.CENTER_FREQUENCY)
+        window_size      = capture_config.get_parameter_value(PName.WINDOW_SIZE)
+        sample_rate      = capture_config.get_parameter_value(PName.SAMPLE_RATE)
+        amplitude        = capture_config.get_parameter_value(PName.AMPLITUDE)
+        frequency        = capture_config.get_parameter_value(PName.FREQUENCY)
+        window_hop       = capture_config.get_parameter_value(PName.WINDOW_HOP)
+        center_frequency = capture_config.get_parameter_value(PName.CENTER_FREQUENCY)
         # Calculate derived parameters a (sampling rate ratio) and p (sampled periods).
         a = int(sample_rate / frequency)
         p = int(window_size / a)
@@ -126,11 +126,11 @@ class _AnalyticalFactory:
                         num_spectrums: int,
                         capture_config: CaptureConfig) -> Spectrogram:
         # Extract necessary parameters from the capture configuration.
-        window_size          = capture_config.get_parameter_value(PNames.WINDOW_SIZE)
-        min_samples_per_step = capture_config.get_parameter_value(PNames.MIN_SAMPLES_PER_STEP)
-        max_samples_per_step = capture_config.get_parameter_value(PNames.MAX_SAMPLES_PER_STEP)
-        step_increment       = capture_config.get_parameter_value(PNames.STEP_INCREMENT)
-        samp_rate            = capture_config.get_parameter_value(PNames.SAMPLE_RATE)
+        window_size          = capture_config.get_parameter_value(PName.WINDOW_SIZE)
+        min_samples_per_step = capture_config.get_parameter_value(PName.MIN_SAMPLES_PER_STEP)
+        max_samples_per_step = capture_config.get_parameter_value(PName.MAX_SAMPLES_PER_STEP)
+        step_increment       = capture_config.get_parameter_value(PName.STEP_INCREMENT)
+        samp_rate            = capture_config.get_parameter_value(PName.SAMPLE_RATE)
 
         # Calculate step sizes and derived parameters.
         num_samples_per_step = np.arange(min_samples_per_step, max_samples_per_step + 1, step_increment)

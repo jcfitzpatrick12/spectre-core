@@ -5,11 +5,11 @@
 from copy import deepcopy
 from typing import Any, Iterator
 
-from ._capture_modes import CaptureModes
+from ._capture_modes import CaptureMode
 from ._parameters import Parameter, Parameters
 from ._pconstraints import PConstraint
 from ._ptemplates import PTemplate, get_base_ptemplate
-from ._ptemplates import PNames
+from ._ptemplates import PName
 
 class CaptureTemplate:
     """A managed collection of parameter templates. Strictly outlines what parameters should exists
@@ -18,11 +18,11 @@ class CaptureTemplate:
     def __init__(self) -> None:
         """Initialise a `CaptureTemplate` instance.
         """
-        self._ptemplates: dict[PNames, PTemplate] = {}
+        self._ptemplates: dict[PName, PTemplate] = {}
 
 
     @property
-    def name_list(self) -> list[PNames]:
+    def name_list(self) -> list[PName]:
         """The names of all allowed parameters in the capture template."""
         return list(self._ptemplates.keys())
     
@@ -37,7 +37,7 @@ class CaptureTemplate:
 
 
     def get_ptemplate(self,
-                      parameter_name: PNames) -> PTemplate:
+                      parameter_name: PName) -> PTemplate:
         """Get the parameter template corresponding to the parameter with the name `parameter_name`.
 
         :param parameter_name: The name of the parameter.
@@ -97,7 +97,7 @@ class CaptureTemplate:
 
 
     def set_default(self, 
-                    parameter_name: PNames, 
+                    parameter_name: PName, 
                     default: Any) -> None:
         """Set the default of an existing parameter template.
 
@@ -108,7 +108,7 @@ class CaptureTemplate:
 
 
     def set_defaults(self, 
-                     *ptuples: tuple[PNames, Any]) -> None:
+                     *ptuples: tuple[PName, Any]) -> None:
         """Update the defaults of multiple parameter templates.
 
         :param ptuples: Tuples of the form (`parameter_name`, `new_default`) to update defaults.
@@ -118,7 +118,7 @@ class CaptureTemplate:
 
 
     def enforce_default(self,
-                        parameter_name: PNames) -> None:
+                        parameter_name: PName) -> None:
         """Set the `enforce_default` attribute of an existing parameter template to True.
 
         :param parameter_name: The name of the parameter template to enforce its default value.
@@ -127,7 +127,7 @@ class CaptureTemplate:
 
 
     def enforce_defaults(self, 
-                         *parameter_names: PNames) -> None:
+                         *parameter_names: PName) -> None:
         """Set the `enforce_default` attribute of multiple existing parameter templates to True.
 
         :param parameter_names: The names of the parameter templates to enforce their default values.
@@ -137,7 +137,7 @@ class CaptureTemplate:
 
 
     def add_pconstraint(self,
-                        parameter_name: PNames,
+                        parameter_name: PName,
                         pconstraints: list[PConstraint]) -> None:
         """Add one or more `PConstraint` instances to an existing parameter template.
 
@@ -158,7 +158,7 @@ class CaptureTemplate:
     
     
 
-def make_base_capture_template(*pnames: PNames):
+def make_base_capture_template(*pnames: PName):
     """Make a capture template composed entirely of base `PTemplate` instances.
 
     :param pnames: The names of parameters to include in the capture template.
@@ -174,35 +174,35 @@ def _make_fixed_frequency_capture_template(
 ) -> CaptureTemplate:
     """The absolute minimum required parameters for any fixed frequency capture template."""
     capture_template = make_base_capture_template(
-        PNames.BATCH_SIZE,
-        PNames.CENTER_FREQUENCY,
-        PNames.BATCH_KEY,
-        PNames.EVENT_HANDLER_KEY,
-        PNames.FREQUENCY_RESOLUTION,
-        PNames.INSTRUMENT,
-        PNames.OBS_ALT,
-        PNames.OBS_LAT,
-        PNames.OBS_LON,
-        PNames.OBJECT,
-        PNames.ORIGIN,
-        PNames.SAMPLE_RATE,
-        PNames.TELESCOPE,
-        PNames.TIME_RANGE,
-        PNames.TIME_RESOLUTION,
-        PNames.WATCH_EXTENSION,
-        PNames.WINDOW_HOP,
-        PNames.WINDOW_SIZE,
-        PNames.WINDOW_TYPE,
+        PName.BATCH_SIZE,
+        PName.CENTER_FREQUENCY,
+        PName.BATCH_KEY,
+        PName.EVENT_HANDLER_KEY,
+        PName.FREQUENCY_RESOLUTION,
+        PName.INSTRUMENT,
+        PName.OBS_ALT,
+        PName.OBS_LAT,
+        PName.OBS_LON,
+        PName.OBJECT,
+        PName.ORIGIN,
+        PName.SAMPLE_RATE,
+        PName.TELESCOPE,
+        PName.TIME_RANGE,
+        PName.TIME_RESOLUTION,
+        PName.WATCH_EXTENSION,
+        PName.WINDOW_HOP,
+        PName.WINDOW_SIZE,
+        PName.WINDOW_TYPE,
     )
     capture_template.set_defaults(
-            (PNames.EVENT_HANDLER_KEY,     CaptureModes.FIXED_CENTER_FREQUENCY),
-            (PNames.BATCH_KEY,             "IQStreamBatch"),
-            (PNames.WATCH_EXTENSION,       "bin")
+            (PName.EVENT_HANDLER_KEY,     CaptureMode.FIXED_CENTER_FREQUENCY),
+            (PName.BATCH_KEY,             "IQStreamBatch"),
+            (PName.WATCH_EXTENSION,       "bin")
     )
     capture_template.enforce_defaults(
-        PNames.EVENT_HANDLER_KEY,
-        PNames.BATCH_KEY,
-        PNames.WATCH_EXTENSION
+        PName.EVENT_HANDLER_KEY,
+        PName.BATCH_KEY,
+        PName.WATCH_EXTENSION
     )
     return capture_template
 
@@ -210,49 +210,49 @@ def _make_swept_frequency_capture_template(
 ) -> CaptureTemplate:
     """The absolute minimum required parameters for any swept frequency capture template."""
     capture_template = make_base_capture_template(
-        PNames.BATCH_SIZE,
-        PNames.BATCH_KEY,
-        PNames.EVENT_HANDLER_KEY,
-        PNames.FREQUENCY_RESOLUTION,
-        PNames.FREQUENCY_STEP,
-        PNames.INSTRUMENT,
-        PNames.MAX_FREQUENCY,
-        PNames.MIN_FREQUENCY,
-        PNames.OBS_ALT,
-        PNames.OBS_LAT,
-        PNames.OBS_LON,
-        PNames.OBJECT,
-        PNames.ORIGIN,
-        PNames.SAMPLE_RATE,
-        PNames.SAMPLES_PER_STEP,
-        PNames.TELESCOPE,
-        PNames.TIME_RANGE,
-        PNames.TIME_RESOLUTION,
-        PNames.WATCH_EXTENSION,
-        PNames.WINDOW_HOP,
-        PNames.WINDOW_SIZE,
-        PNames.WINDOW_TYPE)
+        PName.BATCH_SIZE,
+        PName.BATCH_KEY,
+        PName.EVENT_HANDLER_KEY,
+        PName.FREQUENCY_RESOLUTION,
+        PName.FREQUENCY_STEP,
+        PName.INSTRUMENT,
+        PName.MAX_FREQUENCY,
+        PName.MIN_FREQUENCY,
+        PName.OBS_ALT,
+        PName.OBS_LAT,
+        PName.OBS_LON,
+        PName.OBJECT,
+        PName.ORIGIN,
+        PName.SAMPLE_RATE,
+        PName.SAMPLES_PER_STEP,
+        PName.TELESCOPE,
+        PName.TIME_RANGE,
+        PName.TIME_RESOLUTION,
+        PName.WATCH_EXTENSION,
+        PName.WINDOW_HOP,
+        PName.WINDOW_SIZE,
+        PName.WINDOW_TYPE)
     capture_template.set_defaults(
-            (PNames.EVENT_HANDLER_KEY,     CaptureModes.SWEPT_CENTER_FREQUENCY),
-            (PNames.BATCH_KEY,             "IQStreamBatch"),
-            (PNames.WATCH_EXTENSION,       "bin")
+            (PName.EVENT_HANDLER_KEY,     CaptureMode.SWEPT_CENTER_FREQUENCY),
+            (PName.BATCH_KEY,             "IQStreamBatch"),
+            (PName.WATCH_EXTENSION,       "bin")
     )
     capture_template.enforce_defaults(
-        PNames.EVENT_HANDLER_KEY,
-        PNames.BATCH_KEY,
-        PNames.WATCH_EXTENSION
+        PName.EVENT_HANDLER_KEY,
+        PName.BATCH_KEY,
+        PName.WATCH_EXTENSION
     )
     return capture_template
 
 
-_base_capture_templates: dict[CaptureModes, CaptureTemplate] = {
-    CaptureModes.FIXED_CENTER_FREQUENCY: _make_fixed_frequency_capture_template(),
-    CaptureModes.SWEPT_CENTER_FREQUENCY: _make_swept_frequency_capture_template()
+_base_capture_templates: dict[CaptureMode, CaptureTemplate] = {
+    CaptureMode.FIXED_CENTER_FREQUENCY: _make_fixed_frequency_capture_template(),
+    CaptureMode.SWEPT_CENTER_FREQUENCY: _make_swept_frequency_capture_template()
 }
 
 
 def get_base_capture_template(
-       capture_mode: CaptureModes
+       capture_mode: CaptureMode
 ) -> CaptureTemplate:
     """Get a pre-defined capture template, to be configured according to the specific use case.
 

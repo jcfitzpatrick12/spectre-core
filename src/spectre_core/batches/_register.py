@@ -5,13 +5,13 @@
 from typing import Type, Callable, Literal
 
 from ._base import BaseBatch
-from .plugins._batch_keys import BatchKeys
+from .plugins._batch_keys import BatchKey
 
 # Map populated at runtime via the `register_batch` decorator.
-batch_map: dict[BatchKeys, Type[BaseBatch]] = {}
+batch_map: dict[BatchKey, Type[BaseBatch]] = {}
 
 def register_batch(
-    batch_key: Literal[BatchKeys.IQ_STREAM, BatchKeys.CALLISTO]
+    batch_key: Literal[BatchKey.IQ_STREAM, BatchKey.CALLISTO]
 ) -> Callable:
     """Decorator to formally register a `Batch` plugin class under a defined `BatchKey`.
 
