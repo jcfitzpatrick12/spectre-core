@@ -44,7 +44,7 @@ def frequency_chop(input_spectrogram: Spectrogram,
                        transformed_frequencies,
                        input_spectrogram.tag,
                        input_spectrogram.start_datetime,
-                       input_spectrogram.spectrum_type)
+                       input_spectrogram.spectrum_unit)
 
 
 def time_chop(input_spectrogram: Spectrogram, 
@@ -87,7 +87,7 @@ def time_chop(input_spectrogram: Spectrogram,
                        input_spectrogram.frequencies, 
                        input_spectrogram.tag, 
                        transformed_start_datetime,
-                       input_spectrogram.spectrum_type)
+                       input_spectrogram.spectrum_unit)
 
 
 def time_average(input_spectrogram: Spectrogram, 
@@ -137,7 +137,7 @@ def time_average(input_spectrogram: Spectrogram,
                        input_spectrogram.frequencies, 
                        input_spectrogram.tag,
                        transformed_start_datetime,
-                       input_spectrogram.spectrum_type)
+                       input_spectrogram.spectrum_unit)
 
 
 
@@ -176,7 +176,7 @@ def frequency_average(input_spectrogram: Spectrogram,
                        transformed_frequencies, 
                        input_spectrogram.tag,
                        input_spectrogram.start_datetime,
-                       input_spectrogram.spectrum_type)
+                       input_spectrogram.spectrum_unit)
 
 
 def _time_elapsed(datetimes: np.ndarray) -> np.ndarray:
@@ -207,7 +207,7 @@ def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
             raise ValueError(f"All spectrograms must have identical frequency ranges")
         if spectrogram.tag != reference_spectrogram.tag:
             raise ValueError(f"All tags must be equal for each spectrogram in the input list!")
-        if spectrogram.spectrum_type != reference_spectrogram.spectrum_type:
+        if spectrogram.spectrum_unit != reference_spectrogram.spectrum_unit:
             raise ValueError(f"All units must be equal for each spectrogram in the input list!")
         if not spectrogram.start_datetime_is_set:
             raise ValueError(f"All spectrograms must have their start datetime set.")
@@ -234,4 +234,4 @@ def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
                        reference_spectrogram.frequencies, 
                        reference_spectrogram.tag, 
                        reference_spectrogram.start_datetime,
-                       reference_spectrogram.spectrum_type) 
+                       reference_spectrogram.spectrum_unit) 

@@ -12,7 +12,7 @@ from astropy.io.fits.hdu.image import PrimaryHDU
 from astropy.io.fits.hdu.table import BinTableHDU
 from astropy.io.fits.hdu.hdulist import HDUList
 
-from spectre_core.spectrograms import Spectrogram, SpectrumUnits
+from spectre_core.spectrograms import Spectrogram, SpectrumUnit
 from ._batch_keys import BatchKey
 from .._base import BaseBatch, BatchFile
 from .._register import register_batch
@@ -57,18 +57,18 @@ class _FitsFile(BatchFile[Spectrogram]):
             frequencies                = self._get_frequencies(bintable_hdu)
             bunit                      = self._get_bunit(primary_hdu)
 
-            # bunit is interpreted as a SpectrumUnits
-            spectrum_type = SpectrumUnits(bunit)
-            if spectrum_type == SpectrumUnits.DIGITS:
+            # bunit is interpreted as a SpectrumUnit
+            spectrum_unit = SpectrumUnit(bunit)
+            if spectrum_unit == SpectrumUnit.DIGITS:
                 dynamic_spectra_linearised = self._convert_units_to_linearised(dynamic_spectra)
                 return Spectrogram(dynamic_spectra_linearised[::-1, :], # reverse the spectra along the frequency axis
                                    times, 
                                    frequencies[::-1], # sort the frequencies in ascending order
                                    self.tag, 
                                    spectrogram_start_datetime,
-                                   spectrum_type)
+                                   spectrum_unit)
             else:
-                raise NotImplementedError(f"SPECTRE does not currently support spectrum type with BUNITS '{spectrum_type}'")   
+                raise NotImplementedError(f"SPECTRE does not currently support spectrum type with BUNITS '{spectrum_unit}'")   
 
 
     def _get_primary_hdu(self, hdulist: HDUList) -> PrimaryHDU:

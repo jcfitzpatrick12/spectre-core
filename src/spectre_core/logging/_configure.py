@@ -15,7 +15,8 @@ def configure_root_logger(
     process_type: ProcessType, 
     level: int = logging.INFO
 ) -> str:
-    """Sets up the root logger to write log messages to a date-based log file.
+    """Configures the root logger to write log messages to a file named based on 
+    the process type, PID, and start time.
 
     :param process_type: Indicates the type of process, as defined by `ProcessType`.
     :param level: The logging level, as defined in Python's `logging` module. Defaults to logging.INFO.

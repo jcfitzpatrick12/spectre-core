@@ -12,10 +12,9 @@ T = TypeVar('T')
 class BaseFileHandler(ABC, Generic[T]):
     """Base class for handling file operations with type safety.
 
-    This class uses Python Generics to enforce type definitions for the file contents.
     Derived classes must:
     - Implement the `_read` method, which defines how to read the file's contents.
-    - Explicitly specify the return type of `_read` using the `Generic[T]` parameter when subclassing.
+    - Explicitly specify the return type of `_read` using `Generic[]`  when subclassing.
 
     For example:
         class JsonHandler(BaseFileHandler[dict[str, Any]]):
@@ -51,7 +50,6 @@ class BaseFileHandler(ABC, Generic[T]):
 
         :return: The file contents.
         """
-        pass
     
     
     @property
@@ -170,7 +168,7 @@ class JsonHandler(BaseFileHandler[dict[str, Any]]):
     def save(self, 
              d: dict[str, Any], 
              force: bool = False) -> None:
-        """_summary_
+        """Save the input dictionary to file in the JSON file format.
 
         :param d: The dictionary to save.
         :param force: If True, overwrites the file if it already exists, defaults to False

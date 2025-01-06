@@ -31,7 +31,8 @@ def _validate_window(
 
     :param parameters: The parameters to be validated.
     :raises ValueError: If the window interval is greater than the batch size.
-    :raises ValueError: If a window cannot be fetched via the `get_window` SciPy function.
+    :raises ValueError: If the specified window type cannot be fetched using 
+    the SciPy `get_window` function.
     """
     window_size = cast(int, parameters.get_parameter_value(PName.WINDOW_SIZE))
     sample_rate = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
@@ -173,7 +174,7 @@ def _validate_step_interval(
     than the empirically derived API retuning latency.
 
     :param parameters: The parameters to be validated.
-    :param api_retuning_latency: The empirically derived API retuning latency.
+    :param api_retuning_latency: The empirically derived API retuning latency (in seconds).
     :raises ValueError: If the time elapsed for a step is less than the API retuning latency.
     """
     samples_per_step = cast(int, parameters.get_parameter_value(PName.SAMPLES_PER_STEP))

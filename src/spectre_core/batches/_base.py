@@ -21,7 +21,8 @@ class BatchFile(BaseFileHandler[T]):
         `<start time>_<tag>.<extension>`
 
     Here, `<start time>_<tag>` is referred to as the batch name. Files with the same batch name 
-    belong to the same batch. Subclass this as needed based on `BaseFileHandler` requirements.
+    belong to the same batch. Fully implement this subclass as needed based on `BaseFileHandler` 
+    requirements.
     """
     
 

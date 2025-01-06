@@ -27,13 +27,13 @@ def get_batch_cls(
 
 
 def get_batch_cls(
-    batch_key: Literal[BatchKey.CALLISTO, BatchKey.IQ_STREAM]
+    batch_key: BatchKey,
 ) -> Type[BaseBatch]:
-    """Get a `Batch` plugin class.
+    """Get a registered `BaseBatch` subclass.
 
-    :param batch_key: The key used to register the `Batch` class.
-    :raises BatchNotFoundError: If an undefined `batch_key` is provided.
-    :return: The `Batch` corresponding to the input key.
+    :param batch_key: The key used to register the `BaseBatch` subclass.
+    :raises BatchNotFoundError: If an invalid `batch_key` is provided.
+    :return: The `BaseBatch` subclass corresponding to the input key.
     """
     Batch = batch_map.get(batch_key)
     if Batch is None:

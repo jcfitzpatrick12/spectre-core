@@ -116,6 +116,7 @@ def _parse_string_parameter(
     :param string_parameter: A string representation of a capture configuration parameter.
     :raises ValueError: If the input parameter is not of the form `a=b`.
     :return: The parsed components of the input string parameter, using the `=` character as a separator.
+    The return list will always contain two elements.
     """
     if not string_parameter or '=' not in string_parameter:
         raise ValueError(f"Invalid format: '{string_parameter}'. Expected 'KEY=VALUE'.")

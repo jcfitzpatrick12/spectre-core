@@ -164,7 +164,13 @@ class Batches(Generic[T]):
         return self.batch_list[index]
 
 
-    def __getitem__(self, subscript: str | int):
+    def __getitem__(self, subscript: str | int) -> T:
+        """_summary_
+
+        :param subscript: If the subscript is a string, interpreted as a formatted start time. 
+        If the subscript is an integer, it is interpreted as a chronological index.
+        :return: The corresponding `BaseBatch` subclass.
+        """
         if isinstance(subscript, str):
             return self._get_from_start_time(subscript)
         elif isinstance(subscript, int):
@@ -175,12 +181,12 @@ class Batches(Generic[T]):
                                    start_time: str, 
                                    end_time: str) -> Spectrogram:
         """
-        Retrieve a spectrogram spanning the specified time range.
+        Retrieve a spectrogram spanning the specified time range. 
 
         :param start_time: The start time of the range (inclusive).
         :param end_time: The end time of the range (inclusive).
         :raises SpectrogramNotFoundError: If no spectrogram data is available within the specified time range.
-        :return: A spectrogram created by combining data from all matching batches.
+        :return: A spectrogram created by stitching together data from all matching batches.
         """
         # Convert input strings to datetime objects
         start_datetime = datetime.strptime(start_time, TimeFormat.DATETIME)

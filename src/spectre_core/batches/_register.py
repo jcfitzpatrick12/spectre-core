@@ -11,12 +11,13 @@ from .plugins._batch_keys import BatchKey
 batch_map: dict[BatchKey, Type[BaseBatch]] = {}
 
 def register_batch(
-    batch_key: Literal[BatchKey.IQ_STREAM, BatchKey.CALLISTO]
+    batch_key: BatchKey
 ) -> Callable:
-    """Decorator to formally register a `Batch` plugin class under a defined `BatchKey`.
+    """Decorator to register a `BaseBatch` subclass under a specified `BatchKey`.
 
-    :param batch_key: The key to register the `Batch` class under.
-    :return: A decorator that registers a `Batch` plugin class under the given `batch_key`.
+    :param batch_key: The key to register the `BaseBatch` subclass under.
+    :raises ValueError: If the provided `batch_key` is already registered.
+    :return: A decorator that registers the `BaseBatch` subclass under the given `batch_key`.
     """
     def decorator(cls: Type[BaseBatch]):
         if batch_key in batch_map:

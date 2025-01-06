@@ -15,7 +15,7 @@ from astropy.io.fits.hdu.hdulist import HDUList
 
 from spectre_core.exceptions import InvalidSweepMetadataError
 from spectre_core.config import TimeFormat
-from spectre_core.spectrograms import Spectrogram
+from spectre_core.spectrograms import Spectrogram, SpectrumUnit
 from ._batch_keys import BatchKey
 from .._base import BaseBatch, BatchFile
 from .._register import register_batch
@@ -192,19 +192,20 @@ class _FitsFile(BatchFile[Spectrogram]):
         with fits.open(self.file_path, mode='readonly') as hdulist:
             primary_hdu                = self._get_primary_hdu(hdulist)
             dynamic_spectra            = self._get_dynamic_spectra(primary_hdu)
-            spectrum_type              = self._get_bunit(primary_hdu)
+            bunit                      = self._get_bunit(primary_hdu)
             spectrogram_start_datetime = self._get_spectrogram_start_datetime(primary_hdu)
             bintable_hdu               = self._get_bintable_hdu(hdulist)
             times                      = self._get_times(bintable_hdu)
             frequencies                = self._get_frequencies(bintable_hdu)
             
-
+        # bunit is interpreted as a SpectrumUnit
+        spectrum_unit = SpectrumUnit(bunit)
         return Spectrogram(dynamic_spectra, 
                            times, 
                            frequencies, 
                            self.tag,
                            spectrogram_start_datetime,
-                           spectrum_type)
+                           spectrum_unit)
 
 
     def _get_primary_hdu(self, 

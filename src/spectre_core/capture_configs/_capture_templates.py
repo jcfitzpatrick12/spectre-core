@@ -7,12 +7,12 @@ from typing import Any, Iterator
 
 from ._capture_modes import CaptureMode
 from ._parameters import Parameter, Parameters
-from ._pconstraints import PConstraint
+from ._pconstraints import BasePConstraint
 from ._ptemplates import PTemplate, get_base_ptemplate
 from ._ptemplates import PName
 
 class CaptureTemplate:
-    """A managed collection of parameter templates. Strictly outlines what parameters should exists
+    """A managed collection of parameter templates. Strictly outlines what parameters should exist
     in a capture configuration file, and what the values of those parameters should look like. 
     """
     def __init__(self) -> None:
@@ -77,11 +77,12 @@ class CaptureTemplate:
 
     def apply_template(self,
                        parameters: Parameters) -> Parameters:
-        """Apply the capture template to the input parameters and return anew.
-
-        Missing parameters are replaced by defaults as per the stored parameter templates.
-        Each parameter template is applied to the corresponding parameter to ensure types
-        and constraints are satisfied.
+        """Apply the capture template to the input parameters. This involves:
+        
+        - Adding default parameters if they are missing with respect to this template.
+        - Type casting the value of each input parameter according to the corresponding 
+        parameter template.
+        - Validating the value of each input parameter against any corresponding pconstraints.
 
         :param parameters: The parameters to apply this capture template to.
         :return: A `Parameters` instance compliant with this template.
@@ -138,7 +139,7 @@ class CaptureTemplate:
 
     def add_pconstraint(self,
                         parameter_name: PName,
-                        pconstraints: list[PConstraint]) -> None:
+                        pconstraints: list[BasePConstraint]) -> None:
         """Add one or more `PConstraint` instances to an existing parameter template.
 
         :param parameter_name: The name of the parameter template to add constraints to.

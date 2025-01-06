@@ -61,7 +61,7 @@ class _FrequencyCutsPanel(BaseSpectrumPanel):
         elif self._peak_normalise:
             return # no y-axis label
         else:
-            self.ax.set_ylabel(f'{self._spectrogram.spectrum_type.capitalize()}')
+            self.ax.set_ylabel(f'{self._spectrogram.spectrum_unit.capitalize()}')
 
     
     def bind_to_colors(self):
@@ -140,7 +140,7 @@ class _TimeCutsPanel(BaseTimeSeriesPanel):
         elif self._peak_normalise:
             return # no y-axis label
         else:
-            self.ax.set_ylabel(f'{self._spectrogram.spectrum_type.capitalize()}')
+            self.ax.set_ylabel(f'{self._spectrogram.spectrum_unit.capitalize()}')
 
     
     def bind_to_colors(self):

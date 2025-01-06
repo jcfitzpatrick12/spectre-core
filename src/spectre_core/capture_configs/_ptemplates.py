@@ -7,14 +7,14 @@ from textwrap import dedent
 from copy import deepcopy
 
 from ._pnames import PName
-from ._pconstraints import PConstraint, PConstraints
+from ._pconstraints import PConstraint, BasePConstraint
 from ._parameters import Parameter
     
 VT = TypeVar('VT')
 
 class PTemplate(Generic[VT]):
-    """A parameter template. Constrains the value and type that a capture configuration parameter
-    with a given name can take.
+    """Constrains the value and type of a capture configuration parameter 
+    associated with a given name.
     """
     def __init__(self,
                  name: PName,
@@ -23,14 +23,14 @@ class PTemplate(Generic[VT]):
                  nullable: bool = False,
                  enforce_default: bool = False,
                  help: Optional[str] = None,
-                 pconstraints: Optional[list[PConstraint]] = None):
+                 pconstraints: Optional[list[BasePConstraint]] = None):
         """Initialise an instance of `PTemplate` and create a parameter template.
 
         :param name: The name of the parameter.
         :param ptype: The required type of the parameter value.
         :param default: The parameter value if not explicitly specified. Defaults to None.
         :param nullable: Whether the value of the parameter can be `None`. Defaults to False.
-        :param enforce_default: Whether the value must be that specified by `default`. Defaults to False.
+        :param enforce_default: Indicates whether the value must match the specified `default`. Defaults to False.
         :param help: A helpful description of what the parameter is and the value it stores. Defaults to None.
         :param pconstraints: Custom constraints to be applied to the value of the parameter. Defaults to None.
         """
@@ -40,7 +40,7 @@ class PTemplate(Generic[VT]):
         self._nullable = nullable
         self._enforce_default = enforce_default
         self._help = dedent(help).strip().replace("\n", " ") if help else "No help has been provided."
-        self._pconstraints: list[PConstraint] = pconstraints or []
+        self._pconstraints: list[BasePConstraint] = pconstraints or []
 
 
     @property
@@ -78,7 +78,7 @@ class PTemplate(Generic[VT]):
 
     @property
     def enforce_default(self) -> bool:
-        """Whether we force that the value must be that specified by `default`."""
+        """Indicates whether the value must match the specified `default`."""
         return self._enforce_default
     
 
@@ -98,7 +98,7 @@ class PTemplate(Generic[VT]):
     
     
     def add_pconstraint(self,
-                        pconstraint: PConstraint) -> None:
+                        pconstraint: BasePConstraint) -> None:
         """Add a parameter constraint to this template.
 
         :param pconstraint: A `PConstraint` instance compatible with the `ptype`.

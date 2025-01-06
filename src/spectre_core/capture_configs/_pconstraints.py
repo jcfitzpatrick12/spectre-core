@@ -12,7 +12,8 @@ class BasePConstraint(ABC, Generic[VT]):
     """An abstract base class for an arbitary parameter constraint.
     
     Derived classes must:
-    - Implement the `constraint` method, which defines how value of a parameter is to be constrainted.
+    - Implement the `constraint` method, which defines how the value of a parameter 
+    is to be constrainted.
     """
     @abstractmethod
     def constrain(self, value: VT) -> None:
@@ -48,7 +49,7 @@ class Bound(BasePConstraint[float | int]):
         self._strict_upper = strict_upper
 
     def constrain(self, value: float | int) -> None:
-        """Bound the parameter value to some interval.
+        """Bound the parameter value to a specified interval.
 
         :param value: The value to be constrained.
         :raises ValueError: If the value is outside the specified interval.

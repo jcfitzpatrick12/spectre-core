@@ -23,13 +23,20 @@ from ._array_operations import (
 )
 
 
+class SpectrumUnit(Enum):
+    """A container for defined units of dynamic spectra."""
+    AMPLITUDE = "amplitude"
+    POWER     = "power"
+    DIGITS    = "digits"
+    
+    
 @dataclass
 class FrequencyCut:
     """A container to hold a cut of a dynamic spectra at a particular instant of time."""
     time: float | datetime
     frequencies: np.ndarray
     cut: np.ndarray
-    spectrum_type: str
+    spectrum_unit: SpectrumUnit
 
 
 @dataclass
@@ -38,7 +45,7 @@ class TimeCut:
     frequency: float
     times: np.ndarray
     cut: np.ndarray
-    spectrum_type: str
+    spectrum_unit: SpectrumUnit
 
 
 class TimeType(Enum):
@@ -49,24 +56,31 @@ class TimeType(Enum):
     """
     RELATIVE   = "relative"
     DATETIMES  = "datetimes"
-    
-
-class SpectrumUnits(Enum):
-    """A container for defined units of dynamic spectra."""
-    AMPLITUDE = "amplitude"
-    POWER     = "power"
-    DIGITS    = "digits"
 
 
 class Spectrogram:
-    """A convenient, standardised wrapper for spectrogram data."""
+    """Standardised wrapper for spectrogram data.
+
+    This class provides a structured interface for storing, accessing, and
+    manipulating spectrogram data, along with associated metadata.
+    """
     def __init__(self, 
                  dynamic_spectra: np.ndarray,
                  times: np.ndarray, 
                  frequencies: np.ndarray, 
                  tag: str,
                  start_datetime: Optional[datetime] = None, 
-                 spectrum_type: Optional[str] = None): 
+                 spectrum_unit: Optional[SpectrumUnit] = None) -> None:
+        """Initialise an instance of `Spectrogram`.
+
+        :param dynamic_spectra: 2D array of spectrogram data.
+        :param times: The time values assigned to each spectrum.
+        :param frequencies: The physical frequency assigned to each spectral component.
+        :param tag: Identifier for the spectrogram.
+        :param start_datetime: Starting datetime for the spectrogram, defaults to None.
+        :param spectrum_unit: Unit of `dynamic_spectra` values, defaults to None.
+        :raises ValueError: If `times` does not start at 0 or shapes are inconsistent.
+        """
         
         # dynamic spectra
         self._dynamic_spectra = dynamic_spectra
@@ -81,7 +95,7 @@ class Spectrogram:
 
         # general metadata
         self._tag = tag
-        self._spectrum_type = spectrum_type
+        self._spectrum_unit = spectrum_unit
         
         # datetime information 
         self._start_datetime = start_datetime
@@ -194,9 +208,9 @@ class Spectrogram:
     
 
     @property
-    def spectrum_type(self) -> Optional[str]:
+    def spectrum_unit(self) -> Optional[str]:
         """The units of the dynamic spectra."""
-        return self._spectrum_type
+        return self._spectrum_unit
     
 
     @property
@@ -232,12 +246,12 @@ class Spectrogram:
             # Suppress divide by zero and invalid value warnings for this block of code
             with np.errstate(divide='ignore'):
                 # Depending on the spectrum type, compute the dBb values differently
-                if self._spectrum_type == SpectrumType.AMPLITUDE or self._spectrum_type == SpectrumType.DIGITS:
+                if self._spectrum_unit == SpectrumType.AMPLITUDE or self._spectrum_unit == SpectrumType.DIGITS:
                     self._dynamic_spectra_dBb = 10 * np.log10(self._dynamic_spectra / background_spectra)
-                elif self._spectrum_type == SpectrumType.POWER:
+                elif self._spectrum_unit == SpectrumType.POWER:
                     self._dynamic_spectra_dBb = 20 * np.log10(self._dynamic_spectra / background_spectra)
                 else:
-                    raise NotImplementedError(f"{self.spectrum_type} unrecognised, uncertain decibel conversion!")
+                    raise NotImplementedError(f"{self.spectrum_unit} unrecognised, uncertain decibel conversion!")
         return self._dynamic_spectra_dBb  
     
     
@@ -342,7 +356,7 @@ class Spectrogram:
         return FrequencyCut(time_of_cut, 
                             self._frequencies, 
                             cut, 
-                            self._spectrum_type)
+                            self._spectrum_unit)
 
         
     def get_time_cut(self,
@@ -394,7 +408,7 @@ class Spectrogram:
         return TimeCut(frequency_of_cut, 
                          times, 
                          cut,
-                         self.spectrum_type)
+                         self.spectrum_unit)
     
 
 def _seconds_of_day(dt: datetime) -> float:
@@ -469,7 +483,7 @@ def _save_spectrogram(spectrogram: Spectrogram) -> None:
 
     primary_hdu.header.set('BZERO', 0, 'scaling offset')
     primary_hdu.header.set('BSCALE', 1, 'scaling factor')
-    primary_hdu.header.set('BUNIT', f"{spectrogram.spectrum_type}", 'z-axis title') 
+    primary_hdu.header.set('BUNIT', f"{spectrogram.spectrum_unit}", 'z-axis title') 
 
     primary_hdu.header.set('DATAMIN', np.nanmin(spectrogram.dynamic_spectra), 'minimum element in image')
     primary_hdu.header.set('DATAMAX', np.nanmax(spectrogram.dynamic_spectra), 'maximum element in image')

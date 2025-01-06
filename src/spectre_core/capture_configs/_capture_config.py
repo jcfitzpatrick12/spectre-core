@@ -92,7 +92,8 @@ class CaptureConfig(JsonHandler):
         """Get the value of a parameter stored by the capture config.
 
         :param name: The name of the parameter.
-        :return: The value of the parameter corresponding to `name`.
+        :return: The value of the parameter corresponding to `name`. If the JSON value is
+        `null`, this method will return `None`.
         """
         return self.parameters.get_parameter_value(name)
 

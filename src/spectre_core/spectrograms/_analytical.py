@@ -119,7 +119,7 @@ class _AnalyticalFactory:
                            times,
                            frequencies,
                            'analytically-derived-spectrogram',
-                           spectrum_type="amplitude")
+                           spectrum_unit="amplitude")
 
 
     def tagged_staircase(self, 
@@ -167,7 +167,7 @@ class _AnalyticalFactory:
                            times,
                            frequencies,
                            'analytically-derived-spectrogram',
-                           spectrum_type="amplitude")
+                           spectrum_unit="amplitude")
     
 
 def get_analytical_spectrogram(num_spectrums: int,

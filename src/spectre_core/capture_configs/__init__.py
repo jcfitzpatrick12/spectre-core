@@ -16,12 +16,12 @@ from ._capture_templates import (
     CaptureTemplate, get_base_capture_template, make_base_capture_template
 )
 from ._pconstraints import (
-    PConstraint, PConstraints, Bound, OneOf
+    BasePConstraint, PConstraint, Bound, OneOf
 )
 
 __all__ = [
     "PTemplate", "PValidator", "CaptureConfig", "Parameter", "Parameters", "parse_string_parameters",
     "make_parameters", "CaptureTemplate", "CaptureMode", "get_base_capture_template", "make_base_capture_template"
-    "PConstraint", "PConstraints", "Bound", "OneOf", "make_base_capture_template", "PName",
-    "get_base_ptemplate"
+    "PConstraint", "PConstraint", "Bound", "OneOf", "make_base_capture_template", "PName",
+    "get_base_ptemplate", "BasePConstraint"
 ]

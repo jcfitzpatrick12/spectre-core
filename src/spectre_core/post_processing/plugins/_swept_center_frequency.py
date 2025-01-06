@@ -306,7 +306,7 @@ def _build_spectrogram(batch: BaseBatch,
                        frequencies,
                        batch.tag,
                        spectrogram_start_datetime,
-                       spectrum_type = "amplitude")
+                       spectrum_unit = "amplitude")
 
 
 @register_event_handler(CaptureMode.SWEPT_CENTER_FREQUENCY)

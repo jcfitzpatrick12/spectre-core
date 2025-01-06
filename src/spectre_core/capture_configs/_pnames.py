@@ -7,7 +7,7 @@ from enum import Enum
 class PName(Enum):
     """A centralised store of parameter names.
     
-    Each of `PName` has an associated base parameter template which can be fetched
+    Each `PName` has an associated base parameter template which can be fetched
     using:
     
     `get_base_ptemplate`
