@@ -10,6 +10,7 @@ from enum import Enum
 import os
 
 import numpy as np
+import numpy.typing as npt
 from astropy.io import fits
 
 from spectre_core.capture_configs import CaptureConfig, PName
@@ -24,7 +25,10 @@ from ._array_operations import (
 
 
 class SpectrumUnit(Enum):
-    """A container for defined units of dynamic spectra."""
+    """Defined units for dynamic spectra arrays.
+    
+    _Note_: Define these formally.
+    """
     AMPLITUDE = "amplitude"
     POWER     = "power"
     DIGITS    = "digits"
@@ -32,99 +36,97 @@ class SpectrumUnit(Enum):
     
 @dataclass
 class FrequencyCut:
-    """A container to hold a cut of a dynamic spectra at a particular instant of time."""
+    """A cut of a dynamic spectra, at a particular instant of time."""
     time: float | datetime
-    frequencies: np.ndarray
-    cut: np.ndarray
+    frequencies: npt.NDArray[np.float32]
+    cut: npt.NDArray[np.float32]
     spectrum_unit: SpectrumUnit
 
 
 @dataclass
 class TimeCut:
-    """A container to hold a cut of a dynamic spectra at a particular frequency."""
+    """A cut of a dynamic spectra, at some fixed frequency."""
     frequency: float
-    times: np.ndarray
-    cut: np.ndarray
+    times: npt.NDArray[np.float32]
+    cut: npt.NDArray[np.float32]
     spectrum_unit: SpectrumUnit
 
 
 class TimeType(Enum):
-    """Container to hold the different types of time we can assign to each spectrum in the dynamic spectra.
+    """Defined types of time we can assign to each spectrum in the dynamic spectra.
     
-    'RELATIVE' is equivalent to 'elapsed time from the first spectrum'.
-    'DATETIMES' is equivalent to 'the datetime associated with each spectrum'.
+    `RELATIVE` is equivalent to 'elapsed time from the first spectrum'.
+    `DATETIMES` is equivalent to 'the datetime associated with each spectrum'.
     """
     RELATIVE   = "relative"
     DATETIMES  = "datetimes"
 
 
 class Spectrogram:
-    """Standardised wrapper for spectrogram data.
-
-    This class provides a structured interface for storing, accessing, and
-    manipulating spectrogram data, along with associated metadata.
+    """Standardised wrapper for spectrogram data, providing a consistent
+    interface for storing, accessing, and manipulating spectrogram data, 
+    along with associated metadata.
     """
     def __init__(self, 
-                 dynamic_spectra: np.ndarray,
-                 times: np.ndarray, 
-                 frequencies: np.ndarray, 
-                 tag: str,
-                 start_datetime: Optional[datetime] = None, 
-                 spectrum_unit: Optional[SpectrumUnit] = None) -> None:
-        """Initialise an instance of `Spectrogram`.
+                 dynamic_spectra: npt.NDArray[np.float32],
+                 times          : npt.NDArray[np.float32], 
+                 frequencies    : npt.NDArray[np.float32], 
+                 tag            : str,
+                 start_datetime : Optional[datetime]     = None, 
+                 spectrum_unit  : Optional[SpectrumUnit] = None) -> None:
+        """Initialise a `Spectrogram` instance.
 
-        :param dynamic_spectra: 2D array of spectrogram data.
-        :param times: The time values assigned to each spectrum.
-        :param frequencies: The physical frequency assigned to each spectral component.
-        :param tag: Identifier for the spectrogram.
-        :param start_datetime: Starting datetime for the spectrogram, defaults to None.
-        :param spectrum_unit: Unit of `dynamic_spectra` values, defaults to None.
-        :raises ValueError: If `times` does not start at 0 or shapes are inconsistent.
+        :param dynamic_spectra: A 2D array of spectrogram data with shape 
+            (num_frequencies, num_times).
+        :param times: The physical times assigned to each spectrum. Specifically, a 1D array 
+        of time values in seconds, starting at 0, with size `num_times`.
+        :param frequencies: The physical frequencies assigned to each spectral component.
+        Specifically, a 1D array of frequency values in Hz, with size `num_frequencies`.
+        :param tag: A string identifier for the spectrogram (e.g., for grouping or metadata lookup).
+        :param start_datetime: Optional. The datetime corresponding to the first spectrum, defaults to None.
+        :param spectrum_unit: Optional. The unit of the `dynamic_spectra` values, defaults to None.
+        :raises ValueError: If `times` does not start at 0 or array shapes are inconsistent.
         """
         
-        # dynamic spectra
         self._dynamic_spectra = dynamic_spectra
-        self._dynamic_spectra_dBb: Optional[np.ndarray] = None # cache
 
-        # assigned times and frequencies
         if times[0] != 0:
             raise ValueError(f"The first spectrum must correspond to t=0")
-        
         self._times = times
+        
         self._frequencies = frequencies
-
-        # general metadata
         self._tag = tag
+        self._start_datetime = start_datetime
         self._spectrum_unit = spectrum_unit
         
-        # datetime information 
-        self._start_datetime = start_datetime
-        self._datetimes: Optional[list[datetime]] = None # cache
-        
-        # background metadata     
-        self._background_spectrum: Optional[np.ndarray] = None # cache
+        # by default, the background is evaluated over the whole spectrogram
         self._start_background_index = 0 
         self._end_background_index   = self.num_times 
-        # background interval can be set after instanitation.
-        self._start_background = None
-        self._end_background   = None
+        # the background interval can be set after instantiation
+        self._start_background: Optional[str]   = None
+        self._end_background  : Optional[str]   = None
         
         # finally check that the spectrogram arrays are matching in shape
         self._check_shapes()
 
 
     @property
-    def dynamic_spectra(self) -> np.ndarray:
-        """The dynamic spectra."""
+    def dynamic_spectra(self) -> npt.NDArray[np.float32]:
+        """The dynamic spectra array.
+        
+        Returns the 2D array of spectrogram data with shape 
+        (num_frequencies, num_times), where values are in the units specified 
+        by `spectrum_unit`.
+        """
         return self._dynamic_spectra
     
 
     @property
-    def times(self) -> np.ndarray:
-        """The physical time assigned to each spectrum.
-        
-        Equivalent to the 'seconds elapsed since the first spectrum'. So, by convention, the
-        first spectrum is at t=0.
+    def times(self) -> npt.NDArray[np.float32]:
+        """The time values assigned to each spectrum, in seconds.
+
+        This 1D array represents the elapsed time since the first spectrum, 
+        with the first value conventionally set to 0.
         """
         return self._times
     
@@ -137,37 +139,59 @@ class Spectrogram:
 
     @property
     def time_resolution(self) -> float:
-        """The time resolution of the dynamic spectra."""
+        """The time resolution of the dynamic spectra.
+
+        Represents the spacing between consecutive time values in the `times` array, 
+        calculated as the median difference between adjacent elements.
+        """
         return compute_resolution(self._times)
     
 
     @property
     def time_range(self) -> float:
-        """The time range of the dynamic spectra."""
+        """The time range of the dynamic spectra.
+
+        Represents the difference between the first and last time values 
+        in the `times` array.
+        """
         return compute_range(self._times)
     
 
     @property
     def frequencies(self) -> np.ndarray:
-        """The physical frequency assigned to each spectral component."""
+        """The physical frequencies assigned to each spectral component, in Hz.
+
+        Returns a 1D array with size `num_frequencies`.
+        """
         return self._frequencies
 
 
     @property
     def num_frequencies(self) -> int:
-        """The number of spectral components."""
+        """The number of spectral components in the spectrogram.
+
+        Equivalent to the size of the `frequencies` array.
+        """
         return len(self._frequencies)
     
     
     @property
     def frequency_resolution(self) -> float:
-        """The frequency resolution of the dynamic spectra."""
+        """The frequency resolution of the dynamic spectra.
+
+        Represents the spacing between consecutive frequency values in the 
+        `frequencies` array, calculated as the median difference between adjacent elements.
+        """
         return compute_resolution(self._frequencies)
     
 
     @property
     def frequency_range(self) -> float:
-        """The frequency range covered by the dynamic spectra."""
+        """The frequency range covered by the dynamic spectra.
+
+        Represents the difference between the minimum and maximum frequency 
+        values in the `frequencies` array.
+        """
         return compute_range(self._frequencies)
     
 
@@ -179,90 +203,120 @@ class Spectrogram:
 
     @property
     def start_datetime_is_set(self) -> bool:
-        """Returns true if the start datetime for the spectrogram has been set."""
+        """Indicates whether the start datetime for the spectrogram has been set."""
         return (self._start_datetime is not None)
     
     
     @property
     def start_datetime(self) -> datetime:
-        """The datetime assigned to the first spectrum in the dynamic spectra."""
+        """The datetime assigned to the first spectrum in the dynamic spectra.
+
+        :raises AttributeError: If the `start_datetime` has not been set.
+        """
         if self._start_datetime is None:
             raise AttributeError(f"A start time has not been set.")
         return self._start_datetime
     
     
-    def format_start_time(self,
-                          precise: bool = False) -> str:
-        """The datetime assigned to the first spectrum in the dynamic spectra, formatted as a string."""
-        if precise:
-            return datetime.strftime(self.start_datetime, TimeFormat.PRECISE_DATETIME)
-        return datetime.strftime(self.start_datetime, TimeFormat.DATETIME)
-    
-    
     @property
     def datetimes(self) -> list[datetime]:
-        """The datetimes associated with each spectrum in the dynamic spectra."""
-        if self._datetimes is None:
-            self._datetimes = [self.start_datetime + timedelta( seconds=(float(t)) ) for t in self._times]
-        return self._datetimes
+        """The datetimes associated with each spectrum in the dynamic spectra.
+
+        Returns a list of datetime objects, calculated by adding the elapsed 
+        times in the `times` array to the `start_datetime`.
+        """
+        return [self.start_datetime + timedelta( seconds=(float(t)) ) for t in self._times]
     
 
     @property
-    def spectrum_unit(self) -> Optional[str]:
-        """The units of the dynamic spectra."""
+    def spectrum_unit(self) -> Optional[SpectrumUnit]:
+        """The units associated with the `dynamic_spectra` array."""
         return self._spectrum_unit
     
 
     @property
     def start_background(self) -> Optional[str]:
-        """The start of the background interval, as a datetime string up to seconds precision."""
+        """The start of the background interval.
+
+        Returns a string-formatted datetime up to seconds precision, or None 
+        if the background interval has not been set.
+        """
         return self._start_background
     
 
     @property
     def end_background(self) -> Optional[str]:
-        """The end of the background interval, as a datetime string up to seconds precision."""
+        """The end of the background interval.
+
+        Returns a string-formatted datetime up to seconds precision, or None 
+        if the background interval has not been set.
+        """
         return self._end_background
     
-    
-    @property
-    def background_spectrum(self) -> np.ndarray:
-        """The background spectrum, computed by averaging the dynamic spectra according to the specified background interval.
-        
-        By default, the entire dynamic spectra is averaged over.
+
+    def compute_background_spectrum(self) -> npt.NDArray[np.float32]:
+        """Compute the background spectrum by averaging the dynamic spectra over time.
+
+        By default, the entire dynamic spectra is averaged. Use `set_background` 
+        to specify a custom background interval.
+
+        :return: A 1D array representing the time-averaged dynamic spectra 
+        over the specified background interval.
         """
-        if self._background_spectrum is None:
-            self._background_spectrum = np.nanmean(self._dynamic_spectra[:, self._start_background_index:self._end_background_index+1], 
+        return np.nanmean(self._dynamic_spectra[:, self._start_background_index:self._end_background_index+1], 
                                                    axis=-1)
-        return self._background_spectrum
     
 
-    @property
-    def dynamic_spectra_dBb(self) -> np.ndarray:
-        """The dynamic spectra in units of decibels above the background spectrum."""
-        if self._dynamic_spectra_dBb is None:
-            # Create an artificial spectrogram where each spectrum is identically the background spectrum
-            background_spectra = self.background_spectrum[:, np.newaxis]
-            # Suppress divide by zero and invalid value warnings for this block of code
-            with np.errstate(divide='ignore'):
-                # Depending on the spectrum type, compute the dBb values differently
-                if self._spectrum_unit == SpectrumType.AMPLITUDE or self._spectrum_unit == SpectrumType.DIGITS:
-                    self._dynamic_spectra_dBb = 10 * np.log10(self._dynamic_spectra / background_spectra)
-                elif self._spectrum_unit == SpectrumType.POWER:
-                    self._dynamic_spectra_dBb = 20 * np.log10(self._dynamic_spectra / background_spectra)
-                else:
-                    raise NotImplementedError(f"{self.spectrum_unit} unrecognised, uncertain decibel conversion!")
-        return self._dynamic_spectra_dBb  
+    def compute_dynamic_spectra_dBb(self) -> npt.NDArray[np.float32]:
+        """Compute the dynamic spectra in decibels above the background spectrum.
+
+        The computation applies logarithmic scaling based on the `spectrum_unit`. 
+        If `spectrum_unit` is unrecognised, the method raises a `NotImplementedError`.
+
+        :raises NotImplementedError: If the `spectrum_unit` is unrecognised.
+        :return: A 2D array with the same shape as `dynamic_spectra`, representing 
+        the values in decibels above the background.
+        """
+        # Create a 'background' spectrogram where each spectrum is identically the background spectrum
+        background_spectrum = self.compute_background_spectrum()
+        background_spectra = background_spectrum[:, np.newaxis]
+        # Suppress divide by zero and invalid value warnings for this block of code
+        with np.errstate(divide='ignore', invalid='ignore'):
+            if self._spectrum_unit == SpectrumUnit.AMPLITUDE or self._spectrum_unit == SpectrumUnit.DIGITS:
+                return 10 * np.log10(self._dynamic_spectra / background_spectra)
+            elif self._spectrum_unit == SpectrumUnit.POWER:
+                return 20 * np.log10(self._dynamic_spectra / background_spectra)
+            else:
+                raise NotImplementedError(f"{self._spectrum_unit} is unrecognised; decibel conversion is uncertain!")
+
+    
+    
+    def format_start_time(self,
+                          precise: bool = False) -> str:
+        """Format the datetime assigned to the first spectrum in the dynamic spectra.
+
+        :param precise: If True, formats the datetime with microsecond precision,
+        defaults to False.
+        :return: A string representation of the `start_datetime`.
+        """
+        if precise:
+            return datetime.strftime(self.start_datetime, TimeFormat.PRECISE_DATETIME)
+        return datetime.strftime(self.start_datetime, TimeFormat.DATETIME)
     
     
     def set_background(self, 
                        start_background: str, 
                        end_background: str) -> None:
-        """Public setter for start and end of the background"""
-        self._dynamic_spectra_dBb = None # reset cache
-        self._background_spectrum = None # reset cache
+        """Set the background interval for computing the background spectrum, and doing
+        background subtractions.
+
+        :param start_background: The start time of the background interval, formatted as 
+                                a string in `TimeFormat.DATETIME` (up to seconds precision).
+        :param end_background: The end time of the background interval, formatted as 
+                            a string in `TimeFormat.DATETIME` (up to seconds precision).
+        """
         self._start_background = start_background
-        self._end_background = end_background
+        self._end_background   = end_background
         self._update_background_indices_from_interval()
     
     
@@ -279,6 +333,7 @@ class Spectrogram:
 
 
     def _check_shapes(self) -> None:
+        """Check that the data array shapes are consistent with one another."""
         num_spectrogram_dims = np.ndim(self._dynamic_spectra)
         # Check if 'dynamic_spectra' is a 2D array
         if num_spectrogram_dims != 2:
@@ -293,14 +348,22 @@ class Spectrogram:
         
 
     def save(self) -> None:
-        """Save the spectrogram as a fits file."""
+        """Store the spectrogram and its associated metadata in a standard FITS file format."""
         _save_spectrogram(self)
     
 
     def integrate_over_frequency(self, 
                                  correct_background: bool = False, 
                                  peak_normalise: bool = False) -> np.ndarray[np.float32]:
-        """Return the dynamic spectra, numerically integrated over frequency."""
+        """Numerically integrate the spectrogram over the frequency axis.
+
+        :param correct_background: Indicates whether to subtract the background after
+        computing the integral, defaults to False
+        :param peak_normalise: Indicates whether to normalise the integral such that
+        the peak value is equal to unity, defaults to False
+        :return: A 1D array containing each spectrum numerically integrated over the 
+        frequency axis.
+        """
         # integrate over frequency
         I = np.trapz(self._dynamic_spectra, self._frequencies, axis=0)
 
@@ -317,10 +380,19 @@ class Spectrogram:
                           at_time: float | str,
                           dBb: bool = False,
                           peak_normalise: bool = False) -> FrequencyCut:
-        """Get a cut of the dynamic spectra at a particular instant of time.
+        """Retrieve a cut of the dynamic spectra at a specific time.
 
-        It is important to note that the 'at_time' as specified at input may not correspond exactly
-        to one of the times assigned to each spectrogram. 
+        If `at_time` does not match exactly with a time in `times`, the closest match 
+        is selected. The cut represents one of the spectrums in the spectrogram.
+
+        :param at_time: The requested time for the cut. If a string, it is parsed 
+        as a datetime. If a float, it is treated as elapsed time since the first spectrum.
+        :param dBb: If True, returns the cut in decibels above the background, 
+        defaults to False.
+        :param peak_normalise: If True, normalises the cut such that its peak value 
+        is equal to 1. Ignored if `dBb` is True, defaults to False.
+        :raises ValueError: If `at_time` is not a recognised type.
+        :return: A `FrequencyCut` object containing the spectral values and associated metadata.
         """
 
         if isinstance(at_time, str):
@@ -337,10 +409,10 @@ class Spectrogram:
             time_of_cut = self.times[index_of_cut]
         
         else:
-            raise ValueError(f"Type of at_time is unsupported: {type(at_time)}")
+            raise ValueError(f"'at_time' type '{type(at_time)}' is unsupported.")
         
         if dBb:
-            ds = self.dynamic_spectra_dBb
+            ds = self.compute_dynamic_spectra_dBb()
         else:
             ds = self._dynamic_spectra
         
@@ -364,12 +436,27 @@ class Spectrogram:
                      dBb: bool = False,
                      peak_normalise = False, 
                      correct_background = False, 
-                     return_time_type: str = TimeType.SECONDS) -> TimeCut:
-        """Get a cut of the dynamic spectra at a particular frequency.
+                     return_time_type: str = TimeType.RELATIVE) -> TimeCut:
+        """Retrieve a cut of the dynamic spectra at a specific frequency.
 
-        It is important to note that the 'at_frequency' as specified at input may not correspond exactly
-        to one of the times assigned to each spectrogram. 
+        If `at_frequency` does not exactly match a frequency in `frequencies`, the 
+        closest match is selected. The cut represents the time series of some spectral
+        component.
+
+        :param at_frequency: The requested frequency for the cut, in Hz.
+        :param dBb: If True, returns the cut in decibels above the background. 
+                    Defaults to False.
+        :param peak_normalise: If True, normalises the cut so its peak value is 1. 
+                            Ignored if `dBb` is True. Defaults to False.
+        :param correct_background: If True, subtracts the background from the cut. 
+                                Ignored if `dBb` is True. Defaults to False.
+        :param return_time_type: Specifies the type of time values in the cut 
+                                (`TimeType.RELATIVE` or `TimeType.DATETIMES`). 
+                                Defaults to `TimeType.RELATIVE`.
+        :raises ValueError: If `return_time_type` is not recognised.
+        :return: A `TimeCut` object containing the temporal values and associated metadata.
         """
+
         index_of_cut = find_closest_index(at_frequency, 
                                           self._frequencies, 
                                           enforce_strict_bounds = True)
@@ -377,14 +464,14 @@ class Spectrogram:
 
         if return_time_type == TimeType.DATETIMES:
             times = self.datetimes
-        elif return_time_type == TimeType.SECONDS:
+        elif return_time_type == TimeType.RELATIVE:
             times = self.times
         else:
             raise ValueError(f"Invalid return_time_type. Got {return_time_type}, expected one of 'datetimes' or 'seconds'")
 
         # dependent on the requested cut type, we return the dynamic spectra in the preferred units
         if dBb:
-            ds = self.dynamic_spectra_dBb
+            ds = self.compute_dynamic_spectra_dBb()
         else:
             ds = self.dynamic_spectra
         
@@ -406,9 +493,9 @@ class Spectrogram:
                 cut = normalise_peak_intensity(cut)
 
         return TimeCut(frequency_of_cut, 
-                         times, 
-                         cut,
-                         self.spectrum_unit)
+                       times, 
+                       cut,
+                       self.spectrum_unit)
     
 
 def _seconds_of_day(dt: datetime) -> float:
@@ -418,7 +505,11 @@ def _seconds_of_day(dt: datetime) -> float:
 
 # Function to create a FITS file with the specified structure
 def _save_spectrogram(spectrogram: Spectrogram) -> None:
+    """Save the input spectrogram and associated metadata to a fits file. Some metadata
+    will be fetched from the corresponding capture config.
     
+    :param spectrogram: The spectrogram containing the data to be saved.
+    """
     # making the write path
     batch_parent_path = get_batches_dir_path(year  = spectrogram.start_datetime.year,
                                              month = spectrogram.start_datetime.month,
