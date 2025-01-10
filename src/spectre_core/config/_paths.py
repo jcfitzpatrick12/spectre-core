@@ -26,7 +26,7 @@ from typing import Optional
 
 
 _SPECTRE_DATA_DIR_PATH = os.environ.get("SPECTRE_DATA_DIR_PATH", "NOTSET")
-if _SPECTRE_DATA_DIR_PATH is "NOTSET":
+if _SPECTRE_DATA_DIR_PATH == "NOTSET":
     raise ValueError("The environment variable SPECTRE_DATA_DIR_PATH has not been set")
 
 _BATCHES_DIR_PATH = os.environ.get("SPECTRE_BATCHES_DIR_PATH", 

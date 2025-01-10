@@ -24,19 +24,19 @@ class BatchFile(BaseFileHandler[T]):
     belong to the same batch. Fully implement this subclass as needed based on `BaseFileHandler` 
     requirements.
     """
-    
-
-    def __init__(self, 
-                 batch_parent_dir_path: str, 
-                 batch_name: str, 
-                 extension: str) -> None:
+    def __init__(
+        self, 
+        batch_parent_dir_path: str, 
+        batch_name: str, 
+        extension: str
+    ) -> None:
         """Initialise a `BatchFile` instance.
 
         :param batch_parent_dir_path: Parent directory of the batch.
         :param batch_name: Base file name, composed of the batch start time and tag.
         :param extension: File extension.
         """
-        # no cache, as batch files should always be static in content when reading
+        # Explictly enable caching, as batch files should always be static in content when reading
         super().__init__(batch_parent_dir_path, 
                          batch_name, 
                          extension,
@@ -47,13 +47,17 @@ class BatchFile(BaseFileHandler[T]):
    
    
     @property
-    def start_time(self) -> str:
+    def start_time(
+        self
+    ) -> str:
         """The start time of the batch, formatted as a string up to seconds precision."""
         return self._start_time
 
 
     @property
-    def start_datetime(self) -> datetime:
+    def start_datetime(
+        self
+    ) -> datetime:
         """The start time of the batch, parsed as a datetime up to seconds precision."""
         # the start datetime is lazily computed, if it is required.
         if self._start_datetime is None:
@@ -62,13 +66,15 @@ class BatchFile(BaseFileHandler[T]):
     
 
     @property
-    def tag(self) -> str:
+    def tag(
+        self
+    ) -> str:
         """The batch name tag."""
         return self._tag
          
  
 class BaseBatch(ABC):
-    """Abstract base class representing a group of data files for a common time interval.
+    """Abstract base class representing a group of data files over a common time interval.
 
     All files in a batch share a base file name and differ only by their extension. 
     `BaseBatch` subclasses define the expected data for each file extension and provide 
@@ -76,12 +82,14 @@ class BaseBatch(ABC):
 
     Derived classes must:
     - Implement the `spectrogram_file` abstract property, as all batches in SPECTRE 
-    must include a `BatchFile` subclass containing spectrogram data.
+    must include some file containing spectrogram data.
     - Expose `BatchFile` instances directly as attributes.
     """
-    def __init__(self, 
-                 start_time: str,
-                 tag: str) -> None:
+    def __init__(
+        self, 
+        start_time: str,
+        tag: str
+    ) -> None:
         """Initialise a `BaseBatch` instance.
 
         :param start_time: Start time of the batch as a string with seconds precision.
@@ -97,42 +105,56 @@ class BaseBatch(ABC):
     
     @property
     @abstractmethod
-    def spectrogram_file(self) -> BatchFile:
+    def spectrogram_file(
+        self
+    ) -> BatchFile:
         """The batch file which contains spectrogram data."""
  
     
     @property
-    def start_time(self) -> str:
+    def start_time(
+        self
+    ) -> str:
         """The start time of the batch, formatted as a string up to seconds precision."""
         return self._start_time
 
 
     @property
-    def start_datetime(self) -> datetime:
+    def start_datetime(
+        self
+    ) -> datetime:
         """The start time of the batch, parsed as a datetime up to seconds precision."""
         return self._start_datetime
     
     
     @property
-    def tag(self) -> str:
+    def tag(
+        self
+    ) -> str:
         """The batch name tag."""
         return self._tag
     
 
     @property
-    def parent_dir_path(self) -> str:
+    def parent_dir_path(
+        self
+    ) -> str:
         """The parent directory for the batch."""
         return self._parent_dir_path
 
 
     @property
-    def name(self) -> str:
+    def name(
+        self
+    ) -> str:
         """Return the base file name shared by all files in the batch, 
         composed of the start time and tag identifier."""
         return f"{self._start_time}_{self._tag}"
     
 
-    def read_spectrogram(self) -> Spectrogram:
+    def read_spectrogram(
+        self
+    ) -> Spectrogram:
         """Read and return the spectrogram data stored in the batch.
 
         :return: The spectrogram stored by the batch `spectrogram_file`.

@@ -10,8 +10,7 @@ import numpy as np
 
 from spectre_core.capture_configs import CaptureConfig, PName
 from spectre_core.exceptions import ModeNotFoundError
-from spectre_core.spectrograms import SpectrumUnit
-from ._spectrogram import Spectrogram
+from ._spectrogram import Spectrogram, SpectrumUnit
 from ._array_operations import is_close
 
 @dataclass

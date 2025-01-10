@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Type, Callable, Literal
+from typing import Type, Callable, TypeVar
 
 from ._base import BaseBatch
 from .plugins._batch_keys import BatchKey
@@ -10,9 +10,10 @@ from .plugins._batch_keys import BatchKey
 # Map populated at runtime via the `register_batch` decorator.
 batch_map: dict[BatchKey, Type[BaseBatch]] = {}
 
+T = TypeVar('T', bound=BaseBatch)
 def register_batch(
     batch_key: BatchKey
-) -> Callable:
+) -> Callable[[Type[T]], Type[T]]:
     """Decorator to register a `BaseBatch` subclass under a specified `BatchKey`.
 
     :param batch_key: The key to register the `BaseBatch` subclass under.

@@ -17,16 +17,17 @@ from spectre_core.exceptions import (
 from ._base import BaseBatch
 
 T = TypeVar('T', bound=BaseBatch)
-
 class Batches(Generic[T]):
     """Managed collection of `Batch` instances for a given tag. Provides a simple
     interface for read operations on batched data files."""
-    def __init__(self, 
-                 tag: str,
-                 batch_cls: Type[T],
-                 year: Optional[int] = None, 
-                 month: Optional[int] = None, 
-                 day: Optional[int] = None) -> None:
+    def __init__(
+        self, 
+        tag: str,
+        batch_cls: Type[T],
+        year: Optional[int] = None, 
+        month: Optional[int] = None, 
+        day: Optional[int] = None
+    ) -> None:
         """Initialise a `Batches` instance.
 
         :param tag: The batch name tag.
@@ -42,70 +43,90 @@ class Batches(Generic[T]):
 
 
     @property
-    def tag(self) -> str:
+    def tag(
+        self
+    ) -> str:
         """The batch name tag."""
         return self._tag
 
 
     @property
-    def batch_cls(self) -> Type[T]:
+    def batch_cls(
+        self
+    ) -> Type[T]:
         """The `Batch` class used to read the batched files."""
         return self._batch_cls
 
 
     @property
-    def year(self) -> Optional[int]:
-        """The numeric year."""
+    def year(
+        self
+    ) -> Optional[int]:
+        """The numeric year, to filter batch files."""
         return self._year
 
 
     @property 
-    def month(self) -> Optional[int]:
-        """The numeric month of the year."""
+    def month(
+        self
+    ) -> Optional[int]:
+        """The numeric month of the year, to filter batch files."""
         return self._month
     
 
     @property
-    def day(self) -> Optional[int]:
-        """The numeric day of the year."""
+    def day(
+        self
+    ) -> Optional[int]:
+        """The numeric day of the year, to filter batch files."""
         return self._day
     
 
     @property
-    def batches_dir_path(self) -> str:
+    def batches_dir_path(
+        self
+    ) -> str:
         """The shared ancestral path for all the batches. `Batches` recursively searches
         this directory to find all batches whose batch name contains `tag`."""
         return get_batches_dir_path(self.year, self.month, self.day)
     
 
     @property
-    def batch_list(self) -> list[T]:
+    def batch_list(
+        self
+    ) -> list[T]:
         """A list of all batches found within `batches_dir_path`."""
         return  list(self._batch_map.values())
     
 
     @property
-    def start_times(self) -> list[str]:
+    def start_times(
+        self
+    ) -> list[str]:
         """The start times of each batch found within `batches_dir_path`."""
         return list(self._batch_map.keys())
 
 
     @property
-    def num_batches(self) -> int:
+    def num_batches(
+        self
+    ) -> int:
         """The total number of batches found within `batches_dir_path`."""
         return len(self.batch_list)
 
 
-    def set_date(self, 
-                 year: Optional[int],
-                 month: Optional[int],
-                 day: Optional[int]) -> None:
+    def set_date(
+        self, 
+        year: Optional[int],
+        month: Optional[int],
+        day: Optional[int]
+    ) -> None:
         """Reset `batches_dir_path` according to the numeric date, and refresh the list
         of available batches.
 
-        :param year: The numeric year.
-        :param month: The numeric month of the year.
-        :param day: The numeric day of the month.
+        :param year: Filter by the numeric year.
+        :param month: Filter by the numeric month of the year.
+        :param day: Filter by the numeric day of the month.
         """
         self._year = year
         self._month = month
@@ -113,7 +134,9 @@ class Batches(Generic[T]):
         self.update()
 
 
-    def update(self) -> None:
+    def update(
+        self
+    ) -> None:
         """Perform a fresh search all files in `batches_dir_path` for batches 
         with `tag` in the batch name."""
         # reset cache
@@ -131,17 +154,23 @@ class Batches(Generic[T]):
         self._batch_map = OrderedDict(sorted(self._batch_map.items()))
     
 
-    def __iter__(self) -> Iterator[T]:
+    def __iter__(
+        self
+    ) -> Iterator[T]:
         """Iterate over the stored batch instances."""
         yield from self.batch_list
         
     
-    def __len__(self):
+    def __len__(
+        self
+    ):
         return self.num_batches
 
 
-    def _get_from_start_time(self, 
-                             start_time: str) -> T:
+    def _get_from_start_time(
+        self, 
+        start_time: str
+    ) -> T:
         """Find and return the `Batch` instance based on the string formatted start time."""
         try:
             return self._batch_map[start_time]
@@ -149,13 +178,14 @@ class Batches(Generic[T]):
             raise BatchNotFoundError(f"Batch with start time {start_time} could not be found within {self.batches_dir_path}")
 
 
-    def _get_from_index(self, 
-                        index: int) -> T:
+    def _get_from_index(
+        self, 
+        index: int
+    ) -> T:
         """Find and return the `Batch` instance based on its numeric index.
         
         Batches are ordered sequentially in time, so index `0` corresponds to the oldest
-        `Batch` with respect to the start time. Index is wrapped around using the modulo
-        operator.
+        `Batch` with respect to the start time.
         """
         if self.num_batches == 0:
             raise BatchNotFoundError("No batches are available")
@@ -164,8 +194,11 @@ class Batches(Generic[T]):
         return self.batch_list[index]
 
 
-    def __getitem__(self, subscript: str | int) -> T:
-        """_summary_
+    def __getitem__(
+        self, 
+        subscript: str | int
+    ) -> T:
+        """Get a `Batch` instanced based on either the start time or chronological index.
 
         :param subscript: If the subscript is a string, interpreted as a formatted start time. 
         If the subscript is an integer, it is interpreted as a chronological index.
@@ -177,9 +210,11 @@ class Batches(Generic[T]):
             return self._get_from_index(subscript)
 
 
-    def get_spectrogram_from_range(self,
-                                   start_time: str, 
-                                   end_time: str) -> Spectrogram:
+    def get_spectrogram_from_range(
+        self,
+        start_time: str, 
+        end_time: str
+    ) -> Spectrogram:
         """
         Retrieve a spectrogram spanning the specified time range. 
 
