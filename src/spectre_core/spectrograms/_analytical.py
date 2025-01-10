@@ -1,96 +1,115 @@
+
 # SPDX-FileCopyrightText: © 2024 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Callable
-from dataclasses import dataclass
+from typing import Callable, cast
+from dataclasses import dataclass, field
 
 import numpy as np
 
 from spectre_core.capture_configs import CaptureConfig, PName
 from spectre_core.exceptions import ModeNotFoundError
+from spectre_core.spectrograms import SpectrumUnit
 from ._spectrogram import Spectrogram
 from ._array_operations import is_close
 
 @dataclass
 class TestResults:
-    # Whether the times array matches analytically 
-    times_validated: bool = False  
-    # Whether the frequencies array matches analytically
-    frequencies_validated: bool = False  
-    # Maps each time to whether the corresponding spectrum matched analytically
-    spectrum_validated: dict[float, bool] = None
+    """
+    Summarise the validation results when comparing two spectrograms.
 
+    :ivar times_validated: Whether the time arrays match.
+    :ivar frequencies_validated: Whether the frequency arrays match.
+    :ivar spectrum_validated: Maps times to spectrum match results.
+    """
+    times_validated: bool = False
+    frequencies_validated: bool = False
+    spectrum_validated: dict[float, bool] = field(default_factory=dict)
 
     @property
     def num_validated_spectrums(self) -> int:
-        """Counts the number of validated spectrums."""
+        """Returns the count of spectrums that successfully passed validation."""
         return sum(is_validated for is_validated in self.spectrum_validated.values())
 
 
     @property
     def num_invalid_spectrums(self) -> int:
-        """Counts the number of spectrums that are not validated."""
+        """Returns the count of spectrums that failed validation."""
         return len(self.spectrum_validated) - self.num_validated_spectrums
     
-
     def to_dict(self) -> dict[str, bool | dict[float, bool]]:
+        """Converts the instance into a serialisable dictionary."""
         return {
-            "times_validated": self.times_validated,
+            "times_validated"      : self.times_validated,
             "frequencies_validated": self.frequencies_validated,
-            "spectrum_validated": self.spectrum_validated
+            "spectrum_validated"   : self.spectrum_validated
         }
 
 
 class _AnalyticalFactory:
-    def __init__(self):
-        self._builders: dict[str, Callable] = {
-            "cosine-signal-1": self.cosine_signal_1,
-            "tagged-staircase": self.tagged_staircase
+    """Factory for creating analytical spectrograms."""
+    def __init__(self) -> None:
+        """Initialises an instance of the `_AnalyticalFactory` class."""
+        self._builders: dict[str, Callable[[int, CaptureConfig], Spectrogram]] = {
+            "cosine-signal-1" : self._cosine_signal_1,
+            "tagged-staircase": self._tagged_staircase
         }
-        self._test_modes = list(self.builders.keys())
 
 
     @property
-    def builders(self) -> dict[str, Callable]:
+    def builders(self) -> dict[str, Callable[[int, CaptureConfig], Spectrogram]]:
+        """
+        Provides a mapping of each `Test` receiver mode to its corresponding builder method.
+
+        Each builder method generates the expected spectrograms for a session run in the associated mode.
+        """
         return self._builders
     
 
     @property
     def test_modes(self) -> list[str]:
-        return self._test_modes
+        """Returns the available modes for the `Test` receiver."""
+        return list(self.builders.keys())
     
 
     def get_spectrogram(self, 
                         num_spectrums: int, 
                         capture_config: CaptureConfig) -> Spectrogram:
-        """Get an analytical spectrogram based on a test receiver capture config.
-        
-        The anaytically derived spectrogram should be able to be fully determined
-        by parameters in the corresponding capture config and the number of spectrums
-        in the output spectrogram.
         """
+        Generates an analytical spectrogram based on the capture configuration of a `Test` receiver.
 
+        :param num_spectrums: The number of spectrums to include in the output spectrogram.
+        :param capture_config: The capture configuration specifying parameters for the session.
+        :raises ValueError: Raised if the capture configuration is not associated with a `Test` receiver.
+        :raises ModeNotFoundError: Raised if the specified `Test` mode in the capture configuration lacks
+            a corresponding builder method.
+        :return: The expected spectrogram for the `Test` receiver in the specified mode.
+        """
         if capture_config.receiver_name != "test":
             raise ValueError(f"Input capture config must correspond to the test receiver")
         
         builder_method = self.builders.get(capture_config.receiver_mode)
         if builder_method is None:
-            raise ModeNotFoundError(f"Test mode not found. Expected one of {self.test_modes}, but received {capture_config.receiver_mode}")
+            raise ModeNotFoundError(f"Test mode not found. Expected one of '{self.test_modes}', but received '{capture_config.receiver_mode}'")
         return builder_method(num_spectrums, 
                               capture_config)
     
 
-    def cosine_signal_1(self, 
+    def _cosine_signal_1(self, 
                         num_spectrums: int,
                         capture_config: CaptureConfig) -> Spectrogram:
+        """
+        Creates the expected spectrogram for the `Test` receiver operating in the `cosine-signal-1` mode.
+        """
         # Extract necessary parameters from the capture configuration.
-        window_size      = capture_config.get_parameter_value(PName.WINDOW_SIZE)
-        sample_rate      = capture_config.get_parameter_value(PName.SAMPLE_RATE)
-        amplitude        = capture_config.get_parameter_value(PName.AMPLITUDE)
-        frequency        = capture_config.get_parameter_value(PName.FREQUENCY)
-        window_hop       = capture_config.get_parameter_value(PName.WINDOW_HOP)
-        center_frequency = capture_config.get_parameter_value(PName.CENTER_FREQUENCY)
+        window_size      = cast(int,   capture_config.get_parameter_value(PName.WINDOW_SIZE))
+        sample_rate      = cast(int,   capture_config.get_parameter_value(PName.SAMPLE_RATE))
+        frequency        = cast(int,   capture_config.get_parameter_value(PName.FREQUENCY))
+        window_hop       = cast(int,   capture_config.get_parameter_value(PName.WINDOW_HOP))
+        amplitude        = cast(float, capture_config.get_parameter_value(PName.AMPLITUDE))
+        center_frequency = cast(float, capture_config.get_parameter_value(PName.CENTER_FREQUENCY))
+        
         # Calculate derived parameters a (sampling rate ratio) and p (sampled periods).
         a = int(sample_rate / frequency)
         p = int(window_size / a)
@@ -119,18 +138,23 @@ class _AnalyticalFactory:
                            times,
                            frequencies,
                            'analytically-derived-spectrogram',
-                           spectrum_unit="amplitude")
+                           SpectrumUnit.AMPLITUDE)
 
 
-    def tagged_staircase(self, 
-                        num_spectrums: int,
-                        capture_config: CaptureConfig) -> Spectrogram:
+    def _tagged_staircase(self, 
+                          num_spectrums: int,
+                          capture_config: CaptureConfig) -> Spectrogram:
+        """
+        Creates the expected spectrogram for the `Test` receiver operating in the `tagged-staircase` mode.
+
+        This method generates an analytical spectrogram using parameters specified in the capture configuration.
+        """
         # Extract necessary parameters from the capture configuration.
-        window_size          = capture_config.get_parameter_value(PName.WINDOW_SIZE)
-        min_samples_per_step = capture_config.get_parameter_value(PName.MIN_SAMPLES_PER_STEP)
-        max_samples_per_step = capture_config.get_parameter_value(PName.MAX_SAMPLES_PER_STEP)
-        step_increment       = capture_config.get_parameter_value(PName.STEP_INCREMENT)
-        samp_rate            = capture_config.get_parameter_value(PName.SAMPLE_RATE)
+        window_size          = cast(int, capture_config.get_parameter_value(PName.WINDOW_SIZE))
+        min_samples_per_step = cast(int, capture_config.get_parameter_value(PName.MIN_SAMPLES_PER_STEP))
+        max_samples_per_step = cast(int, capture_config.get_parameter_value(PName.MAX_SAMPLES_PER_STEP))
+        step_increment       = cast(int, capture_config.get_parameter_value(PName.STEP_INCREMENT))
+        samp_rate            = cast(int, capture_config.get_parameter_value(PName.SAMPLE_RATE))
 
         # Calculate step sizes and derived parameters.
         num_samples_per_step = np.arange(min_samples_per_step, max_samples_per_step + 1, step_increment)
@@ -156,7 +180,7 @@ class _AnalyticalFactory:
 
         # Compute the frequency array
         baseband_frequencies = np.fft.fftshift(np.fft.fftfreq(window_size, sampling_interval))
-        frequencies = np.empty((window_size * num_steps))
+        frequencies = np.empty((window_size * num_steps), dtype=np.float32)
         for i in range(num_steps):
             lower_bound = i * window_size
             upper_bound = (i + 1) * window_size
@@ -167,24 +191,38 @@ class _AnalyticalFactory:
                            times,
                            frequencies,
                            'analytically-derived-spectrogram',
-                           spectrum_unit="amplitude")
+                           SpectrumUnit.AMPLITUDE)
     
 
 def get_analytical_spectrogram(num_spectrums: int,
                                capture_config: CaptureConfig) -> Spectrogram:
-    
+    """
+    Retrieves the analytical spectrogram for a `Test` receiver session.
+
+    :param num_spectrums: Number of spectrums in the output spectrogram.
+    :param capture_config: Capture configuration for the session.
+    :return: The expected spectrogram for the specified mode of the `Test` receiver.
+    """
     factory = _AnalyticalFactory()
     return factory.get_spectrogram(num_spectrums,
                                    capture_config)
 
 
-def validate_analytically(spectrogram: Spectrogram,
-                          capture_config: CaptureConfig,
-                          absolute_tolerance: float) -> TestResults:
+def validate_analytically(
+    spectrogram: Spectrogram,
+    capture_config: CaptureConfig,
+    absolute_tolerance: float
+) -> TestResults:
+    """
+    Validates a spectrogram against an analytically derived spectrogram.
 
+    :param spectrogram: The spectrogram to be validated.
+    :param capture_config: Configuration used to derive the analytical spectrogram.
+    :param absolute_tolerance: Tolerance level for numerical comparisons.
+    :return: A `TestResults` object summarising the validation outcome.
+    """
     analytical_spectrogram = get_analytical_spectrogram(spectrogram.num_times,
                                                         capture_config)
-
 
     test_results = TestResults()
 
