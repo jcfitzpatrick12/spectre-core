@@ -10,20 +10,22 @@ from ._pnames import PName
 from ._pconstraints import PConstraint, BasePConstraint
 from ._parameters import Parameter
     
+# value type
 VT = TypeVar('VT')
-
 class PTemplate(Generic[VT]):
     """Constrains the value and type of a capture configuration parameter 
     associated with a given name.
     """
-    def __init__(self,
-                 name: PName,
-                 ptype: Callable[[Any], VT],
-                 default: Optional[VT] = None,
-                 nullable: bool = False,
-                 enforce_default: bool = False,
-                 help: Optional[str] = None,
-                 pconstraints: Optional[list[BasePConstraint]] = None):
+    def __init__(
+        self,
+        name: PName,
+        ptype: Callable[[Any], VT],
+        default: Optional[VT] = None,
+        nullable: bool = False,
+        enforce_default: bool = False,
+        help: Optional[str] = None,
+        pconstraints: Optional[list[BasePConstraint]] = None
+    ) -> None:
         """Initialise an instance of `PTemplate` and create a parameter template.
 
         :param name: The name of the parameter.
@@ -44,25 +46,34 @@ class PTemplate(Generic[VT]):
 
 
     @property
-    def name(self) -> PName:
+    def name(
+        self
+    ) -> PName:
         """The name of the parameter."""
         return self._name
     
 
     @property
-    def ptype(self) -> Callable[[object], VT]:
+    def ptype(
+        self
+    ) -> Callable[[object], VT]:
         """The required type of the parameter. The value must be castable as this type."""
         return self._ptype
     
 
     @property
-    def default(self) -> Optional[VT]:
+    def default(
+        self
+    ) -> Optional[VT]:
         """The parameter value if not explictly specified."""
         return self._default
     
 
     @default.setter
-    def default(self, value: VT) -> None:
+    def default(
+        self, 
+        value: VT
+    ) -> None:
         """Update the `default` of this parameter template.
 
         :param value: The new default value to set.
@@ -71,19 +82,26 @@ class PTemplate(Generic[VT]):
 
 
     @property
-    def nullable(self) -> bool:
+    def nullable(
+        self
+    ) -> bool:
         """Whether the value of the parameter can be `None`."""
         return self._nullable
     
 
     @property
-    def enforce_default(self) -> bool:
+    def enforce_default(
+        self
+    ) -> bool:
         """Indicates whether the value must match the specified `default`."""
         return self._enforce_default
     
 
     @enforce_default.setter
-    def enforce_default(self, value: bool) -> None:
+    def enforce_default(
+        self, 
+        value: bool
+    ) -> None:
         """Update whether to `enforce_default` for this parameter template.
 
         :param value: Whether to enforce the default value.
@@ -92,13 +110,17 @@ class PTemplate(Generic[VT]):
     
 
     @property
-    def help(self) -> str:
+    def help(
+        self
+    ) -> str:
         """A helpful description of what the parameter is, and the value it stores."""
         return self._help
     
     
-    def add_pconstraint(self,
-                        pconstraint: BasePConstraint) -> None:
+    def add_pconstraint(
+        self,
+        pconstraint: BasePConstraint
+    ) -> None:
         """Add a parameter constraint to this template.
 
         :param pconstraint: A `PConstraint` instance compatible with the `ptype`.
@@ -106,8 +128,10 @@ class PTemplate(Generic[VT]):
         self._pconstraints.append(pconstraint)
 
 
-    def _cast(self, 
-              value: Any) -> VT:
+    def _cast(
+        self, 
+        value: Any
+    ) -> VT:
         """Cast the input value to the `ptype` for this parameter template.
 
         :param value: The value to be type casted.
@@ -120,8 +144,10 @@ class PTemplate(Generic[VT]):
             raise ValueError(f"Could not cast '{value}' to '{self._ptype.__name__}': {e}")
 
 
-    def _constrain(self, 
-                   value: VT) -> VT:
+    def _constrain(
+        self, 
+        value: VT
+    ) -> VT:
         """Constrain the input value according to constraints of the template.
 
         :param value: The value to be constrained.
@@ -145,8 +171,10 @@ class PTemplate(Generic[VT]):
         return value
 
 
-    def apply_template(self, 
-                       value: Optional[Any]) -> Optional[VT]:
+    def apply_template(
+        self, 
+        value: Optional[Any]
+    ) -> Optional[VT]:
         """Cast a value and validate it according to this parameter template.
 
         :param value: The input value.
@@ -166,9 +194,11 @@ class PTemplate(Generic[VT]):
         return self._constrain( self._cast(value) )
 
 
-    def make_parameter(self, 
-                       value: Optional[Any] = None) -> Parameter:
-        """Create a `Parameter` object based on this template and the provided value.
+    def make_parameter(
+        self, 
+        value: Optional[Any] = None
+    ) -> Parameter:
+        """Create a `Parameter` compliant with this template.
 
         :param value: The provided value for the parameter. Defaults to None.
         :return: A `Parameter` object validated according to this template.
@@ -177,10 +207,12 @@ class PTemplate(Generic[VT]):
         return Parameter(self._name, value)
 
 
-    def to_dict(self) -> dict[str, str]:
-        """Convert this parameter template to a dictionary representation.
+    def to_dict(
+        self
+    ) -> dict[str, str]:
+        """Convert this parameter template to a serialisable dictionary.
 
-        :return: A dictionary representation of this parameter template, where all values are string-formatted for ease of serialisation.
+        :return: A dictionary representation of this parameter template with string formatted values.
         """
         d = {
             "name": self._name,

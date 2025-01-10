@@ -6,13 +6,16 @@ from typing import Any, Optional, TypeVar, Generic, Iterator
 
 from ._pnames import PName
 
+# value type
 VT = TypeVar('VT')
 
 class Parameter(Generic[VT]):
     """A simple container for a named value."""
-    def __init__(self, 
-                 name: PName,
-                 value: Optional[VT] = None):
+    def __init__(
+        self, 
+        name: PName,
+        value: Optional[VT] = None
+    ) -> None:
         """Initialise a `Parameter` instance.
 
         :param name: The name of the parameter.
@@ -23,19 +26,26 @@ class Parameter(Generic[VT]):
 
 
     @property
-    def name(self) -> PName:
+    def name(
+        self
+    ) -> PName:
         """The parameter name."""
         return self._name
     
 
     @property
-    def value(self) -> Optional[VT]:
+    def value(
+        self
+    ) -> Optional[VT]:
         """The parameter value."""
         return self._value
     
     
     @value.setter
-    def value(self, v: Optional[VT]) -> None:
+    def value(
+        self, 
+        v: Optional[VT]
+    ) -> None:
         """Update the parameter value.
 
         :param v: The new value to set for the parameter.
@@ -45,20 +55,26 @@ class Parameter(Generic[VT]):
 
 class Parameters:
     """A managed collection of parameters."""
-    def __init__(self) -> None:
+    def __init__(
+        self
+    ) -> None:
         """Initialise a `Parameters` instance."""
         self._parameters: dict[PName, Parameter] = {}
     
     
     @property
-    def name_list(self) -> list[PName]:
+    def name_list(
+        self
+    ) -> list[PName]:
         """List the names of stored parameters."""
         return list(self._parameters.keys())
 
 
-    def add_parameter(self, 
-                      name: PName,
-                      value: Optional[VT]) -> None:
+    def add_parameter(
+        self, 
+        name: PName,
+        value: Optional[VT]
+    ) -> None:
         """Add a `Parameter` instance to this `Parameters` instance with the input name and value.
 
         :param name: The name of the parameter.
@@ -71,8 +87,10 @@ class Parameters:
         self._parameters[name] = Parameter(name, value)
 
 
-    def get_parameter(self, 
-                      name: PName) -> Parameter:
+    def get_parameter(
+        self, 
+        name: PName
+    ) -> Parameter:
         """Get the stored `Parameter` instance corresponding to the input name.
 
         :param name: The name of the parameter.
@@ -85,8 +103,10 @@ class Parameters:
         return self._parameters[name]
 
 
-    def get_parameter_value(self,
-                            name: PName) -> Optional[VT]:
+    def get_parameter_value(
+        self,
+        name: PName
+    ) -> Optional[VT]:
         """Get the value of the parameter with the corresponding name.
 
         :param name: The name of the parameter.
@@ -95,12 +115,16 @@ class Parameters:
         return self.get_parameter(name).value
     
 
-    def __iter__(self) -> Iterator[Parameter]:
+    def __iter__(
+        self
+    ) -> Iterator[Parameter]:
         """Iterate over stored parameters."""
         yield from self._parameters.values() 
 
     
-    def to_dict(self) -> dict[str, Optional[Any]]:
+    def to_dict(
+        self
+    ) -> dict[str, Optional[Any]]:
         """Convert the `Parameters` instance to an equivalent dictionary representation.
 
         :return: A dictionary representation of the stored parameters.
@@ -145,7 +169,7 @@ def parse_string_parameters(
 def make_parameters(
     d: dict[str, Any]
 ) -> Parameters:
-    """Create a `Parameters` instance from the given dictionary.
+    """Create a `Parameters` instance from the given dictionary. Each key is interpreted as a valid `PName`.
 
     :param d: A dictionary where keys represent parameter names and values represent their corresponding values.
     :return: An instance of `Parameters` with each key-value pair in `d` added as a parameter.

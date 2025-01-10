@@ -233,8 +233,8 @@ class _FitsFile(BatchFile[Spectrogram]):
                            times, 
                            frequencies, 
                            self.tag,
-                           spectrogram_start_datetime,
-                           spectrum_unit)
+                           spectrum_unit,
+                           spectrogram_start_datetime)
 
 
     def _get_primary_hdu(
