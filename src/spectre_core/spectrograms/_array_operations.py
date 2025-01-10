@@ -16,14 +16,9 @@ def average_array(
     """
     Averages elements of an array in blocks along a specified axis.
 
-    Groups elements along the given axis into blocks of size `average_over`, 
-    computes the mean of each block, and returns a new array of these means. 
-    If the number of elements is not evenly divisible by `average_over`, 
-    the remainder is padded with NaN values, which are excluded from the mean calculation.
-
     :param array: Input array to be averaged.
     :param average_over: Number of elements in each averaging block.
-    :param axis: Axis along which to perform the averaging. Defaults to 0.
+    :param axis: Axis along which to perform the averaging, defaults to 0.
     :raises TypeError: If `average_over` is not an integer.
     :raises ValueError: If `average_over` is not in the range [1, size of the axis].
     :raises ValueError: If `axis` is out of bounds for the array.
@@ -80,10 +75,6 @@ def is_close(
     """
     Checks if all elements in two arrays are element-wise close within a given tolerance.
 
-    Compares each element in `ar` with the corresponding element in `ar_comparison` 
-    using an absolute tolerance (`absolute_tolerance`) and returns `True` if all 
-    elements are within the specified tolerance, otherwise `False`.
-
     :param ar: First array for comparison.
     :param ar_comparison: Second array for comparison.
     :param absolute_tolerance: Absolute tolerance for element-wise comparison.
@@ -118,7 +109,7 @@ def find_closest_index(
             raise ValueError(f"Target value {target_value} is less than min array value {min_value}")
 
     # Find the index of the closest value
-    return int(np.argmin(np.abs(array - target_value)))
+    return int( np.argmin(np.abs(array - target_value)) )
 
 
 def normalise_peak_intensity(

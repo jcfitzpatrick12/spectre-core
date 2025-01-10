@@ -14,8 +14,8 @@ from ._spectrogram import Spectrogram
 
 def frequency_chop(
     spectrogram: Spectrogram, 
-    start_frequency  : np.float32, 
-    end_frequency    : np.float32
+    start_frequency  : float, 
+    end_frequency    : float
 ) -> Spectrogram:
     """
     Extracts a portion of the spectrogram within the specified frequency range.
@@ -33,8 +33,8 @@ def frequency_chop(
         raise ValueError(f"The requested frequency interval is entirely out of range of the input spectrogram.")
     
     # find the index of the nearest matching frequency bins in the spectrogram
-    start_index = find_closest_index(start_frequency, spectrogram.frequencies)
-    end_index   = find_closest_index(end_frequency  , spectrogram.frequencies)
+    start_index = find_closest_index(np.float32(start_frequency), spectrogram.frequencies)
+    end_index   = find_closest_index(np.float32(end_frequency)  , spectrogram.frequencies)
     
     # enforce distinct start and end indices
     if start_index == end_index:
@@ -65,11 +65,11 @@ def time_chop(
     Extracts a portion of the spectrogram within the specified time range.
 
     :param spectrogram: The input spectrogram to process.
-    :param start_time: The starting time of the desired range (ISO 8601 format).
-    :param end_time: The ending time of the desired range (ISO 8601 format).
+    :param start_time: The starting time of the desired range.
+    :param end_time: The ending time of the desired range.
     :raises ValueError: If the specified time range is entirely outside the spectrogram's time range.
     :raises ValueError: If the start and end indices for the time range are identical.
-    :return: A new spectrogram containing only the specified time range, with adjusted time offsets.
+    :return: A new spectrogram containing only the specified time range.
     """
     start_datetime = np.datetime64( datetime.strptime(start_time, TimeFormat.DATETIME) )
     end_datetime   = np.datetime64( datetime.strptime(end_time  , TimeFormat.DATETIME) )
@@ -108,16 +108,16 @@ def time_chop(
 
 
 def _validate_and_compute_average_over(
+    original_resolution: float,
     resolution: Optional[float], 
-    average_over: int, 
-    resolution_per_unit: float
+    average_over: int
 ) -> int:
     """
     Validates the input parameters and computes `average_over` if `resolution` is specified.
 
     :param resolution: The desired resolution for averaging. Mutually exclusive with `average_over`.
-    :param average_over: The number of consecutive points to average. Mutually exclusive with `resolution`.
-    :param resolution_per_unit: The resolution per unit (e.g., time or frequency resolution).
+    :param average_over: The number of consecutive spectrums to average over. Mutually exclusive with `resolution`.
+    :param original_resolution: The original resolution (e.g., time or frequency).
     :raises ValueError: If neither or both `resolution` and `average_over` are specified.
     :return: The computed or validated `average_over` value.
     """
@@ -128,9 +128,10 @@ def _validate_and_compute_average_over(
         raise ValueError("Exactly one of 'resolution' or 'average_over' must be specified.")
 
     if resolution is not None:
-        return max(1, floor(resolution / resolution_per_unit))
+        return max(1, floor(resolution / original_resolution))
 
-    return average_over
+    else:
+        return average_over
 
 
 def time_average(
@@ -154,7 +155,9 @@ def time_average(
         )
 
     average_over = _validate_and_compute_average_over(
-        resolution, average_over, spectrogram.time_resolution
+        spectrogram.time_resolution,
+        resolution, 
+        average_over
     )
 
     # Perform averaging
@@ -194,7 +197,9 @@ def frequency_average(
     :return: A new spectrogram with frequency-averaged data.
     """
     average_over = _validate_and_compute_average_over(
-        resolution, average_over, spectrogram.frequency_resolution
+        spectrogram.frequency_resolution,
+        resolution, 
+        average_over
     )
 
     # Perform averaging
