@@ -16,10 +16,10 @@ def configure_root_logger(
     level: int = logging.INFO
 ) -> str:
     """Configures the root logger to write log messages to a file named based on 
-    the process type, PID, and start time.
+    the process type, PID, and current system time.
 
     :param process_type: Indicates the type of process, as defined by `ProcessType`.
-    :param level: The logging level, as defined in Python's `logging` module. Defaults to logging.INFO.
+    :param level: The logging level, as defined in Python's `logging` module. Defaults to `logging.INFO`.
     :return: The file path of the created log file.
     """
     # create a `spectre` log handler instance, to represent the log file.
@@ -36,18 +36,19 @@ def configure_root_logger(
               process_type)
     log.make_parent_dir_path()
 
-    # configure the root logger level and remove any existing handlers.
+    # get the root logger and set its level.
     logger = logging.getLogger()
     logger.setLevel(level)
+    
+    # remove existing handlers
     for handler in logger.handlers:
         logger.removeHandler(handler)
         
-    # Set up `logging` module specific file handler
+    # Set up a file handler and add it to the root logger
     file_handler = logging.FileHandler(log.file_path)
     file_handler.setLevel(level)
     formatter = logging.Formatter("[%(asctime)s] [%(levelname)8s] --- %(message)s (%(name)s:%(lineno)s)")
     file_handler.setFormatter(formatter)
-    # and add it to the root logger
     logger.addHandler(file_handler)
 
     return log.file_path

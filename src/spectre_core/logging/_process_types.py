@@ -7,8 +7,8 @@ from enum import Enum
 class ProcessType(Enum):
     """Defines the origin of processes in `spectre`.
     
-    A `USER` process is one initiated directly by the user. A `WORKER`
-    process is one which is created internally by `spectre`.
+    :ivar USER: A process is one initiated directly by the user, or part of the main user session.
+    :ivar WORKER: A process is one which is created and managed internally by `spectre`.
     """
     USER   = "user"
     WORKER = "worker"

@@ -3,10 +3,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
-from typing import Callable
+from typing import Callable, TypeVar
 from functools import wraps
 
-def log_call(func: Callable) -> Callable:
+# return type
+RT = TypeVar('RT')
+def log_call(func: Callable[..., RT]) -> Callable[..., RT]:
     """Decorator to log the execution of a function.
 
     Logs an informational message when the decorated function is called

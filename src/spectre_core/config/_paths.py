@@ -5,44 +5,28 @@
 """
 File system path definitions.
 
-By default, `spectre` uses the required environment variable `os.environ.get("SPECTRE_DATA_DIR_PATH")`
+By default, `spectre` uses the required environment variable `SPECTRE_DATA_DIR_PATH`
 and creates three directories inside it:  
 
 - `batches`: To hold the batched data files.
 - `logs`: To log files generated at runtime.
 - `configs`: To hold the capture configuration files.
-
-Each of these directories can be customised using the following optional environment variables
-
-- `SPECTRE_BATCHES_DIR_PATH`
-- `SPECTRE_LOGS_DIR_PATH`
-- `SPECTRE_CONFIGS_DIR_PATH`
-
-respectively.
 """
 
 import os
 from typing import Optional
 
-
 _SPECTRE_DATA_DIR_PATH = os.environ.get("SPECTRE_DATA_DIR_PATH", "NOTSET")
 if _SPECTRE_DATA_DIR_PATH == "NOTSET":
-    raise ValueError("The environment variable SPECTRE_DATA_DIR_PATH has not been set")
+    raise ValueError("The environment variable `SPECTRE_DATA_DIR_PATH` must be set.")
 
-_BATCHES_DIR_PATH = os.environ.get("SPECTRE_BATCHES_DIR_PATH", 
-                                   os.path.join(_SPECTRE_DATA_DIR_PATH, 'batches'))
-os.makedirs(_BATCHES_DIR_PATH, 
-            exist_ok=True)
+_BATCHES_DIR_PATH = os.path.join(_SPECTRE_DATA_DIR_PATH, 'batches')
+_LOGS_DIR_PATH    = os.path.join(_SPECTRE_DATA_DIR_PATH, 'logs')
+_CONFIGS_DIR_PATH = os.path.join(_SPECTRE_DATA_DIR_PATH, "configs")
 
-_LOGS_DIR_PATH = os.environ.get("SPECTRE_LOGS_DIR_PATH",
-                               os.path.join(_SPECTRE_DATA_DIR_PATH, 'logs'))
-os.makedirs(_LOGS_DIR_PATH, 
-            exist_ok=True)
-
-_CONFIGS_DIR_PATH = os.environ.get("SPECTRE_CONFIGS_DIR_PATH",
-                                  os.path.join(_SPECTRE_DATA_DIR_PATH, "configs"))
-os.makedirs(_CONFIGS_DIR_PATH, 
-            exist_ok=True)
+os.makedirs(_BATCHES_DIR_PATH, exist_ok=True)
+os.makedirs(_LOGS_DIR_PATH,    exist_ok=True)
+os.makedirs(_CONFIGS_DIR_PATH, exist_ok=True)
 
 
 def get_spectre_data_dir_path(
