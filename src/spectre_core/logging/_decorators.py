@@ -8,7 +8,9 @@ from functools import wraps
 
 # return type
 RT = TypeVar('RT')
-def log_call(func: Callable[..., RT]) -> Callable[..., RT]:
+def log_call(
+    func: Callable[..., RT]
+) -> Callable[..., RT]:
     """Decorator to log the execution of a function.
 
     Logs an informational message when the decorated function is called

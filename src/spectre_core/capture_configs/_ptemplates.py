@@ -322,7 +322,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                     """,
                                              pconstraints=[
                                                  EnforceSign.positive, 
-                                                 PowerOfTwo()
+                                                 PowerOfTwo,
                                                  ]),
     PName.WINDOW_HOP:             PTemplate(PName.WINDOW_HOP,             
                                              int,   

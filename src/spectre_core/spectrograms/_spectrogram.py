@@ -63,7 +63,7 @@ class TimeCut:
     :ivar cut: The time series values of the spectral component.
     :ivar spectrum_unit: The unit of each time series value.
     """
-    frequency: np.float32
+    frequency: float
     times: npt.NDArray[np.float32 | np.datetime64]
     cut: npt.NDArray[np.float32]
     spectrum_unit: SpectrumUnit
@@ -523,7 +523,7 @@ class Spectrogram:
         index_of_cut = find_closest_index(_at_frequency, 
                                           self._frequencies, 
                                           enforce_strict_bounds = True)
-        frequency_of_cut = self.frequencies[index_of_cut]
+        frequency_of_cut = float( self.frequencies[index_of_cut] )
 
         # dependent on the requested cut type, we return the dynamic spectra in the preferred units
         if dBb:
