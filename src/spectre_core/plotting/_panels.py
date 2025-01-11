@@ -37,7 +37,7 @@ def _bind_to_colors(
 
 class FrequencyCutsPanel(BaseSpectrumPanel):
     """
-    Panel for visualizing spectrogram data as frequency cuts.
+    Panel for visualising spectrogram data as frequency cuts.
 
     This panel plots spectrums corresponding to specific time instances 
     in the spectrogram. Each cut is drawn as a line plot, optionally normalized 
@@ -52,7 +52,7 @@ class FrequencyCutsPanel(BaseSpectrumPanel):
     ) -> None:
         """Initialise an instance of `FrequencyCutsPanel`.
 
-        :param spectrogram: The spectrogram to be visualized.
+        :param spectrogram: The spectrogram to be visualised.
         :param *times: Times at which to take frequency cuts. Can be floats (relative time) or 
         strings (formatted datetimes).
         :param dBb: If True, plots the spectrums in decibels above the background. Defaults to False.
@@ -150,7 +150,7 @@ class FrequencyCutsPanel(BaseSpectrumPanel):
     
 class TimeCutsPanel(BaseTimeSeriesPanel):
     """
-    Panel for visualizing spectrogram data as time series of spectral components.
+    Panel for visualising spectrogram data as time series of spectral components.
 
     This panel plots the time evolution of spectral components at specific 
     frequencies in the spectrogram. Each time series is drawn as a line plot, 
@@ -166,7 +166,7 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
     ) -> None:
         """Initialise an instance of `TimeCutsPanel`.
 
-        :param spectrogram: The spectrogram to be visualized.
+        :param spectrogram: The spectrogram to be visualised.
         :param *frequencies: Frequencies at which to extract time series.
         :param dBb: If True, returns the cuts in decibels above the background. Defaults to False.
         :param peak_normalise: If True, normalizes each time series so its peak value is 1. 
@@ -265,7 +265,7 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
     
 
 class IntegralOverFrequencyPanel(BaseTimeSeriesPanel):
-    """Panel for visualizing the spectrogram integrated over frequency.
+    """Panel for visualising the spectrogram integrated over frequency.
 
     This panel plots the spectrogram's numerical integral over frequency as a time 
     series. The result can be normalized to its peak value or adjusted by subtracting 
@@ -277,7 +277,7 @@ class IntegralOverFrequencyPanel(BaseTimeSeriesPanel):
                  background_subtract: bool = False):
         """Initialise an instance of `IntegralOverFrequencyPanel`.
         
-        :param spectrogram: The spectrogram to be visualized.
+        :param spectrogram: The spectrogram to be visualised.
         :param peak_normalise: If True, normalizes the integral so its peak value is 1. Defaults to False.
         :param background_subtract: If True, subtracts the background after computing the integral. Defaults to False.
         """
@@ -304,7 +304,7 @@ class IntegralOverFrequencyPanel(BaseTimeSeriesPanel):
     
 class SpectrogramPanel(BaseTimeSeriesPanel):
     """
-    Panel for visualizing the full spectrogram.
+    Panel for visualising the full spectrogram.
 
     This panel plots the spectrogram as a colormap, with optional log normalization or 
     in units of decibels above the background.
@@ -319,7 +319,7 @@ class SpectrogramPanel(BaseTimeSeriesPanel):
     ) -> None:
         """Initialise an instance of `SpectrogramPanel`.
 
-        :param spectrogram: The spectrogram to be visualized.
+        :param spectrogram: The spectrogram to be visualised.
         :param log_norm: If True, normalizes the values to the 0-1 range on a logarithmic scale. Defaults to False.
         :param dBb: If True, plots the spectrogram in decibels above the background. Defaults to False.
         :param vmin: Minimum value for the colormap. Only applies if `dBb` is True. Defaults to None.

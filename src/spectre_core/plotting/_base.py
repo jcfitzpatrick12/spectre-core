@@ -30,7 +30,7 @@ class XAxisType(Enum):
 
 
 class BasePanel(ABC):
-    """Abstract base class for a panel used to visualize spectrogram data.
+    """Abstract base class for a panel used to visualise spectrogram data.
 
     `BasePanel` instances are designed to be part of a `PanelStack`, where multiple
     panels contribute to a composite plot. Subclasses must implement methods to define
@@ -43,7 +43,7 @@ class BasePanel(ABC):
     - :meth:`xaxis_type`: Specify the type of x-axis (time or frequency).
 
     :param name: The name of the panel.
-    :param spectrogram: The spectrogram to visualize.
+    :param spectrogram: The spectrogram to visualise.
     """
     def __init__(
         self, 
@@ -57,7 +57,7 @@ class BasePanel(ABC):
         by the `PanelStack`.
 
         :param name: The name of the panel.
-        :param spectrogram: The spectrogram being visualized.
+        :param spectrogram: The spectrogram being visualised.
         """
         self._name = name
         self._spectrogram = spectrogram
@@ -119,7 +119,7 @@ class BasePanel(ABC):
     def spectrogram(
         self
     ) -> Spectrogram:
-        """The spectrogram being visualized on this panel."""
+        """The spectrogram being visualised on this panel."""
         return self._spectrogram
     
 
@@ -295,7 +295,7 @@ class BasePanel(ABC):
 
 class BaseTimeSeriesPanel(BasePanel):
     """
-    Abstract subclass of `BasePanel` designed for visualizing time series data.
+    Abstract subclass of `BasePanel` designed for visualising time series data.
 
     Subclasses must implement any remaining abstract methods from `BasePanel`.
     """   
