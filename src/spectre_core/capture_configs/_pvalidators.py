@@ -24,7 +24,7 @@ from ._pnames import PName
 # ----------------------------------------------------------------------- # 
 
 
-def _validate_window(
+def validate_window(
         parameters: Parameters
 ) -> None:
     """Ensure that the capture configuration file describes a valid window.
@@ -52,7 +52,7 @@ def _validate_window(
                           f"Got {str(e)}"))
     
 
-def _validate_nyquist_criterion(
+def validate_nyquist_criterion(
         parameters: Parameters
 ) -> None:
     """Ensure that the Nyquist criterion is satisfied.
@@ -85,7 +85,7 @@ def _compute_num_steps_per_sweep(min_freq: float,
     return floor((max_freq - min_freq) / freq_step)
 
 
-def _validate_num_steps_per_sweep(
+def validate_num_steps_per_sweep(
         parameters: Parameters
 ) -> None:
     """Ensure that there are at least two steps in frequency per sweep.
@@ -105,7 +105,7 @@ def _validate_num_steps_per_sweep(
                           f"Computed {num_steps_per_sweep} step per sweep"))
     
 
-def _validate_sweep_interval(
+def validate_sweep_interval(
         parameters: Parameters
 ) -> None: 
     """Ensure that the sweep interval is greater than the batch size.
@@ -131,7 +131,7 @@ def _validate_sweep_interval(
                           f"but the given batch size is {batch_size} [s]"))
     
 
-def _validate_num_samples_per_step(
+def validate_num_samples_per_step(
         parameters: Parameters
 ) -> None:
     """Ensure that the number of samples per step is greater than the window size.
@@ -148,7 +148,7 @@ def _validate_num_samples_per_step(
                           f"to the number of samples per step {samples_per_step}"))
     
 
-def _validate_non_overlapping_steps(
+def validate_non_overlapping_steps(
         parameters: Parameters
 ) -> None:
     """Ensure that the stepped spectrograms are non-overlapping in the frequency domain.
@@ -166,7 +166,7 @@ def _validate_non_overlapping_steps(
                                   f"rate {sample_rate * 1e-6} [MHz]")
     
 
-def _validate_step_interval(
+def validate_step_interval(
         parameters: Parameters,
         api_retuning_latency: float
 ) -> None:
@@ -186,18 +186,18 @@ def _validate_step_interval(
                          f"derived api latency {api_retuning_latency} [s]; you may experience undefined behaviour!")
 
 
-def _validate_fixed_center_frequency_parameters(
+def validate_fixed_center_frequency_parameters(
     parameters: Parameters
 ) -> None:
     """Apply validators for capture configuration parameters describing fixed center frequency capture.
 
     :param parameters: The parameters to be validated.
     """
-    _validate_nyquist_criterion(parameters)
-    _validate_window(parameters)
+    validate_nyquist_criterion(parameters)
+    validate_window(parameters)
 
 
-def _validate_swept_center_frequency_parameters(
+def validate_swept_center_frequency_parameters(
     parameters: Parameters,
     api_retuning_latency: Optional[float] = None,
 ) -> None:
@@ -206,26 +206,12 @@ def _validate_swept_center_frequency_parameters(
     :param parameters: The parameters to be validated.
     :param api_retuning_latency: The empirically derived API retuning latency. Defaults to None.
     """
-    _validate_nyquist_criterion(parameters)
-    _validate_window(parameters)
-    _validate_non_overlapping_steps(parameters)
-    _validate_num_steps_per_sweep(parameters)
-    _validate_num_samples_per_step(parameters)
-    _validate_sweep_interval(parameters)
+    validate_nyquist_criterion(parameters)
+    validate_window(parameters)
+    validate_non_overlapping_steps(parameters)
+    validate_num_steps_per_sweep(parameters)
+    validate_num_samples_per_step(parameters)
+    validate_sweep_interval(parameters)
     
     if api_retuning_latency is not None:
-        _validate_step_interval(parameters, api_retuning_latency)
-    
-
-@dataclass(frozen=True)
-class PValidator:
-    """Ready-made parameter validating functions."""
-    window                : Callable[[Parameters], None]        = _validate_window
-    nyquist_criterion     : Callable[[Parameters], None]        = _validate_nyquist_criterion
-    non_overlapping_steps : Callable[[Parameters], None]        = _validate_non_overlapping_steps
-    num_steps_per_sweep   : Callable[[Parameters], None]        = _validate_num_steps_per_sweep
-    num_samples_per_step  : Callable[[Parameters], None]        = _validate_num_samples_per_step
-    sweep_interval        : Callable[[Parameters], None]        = _validate_sweep_interval
-    fixed_center_frequency: Callable[[Parameters], None]        = _validate_fixed_center_frequency_parameters
-    swept_center_frequency: Callable[[Parameters], None]        = _validate_swept_center_frequency_parameters
-    step_interval         : Callable[[Parameters, float], None] = _validate_step_interval
+        validate_step_interval(parameters, api_retuning_latency)

@@ -7,7 +7,7 @@ import logging
 from datetime import datetime
 
 from spectre_core.config import TimeFormat
-from ._log_handlers import Log
+from ._logs import Log
 from ._process_types import ProcessType
 
 

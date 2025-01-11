@@ -109,7 +109,7 @@ class OneOf(BasePConstraint[OT]):
             raise ValueError(f"Value must be one of {self._options}. Got {value}.")
         
 
-class _PowerOfTwo(BasePConstraint[int]):
+class PowerOfTwo(BasePConstraint[int]):
     """Constrain a numeric parameter value to be a power of two."""
     def constrain(
         self, 
@@ -125,17 +125,15 @@ class _PowerOfTwo(BasePConstraint[int]):
 
 
 @dataclass(frozen=True)
-class PConstraint:
-    """Ready-made `PConstraint` subclass instances for frequent use-cases.
+class EnforceSign:
+    """Enforce the sign of some value.
     
-    :ivar power_of_two: Enforce the value to be some power of two.
-    :ivar enforce_positive: Enforce the value to be strictly positive.
-    :ivar enforce_negative: Enforce the value to be strictly negative.
-    :ivar enforce_non_negative: Enforce the value to be zero or positive.
-    :ivar enforce_non_positive: Enforce the value to be zero or negative.
+    :ivar positive: Enforce the value to be strictly positive.
+    :ivar negative: Enforce the value to be strictly negative.
+    :ivar non_negative: Enforce the value to be zero or positive.
+    :ivar non_positive: Enforce the value to be zero or negative.
     """
-    power_of_two           = _PowerOfTwo()
-    enforce_positive       = Bound(lower_bound=0, strict_lower=True)
-    enforce_negative       = Bound(upper_bound=0, strict_upper=True)
-    enforce_non_negative   = Bound(lower_bound=0, strict_lower=False)
-    enforce_non_positive   = Bound(upper_bound=0, strict_upper=False)
+    positive       = Bound(lower_bound=0, strict_lower=True)
+    negative       = Bound(upper_bound=0, strict_upper=True)
+    non_negative   = Bound(lower_bound=0, strict_lower=False)
+    non_positive   = Bound(upper_bound=0, strict_upper=False)
