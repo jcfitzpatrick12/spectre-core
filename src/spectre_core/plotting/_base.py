@@ -36,11 +36,12 @@ class BasePanel(ABC):
     panels contribute to a composite plot. Subclasses must implement methods to define
     how the panel is drawn and annotated, and specify its x-axis type.
 
-    Subclasses must implement:
-    - :meth:`draw`: Define how to render the panel on its matplotlib `Axes`.
-    - :meth:`annotate_xaxis`: Annotate the x-axis for the panel.
-    - :meth:`annotate_yaxis`: Annotate the y-axis for the panel.
-    - :meth:`xaxis_type`: Specify the type of x-axis (time or frequency).
+    Subclasses must implement the following:
+    
+    :method draw: Define how to render the panel on its matplotlib `Axes`.
+    :method annotate_xaxis: Annotate the x-axis for the panel.
+    :method annotate_yaxis: Annotate the y-axis for the panel.
+    :method xaxis_type: A property specifying the type of x-axis (time or frequency).
 
     :param name: The name of the panel.
     :param spectrogram: The spectrogram to visualise.

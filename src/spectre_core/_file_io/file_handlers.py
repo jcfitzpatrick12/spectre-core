@@ -10,15 +10,24 @@ from typing import Any, Optional, TypeVar, Generic
 T = TypeVar('T')
 
 class BaseFileHandler(ABC, Generic[T]):
-    """Base class for handling file operations with type safety.
+    """
+    Base class for handling file operations with type safety.
 
-    Derived classes must:
-    - Implement the `_read` method, which defines how to read the file's contents.
-    - Explicitly specify the return type of `_read` using `Generic[]`  when subclassing.
+    Subclasses must implement the following:
+    
+    :method _read: Defines how to read the file's contents. 
+    
+    Additionally, when subclassing, specify the return type of `_read` 
+    using `Generic[T]`. 
 
-    For example:
+    Example:
+    .. code-block:: python
+
+        from typing import Any, Generic
+
         class JsonHandler(BaseFileHandler[dict[str, Any]]):
             def _read(self) -> dict[str, Any]:
+                # Implementation here
                 ...
     """
     def __init__(

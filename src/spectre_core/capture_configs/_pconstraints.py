@@ -12,8 +12,9 @@ VT = TypeVar('VT')
 class BasePConstraint(ABC, Generic[VT]):
     """An abstract base class for an arbitary parameter constraint.
     
-    Derived classes must:
-    - Implement the `constraint` method, which defines how the value of a parameter 
+    Subclasses must implement the following:
+    
+    :method constrain: Defines how the value of a parameter 
     is to be constrainted.
     """
     @abstractmethod

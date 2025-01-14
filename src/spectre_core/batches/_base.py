@@ -74,16 +74,21 @@ class BatchFile(BaseFileHandler[T]):
          
  
 class BaseBatch(ABC):
-    """Abstract base class representing a group of data files over a common time interval.
+    """
+    Abstract base class representing a group of data files over a common time interval.
 
-    All files in a batch share a base file name and differ only by their extension. 
-    `BaseBatch` subclasses define the expected data for each file extension and provide 
-    an API for accessing their contents using `BatchFile` subclasses.
+    All files in a batch share a base file name and differ only by their extension.
+    Subclasses of `BaseBatch` define the expected data for each file extension and 
+    provide an API for accessing their contents using `BatchFile` subclasses.
 
-    Derived classes must:
-    - Implement the `spectrogram_file` abstract property, as all batches in SPECTRE 
-    must include some file containing spectrogram data.
-    - Expose `BatchFile` instances directly as attributes.
+    Subclasses must implement the following:
+    
+    :method spectrogram_file: A property that returns the `BatchFile` instance
+    containing spectrogram data. All batches in SPECTRE must include a file containing
+    spectrogram data.
+
+    Additionally, you should expose `BatchFile` instances directly as attributes, which
+    simplifies static typing.
     """
     def __init__(
         self, 

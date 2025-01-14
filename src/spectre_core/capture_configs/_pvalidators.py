@@ -2,8 +2,6 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Callable
-from dataclasses import dataclass
 from math import floor
 from typing import Optional, cast
 
@@ -11,7 +9,6 @@ from scipy.signal import get_window
 
 from ._parameters import Parameters
 from ._pnames import PName
-
 
 # ----------------------------------------------------------------------- # 
 # Throughout this module, repeated calls to `cast` will be seen on using the
