@@ -19,23 +19,19 @@
 from functools import partial
 from dataclasses import dataclass
 
-from gnuradio import gr
-from gnuradio import spectre
-from gnuradio import sdrplay3
-
 from spectre_core.capture_configs import Parameters, PName
 from spectre_core.config import get_batches_dir_path
-from ._base import capture
+from ._base import capture, spectre_top_block
 
-class _fixed_center_frequency(gr.top_block):
-    def __init__(self, 
-                 tag: str,
-                 parameters: Parameters):
-        gr.top_block.__init__(self, catch_exceptions=True)
+class _fixed_center_frequency(spectre_top_block):
+    def flowgraph(self, 
+                  tag: str,
+                  parameters: Parameters):
+        # Inline imports 
+        from gnuradio import spectre
+        from gnuradio import sdrplay3
 
-        ##################################################
-        # Unpack capture config
-        ##################################################
+        # Unpack the capture config parameters
         sample_rate = parameters.get_parameter_value(PName.SAMPLE_RATE)
         batch_size  = parameters.get_parameter_value(PName.BATCH_SIZE)
         center_freq = parameters.get_parameter_value(PName.CENTER_FREQUENCY)
@@ -44,9 +40,7 @@ class _fixed_center_frequency(gr.top_block):
         rf_gain     = parameters.get_parameter_value(PName.RF_GAIN)
         
 
-        ##################################################
         # Blocks
-        ##################################################
         self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_batches_dir_path(), 
                                                                      tag, 
                                                                      batch_size, 
@@ -75,22 +69,19 @@ class _fixed_center_frequency(gr.top_block):
         self.sdrplay3_rsp1a_0.set_sample_sequence_gaps_check(False)
         self.sdrplay3_rsp1a_0.set_show_gain_changes(False)
 
-
-        ##################################################
         # Connections
-        ##################################################
         self.connect((self.sdrplay3_rsp1a_0, 0), (self.spectre_batched_file_sink_0, 0))
 
 
-class _swept_center_frequency(gr.top_block):
-    def __init__(self, 
-                 tag: str,
-                 parameters: Parameters):
-        gr.top_block.__init__(self, catch_exceptions=True)
+class _swept_center_frequency(spectre_top_block):
+    def flowgraph(self, 
+                  tag: str,
+                  parameters: Parameters):
+        # Inline imports 
+        from gnuradio import spectre
+        from gnuradio import sdrplay3
 
-        ##################################################
-        # Unpack capture config
-        ##################################################
+        # Unpack the capture config parameters
         sample_rate      = parameters.get_parameter_value(PName.SAMPLE_RATE)
         bandwidth        = parameters.get_parameter_value(PName.BANDWIDTH)
         min_frequency    = parameters.get_parameter_value(PName.MIN_FREQUENCY)
@@ -102,9 +93,7 @@ class _swept_center_frequency(gr.top_block):
         batch_size       = parameters.get_parameter_value(PName.BATCH_SIZE)
 
 
-        ##################################################
         # Blocks
-        ##################################################
         self.spectre_sweep_driver_0 = spectre.sweep_driver(min_frequency, 
                                                            max_frequency, 
                                                            frequency_step, 
@@ -143,10 +132,7 @@ class _swept_center_frequency(gr.top_block):
         self.sdrplay3_rsp1a_0.set_sample_sequence_gaps_check(False)
         self.sdrplay3_rsp1a_0.set_show_gain_changes(False)
 
-
-        ##################################################
         # Connections
-        ##################################################
         self.msg_connect((self.spectre_sweep_driver_0, 'freq'), (self.sdrplay3_rsp1a_0, 'freq'))
         self.connect((self.sdrplay3_rsp1a_0, 0), (self.spectre_batched_file_sink_0, 0))
         self.connect((self.sdrplay3_rsp1a_0, 0), (self.spectre_sweep_driver_0, 0))

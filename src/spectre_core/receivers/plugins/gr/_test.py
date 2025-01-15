@@ -22,31 +22,27 @@ from dataclasses import dataclass
 
 from gnuradio import gr
 from gnuradio import blocks
-from gnuradio import spectre
 from gnuradio import analog
 
 from spectre_core.capture_configs import Parameters, PName
 from spectre_core.config import get_batches_dir_path
-from ._base import capture
+from ._base import capture, spectre_top_block
 
 
-class _cosine_signal_1(gr.top_block):
-    def __init__(self, 
-                 tag: str,
-                 parameters: Parameters):
-        gr.top_block.__init__(self, catch_exceptions=True)
+class _cosine_signal_1(spectre_top_block):
+    def flowgraph(self, 
+                  tag: str,
+                  parameters: Parameters):
+        # Inline imports 
+        from gnuradio import spectre
 
-        ##################################################
-        # Unpack capture config
-        ##################################################
+        # Unpack the capture config parameters
         samp_rate   = parameters.get_parameter_value(PName.SAMPLE_RATE)
         batch_size  = parameters.get_parameter_value(PName.BATCH_SIZE)
         frequency   = parameters.get_parameter_value(PName.FREQUENCY)
         amplitude   = parameters.get_parameter_value(PName.AMPLITUDE)
 
-        ##################################################
         # Blocks
-        ##################################################
         self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_batches_dir_path(), 
                                                                      tag, 
                                                                      batch_size, 
@@ -77,11 +73,12 @@ class _cosine_signal_1(gr.top_block):
         self.connect((self.blocks_throttle_0_1, 0), (self.blocks_float_to_complex_1, 1))
 
 
-class _tagged_staircase(gr.top_block):
-    def __init__(self, 
-                 tag: str,
-                 parameters: Parameters):
-        gr.top_block.__init__(self, catch_exceptions=True)
+class _tagged_staircase(spectre_top_block):
+    def flowgraph(self, 
+                  tag: str,
+                  parameters: Parameters):
+        # Inline imports 
+        from gnuradio import spectre
 
         ##################################################
         # Unpack capture config

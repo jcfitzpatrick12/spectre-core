@@ -24,13 +24,13 @@ class Mode:
 class RSP1A(SDRPlayReceiver):
     """Receiver implementation for the SDRPlay RSPduo (https://www.sdrplay.com/rsp1a/)"""
     def _add_specs(self) -> None:
-        self.add_spec( SpecName.SAMPLE_RATE_LOWER_BOUND, 200e3     ) # Hz
-        self.add_spec( SpecName.SAMPLE_RATE_UPPER_BOUND, 10e6      ) # Hz
-        self.add_spec( SpecName.FREQUENCY_LOWER_BOUND  , 1e3       ) # Hz
-        self.add_spec( SpecName.FREQUENCY_UPPER_BOUND  , 2e9       ) # Hz
-        self.add_spec( SpecName.IF_GAIN_UPPER_BOUND    , -20       ) # dB
-        self.add_spec( SpecName.RF_GAIN_UPPER_BOUND    , 0         ) # dB
-        self.add_spec( SpecName.API_RETUNING_LATENCY   , 50 * 1e-3 ) # s
+        self.add_spec( SpecName.SAMPLE_RATE_LOWER_BOUND, 200e3     )
+        self.add_spec( SpecName.SAMPLE_RATE_UPPER_BOUND, 10e6      )
+        self.add_spec( SpecName.FREQUENCY_LOWER_BOUND  , 1e3       )
+        self.add_spec( SpecName.FREQUENCY_UPPER_BOUND  , 2e9       )
+        self.add_spec( SpecName.IF_GAIN_UPPER_BOUND    , -20       )
+        self.add_spec( SpecName.RF_GAIN_UPPER_BOUND    , 0         )
+        self.add_spec( SpecName.API_RETUNING_LATENCY   , 50 * 1e-3 )
         self.add_spec( SpecName.BANDWIDTH_OPTIONS, 
                       [200000, 300000, 600000, 1536000, 5000000, 6000000, 7000000, 8000000])
 
