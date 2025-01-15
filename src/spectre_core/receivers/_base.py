@@ -16,12 +16,11 @@ class BaseReceiver(ABC):
     """Abstract base class for software-defined radio receivers.
 
     Subclasses must implement the following:
-    - `_add_specs`: Use `add_spec` to set hardware specifications.
-    - `_add_capture_methods`: Define data capture methods for each operating mode.
-    - `_add_capture_templates`: Add a `CaptureTemplate` outlining required parameters 
-    for each mode, and what values each parameter can take.
-    - `_add_pvalidators`: Define methods which validate the capture config parameters 
-    for each operating mode.
+    
+    :method _add_specs: Use `add_spec` to add hardware specifications.
+    :method _add_capture_methods: Use `add_capture_method` to define a capture method per operating mode.
+    :method _add_capture_templates: Use `add_capture_template` to add a `CaptureTemplate` per operating mode.
+    :method _add_pvalidators: Use `add_pvalidator` to add a pvalidator per operating mode.
     """
     def __init__(
         self, 
@@ -31,7 +30,7 @@ class BaseReceiver(ABC):
         """Initialise an instance of `BaseReceiver`.
 
         :param name: The name of the receiver.
-        :param mode: The initial operating mode. Defaults to None.
+        :param mode: The initial active operating mode. Defaults to None.
         """
         self._name = name
 
@@ -54,41 +53,29 @@ class BaseReceiver(ABC):
     def _add_specs(
         self
     ) -> None:
-        """Define hardware specifications for the receiver.
-
-        Subclasses must use `add_spec` to populate the specifications.
-        """
+        """Subclasses must use `add_spec` to add hardware specifications."""
     
 
     @abstractmethod
     def _add_capture_methods(
         self
     ) -> None:
-        """Define data capture methods for each operating mode.
-
-        Subclasses must use `add_capture_method` to specify the 
-        function which is invoked to collect data.
-        """
+        """Subclasses must use `add_capture_method` to specify the function which is invoked to collect data,
+        for each operating mode."""
+        
 
     @abstractmethod
     def _add_capture_templates(
         self
     ) -> None:
-        """Add a `CaptureTemplate` for each operating mode.
-
-        Subclasses must use `add_capture_template` to specify required capture config parameters, 
-        and what values each of the parameters can take.
-        """
+        """Subclasses must use `add_capture_template` to define a `CaptureTemplate` for each operating mode."""
 
     @abstractmethod
     def _add_pvalidators(
         self
     ) -> None:
-        """Define parameter validation methods for each operating mode.
-
-        Subclasses must use `add_pvalidator` to add functions which validate capture config parameters 
-        as a whole.
-        """
+        """Subclasses must use `add_pvalidator` to add a parameter validation function (pvalidator) 
+        for each operating mode."""
 
     
     @property
@@ -111,8 +98,7 @@ class BaseReceiver(ABC):
     def capture_templates(
         self
     ) -> dict[str, CaptureTemplate]:
-        """For each operating mode, the corresponding `CaptureTemplate` which describes
-        what parameters are expected in the capture config."""
+        """For each operating mode, the corresponding `CaptureTemplate`."""
         return self._capture_templates  
 
 
@@ -120,8 +106,7 @@ class BaseReceiver(ABC):
     def pvalidators(
         self
     ) -> dict[str, Callable[[Parameters], None]]:
-        """For each operating mode, the function which validates capture config
-        parameters as a whole."""
+        """For each operating mode, the corresponding parameter validation function (pvalidator)."""
         return self._pvalidators
 
 
@@ -164,7 +149,7 @@ class BaseReceiver(ABC):
         self, 
         value: Optional[str]
     ) -> None:
-        """Set the active operating mode of the receiver.
+        """Set the active operating mode.
 
         :param value: The new operating mode to activate.
         :raises ModeNotFoundError: If the specified mode is not defined in `modes`.
@@ -187,7 +172,7 @@ class BaseReceiver(ABC):
     def pvalidator(
         self
     ) -> Callable[[Parameters], None]:
-        """Validate parameters for the active operating mode."""
+        """The parameter validation function for the active operating mode."""
         return self.pvalidators[self.mode]
 
 
@@ -195,7 +180,7 @@ class BaseReceiver(ABC):
     def capture_template(
         self
     ) -> CaptureTemplate:
-        """The capture template for the active operating mode."""
+        """The `CaptureTemplate` for the active operating mode."""
         return self._capture_templates[self.mode]
 
 
@@ -204,13 +189,10 @@ class BaseReceiver(ABC):
         mode: str,
         capture_method: Callable[[str, Parameters], None]
     ) -> None:
-        """Add a data capture method for a specific operating mode.
+        """
+        Add a capture method for a specific operating mode.
 
-        Each capture method takes two arguments: the capture config tag and the stored parameters. 
-        When `start_capture` is called, the capture method for the active operating mode is invoked with 
-        the input parameters loaded from the capture config.
-
-        :param mode: The operating mode for which the capture method is added.
+        :param mode: The operating mode.
         :param capture_method: The function to invoke data capture.
         """
         self._capture_methods[mode] = capture_method
@@ -221,13 +203,11 @@ class BaseReceiver(ABC):
         mode: str,
         pvalidator: Callable[[Parameters], None]
     ) -> None:
-        """Add a parameter validation function for a specific operating mode.
+        """
+        Add a parameter validation function for a specific operating mode.
 
-        When `start_capture` is called, the parameters in the capture config are validated 
-        using the specified function before being passed to the capture method.
-
-        :param mode: The operating mode for which the validation function is added.
-        :param pvalidator: The function used to validate the capture config parameters.
+        :param mode: The operating mode.
+        :param pvalidator: The validation function.
         """
         self._pvalidators[mode] = pvalidator
 
@@ -237,13 +217,11 @@ class BaseReceiver(ABC):
         mode: str,
         capture_template: CaptureTemplate
     ) -> None:
-        """Add a `CaptureTemplate` for a specific operating mode.
+        """
+        Add a `CaptureTemplate` for a specific operating mode.
 
-        The `CaptureTemplate` outlines the required parameters for the capture config 
-        and specifies what values each parameter can take.
-
-        :param mode: The operating mode for which the template is added.
-        :param capture_template: The `CaptureTemplate` defining the parameter requirements.
+        :param mode: The operating mode.
+        :param capture_template: The capture template, defining parameter requirements.
         """
         self._capture_templates[mode] = capture_template
 
@@ -253,10 +231,11 @@ class BaseReceiver(ABC):
         name: SpecName,
         value: Number
     ) -> None:
-        """Add a hardware specification to the receiver.
+        """
+        Add a hardware specification.
 
-        :param name: The name of the specification.
-        :param value: The value of the specification.
+        :param name: The specification's name.
+        :param value: The specification's value.
         """
         self.specs[name] = value
 
@@ -265,11 +244,12 @@ class BaseReceiver(ABC):
         self, 
         spec_name: SpecName
     ) -> Number | list[Number]:
-        """Retrieve a hardware specification by name.
+        """
+        Retrieve a hardware specification.
 
-        :param spec_name: The name of the specification to retrieve.
-        :raises KeyError: If the name does not exist in the receiver's specifications.
-        :return: The value of the specification.
+        :param spec_name: The name of the specification.
+        :raises KeyError: If the specification is not found.
+        :return: The specification's value.
         """
         if spec_name not in self.specs:
             raise KeyError(f"Spec not found with name '{spec_name}' "
@@ -283,10 +263,7 @@ class BaseReceiver(ABC):
     ) -> None:
         """Initiate data capture for the active operating mode.
 
-        Loads the capture config for the specified tag, validates its parameters 
-        then starts data capture.
-
-        :param tag: The tag identifying the capture configuration to use.
+        :param tag: The tag identifying the capture config to load.
         """
         self.capture_method( tag, self.load_parameters(tag) )
 
@@ -297,11 +274,11 @@ class BaseReceiver(ABC):
         parameters: Parameters,
         force: bool = False
     ) -> None:
-        """Creates a capture config for the active operating mode and saves the parameters.
+        """Create a capture config for the active operating mode and save the parameters.
 
-        Validates the parameters against the active `capture_template` and `pvalidator` before saving.
-
-        :param tag: The tag identifying the capture configuration.
+        The input parameters are validated before being written to file.
+        
+        :param tag: The tag identifying the capture config.
         :param parameters: The parameters to save in the capture config.
         :param force: If True, overwrites the existing file if it already exists. Defaults to False.
         """
@@ -312,16 +289,15 @@ class BaseReceiver(ABC):
         capture_config.save_parameters(self.name,
                                        self.mode,
                                        parameters,
-                                       force=force)
+                                       force)
 
     def load_parameters(
         self,
         tag: str
     ) -> Parameters:
-        """Loads a capture config and validates its stored parameters.
+        """Load a capture config, and return the parameters it stores.
 
-        Validates the parameters using the active `capture_template` and `pvalidator` 
-        before returning.
+        The parameters are validated before being returned.
 
         :param tag: The tag identifying the capture configuration.
         :return: The validated parameters stored in the capture config.

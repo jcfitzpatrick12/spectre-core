@@ -12,8 +12,8 @@ from ._ptemplates import PTemplate, get_base_ptemplate
 from ._ptemplates import PName
 
 class CaptureTemplate:
-    """A managed collection of parameter templates. Strictly outlines what parameters should exist
-    in a capture configuration file, and what the values of those parameters should look like. 
+    """A managed collection of parameter templates. Strictly defines what parameters are required
+    in a capture configuration file, and the values each parameter can take.
     """
     def __init__(
         self
