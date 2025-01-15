@@ -233,245 +233,245 @@ class PTemplate(Generic[VT]):
 
 _base_ptemplates: dict[PName, PTemplate] = {
     PName.CENTER_FREQUENCY:       PTemplate(PName.CENTER_FREQUENCY,       
-                                             float, 
-                                             help = """
-                                                    The center frequency of the SDR in Hz.
-                                                    This value determines the midpoint of the frequency range
-                                                    being processed.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.positive
-                                                 ]),
-    PName.MIN_FREQUENCY:          PTemplate(PName.MIN_FREQUENCY,          
-                                             float, 
-                                             help = """
-                                                    The minimum center frequency, in Hz, for the frequency sweep.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.positive
-                                                 ]),
-    PName.MAX_FREQUENCY:          PTemplate(PName.MAX_FREQUENCY,          
-                                             float, 
-                                             help = """
-                                                    The maximum center frequency, in Hz, for the frequency sweep.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.positive
-                                                 ]),
-    PName.FREQUENCY_STEP:         PTemplate(PName.FREQUENCY_STEP,         
-                                             float, 
-                                             help = """
-                                                    The amount, in Hz, by which the center frequency is incremented
-                                                    for each step in the frequency sweep. 
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.positive
-                                                 ]),
-    PName.BANDWIDTH:              PTemplate(PName.BANDWIDTH,              
-                                             float, 
-                                             help = """
-                                                    The frequency range in Hz the signal will occupy without
-                                                    significant attenutation.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.positive
-                                                 ]),
-    PName.SAMPLE_RATE:            PTemplate(PName.SAMPLE_RATE,            
-                                             int,   
-                                             help = """
-                                                    The number of samples per second in Hz.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.positive
-                                                 ]),
-    PName.IF_GAIN:                PTemplate(PName.IF_GAIN,                
-                                             float, 
-                                             help = """
-                                                    The intermediate frequency gain, in dB.
-                                                    Negative value indicates attenuation.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.negative
-                                                 ]),
-    PName.RF_GAIN:                PTemplate(PName.RF_GAIN,                
-                                             float, 
-                                             help = """
-                                                    The radio frequency gain, in dB.
-                                                    Negative value indicates attenuation.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.non_positive
-                                                 ]),
-    PName.EVENT_HANDLER_KEY:      PTemplate(PName.EVENT_HANDLER_KEY,      
-                                             str,
-                                             help = """
-                                                    Identifies which post-processing functions to invoke
-                                                    on newly created files.
-                                                    """),
-    PName.BATCH_KEY:              PTemplate(PName.BATCH_KEY,              
-                                             str,
-                                             help = """
-                                                    Identifies the type of data is stored in each batch.
-                                                    """,
-                                             ),
-    PName.WINDOW_SIZE:            PTemplate(PName.WINDOW_SIZE,            
-                                             int,  
-                                             help = """
-                                                    The size of the window, in samples, when performing the
-                                                    Short Time FFT.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.positive, 
-                                                 PowerOfTwo,
-                                                 ]),
-    PName.WINDOW_HOP:             PTemplate(PName.WINDOW_HOP,             
-                                             int,   
-                                             help = """
-                                                    How much the window is shifted, in samples, 
-                                                    when performing the Short Time FFT.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.positive
-                                                 ]),
-    PName.WINDOW_TYPE:            PTemplate(PName.WINDOW_TYPE,            
-                                             str,
-                                             help = """
-                                                    The type of window applied when performing the Short
-                                                    Time FFT.
-                                                    """,
-                                             ),
-    PName.WATCH_EXTENSION:        PTemplate(PName.WATCH_EXTENSION,        
-                                             str,
-                                             help = """
-                                                    Post-processing is triggered by newly created files with this extension.
-                                                    Extensions are specified without the '.' character.
-                                                    """,
-                                             ),
-    PName.TIME_RESOLUTION:        PTemplate(PName.TIME_RESOLUTION,        
-                                             float, 
-                                             nullable=True,
-                                             help = """
-                                                    Batched spectrograms are smoothed by averaging up to the time resolution,
-                                                    specified in seconds.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.non_negative
-                                                 ]),
-    PName.FREQUENCY_RESOLUTION:   PTemplate(PName.FREQUENCY_RESOLUTION,   
-                                             float, 
-                                             nullable=True,
-                                             help = """
-                                                    Batched spectrograms are smoothed by averaging up to the frequency resolution,
-                                                    specified in Hz.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.non_negative
-                                                 ]),
-    PName.TIME_RANGE:             PTemplate(PName.TIME_RANGE,             
-                                             float, 
-                                             nullable=True,
-                                             help = """
-                                                    Batched spectrograms are stitched together until
-                                                    the time range, in seconds, is surpassed.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.non_negative
-                                                 ]),
-    PName.BATCH_SIZE:             PTemplate(PName.BATCH_SIZE,             
-                                             int,   
-                                             help = """
-                                                    SDR data is collected in batches of this size, specified
-                                                    in seconds.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.positive
-                                                 ]),
-    PName.SAMPLES_PER_STEP:       PTemplate(PName.SAMPLES_PER_STEP,       
-                                             int,   
-                                             help = """
-                                                    The number of samples taken at each center frequency in the sweep.
-                                                    This may vary slightly from what is specified due to the nature of
-                                                    GNU Radio runtime.
-                                                    """,
-                                             pconstraints=[
-                                                 EnforceSign.positive
-                                                 ]),
-    PName.ORIGIN:                 PTemplate(PName.ORIGIN,
-                                             str,
-                                             nullable=True,
-                                             help="""
-                                                  Corresponds to the FITS keyword ORIGIN.
-                                                  """),
-    PName.TELESCOPE:              PTemplate(PName.TELESCOPE,
-                                             str,
-                                             nullable=True,
-                                             help="""
-                                                  Corresponds to the FITS keyword TELESCOP.
-                                                  """),
-    PName.INSTRUMENT:             PTemplate(PName.INSTRUMENT,
-                                             str,
-                                             nullable=True,
-                                             help="""
-                                                  Corresponds to the FITS keyword INSTRUME.
-                                                  """),
-    PName.OBJECT:                 PTemplate(PName.OBJECT,
-                                             str,
-                                             nullable=True,
-                                             help="""
-                                                  Corresponds to the FITS keyword OBJECT.
-                                                  """),
-    PName.OBS_LAT:                PTemplate(PName.OBS_LAT,
-                                             float,
-                                             nullable=True,
-                                             help="""
-                                                  Corresponds to the FITS keyword OBS_LAT.
-                                                  """),
-    PName.OBS_LON:                PTemplate(PName.OBS_LON,
-                                             float,
-                                             nullable=True,
-                                             help="""
-                                                  Corresponds to the FITS keyword OBS_LONG.
-                                                  """),
-    PName.OBS_ALT:                PTemplate(PName.OBS_ALT,
-                                             float,
-                                             nullable=True,
-                                             help="""
-                                                  Corresponds to the FITS keyword OBS_ALT.
-                                                  """),
-    PName.AMPLITUDE:              PTemplate(PName.AMPLITUDE,
-                                             float,
-                                             help="""
-                                                  The amplitude of the signal.
-                                                  """),
-    PName.FREQUENCY:              PTemplate(PName.FREQUENCY,
-                                             float,
-                                             help="""
-                                                  The frequency of the signal, in Hz.
-                                                  """),
-    PName.MIN_SAMPLES_PER_STEP:   PTemplate(PName.MIN_SAMPLES_PER_STEP,
-                                             int,
-                                             help="""
-                                                  The number of samples in the shortest step of the staircase.
-                                                  """,
-                                             pconstraints=[
-                                                 EnforceSign.positive
-                                                 ]),
-    PName.MAX_SAMPLES_PER_STEP:   PTemplate(PName.MAX_SAMPLES_PER_STEP,
-                                             int,
-                                             help="""
-                                                  The number of samples in the longest step of the staircase.
-                                                  """,
+                                            float, 
+                                            help = """
+                                                The center frequency of the SDR in Hz.
+                                                This value determines the midpoint of the frequency range
+                                                being processed.
+                                                """,
                                             pconstraints=[
-                                                  EnforceSign.positive
-                                                  ]),
+                                                EnforceSign.positive
+                                                ]),
+    PName.MIN_FREQUENCY:          PTemplate(PName.MIN_FREQUENCY,          
+                                            float, 
+                                            help = """
+                                                The minimum center frequency, in Hz, for the frequency sweep.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.positive
+                                                ]),
+    PName.MAX_FREQUENCY:          PTemplate(PName.MAX_FREQUENCY,          
+                                            float, 
+                                            help = """
+                                                The maximum center frequency, in Hz, for the frequency sweep.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.positive
+                                                ]),
+    PName.FREQUENCY_STEP:         PTemplate(PName.FREQUENCY_STEP,         
+                                            float, 
+                                            help = """
+                                                The amount, in Hz, by which the center frequency is incremented
+                                                for each step in the frequency sweep. 
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.positive
+                                                ]),
+    PName.BANDWIDTH:              PTemplate(PName.BANDWIDTH,              
+                                            float, 
+                                            help = """
+                                                The frequency range in Hz the signal will occupy without
+                                                significant attenutation.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.positive
+                                                ]),
+    PName.SAMPLE_RATE:            PTemplate(PName.SAMPLE_RATE,            
+                                            int,   
+                                            help = """
+                                                The number of samples per second in Hz.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.positive
+                                                ]),
+    PName.IF_GAIN:                PTemplate(PName.IF_GAIN,                
+                                            float, 
+                                            help = """
+                                                The intermediate frequency gain, in dB.
+                                                Negative value indicates attenuation.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.negative
+                                                ]),
+    PName.RF_GAIN:                PTemplate(PName.RF_GAIN,                
+                                            float, 
+                                            help = """
+                                                The radio frequency gain, in dB.
+                                                Negative value indicates attenuation.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.non_positive
+                                                ]),
+    PName.EVENT_HANDLER_KEY:      PTemplate(PName.EVENT_HANDLER_KEY,      
+                                            str,
+                                            help = """
+                                                Identifies which post-processing functions to invoke
+                                                on newly created files.
+                                                """),
+    PName.BATCH_KEY:              PTemplate(PName.BATCH_KEY,              
+                                            str,
+                                            help = """
+                                                Identifies the type of data is stored in each batch.
+                                                """,
+                                            ),
+    PName.WINDOW_SIZE:            PTemplate(PName.WINDOW_SIZE,            
+                                            int,  
+                                            help = """
+                                                The size of the window, in samples, when performing the
+                                                Short Time FFT.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.positive, 
+                                                PowerOfTwo(),
+                                                ]),
+    PName.WINDOW_HOP:             PTemplate(PName.WINDOW_HOP,             
+                                            int,   
+                                            help = """
+                                                How much the window is shifted, in samples, 
+                                                when performing the Short Time FFT.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.positive
+                                                ]),
+    PName.WINDOW_TYPE:            PTemplate(PName.WINDOW_TYPE,            
+                                            str,
+                                            help = """
+                                                The type of window applied when performing the Short
+                                                Time FFT.
+                                                """,
+                                            ),
+    PName.WATCH_EXTENSION:        PTemplate(PName.WATCH_EXTENSION,        
+                                            str,
+                                            help = """
+                                                Post-processing is triggered by newly created files with this extension.
+                                                Extensions are specified without the '.' character.
+                                                """,
+                                            ),
+    PName.TIME_RESOLUTION:        PTemplate(PName.TIME_RESOLUTION,        
+                                            float, 
+                                            nullable=True,
+                                            help = """
+                                                Batched spectrograms are smoothed by averaging up to the time resolution,
+                                                specified in seconds.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.non_negative
+                                                ]),
+    PName.FREQUENCY_RESOLUTION:   PTemplate(PName.FREQUENCY_RESOLUTION,   
+                                            float, 
+                                            nullable=True,
+                                            help = """
+                                                Batched spectrograms are smoothed by averaging up to the frequency resolution,
+                                                specified in Hz.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.non_negative
+                                                ]),
+    PName.TIME_RANGE:             PTemplate(PName.TIME_RANGE,             
+                                            float, 
+                                            nullable=True,
+                                            help = """
+                                                Batched spectrograms are stitched together until
+                                                the time range, in seconds, is surpassed.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.non_negative
+                                                ]),
+    PName.BATCH_SIZE:             PTemplate(PName.BATCH_SIZE,             
+                                            int,   
+                                            help = """
+                                                SDR data is collected in batches of this size, specified
+                                                in seconds.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.positive
+                                                ]),
+    PName.SAMPLES_PER_STEP:       PTemplate(PName.SAMPLES_PER_STEP,       
+                                            int,   
+                                            help = """
+                                                The number of samples taken at each center frequency in the sweep.
+                                                This may vary slightly from what is specified due to the nature of
+                                                GNU Radio runtime.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.positive
+                                                ]),
+    PName.ORIGIN:                 PTemplate(PName.ORIGIN,
+                                            str,
+                                            nullable=True,
+                                            help="""
+                                                Corresponds to the FITS keyword ORIGIN.
+                                                """),
+    PName.TELESCOPE:              PTemplate(PName.TELESCOPE,
+                                            str,
+                                            nullable=True,
+                                            help="""
+                                                Corresponds to the FITS keyword TELESCOP.
+                                                """),
+    PName.INSTRUMENT:             PTemplate(PName.INSTRUMENT,
+                                            str,
+                                            nullable=True,
+                                            help="""
+                                                Corresponds to the FITS keyword INSTRUME.
+                                                """),
+    PName.OBJECT:                 PTemplate(PName.OBJECT,
+                                            str,
+                                            nullable=True,
+                                            help="""
+                                                Corresponds to the FITS keyword OBJECT.
+                                                """),
+    PName.OBS_LAT:                PTemplate(PName.OBS_LAT,
+                                            float,
+                                            nullable=True,
+                                            help="""
+                                                Corresponds to the FITS keyword OBS_LAT.
+                                                """),
+    PName.OBS_LON:                PTemplate(PName.OBS_LON,
+                                            float,
+                                            nullable=True,
+                                            help="""
+                                                Corresponds to the FITS keyword OBS_LONG.
+                                                """),
+    PName.OBS_ALT:                PTemplate(PName.OBS_ALT,
+                                            float,
+                                            nullable=True,
+                                            help="""
+                                                Corresponds to the FITS keyword OBS_ALT.
+                                                """),
+    PName.AMPLITUDE:              PTemplate(PName.AMPLITUDE,
+                                            float,
+                                            help="""
+                                                The amplitude of the signal.
+                                                """),
+    PName.FREQUENCY:              PTemplate(PName.FREQUENCY,
+                                            float,
+                                            help="""
+                                                The frequency of the signal, in Hz.
+                                                """),
+    PName.MIN_SAMPLES_PER_STEP:   PTemplate(PName.MIN_SAMPLES_PER_STEP,
+                                            int,
+                                            help="""
+                                                The number of samples in the shortest step of the staircase.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.positive
+                                                ]),
+    PName.MAX_SAMPLES_PER_STEP:   PTemplate(PName.MAX_SAMPLES_PER_STEP,
+                                            int,
+                                            help="""
+                                                The number of samples in the longest step of the staircase.
+                                                """,
+                                        pconstraints=[
+                                                EnforceSign.positive
+                                                ]),
     PName.STEP_INCREMENT:         PTemplate(PName.STEP_INCREMENT,
-                                             int,
-                                             help="""
-                                                  The length by which each step in the staircase is incremented.
-                                                  """,
-                                             pconstraints=[
-                                                  EnforceSign.positive,
-                                              ])
+                                            int,
+                                            help="""
+                                                The length by which each step in the staircase is incremented.
+                                                """,
+                                            pconstraints=[
+                                                EnforceSign.positive,
+                                            ])
                                     
                                            
 }

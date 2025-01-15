@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Literal, overload, Type
+from typing import Literal, overload, Type, TypeVar
 
 from spectre_core.exceptions import BatchNotFoundError
 from ._base import BaseBatch
@@ -26,9 +26,10 @@ def get_batch_cls(
     ...
 
 
+T = TypeVar('T', bound=Type[BaseBatch])
 def get_batch_cls(
     batch_key: BatchKey,
-) -> Type[BaseBatch]:
+) -> Type[T]:
     """Get a registered `BaseBatch` subclass.
 
     :param batch_key: The key used to register the `BaseBatch` subclass.

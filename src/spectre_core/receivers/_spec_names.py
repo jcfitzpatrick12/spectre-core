@@ -5,7 +5,7 @@
 from enum import Enum
 
 class SpecName(Enum):
-    """Defined hardware specification names.
+    """A centralised store of hardware specification names.
     
     :ivar FREQUENCY_LOWER_BOUND: The lower bound for the center frequency, in Hz.
     :ivar FREQUENCY_UPPER_BOUND: The upper bound for the center frequency, in Hz.

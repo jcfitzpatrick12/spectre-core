@@ -3,56 +3,61 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from dataclasses import dataclass
-from typing import Optional, Callable
+from typing import Callable
 
 from spectre_core.capture_configs import (
-    CaptureTemplate, CaptureMode, Parameters, Bound, PValidator, PName,
-    get_base_capture_template, make_base_capture_template, get_base_ptemplate
+    CaptureTemplate, CaptureMode, Parameters, Bound, PName,
+    get_base_capture_template, make_base_capture_template, get_base_ptemplate,
+    validate_window
 )
 from .gr._test import CaptureMethod
+from ._receiver_names import ReceiverName
 from .._spec_names import SpecName
 from .._base import BaseReceiver
 from .._register import register_receiver
 
 
-@dataclass
+@dataclass(frozen=True)
 class Mode:
     COSINE_SIGNAL_1  = "cosine-signal-1"
     TAGGED_STAIRCASE = "tagged-staircase"
 
 
-@register_receiver("test")
+@register_receiver(ReceiverName.TEST)
 class Test(BaseReceiver):
-    def __init__(self, 
-                 name: str,
-                 mode: Optional[str]):
-        super().__init__(name,
-                         mode)
-        
-
-    def _add_specs(self) -> None:
+    def _add_specs(
+        self
+    ) -> None:
         self.add_spec( SpecName.SAMPLE_RATE_LOWER_BOUND, 64000  )
         self.add_spec( SpecName.SAMPLE_RATE_UPPER_BOUND, 640000 )
         self.add_spec( SpecName.FREQUENCY_LOWER_BOUND  , 16000  )
         self.add_spec( SpecName.FREQUENCY_UPPER_BOUND  , 160000 )
 
 
-    def _add_capture_methods(self) -> None:
+    def _add_capture_methods(
+        self
+    ) -> None:
         self.add_capture_method( Mode.COSINE_SIGNAL_1 , CaptureMethod.cosine_signal_1 )
         self.add_capture_method( Mode.TAGGED_STAIRCASE, CaptureMethod.tagged_staircase)
     
 
-    def _add_pvalidators(self) -> None:
+    def _add_pvalidators(
+        self
+    ) -> None:
         self.add_pvalidator( Mode.COSINE_SIGNAL_1 , self.__get_pvalidator_cosine_signal_1()  )
         self.add_pvalidator( Mode.TAGGED_STAIRCASE, self.__get_pvalidator_tagged_staircase() )
 
 
-    def _add_capture_templates(self) -> None:
+    def _add_capture_templates(
+        self
+    ) -> None:
         self.add_capture_template( Mode.COSINE_SIGNAL_1 , self.__get_capture_template_cosine_signal_1()  )
         self.add_capture_template( Mode.TAGGED_STAIRCASE, self.__get_capture_template_tagged_staircase() )
         
 
-    def __get_capture_template_cosine_signal_1(self) -> CaptureTemplate:
+    def __get_capture_template_cosine_signal_1(
+        self
+    ) -> CaptureTemplate:
         #
         # Create the base template
         #
@@ -109,7 +114,9 @@ class Test(BaseReceiver):
         return capture_template
 
 
-    def __get_capture_template_tagged_staircase(self) -> CaptureTemplate:
+    def __get_capture_template_tagged_staircase(
+        self
+    ) -> CaptureTemplate:
         #
         # Make the base template
         #
@@ -173,9 +180,11 @@ class Test(BaseReceiver):
         return capture_template
     
     
-    def __get_pvalidator_cosine_signal_1(self) -> Callable:
-        def pvalidator(parameters: Parameters):
-            PValidator.window(parameters)
+    def __get_pvalidator_cosine_signal_1(
+        self
+    ) -> Callable[[Parameters], None]:
+        def pvalidator(parameters: Parameters) -> None:
+            validate_window(parameters)
 
             sample_rate          = parameters.get_parameter_value(PName.SAMPLE_RATE)
             frequency            = parameters.get_parameter_value(PName.FREQUENCY)
@@ -200,9 +209,11 @@ class Test(BaseReceiver):
         return pvalidator
 
 
-    def __get_pvalidator_tagged_staircase(self) -> None:
-        def pvalidator(parameters: Parameters):
-            PValidator.window(parameters)
+    def __get_pvalidator_tagged_staircase(
+        self
+    ) -> Callable[[Parameters], None]:
+        def pvalidator(parameters: Parameters) -> None:
+            validate_window(parameters)
 
             freq_step            = parameters.get_parameter_value(PName.FREQUENCY_STEP)
             sample_rate          = parameters.get_parameter_value(PName.SAMPLE_RATE)

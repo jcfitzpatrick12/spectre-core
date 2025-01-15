@@ -22,7 +22,7 @@ def register_batch(
     """
     def decorator(cls: Type[BaseBatch]):
         if batch_key in batch_map:
-            raise ValueError(f"Batch {batch_key} is already registered!")
+            raise ValueError(f"A Batch with '{batch_key}' is already registered!")
         batch_map[batch_key] = cls
         return cls
     return decorator

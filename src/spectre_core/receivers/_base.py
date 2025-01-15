@@ -3,13 +3,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from abc import ABC, abstractmethod
-from typing import Callable, Optional
+from typing import Callable, Optional, cast
 from numbers import Number
 
 from spectre_core.exceptions import ModeNotFoundError
 from spectre_core.capture_configs import (
     CaptureTemplate, Parameters, CaptureConfig
 )
+from .plugins._receiver_names import ReceiverName
 from ._spec_names import SpecName
 
 class BaseReceiver(ABC):
@@ -24,7 +25,7 @@ class BaseReceiver(ABC):
     """
     def __init__(
         self, 
-        name: str, 
+        name: ReceiverName, 
         mode: Optional[str] = None
     ) -> None:
         """Initialise an instance of `BaseReceiver`.
@@ -46,7 +47,9 @@ class BaseReceiver(ABC):
         self._pvalidators: dict[str, Callable[[Parameters], None]] = {}
         self._add_pvalidators()
 
-        self.mode = mode
+        self._mode = None
+        if mode is not None:
+            self.mode = mode
 
 
     @abstractmethod
@@ -81,7 +84,7 @@ class BaseReceiver(ABC):
     @property
     def name(
         self
-    ) -> str:
+    ) -> ReceiverName:
         """The name of the receiver."""
         return self._name
     
@@ -141,20 +144,22 @@ class BaseReceiver(ABC):
         self
     ) -> str:
         """The active operating mode for the receiver."""
+        if self._mode is None:
+            raise ValueError(f"The operating mode for this receiver has not yet been set.")
         return self._mode
 
 
     @mode.setter
     def mode(
         self, 
-        value: Optional[str]
+        value: str,
     ) -> None:
         """Set the active operating mode.
 
         :param value: The new operating mode to activate.
         :raises ModeNotFoundError: If the specified mode is not defined in `modes`.
         """
-        if (value is not None) and value not in self.modes:
+        if (value not in self.modes):
             raise ModeNotFoundError((f"{value} is not a defined mode for the receiver {self.name}. "
                                      f"Expected one of {self.modes}"))
         self._mode = value
@@ -286,7 +291,7 @@ class BaseReceiver(ABC):
         self.pvalidator(parameters)
 
         capture_config = CaptureConfig(tag)
-        capture_config.save_parameters(self.name,
+        capture_config.save_parameters(self.name.value,
                                        self.mode,
                                        parameters,
                                        force)
