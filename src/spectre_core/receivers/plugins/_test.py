@@ -19,12 +19,14 @@ from .._register import register_receiver
 
 @dataclass(frozen=True)
 class Mode:
+    """Operating mode for the `Test` receiver."""
     COSINE_SIGNAL_1  = "cosine-signal-1"
     TAGGED_STAIRCASE = "tagged-staircase"
 
 
 @register_receiver(ReceiverName.TEST)
 class Test(BaseReceiver):
+    """An entirely software-defined receiver, which generates synthetic signals."""
     def _add_specs(
         self
     ) -> None:
@@ -37,37 +39,37 @@ class Test(BaseReceiver):
     def _add_capture_methods(
         self
     ) -> None:
-        self.add_capture_method( Mode.COSINE_SIGNAL_1 , CaptureMethod.cosine_signal_1 )
-        self.add_capture_method( Mode.TAGGED_STAIRCASE, CaptureMethod.tagged_staircase)
+        self.add_capture_method(Mode.COSINE_SIGNAL_1 , 
+                                CaptureMethod.cosine_signal_1 )
+        self.add_capture_method(Mode.TAGGED_STAIRCASE, 
+                                CaptureMethod.tagged_staircase)
     
 
     def _add_pvalidators(
         self
     ) -> None:
-        self.add_pvalidator( Mode.COSINE_SIGNAL_1 , self.__get_pvalidator_cosine_signal_1()  )
-        self.add_pvalidator( Mode.TAGGED_STAIRCASE, self.__get_pvalidator_tagged_staircase() )
+        self.add_pvalidator(Mode.COSINE_SIGNAL_1 , 
+                            self.__get_pvalidator_cosine_signal_1()  )
+        self.add_pvalidator(Mode.TAGGED_STAIRCASE, 
+                            self.__get_pvalidator_tagged_staircase() )
 
 
     def _add_capture_templates(
         self
     ) -> None:
-        self.add_capture_template( Mode.COSINE_SIGNAL_1 , self.__get_capture_template_cosine_signal_1()  )
-        self.add_capture_template( Mode.TAGGED_STAIRCASE, self.__get_capture_template_tagged_staircase() )
+        self.add_capture_template(Mode.COSINE_SIGNAL_1 , 
+                                  self.__get_capture_template_cosine_signal_1()  )
+        self.add_capture_template(Mode.TAGGED_STAIRCASE, 
+                                  self.__get_capture_template_tagged_staircase() )
         
 
     def __get_capture_template_cosine_signal_1(
         self
     ) -> CaptureTemplate:
-        #
-        # Create the base template
-        #
         capture_template = get_base_capture_template( CaptureMode.FIXED_CENTER_FREQUENCY )
         capture_template.add_ptemplate( get_base_ptemplate(PName.AMPLITUDE) )
         capture_template.add_ptemplate( get_base_ptemplate(PName.FREQUENCY) )
 
-        #
-        # Update the defaults
-        #
         capture_template.set_defaults(
             (PName.BATCH_SIZE,            3.0),
             (PName.CENTER_FREQUENCY,      16000),
@@ -79,9 +81,6 @@ class Test(BaseReceiver):
             (PName.WINDOW_TYPE,           "boxcar")
         )
 
-        #
-        # Enforce defaults
-        #
         capture_template.enforce_defaults(
             PName.TIME_RESOLUTION,
             PName.TIME_RANGE,
@@ -90,9 +89,6 @@ class Test(BaseReceiver):
         )
 
 
-        #
-        # Adding pconstraints
-        #
         capture_template.add_pconstraint(
             PName.SAMPLE_RATE,
             [
@@ -117,9 +113,6 @@ class Test(BaseReceiver):
     def __get_capture_template_tagged_staircase(
         self
     ) -> CaptureTemplate:
-        #
-        # Make the base template
-        #
         capture_template = make_base_capture_template(
                 PName.TIME_RESOLUTION,
                 PName.FREQUENCY_RESOLUTION,
@@ -145,9 +138,6 @@ class Test(BaseReceiver):
                 PName.INSTRUMENT
         )
 
-        #
-        # Update the defaults
-        #
         capture_template.set_defaults(
             (PName.BATCH_SIZE,            3.0),
             (PName.FREQUENCY_STEP,        128000),
@@ -163,10 +153,6 @@ class Test(BaseReceiver):
             (PName.WATCH_EXTENSION,       "bin")
         )
 
-
-        #
-        # Enforce defaults
-        #
         capture_template.enforce_defaults(
             PName.TIME_RESOLUTION,
             PName.TIME_RANGE,

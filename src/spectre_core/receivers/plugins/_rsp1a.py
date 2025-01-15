@@ -15,18 +15,14 @@ from .._register import register_receiver
 
 @dataclass
 class Mode:
+    """Operating mode for the `RSP1A` receiver."""
     FIXED_CENTER_FREQUENCY  = CaptureMode.FIXED_CENTER_FREQUENCY
     SWEPT_CENTER_FREQUENCY  = CaptureMode.SWEPT_CENTER_FREQUENCY
 
+
 @register_receiver("rsp1a")
 class RSP1A(SDRPlayReceiver):
-    def __init__(self, 
-                 name: str,
-                 mode: Optional[str]):
-        super().__init__(name,
-                         mode)
-        
-
+    """Receiver implementation for the SDRPlay RSPduo (https://www.sdrplay.com/rsp1a/)"""
     def _add_specs(self) -> None:
         self.add_spec( SpecName.SAMPLE_RATE_LOWER_BOUND, 200e3     ) # Hz
         self.add_spec( SpecName.SAMPLE_RATE_UPPER_BOUND, 10e6      ) # Hz

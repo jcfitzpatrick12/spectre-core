@@ -183,7 +183,7 @@ def validate_step_interval(
                          f"derived api latency {api_retuning_latency} [s]; you may experience undefined behaviour!")
 
 
-def validate_fixed_center_frequency_parameters(
+def validate_fixed_center_frequency(
     parameters: Parameters
 ) -> None:
     """Apply validators for capture configuration parameters describing fixed center frequency capture.
@@ -194,7 +194,7 @@ def validate_fixed_center_frequency_parameters(
     validate_window(parameters)
 
 
-def validate_swept_center_frequency_parameters(
+def validate_swept_center_frequency(
     parameters: Parameters,
     api_retuning_latency: Optional[float] = None,
 ) -> None:

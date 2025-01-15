@@ -2,43 +2,59 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from abc import ABC, abstractmethod
-from typing import Callable, Optional
-from numbers import Number
+from typing import Callable
 
 from spectre_core.capture_configs import (
-    CaptureTemplate, CaptureMode, Parameters, Bound, PValidator, PName,
-    get_base_capture_template, get_base_ptemplate, OneOf, CaptureConfig
+    CaptureTemplate, CaptureMode, Parameters, Bound, PName,
+    get_base_capture_template, get_base_ptemplate, OneOf,
+    validate_fixed_center_frequency, validate_swept_center_frequency
 )
 from .._base import BaseReceiver
 from .._spec_names import SpecName
 
 class SDRPlayReceiver(BaseReceiver):
-    def _get_pvalidator_fixed_center_frequency(self) -> Callable:
+    """An abstract base class for SDRPlay receivers.
+    
+    Includes ready-to-go pvalidators and capture templates which are shared by all subclasses. 
+    Each subclasses must also define the following hardware specifications:
+    
+    .. code-block:: python
+        def _add_specs(self) -> None:
+            self.add_spec( SpecName.SAMPLE_RATE_LOWER_BOUND, <TBD> )
+            self.add_spec( SpecName.SAMPLE_RATE_UPPER_BOUND, <TBD> )
+            self.add_spec( SpecName.FREQUENCY_LOWER_BOUND  , <TBD> )
+            self.add_spec( SpecName.FREQUENCY_UPPER_BOUND  , <TBD> )
+            self.add_spec( SpecName.IF_GAIN_UPPER_BOUND    , <TBD> )
+            self.add_spec( SpecName.RF_GAIN_UPPER_BOUND    , <TBD> )
+            self.add_spec( SpecName.API_RETUNING_LATENCY   , <TBD> )
+            self.add_spec( SpecName.BANDWIDTH_OPTIONS      , <TBD> )
+    """
+    def _get_pvalidator_fixed_center_frequency(
+        self
+    ) -> Callable[[Parameters], None]:
         def pvalidator(parameters: Parameters):
-            PValidator.fixed_center_frequency(parameters)
+            validate_fixed_center_frequency(parameters)
         return pvalidator
 
 
-    def _get_pvalidator_swept_center_frequency(self) -> None:
+    def _get_pvalidator_swept_center_frequency(
+        self
+    ) -> Callable[[Parameters], None]:
         def pvalidator(parameters: Parameters):
-            PValidator.swept_center_frequency(parameters,
-                                               self.get_spec(SpecName.API_RETUNING_LATENCY))
+            validate_swept_center_frequency(parameters,
+                                            self.get_spec(SpecName.API_RETUNING_LATENCY))
         return pvalidator
 
 
-    def _get_capture_template_fixed_center_frequency(self) -> CaptureTemplate:
-        #
-        # Create the base template
-        #
+    def _get_capture_template_fixed_center_frequency(
+        self
+    ) -> CaptureTemplate:
+        
         capture_template = get_base_capture_template( CaptureMode.FIXED_CENTER_FREQUENCY )
         capture_template.add_ptemplate( get_base_ptemplate(PName.BANDWIDTH) )
         capture_template.add_ptemplate( get_base_ptemplate(PName.IF_GAIN) )
         capture_template.add_ptemplate( get_base_ptemplate(PName.RF_GAIN) )
 
-        #
-        # Update the defaults
-        #
         capture_template.set_defaults(
             (PName.BATCH_SIZE,            3.0),
             (PName.CENTER_FREQUENCY,      95800000),
@@ -51,9 +67,6 @@ class SDRPlayReceiver(BaseReceiver):
             (PName.IF_GAIN,               -30)
         )   
 
-        #
-        # Adding pconstraints
-        #
         capture_template.add_pconstraint(
             PName.CENTER_FREQUENCY,
             [
@@ -99,19 +112,15 @@ class SDRPlayReceiver(BaseReceiver):
         return capture_template
 
 
-    def _get_capture_template_swept_center_frequency(self) -> CaptureTemplate:
-        #
-        # Create the base template
-        #
+    def _get_capture_template_swept_center_frequency(
+        self
+    ) -> CaptureTemplate:
+
         capture_template = get_base_capture_template( CaptureMode.SWEPT_CENTER_FREQUENCY )
         capture_template.add_ptemplate( get_base_ptemplate(PName.BANDWIDTH) )
         capture_template.add_ptemplate( get_base_ptemplate(PName.IF_GAIN) )
         capture_template.add_ptemplate( get_base_ptemplate(PName.RF_GAIN) )
 
-
-        #
-        # Update the defaults
-        #
         capture_template.set_defaults(
             (PName.BATCH_SIZE,            4.0),
             (PName.MIN_FREQUENCY,         95000000),
@@ -127,10 +136,6 @@ class SDRPlayReceiver(BaseReceiver):
             (PName.IF_GAIN,               -30)
         )   
 
-
-        #
-        # Adding pconstraints
-        #
         capture_template.add_pconstraint(
             PName.MIN_FREQUENCY,
             [

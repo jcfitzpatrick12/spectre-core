@@ -25,7 +25,7 @@ from ._array_operations import (
 
 
 class SpectrumUnit(Enum):
-    """Defined units for dynamic spectra arrays.
+    """A defined unit for dynamic spectra values.
     
     :ivar AMPLITUDE: Formal definition TBC.
     :ivar POWER: Formal definition TBC.
@@ -70,7 +70,7 @@ class TimeCut:
 
 
 class TimeType(Enum):
-    """Defined types of time we can assign to each spectrum in the dynamic spectra.
+    """The type of time we can assign to each spectrum in the dynamic spectra.
     
     :ivar RELATIVE: The elapsed time from the first spectrum, in seconds.
     :ivar DATETIMES: The datetime associated with each spectrum.

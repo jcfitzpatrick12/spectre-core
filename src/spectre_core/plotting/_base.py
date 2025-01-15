@@ -18,7 +18,7 @@ from ._panel_names import PanelName
 
 
 class XAxisType(Enum):
-    """Denote the xaxis types for a panel.
+    """The x-axis type for a panel.
     
     Axes are shared in a stack between panels with common `XAxisType`.
     

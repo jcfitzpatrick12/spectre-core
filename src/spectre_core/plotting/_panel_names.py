@@ -5,7 +5,7 @@
 from enum import Enum
 
 class PanelName(Enum):
-    """Defined panel names, each with a corresponding fully implemented `BasePanel` subclass.
+    """Literal corresponding to a fully implemented `BasePanel` subclass.
     
     :ivar SPECTROGRAM: Panel for visualising the full spectrogram.
     :ivar FREQUENCY_CUTS: Panel for visualising spectrogram data as frequency cuts.

@@ -73,6 +73,7 @@ class BaseReceiver(ABC):
     ) -> None:
         """Subclasses must use `add_capture_template` to define a `CaptureTemplate` for each operating mode."""
 
+
     @abstractmethod
     def _add_pvalidators(
         self
@@ -117,7 +118,7 @@ class BaseReceiver(ABC):
     def specs(
         self
     ) -> dict[SpecName, Number | list[Number]]:
-        """The hardware specifications for the receiver."""
+        """The hardware specifications."""
         return self._specs
 
 

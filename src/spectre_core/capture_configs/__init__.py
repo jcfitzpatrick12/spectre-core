@@ -7,9 +7,9 @@
 from ._pnames import PName
 from ._capture_modes import CaptureMode
 from ._pvalidators  import (
-    validate_fixed_center_frequency_parameters, validate_non_overlapping_steps, validate_num_samples_per_step,
+    validate_fixed_center_frequency, validate_non_overlapping_steps, validate_num_samples_per_step,
     validate_num_steps_per_sweep, validate_nyquist_criterion, validate_step_interval, validate_sweep_interval,
-    validate_swept_center_frequency_parameters, validate_window
+    validate_swept_center_frequency, validate_window
 )
 from ._capture_config import CaptureConfig
 from ._ptemplates import PTemplate, get_base_ptemplate
@@ -27,7 +27,7 @@ __all__ = [
     "PTemplate", "PValidator", "CaptureConfig", "Parameter", "Parameters", "parse_string_parameters",
     "make_parameters", "CaptureTemplate", "CaptureMode", "get_base_capture_template", "make_base_capture_template"
     "PConstraint", "PConstraint", "Bound", "OneOf", "EnforceSign", "PowerOfTwo", "make_base_capture_template", "PName",
-    "get_base_ptemplate", "BasePConstraint", "validate_fixed_center_frequency_parameters", "validate_non_overlapping_steps",
+    "get_base_ptemplate", "BasePConstraint", "validate_fixed_center_frequency", "validate_non_overlapping_steps",
     "validate_num_samples_per_step", "validate_num_steps_per_sweep", "validate_nyquist_criterion", "validate_step_interval",
-    "validate_sweep_interval", "validate_swept_center_frequency_parameters", "validate_window"
+    "validate_sweep_interval", "validate_swept_center_frequency", "validate_window"
 ]

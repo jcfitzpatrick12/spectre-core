@@ -5,9 +5,9 @@
 from enum import Enum
 
 class CaptureMode(Enum):
-    """A centralised store of capture modes.
+    """A default capture mode for `spectre`.
     
-    Each of `CaptureMode` has an associated base capture template, which can be fetched using: 
+    Each `CaptureMode` has an associated base capture template, which can be fetched using: 
     
     `get_base_capture_template`
     

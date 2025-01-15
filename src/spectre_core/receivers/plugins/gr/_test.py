@@ -17,6 +17,7 @@
 #
 
 from functools import partial
+from typing import Callable
 from dataclasses import dataclass
 
 from gnuradio import gr
@@ -119,5 +120,5 @@ class _tagged_staircase(gr.top_block):
 
 @dataclass(frozen=True)
 class CaptureMethod:
-    cosine_signal_1  = partial(capture, top_block_cls=_cosine_signal_1)
-    tagged_staircase = partial(capture, top_block_cls=_tagged_staircase)
+    cosine_signal_1 : Callable[[str, Parameters], None] = partial(capture, top_block_cls=_cosine_signal_1)
+    tagged_staircase: Callable[[str, Parameters], None] = partial(capture, top_block_cls=_tagged_staircase)

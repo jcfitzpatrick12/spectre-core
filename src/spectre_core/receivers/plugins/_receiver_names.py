@@ -5,7 +5,7 @@
 from enum import Enum
 
 class ReceiverName(Enum):  
-    """`spectre` supported receivers.
+    """A `spectre` supported receiver.
     
     :ivar RSP1A: SDRPlay RSP1A
     :ivar RSPDUO: SDRPlay RSPduo

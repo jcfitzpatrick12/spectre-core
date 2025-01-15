@@ -5,7 +5,7 @@
 from enum import Enum
 
 class BatchKey(Enum):  
-    """Keys bound to `Batch` plugin classes.
+    """Key bound to a `Batch` plugin class.
     
     :ivar IQ_STREAM: Represents the default batch data generated  by `spectre`, 
     containing IQ stream data and other data derived from it.
