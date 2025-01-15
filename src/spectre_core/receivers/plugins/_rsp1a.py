@@ -2,25 +2,23 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Optional
 from dataclasses import dataclass
 
-from spectre_core.capture_configs import (
-    CaptureMode
-)
+from spectre_core.capture_configs import CaptureMode
+from ._receiver_names import ReceiverName
 from .gr._rsp1a import CaptureMethod
 from .._spec_names import SpecName
 from ._sdrplay_receiver import SDRPlayReceiver
 from .._register import register_receiver
 
-@dataclass
+@dataclass(frozen=True)
 class Mode:
     """Operating mode for the `RSP1A` receiver."""
     FIXED_CENTER_FREQUENCY  = CaptureMode.FIXED_CENTER_FREQUENCY
     SWEPT_CENTER_FREQUENCY  = CaptureMode.SWEPT_CENTER_FREQUENCY
 
 
-@register_receiver("rsp1a")
+@register_receiver(ReceiverName.RSP1A)
 class RSP1A(SDRPlayReceiver):
     """Receiver implementation for the SDRPlay RSPduo (https://www.sdrplay.com/rsp1a/)"""
     def _add_specs(self) -> None:

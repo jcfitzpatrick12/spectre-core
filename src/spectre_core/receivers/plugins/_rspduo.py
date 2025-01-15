@@ -4,9 +4,8 @@
 
 from dataclasses import dataclass
 
-from spectre_core.capture_configs import (
-    CaptureMode
-)
+from spectre_core.capture_configs import CaptureMode
+from ._receiver_names import ReceiverName
 from .gr._rspduo import CaptureMethod
 from .._spec_names import SpecName
 from ._sdrplay_receiver import SDRPlayReceiver
@@ -21,7 +20,7 @@ class Mode:
     TUNER_1_SWEPT_CENTER_FREQUENCY  = f"tuner-1-{CaptureMode.SWEPT_CENTER_FREQUENCY}"
 
 
-@register_receiver("rspduo")
+@register_receiver(ReceiverName.RSPDUO)
 class RSPduo(SDRPlayReceiver):
     """Receiver implementation for the SDRPlay RSPduo (https://www.sdrplay.com/rspduo/)"""
     def _add_specs(self) -> None:

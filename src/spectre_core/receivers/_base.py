@@ -146,7 +146,7 @@ class BaseReceiver(ABC):
     ) -> str:
         """The active operating mode for the receiver."""
         if self._mode is None:
-            raise ValueError(f"The operating mode for this receiver has not yet been set.")
+            raise ValueError(f"The operating mode for the receiver `{self.name.value}` is not set.")
         return self._mode
 
 

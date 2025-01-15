@@ -2,9 +2,10 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from enum import Enum
+from dataclasses import dataclass
 
-class CaptureMode(Enum):
+@dataclass(frozen=True)
+class CaptureMode:
     """A default capture mode for `spectre`.
     
     Each `CaptureMode` has an associated base capture template, which can be fetched using: 
