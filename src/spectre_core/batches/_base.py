@@ -36,11 +36,9 @@ class BatchFile(BaseFileHandler[T]):
         :param batch_name: Base file name, composed of the batch start time and tag.
         :param extension: File extension.
         """
-        # Explictly enable caching, as batch files should always be static in content when reading
         super().__init__(batch_parent_dir_path, 
                          batch_name, 
-                         extension,
-                         no_cache=False)
+                         extension)
         self._start_time, self._tag = batch_name.split("_")
         # the start datetime is lazily computed, if it is required.
         self._start_datetime: Optional[datetime] = None

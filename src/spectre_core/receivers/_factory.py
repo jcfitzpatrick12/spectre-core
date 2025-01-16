@@ -37,17 +37,16 @@ def get_receiver(
     ...
 
 
-T = TypeVar('T', bound=BaseReceiver)
 def get_receiver(
     receiver_name: ReceiverName, 
     mode: Optional[str] = None
-) -> T:
-    """Get an instance of a registered receiver.
+) -> BaseReceiver:
+    """Get a registered receiver.
 
     :param receiver_name: The name of the receiver.
     :param mode: The initial operating mode for the receiver, defaults to None
     :raises ReceiverNotFoundError: If the receiver name is not registered.
-    :return: A fully implemented subclass of `BaseReceiver`.
+    :return: An instance of the receiver class registered under `receiver_name`.
     """
     receiver_cls = receivers.get(receiver_name)
     if receiver_cls is None:

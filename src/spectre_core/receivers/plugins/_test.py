@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, cast
 
 from spectre_core.capture_configs import (
     CaptureTemplate, CaptureMode, Parameters, Bound, PName,
@@ -19,7 +19,7 @@ from .._register import register_receiver
 
 @dataclass(frozen=True)
 class Mode:
-    """Operating mode for the `Test` receiver."""
+    """An operating mode for the `Test` receiver."""
     COSINE_SIGNAL_1  = "cosine-signal-1"
     TAGGED_STAIRCASE = "tagged-staircase"
 
@@ -172,9 +172,9 @@ class Test(BaseReceiver):
         def pvalidator(parameters: Parameters) -> None:
             validate_window(parameters)
 
-            sample_rate          = parameters.get_parameter_value(PName.SAMPLE_RATE)
-            frequency            = parameters.get_parameter_value(PName.FREQUENCY)
-            window_size          = parameters.get_parameter_value(PName.WINDOW_SIZE)
+            sample_rate          = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
+            window_size          = cast(int, parameters.get_parameter_value(PName.WINDOW_SIZE))
+            frequency            = cast(float, parameters.get_parameter_value(PName.FREQUENCY))
 
             # check that the sample rate is an integer multiple of the underlying signal frequency
             if sample_rate % frequency != 0:
@@ -201,10 +201,10 @@ class Test(BaseReceiver):
         def pvalidator(parameters: Parameters) -> None:
             validate_window(parameters)
 
-            freq_step            = parameters.get_parameter_value(PName.FREQUENCY_STEP)
-            sample_rate          = parameters.get_parameter_value(PName.SAMPLE_RATE)
-            min_samples_per_step = parameters.get_parameter_value(PName.MIN_SAMPLES_PER_STEP)
-            max_samples_per_step = parameters.get_parameter_value(PName.MAX_SAMPLES_PER_STEP)
+            freq_step            = cast(float, parameters.get_parameter_value(PName.FREQUENCY_STEP))
+            sample_rate          = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
+            min_samples_per_step = cast(int, parameters.get_parameter_value(PName.MIN_SAMPLES_PER_STEP))
+            max_samples_per_step = cast(int, parameters.get_parameter_value(PName.MAX_SAMPLES_PER_STEP))
 
             if freq_step != sample_rate:
                 raise ValueError(f"The frequency step must be equal to the sampling rate")

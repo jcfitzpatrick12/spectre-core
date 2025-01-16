@@ -24,9 +24,11 @@ from spectre_core.config import get_batches_dir_path
 from ._base import capture, spectre_top_block
 
 class _fixed_center_frequency(spectre_top_block):
-    def flowgraph(self, 
-                  tag: str,
-                  parameters: Parameters):
+    def flowgraph(
+        self, 
+        tag: str,
+        parameters: Parameters
+    ) -> None:
         # Inline imports 
         from gnuradio import spectre
         from gnuradio import sdrplay3
@@ -74,9 +76,11 @@ class _fixed_center_frequency(spectre_top_block):
 
 
 class _swept_center_frequency(spectre_top_block):
-    def flowgraph(self, 
-                  tag: str,
-                  parameters: Parameters):
+    def flowgraph(
+        self, 
+        tag: str,
+        parameters: Parameters
+    ) -> None:
         # Inline imports 
         from gnuradio import spectre
         from gnuradio import sdrplay3

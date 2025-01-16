@@ -34,18 +34,15 @@ class BaseFileHandler(ABC, Generic[T]):
         self, 
         parent_dir_path: str, 
         base_file_name: str, 
-        extension: Optional[str] = None,
-        no_cache: bool = False
+        extension: Optional[str] = None
     ) -> None:
         """Initialise a `BaseFileHandler` instance.
 
         :param parent_dir_path: The directory path where the file is located (absolute or relative).
         :param base_file_name: The name of the file without its extension.
         :param extension: The file extension (without the dot), defaults to None
-        :param no_cache: If True, bypasses the cache and reads the file directly on each `read` call, defaults to False
         """
         self._data_cache: Optional[T] = None
-        self._no_cache = no_cache
         
         self._parent_dir_path = parent_dir_path
         self._base_file_name  = base_file_name
@@ -63,14 +60,6 @@ class BaseFileHandler(ABC, Generic[T]):
 
         :return: The file contents.
         """
-    
-    
-    @property
-    def no_cache(
-        self
-    ) -> bool:
-        """Ignore the data cache, and freshly read the file at each read call."""
-        return self._no_cache
      
     
     @property
@@ -126,15 +115,17 @@ class BaseFileHandler(ABC, Generic[T]):
 
 
     def read(
-        self
+        self,
+        no_cache: bool = True
     ) -> T:
-        """Read the file contents, using caching if `no_cache` is False.
-
+        """Read the file contents.
+        
+        :param no_cache: If True, bypasses the cache and reads the file directly on each `read` call, defaults to True
         :return: The file contents. If `no_cache` is True, always reads directly from the file. 
         Otherwise, uses the cache if available, or reads and caches the contents.
         """
         # if the user has specified to ignore the cache, simply read the file.
-        if self._no_cache:
+        if no_cache:
             return self._read()
         
         # otherwise make use of the cache

@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Callable
+from typing import Callable, overload
 
 from spectre_core.capture_configs import (
     CaptureTemplate, CaptureMode, Parameters, Bound, PName,
@@ -16,7 +16,7 @@ class SDRPlayReceiver(BaseReceiver):
     """An abstract base class for SDRPlay receivers.
     
     Includes ready-to-go pvalidators and capture templates which are shared by all subclasses. 
-    Each subclasses must also define the following hardware specifications:
+    Each subclasses must define the following hardware specifications:
     
     .. code-block:: python
         def _add_specs(self) -> None:
@@ -28,7 +28,7 @@ class SDRPlayReceiver(BaseReceiver):
             self.add_spec( SpecName.RF_GAIN_UPPER_BOUND    , <TBD> )
             self.add_spec( SpecName.API_RETUNING_LATENCY   , <TBD> )
             self.add_spec( SpecName.BANDWIDTH_OPTIONS      , <TBD> )
-    """
+    """  
     def _get_pvalidator_fixed_center_frequency(
         self
     ) -> Callable[[Parameters], None]:

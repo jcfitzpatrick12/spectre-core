@@ -14,7 +14,7 @@ T = TypeVar('T', bound=BaseReceiver)
 def register_receiver(
     receiver_name: ReceiverName,
 ) -> Callable[[Type[T]], Type[T]]:
-    """Decorator to register a `BaseReceiver` subclass under a specified `ReceiverName`.
+    """Decorator to register a fully implemented `BaseReceiver` subclass under a specified `receiver_name`.
 
     :param receiver_name: The name of the receiver.
     :raises ValueError: If the provided `receiver_name` is already registered.

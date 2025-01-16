@@ -14,7 +14,7 @@ from .._register import register_receiver
 
 @dataclass
 class Mode:
-    """Operating mode for the `RSPduo` receiver."""
+    """An operating mode for the `RSPduo` receiver."""
     TUNER_1_FIXED_CENTER_FREQUENCY  = f"tuner-1-{CaptureMode.FIXED_CENTER_FREQUENCY}"
     TUNER_2_FIXED_CENTER_FREQUENCY  = f"tuner-2-{CaptureMode.FIXED_CENTER_FREQUENCY}"
     TUNER_1_SWEPT_CENTER_FREQUENCY  = f"tuner-1-{CaptureMode.SWEPT_CENTER_FREQUENCY}"
@@ -35,7 +35,9 @@ class RSPduo(SDRPlayReceiver):
                       [200000, 300000, 600000, 1536000, 5000000, 6000000, 7000000, 8000000])
 
 
-    def _add_capture_methods(self) -> None:
+    def _add_capture_methods(
+        self
+    ) -> None:
         self.add_capture_method(Mode.TUNER_1_FIXED_CENTER_FREQUENCY, 
                                 CaptureMethod.tuner_1_fixed_center_frequency)
         self.add_capture_method(Mode.TUNER_2_FIXED_CENTER_FREQUENCY, 
@@ -44,7 +46,9 @@ class RSPduo(SDRPlayReceiver):
                                 CaptureMethod.tuner_1_swept_center_frequency)
     
 
-    def _add_capture_templates(self):
+    def _add_capture_templates(
+        self
+    ) -> None:
         self.add_capture_template(Mode.TUNER_1_FIXED_CENTER_FREQUENCY,
                                   self._get_capture_template_fixed_center_frequency())
         self.add_capture_template(Mode.TUNER_2_FIXED_CENTER_FREQUENCY,
@@ -53,7 +57,9 @@ class RSPduo(SDRPlayReceiver):
                                   self._get_capture_template_swept_center_frequency())
         
     
-    def _add_pvalidators(self):
+    def _add_pvalidators(
+        self
+    ) -> None:
         self.add_pvalidator(Mode.TUNER_1_FIXED_CENTER_FREQUENCY,
                             self._get_pvalidator_fixed_center_frequency())
         self.add_pvalidator(Mode.TUNER_2_FIXED_CENTER_FREQUENCY,

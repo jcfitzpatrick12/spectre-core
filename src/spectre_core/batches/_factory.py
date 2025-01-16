@@ -26,10 +26,9 @@ def get_batch_cls(
     ...
 
 
-T = TypeVar('T', bound=Type[BaseBatch])
 def get_batch_cls(
     batch_key: BatchKey,
-) -> Type[T]:
+) -> Type[BaseBatch]:
     """Get a registered `BaseBatch` subclass.
 
     :param batch_key: The key used to register the `BaseBatch` subclass.

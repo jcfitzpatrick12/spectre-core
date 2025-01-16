@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Any, Optional, TypeVar, Generic, Iterator
+from typing import Any, Optional, TypeVar, Generic, Iterator, overload, cast
 
 from ._pnames import PName
 

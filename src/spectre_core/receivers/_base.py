@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, cast
-from numbers import Number
+from typing import Callable, Optional, Literal, overload
 
 from spectre_core.exceptions import ModeNotFoundError
 from spectre_core.capture_configs import (
@@ -35,7 +34,7 @@ class BaseReceiver(ABC):
         """
         self._name = name
 
-        self._specs: dict[SpecName, Number | list[Number]] = {}
+        self._specs: dict[SpecName, float|int|list[float|int]] = {}
         self._add_specs()
         
         self._capture_methods: dict[str, Callable[[str, Parameters], None]] = {}
@@ -63,8 +62,8 @@ class BaseReceiver(ABC):
     def _add_capture_methods(
         self
     ) -> None:
-        """Subclasses must use `add_capture_method` to specify the function which is invoked to collect data,
-        for each operating mode."""
+        """Subclasses must use `add_capture_method` to specify which method is called to capture 
+        data, for each operating mode."""
         
 
     @abstractmethod
@@ -94,7 +93,7 @@ class BaseReceiver(ABC):
     def capture_methods(
         self
     ) -> dict[str, Callable[[str, Parameters], None]]:
-        """For each operating mode, the method which invokes data capture."""
+        """For each operating mode, the method which is called to capture data."""
         return self._capture_methods
   
   
@@ -117,7 +116,7 @@ class BaseReceiver(ABC):
     @property
     def specs(
         self
-    ) -> dict[SpecName, Number | list[Number]]:
+    ) -> dict[SpecName, float|int|list[float|int]]:
         """The hardware specifications."""
         return self._specs
 
@@ -170,7 +169,7 @@ class BaseReceiver(ABC):
     def capture_method(
         self
     ) -> Callable[[str, Parameters], None]:
-        """Invoke data capture under the active operating mode."""
+        """Start capturing data under the active operating mode."""
         return self.capture_methods[self.mode]
 
 
@@ -199,7 +198,7 @@ class BaseReceiver(ABC):
         Add a capture method for a specific operating mode.
 
         :param mode: The operating mode.
-        :param capture_method: The function to invoke data capture.
+        :param capture_method: The function which captures data.
         """
         self._capture_methods[mode] = capture_method
 
@@ -235,7 +234,7 @@ class BaseReceiver(ABC):
     def add_spec(
         self,
         name: SpecName,
-        value: Number
+        value: float|int|list[float|int]
     ) -> None:
         """
         Add a hardware specification.
@@ -246,10 +245,31 @@ class BaseReceiver(ABC):
         self.specs[name] = value
 
 
+    @overload
+    def get_spec(self, spec_name: Literal[SpecName.API_RETUNING_LATENCY]) -> float: ...
+    @overload
+    def get_spec(self, spec_name: Literal[SpecName.FREQUENCY_LOWER_BOUND]) -> float: ...
+    @overload
+    def get_spec(self, spec_name: Literal[SpecName.FREQUENCY_UPPER_BOUND]) -> float: ...
+    @overload
+    def get_spec(self, spec_name: Literal[SpecName.SAMPLE_RATE_LOWER_BOUND]) -> int: ...
+    @overload
+    def get_spec(self, spec_name: Literal[SpecName.SAMPLE_RATE_UPPER_BOUND]) -> int: ...
+    @overload
+    def get_spec(self, spec_name: Literal[SpecName.BANDWIDTH_LOWER_BOUND]) -> float: ...
+    @overload
+    def get_spec(self, spec_name: Literal[SpecName.BANDWIDTH_UPPER_BOUND]) -> float: ...
+    @overload
+    def get_spec(self, spec_name: Literal[SpecName.RF_GAIN_UPPER_BOUND]) -> int: ...
+    @overload
+    def get_spec(self, spec_name: Literal[SpecName.IF_GAIN_UPPER_BOUND]) -> int: ...
+    @overload
+    def get_spec(self, spec_name: Literal[SpecName.BANDWIDTH_OPTIONS]) -> list[float]: ...
+    
     def get_spec(
         self, 
         spec_name: SpecName
-    ) -> Number | list[Number]:
+    ) -> float|int|list[float|int]:
         """
         Retrieve a hardware specification.
 
@@ -267,9 +287,9 @@ class BaseReceiver(ABC):
         self, 
         tag: str
     ) -> None:
-        """Initiate data capture for the active operating mode.
+        """Start capturing data according to the active operating mode.
 
-        :param tag: The tag identifying the capture config to load.
+        :param tag: The tag of the capture config to load.
         """
         self.capture_method( tag, self.load_parameters(tag) )
 
@@ -280,7 +300,8 @@ class BaseReceiver(ABC):
         parameters: Parameters,
         force: bool = False
     ) -> None:
-        """Create a capture config for the active operating mode and save the parameters.
+        """Create a capture config according to the active operating mode and save the 
+        input parameters.
 
         The input parameters are validated before being written to file.
         

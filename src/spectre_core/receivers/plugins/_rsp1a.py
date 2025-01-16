@@ -13,14 +13,14 @@ from .._register import register_receiver
 
 @dataclass(frozen=True)
 class Mode:
-    """Operating mode for the `RSP1A` receiver."""
-    FIXED_CENTER_FREQUENCY  = CaptureMode.FIXED_CENTER_FREQUENCY
-    SWEPT_CENTER_FREQUENCY  = CaptureMode.SWEPT_CENTER_FREQUENCY
+    """An operating mode for the `RSP1A` receiver."""
+    FIXED_CENTER_FREQUENCY  = CaptureMode.FIXED_CENTER_FREQUENCY.value
+    SWEPT_CENTER_FREQUENCY  = CaptureMode.SWEPT_CENTER_FREQUENCY.value
 
 
 @register_receiver(ReceiverName.RSP1A)
 class RSP1A(SDRPlayReceiver):
-    """Receiver implementation for the SDRPlay RSPduo (https://www.sdrplay.com/rsp1a/)"""
+    """Receiver implementation for the SDRPlay RSP1A (https://www.sdrplay.com/rsp1a/)"""
     def _add_specs(self) -> None:
         self.add_spec( SpecName.SAMPLE_RATE_LOWER_BOUND, 200e3     )
         self.add_spec( SpecName.SAMPLE_RATE_UPPER_BOUND, 10e6      )
@@ -33,21 +33,27 @@ class RSP1A(SDRPlayReceiver):
                       [200000, 300000, 600000, 1536000, 5000000, 6000000, 7000000, 8000000])
 
 
-    def _add_capture_methods(self) -> None:
+    def _add_capture_methods(
+        self
+    ) -> None:
         self.add_capture_method(Mode.FIXED_CENTER_FREQUENCY, 
                                 CaptureMethod.fixed_center_frequency)
         self.add_capture_method(Mode.SWEPT_CENTER_FREQUENCY,
                                 CaptureMethod.swept_center_frequency)
     
 
-    def _add_capture_templates(self):
+    def _add_capture_templates(
+        self
+    ) -> None:
         self.add_capture_template(Mode.FIXED_CENTER_FREQUENCY,
                                   self._get_capture_template_fixed_center_frequency())
         self.add_capture_template(Mode.SWEPT_CENTER_FREQUENCY,
                                   self._get_capture_template_swept_center_frequency())
         
     
-    def _add_pvalidators(self):
+    def _add_pvalidators(
+        self
+    ) -> None:
         self.add_pvalidator(Mode.FIXED_CENTER_FREQUENCY,
                             self._get_pvalidator_fixed_center_frequency())
         self.add_pvalidator(Mode.SWEPT_CENTER_FREQUENCY,

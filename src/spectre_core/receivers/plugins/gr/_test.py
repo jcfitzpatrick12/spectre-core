@@ -17,7 +17,7 @@
 #
 
 from functools import partial
-from typing import Callable
+from typing import Callable, cast, Type
 from dataclasses import dataclass
 
 from gnuradio import gr
@@ -30,9 +30,11 @@ from ._base import capture, spectre_top_block
 
 
 class _cosine_signal_1(spectre_top_block):
-    def flowgraph(self, 
-                  tag: str,
-                  parameters: Parameters):
+    def flowgraph(
+        self, 
+        tag: str,
+        parameters: Parameters
+    ) -> None:
         # Inline imports 
         from gnuradio import spectre
 
@@ -74,9 +76,11 @@ class _cosine_signal_1(spectre_top_block):
 
 
 class _tagged_staircase(spectre_top_block):
-    def flowgraph(self, 
-                  tag: str,
-                  parameters: Parameters):
+    def flowgraph(
+        self, 
+        tag: str,
+        parameters: Parameters
+    ) -> None:
         # Inline imports 
         from gnuradio import spectre
 

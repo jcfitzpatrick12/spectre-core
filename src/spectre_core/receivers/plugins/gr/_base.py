@@ -4,29 +4,30 @@
 
 import sys
 import signal
-from typing import Type
-from abc import ABC, abstractmethod
+from typing import Type, TypeVar
 
 from gnuradio import gr
 
 from spectre_core.capture_configs import Parameters
 
-class spectre_top_block(ABC, gr.top_block):
+class spectre_top_block(gr.top_block):
     """Thin wrapper around GNU Radio's `gr.top_block` class.
     
-    Propagate through the input tag and parameters to the flowgraph definition,
-    to make them easily configurable.
+    Propagate through the input tag and parameters to `flowgraph` in the constructor,
+    to make the GNU Radio flow graphs easily configurable.
     """
-    @abstractmethod
-    def flowgraph(self,
-                  tag: str,
-                  parameters: Parameters):
+    def flowgraph(
+        self,
+        tag: str,
+        parameters: Parameters
+    ) -> None:
         """Define the flowgraph for the block.
         
         This method uses inline imports to allow the `spectre_core.receivers` 
         module to work without requiring all Out-Of-Tree (OOT) modules to be installed. 
         Only import the necessary OOT modules when implementing this method.
         """
+        raise NotImplementedError()
         
         
     def __init__(
@@ -45,7 +46,7 @@ class spectre_top_block(ABC, gr.top_block):
 
 def capture(
     tag: str,
-    parameters: Parameters, 
+    parameters: Parameters,
     top_block_cls: Type[spectre_top_block],
     max_noutput_items: int = 10000000
 ) -> None:
