@@ -9,7 +9,7 @@ from typing import Optional, cast
 from abc import ABC, abstractmethod
 from scipy.signal import ShortTimeFFT, get_window
 
-from watchdog.events import FileSystemEventHandler, FileCreatedEvent
+from watchdog.events import FileSystemEventHandler, FileSystemEvent
 
 from spectre_core.capture_configs import CaptureConfig, PName
 from spectre_core.spectrograms import Spectrogram, join_spectrograms
@@ -38,7 +38,7 @@ def make_sft_instance(
 
 
 class BaseEventHandler(ABC, FileSystemEventHandler):
-    """An abstract base class for file system event-driven post-processing.
+    """An abstract base class for event-driven file post-processing.
     
     Subclasses must implement the following:    
     
@@ -67,30 +67,32 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         self, 
         absolute_file_path: str
     ) -> None:
-        """Process the batch file stored at the input absolute file path.
-        
-        At runtime, `spectre` receivers will generate data files in fixed-size batches. If a 
-        batch file is created and then closed (with extension as per the parameter `PName.WATCH_EXTENSION` 
-        in the capture config), the `process` method is called. Typically, this will process the batch file 
-        into a spectrogram.
+        """
+        Process a batch file at the given file path.
 
-        :param absolute_file_path: The absolute path of the freshly closed batch file.
+        Called when a batch file is closed.
+
+        :param absolute_file_path: The absolute path to the batch file.
         """
 
     def on_closed(
         self, 
-        event: FileCreatedEvent
+        event: FileSystemEvent
     ) -> None:
-        """Call `process` when a batch file opened for writing is closed.
-
-        :param event: The `watchdog` file system event.
         """
+        Called when a batch file opened for writing is closed.
 
+        Calls `process` if the file matches the expected extension.
+
+        :param event: The file system event containing the closed file's details.
+        """
         # the 'src_path' attribute holds the absolute path of the newly created file
         absolute_file_path = event.src_path
         
         # only 'notice' a file if it ends with the appropriate extension as defined in the capture config
-        if absolute_file_path.endswith( self._capture_config.get_parameter_value(PName.WATCH_EXTENSION) ):
+        watch_extension = cast(str, self._capture_config.get_parameter_value(PName.WATCH_EXTENSION))
+        
+        if absolute_file_path.endswith( watch_extension ):
             _LOGGER.info(f"Noticed {absolute_file_path}")
             try:
                 self.process(absolute_file_path)
@@ -121,17 +123,19 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
             self._cached_spectrogram = spectrogram
         else:
             self._cached_spectrogram = join_spectrograms([self._cached_spectrogram, spectrogram])
-
-        time_range = self._capture_config.get_parameter_value(PName.TIME_RANGE) or 0.0
   
-        if self._cached_spectrogram.time_range >= time_range:
+        time_range = self._capture_config.get_parameter(PName.TIME_RANGE) or 0.0
+        if self._cached_spectrogram.time_range >= cast(float, time_range):
             self._flush_cache()
     
 
-    def _flush_cache(self) -> None:
+    def _flush_cache(
+        self
+    ) -> None:
+        """Flush the cached spectrogram to file."""
         if self._cached_spectrogram:
             _LOGGER.info(f"Flushing spectrogram to file with start time "
-                         f"'{self._cached_spectrogram.format_start_time(precise=True)}'")
+                         f"'{self._cached_spectrogram.format_start_time()}'")
             self._cached_spectrogram.save()
             _LOGGER.info("Flush successful, resetting spectrogram cache")
             self._cached_spectrogram = None # reset the cache

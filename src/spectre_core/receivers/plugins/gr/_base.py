@@ -50,19 +50,21 @@ def capture(
     top_block_cls: Type[spectre_top_block],
     max_noutput_items: int = 10000000
 ) -> None:
-    """Run a GNU Radio flowgraph with the given number of output items.
-    
+    """
+    Run a GNU Radio flowgraph with the given number of output items.
+
     Typically, this should be used with `partial` from `functools` to create
     a capture method:
-    
+
     .. code-block:: python
         capture_method = partial(capture, top_block_cls=<your GNU Radio top block>)
 
-    Top block classes 
-    :param tag: _description_
-    :param parameters: _description_
-    :param top_block_cls: _description_
-    :param max_noutput_items: _description_, defaults to 10000000
+    :param tag: The capture config tag
+    :param parameters: The parameters stored in the capture config
+    :param top_block_cls: The subclass of `spectre_top_block`, defining the GNURadio flowgraph.
+    :param max_noutput_items: The number of max `noutput_items` in the flowgraph. This controls
+    the maximum number of output items any block will handle during a call to work. Defaults to 10000000
+    (which has been chosen as per GNU Radio source code).
     """
     tb = top_block_cls(tag,
                        parameters)

@@ -6,22 +6,36 @@ from logging import getLogger
 _LOGGER = getLogger(__name__)
 
 import numpy as np
-from typing import Tuple
+from typing import Tuple, cast
 from datetime import timedelta
 
 import os
+import numpy.typing as npt
+import numpy as np
 
-from spectre_core.capture_configs import CaptureConfig, PName, CaptureMode
-from spectre_core.batches import SPECTREBatch
-from spectre_core.spectrograms import Spectrogram, time_average, frequency_average
+from spectre_core.capture_configs import CaptureConfig, PName
+from spectre_core.batches import IQStreamBatch
+from spectre_core.spectrograms import Spectrogram, SpectrumUnit, time_average, frequency_average
+from ._event_handler_keys import EventHandlerKey
 from .._base import BaseEventHandler, make_sft_instance
 from .._register import register_event_handler
 
 
-def _do_stfft(iq_data: np.array,
-              capture_config: CaptureConfig,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """For reference: https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.ShortTimeFFT.html"""
+def _do_stfft(
+    iq_data: npt.NDArray[np.float32],
+    capture_config: CaptureConfig,
+) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]:
+    """Do a Short-time Fast Fourier Transform on an array of complex IQ samples.
+    
+    The current implementation relies heavily on the `ShortTimeFFT` implementation from 
+    `scipy.signal` (https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.ShortTimeFFT.html)
+    which takes up a lot of the compute time.
+    
+    :param iq_data: The complex IQ samples.
+    :param capture_config: The capture config used to capture the data.
+    :return: A tuple containing the relative times of each spectrum, the physical frequencies assigned to
+    each spectral component, and the dynamic spectra.
+    """
 
     sft = make_sft_instance(capture_config)
 
@@ -47,14 +61,25 @@ def _do_stfft(iq_data: np.array,
                   p0 = p0, 
                   p1 = p1)
     # assign physical frequencies to each spectral component
-    frequencies = sft.f + capture_config.get_parameter_value(PName.CENTER_FREQUENCY) 
+    frequencies = sft.f + cast(float, capture_config.get_parameter_value(PName.CENTER_FREQUENCY))
 
-    return times, frequencies, dynamic_spectra
+    return times.astype(np.float32), frequencies.astype(np.float32), dynamic_spectra.astype(np.float32)
 
 
-def _build_spectrogram(batch: SPECTREBatch,
-                       capture_config: CaptureConfig) -> Spectrogram:
-    """Create a spectrogram by performing a Short Time FFT on the IQ samples for this batch."""
+def _build_spectrogram(
+    batch: IQStreamBatch,
+    capture_config: CaptureConfig
+) -> Spectrogram:
+    """Generate a spectrogram using `IQStreamBatch` IQ samples.
+    
+    Perform a Short-time Fast Fourier Transform on the IQ samples stored in the `.bin` file,
+    collected at a fixed center frequency. The computation requires extra metadata, in the form of
+    the detached header in the batch and the capture config used to capture the data.
+
+    :param batch: The batch containing the IQ samples to process.
+    :param capture_config: The capture config used to capture the data.
+    :return: The computed spectrogram.
+    """
 
     # read the data from the batch
     iq_metadata = batch.hdr_file.read()
@@ -63,22 +88,18 @@ def _build_spectrogram(batch: SPECTREBatch,
     times, frequencies, dynamic_spectra = _do_stfft(iq_samples,
                                                     capture_config)
 
-    # explicitly type cast data arrays to 32-bit floats
-    times = np.array(times, dtype = 'float32')
-    frequencies = np.array(frequencies, dtype = 'float32')
-    dynamic_spectra = np.array(dynamic_spectra, dtype = 'float32')
-
     # compute the start datetime for the spectrogram by adding the millisecond component to the batch start time
     spectrogram_start_datetime = batch.start_datetime + timedelta(milliseconds=iq_metadata.millisecond_correction)
+    
     return Spectrogram(dynamic_spectra,
                        times,
                        frequencies,
                        batch.tag,
-                       spectrogram_start_datetime,
-                       spectrum_unit = "amplitude")
+                       SpectrumUnit.AMPLITUDE,
+                       spectrogram_start_datetime)
 
 
-@register_event_handler(CaptureMode.FIXED_CENTER_FREQUENCY)
+@register_event_handler(EventHandlerKey.FIXED_CENTER_FREQUENCY)
 class FixedEventHandler(BaseEventHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -90,7 +111,7 @@ class FixedEventHandler(BaseEventHandler):
         base_file_name, _ = os.path.splitext(file_name)
         batch_start_time, tag = base_file_name.split('_')
 
-        batch = SPECTREBatch(batch_start_time, tag)
+        batch = IQStreamBatch(batch_start_time, tag)
 
         _LOGGER.info("Creating spectrogram")
         spectrogram = _build_spectrogram(batch,

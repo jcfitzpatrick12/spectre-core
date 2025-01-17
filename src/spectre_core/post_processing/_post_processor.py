@@ -11,28 +11,28 @@ from watchdog.events import FileCreatedEvent
 from ._factory import get_event_handler
 from spectre_core.config import get_batches_dir_path
 
-class PostProcessor:
-    def __init__(self, 
-                 tag: str):
-        
-        self._observer = Observer()
-        self._event_handler = get_event_handler(tag)
 
+def start_post_processor(
+    tag: str
+) -> None:
+    """Start a thread to process newly created files in the `batches` directory.
 
-    def start(self):
-        """Start an observer to process newly created files in the batches directory"""
-        self._observer.schedule(self._event_handler, 
-                                get_batches_dir_path(), 
-                                recursive=True,
-                                event_filter=[FileCreatedEvent])
-        
-        try:
-            _LOGGER.info("Starting the post processing thread...") 
-            self._observer.start()
-            self._observer.join()
-        except KeyboardInterrupt:
-            _LOGGER.warning(("Keyboard interrupt detected. Signalling "
-                             "the post processing thread to stop"))
-            self._observer.stop()
-            _LOGGER.warning(("Post processing thread has been successfully stopped"))
+    :param tag: The tag of the capture config used for data capture.
+    """
+    post_processor = Observer()
+    event_handler = get_event_handler(tag)
+    post_processor.schedule(event_handler, 
+                      get_batches_dir_path(), 
+                      recursive=True,
+                      event_filter=[ FileCreatedEvent ])
+    
+    try:
+        _LOGGER.info("Starting the post processing thread...") 
+        post_processor.start()
+        post_processor.join()
+    except KeyboardInterrupt:
+        _LOGGER.warning(("Keyboard interrupt detected. Signalling "
+                         "the post processing thread to stop"))
+        post_processor.stop()
+        _LOGGER.warning(("Post processing thread has been successfully stopped"))
 

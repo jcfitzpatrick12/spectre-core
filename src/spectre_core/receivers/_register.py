@@ -20,7 +20,9 @@ def register_receiver(
     :raises ValueError: If the provided `receiver_name` is already registered.
     :return: A decorator that registers the `BaseReceiver` subclass under the given `receiver_name`.
     """
-    def decorator(cls):
+    def decorator(
+        cls: Type[T]
+    ) -> Type[T]:
         if receiver_name in receivers:
             raise ValueError(f"The receiver '{receiver_name}' is already registered!")
         receivers[receiver_name] = cls

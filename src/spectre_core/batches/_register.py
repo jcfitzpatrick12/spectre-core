@@ -20,9 +20,11 @@ def register_batch(
     :raises ValueError: If the provided `batch_key` is already registered.
     :return: A decorator that registers the `BaseBatch` subclass under the given `batch_key`.
     """
-    def decorator(cls: Type[BaseBatch]):
+    def decorator(
+        cls: Type[T]
+    ) -> Type[T]:
         if batch_key in batch_map:
-            raise ValueError(f"A Batch with '{batch_key}' is already registered!")
+            raise ValueError(f"A batch with key '{batch_key}' is already registered!")
         batch_map[batch_key] = cls
         return cls
     return decorator

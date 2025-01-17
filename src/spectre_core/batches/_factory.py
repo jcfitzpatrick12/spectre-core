@@ -35,9 +35,9 @@ def get_batch_cls(
     :raises BatchNotFoundError: If an invalid `batch_key` is provided.
     :return: The `BaseBatch` subclass corresponding to the input key.
     """
-    Batch = batch_map.get(batch_key)
-    if Batch is None:
+    batch_cls = batch_map.get(batch_key)
+    if batch_cls is None:
         valid_batch_keys = list(batch_map.keys())
         raise BatchNotFoundError(f"No batch found for the batch key: {batch_key}. "
                                  f"Valid batch keys are: {valid_batch_keys}")
-    return Batch
+    return batch_cls
