@@ -22,9 +22,9 @@ def start_post_processor(
     post_processor = Observer()
     event_handler = get_event_handler(tag)
     post_processor.schedule(event_handler, 
-                      get_batches_dir_path(), 
-                      recursive=True,
-                      event_filter=[ FileCreatedEvent ])
+                            get_batches_dir_path(), 
+                            recursive=True,
+                            event_filter=[ FileCreatedEvent ])
     
     try:
         _LOGGER.info("Starting the post processing thread...") 

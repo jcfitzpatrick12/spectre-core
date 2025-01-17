@@ -31,7 +31,7 @@ def get_event_handler_cls_from_tag(
     tag: str
 ) -> Type[BaseEventHandler]:
     """
-    Retrieve the event handler class specified in the capture config for the given tag.
+    Retrieve the event handler class based on the event handler key stored in a capture config.
 
     :param tag: The capture config tag.
     :return: The event handler class specified in the capture config.
@@ -45,7 +45,7 @@ def get_event_handler(
     tag: str
 ) -> BaseEventHandler:
     """
-    Create an instance of the event handler class specified in the capture config for the given tag.
+    Create an instance of an event handler class based on the event handler key stored in a capture config.
 
     :param tag: The capture config tag.
     :return: An instance of the event handler class.
