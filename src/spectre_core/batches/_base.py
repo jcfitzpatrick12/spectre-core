@@ -3,7 +3,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from datetime import datetime
-from typing import Optional, TypeVar
+from typing import TypeVar
+from functools import cached_property
 from abc import ABC, abstractmethod
 
 from spectre_core._file_io import BaseFileHandler
@@ -40,8 +41,6 @@ class BatchFile(BaseFileHandler[T]):
                          batch_name, 
                          extension)
         self._start_time, self._tag = batch_name.split("_")
-        # the start datetime is lazily computed, if it is required.
-        self._start_datetime: Optional[datetime] = None
    
    
     @property
@@ -52,15 +51,13 @@ class BatchFile(BaseFileHandler[T]):
         return self._start_time
 
 
-    @property
+    @cached_property
     def start_datetime(
         self
     ) -> datetime:
         """The start time of the batch, parsed as a datetime up to seconds precision."""
-        # the start datetime is lazily computed, if it is required.
-        if self._start_datetime is None:
-            self._start_datetime = datetime.strptime(self.start_time, TimeFormat.DATETIME)
-        return self._start_datetime
+        return datetime.strptime(self.start_time, TimeFormat.DATETIME)
+
     
 
     @property
