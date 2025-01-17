@@ -89,7 +89,7 @@ class CaptureConfig(JsonHandler):
         self
     ) -> Parameters:
         """The user-configured parameters provided to the receiver at the time of capture."""
-        d = self.read()
+        d = self.read( cache=True )
         return make_parameters( d[_CaptureConfigKey.PARAMETERS] )
 
 
