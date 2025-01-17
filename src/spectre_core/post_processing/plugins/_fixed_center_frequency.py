@@ -22,7 +22,7 @@ from .._register import register_event_handler
 
 
 def _do_stfft(
-    iq_data: npt.NDArray[np.float32],
+    iq_data: npt.NDArray[np.complex64],
     capture_config: CaptureConfig,
 ) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]:
     """Do a Short-time Fast Fourier Transform on an array of complex IQ samples.
@@ -101,11 +101,18 @@ def _build_spectrogram(
 
 @register_event_handler(EventHandlerKey.FIXED_CENTER_FREQUENCY)
 class FixedEventHandler(BaseEventHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def process(
+        self, 
+        absolute_file_path: str
+    ) -> None:
+        """Compute a spectrogram using `IQStreamBatch` IQ samples, cache it, then save it to file in the FITS
+        format.
+        
+        The computed spectrogram is averaged in time and frequency as per the user-configured capture config.
+        Once the spectrogram has been computed successfully, the `.bin` and `.hdr` files are removed.
 
-    def process(self, 
-                absolute_file_path: str):
+        :param absolute_file_path: The absolute file path of the `.bin` file in the batch.
+        """
         _LOGGER.info(f"Processing: {absolute_file_path}")
         file_name = os.path.basename(absolute_file_path)
         base_file_name, _ = os.path.splitext(file_name)
@@ -115,20 +122,20 @@ class FixedEventHandler(BaseEventHandler):
 
         _LOGGER.info("Creating spectrogram")
         spectrogram = _build_spectrogram(batch,
-                                        self._capture_config)
-
+                                         self._capture_config)
+        
+        time_resolution = cast(float, self._capture_config.get_parameter_value(PName.TIME_RESOLUTION))
         spectrogram = time_average(spectrogram,
-                                   resolution = self._capture_config.get_parameter_value(PName.TIME_RESOLUTION))
+                                   resolution=time_resolution)
 
+        frequency_resolution = cast(float, self._capture_config.get_parameter_value(PName.FREQUENCY_RESOLUTION))
         spectrogram = frequency_average(spectrogram,
-                                        resolution = self._capture_config.get_parameter_value(PName.FREQUENCY_RESOLUTION))
+                                        resolution=frequency_resolution)
         
         self._cache_spectrogram(spectrogram)
 
-        bin_file = batch.get_file('bin')
-        _LOGGER.info(f"Deleting {bin_file.file_path}")
-        bin_file.delete()
+        _LOGGER.info(f"Deleting {batch.bin_file.file_path}")
+        batch.bin_file.delete()
 
-        hdr_file = batch.get_file('hdr')
-        _LOGGER.info(f"Deleting {hdr_file.file_path}")
-        hdr_file.delete()
+        _LOGGER.info(f"Deleting {batch.hdr_file.file_path}")
+        batch.hdr_file.delete()
