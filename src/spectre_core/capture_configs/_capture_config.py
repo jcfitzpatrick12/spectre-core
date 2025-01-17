@@ -4,6 +4,7 @@
 
 from dataclasses import dataclass
 from typing import Optional, Any
+from functools import cached_property
 
 from spectre_core._file_io import JsonHandler
 from spectre_core.config import get_configs_dir_path
@@ -84,7 +85,7 @@ class CaptureConfig(JsonHandler):
         return d[_CaptureConfigKey.RECEIVER_MODE]
     
 
-    @property
+    @cached_property
     def parameters(
         self
     ) -> Parameters:
