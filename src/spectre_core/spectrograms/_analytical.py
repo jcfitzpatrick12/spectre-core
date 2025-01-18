@@ -41,6 +41,7 @@ class TestResults:
         """Returns the count of spectrums that failed validation."""
         return len(self.spectrum_validated) - self.num_validated_spectrums
     
+    
     def to_dict(
         self
     ) -> dict[str, bool | dict[float, bool]]:
@@ -93,7 +94,7 @@ class _AnalyticalFactory:
         Generates an analytical spectrogram based on the capture config for a `Test` receiver.
 
         :param num_spectrums: The number of spectrums to include in the output spectrogram.
-        :param capture_config: The capture config specifying parameters for the session.
+        :param capture_config: The capture config used for `Test` receiver data capture.
         :raises ValueError: Raised if the capture config is not associated with a `Test` receiver.
         :raises ModeNotFoundError: Raised if the specified `Test` mode in the capture config lacks
         a corresponding builder method.
@@ -114,7 +115,7 @@ class _AnalyticalFactory:
         num_spectrums: int,
         capture_config: CaptureConfig
     ) -> Spectrogram:
-        """Creates the expected spectrogram for the `Test` receiver operating in the `cosine-signal-1` mode."""
+        """Creates the expected spectrogram for the `Test` receiver operating in the mode `cosine-signal-1`."""
         # Extract necessary parameters from the capture config.
         window_size      = cast(int,   capture_config.get_parameter_value(PName.WINDOW_SIZE))
         sample_rate      = cast(int,   capture_config.get_parameter_value(PName.SAMPLE_RATE))
@@ -159,10 +160,7 @@ class _AnalyticalFactory:
         num_spectrums: int,
         capture_config: CaptureConfig
     ) -> Spectrogram:
-        """Creates the expected spectrogram for the `Test` receiver operating in the `tagged-staircase` mode.
-
-        This method generates an analytical spectrogram using parameters specified in the capture config.
-        """
+        """Creates the expected spectrogram for the `Test` receiver operating in the mode `tagged-staircase`."""
         # Extract necessary parameters from the capture config.
         window_size          = cast(int, capture_config.get_parameter_value(PName.WINDOW_SIZE))
         min_samples_per_step = cast(int, capture_config.get_parameter_value(PName.MIN_SAMPLES_PER_STEP))
@@ -219,8 +217,8 @@ def get_analytical_spectrogram(
     receiver operating in a specific mode.
 
     :param num_spectrums: The number of spectrums in the output spectrogram.
-    :param capture_config: Configuration details for the capture session.
-    :return: The analytical spectrogram for the specified mode of the `Test` receiver.
+    :param capture_config: The capture config used for data capture.
+    :return: The expected, analytically derived spectrogram for the specified mode of the `Test` receiver.
     """
     factory = _AnalyticalFactory()
     return factory.get_spectrogram(num_spectrums,
@@ -236,7 +234,7 @@ def validate_analytically(
     in a particular mode.
 
     :param spectrogram: The spectrogram to be validated.
-    :param capture_config: Configuration used to derive the analytical spectrogram.
+    :param capture_config: The capture config used for data capture.
     :param absolute_tolerance: Tolerance level for numerical comparisons.
     :return: A `TestResults` object summarising the validation outcome.
     """

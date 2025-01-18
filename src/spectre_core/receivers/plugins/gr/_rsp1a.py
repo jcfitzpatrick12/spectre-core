@@ -29,7 +29,7 @@ class _fixed_center_frequency(spectre_top_block):
         tag: str,
         parameters: Parameters
     ) -> None:
-        # Inline imports 
+        # OOT Module inline imports 
         from gnuradio import spectre
         from gnuradio import sdrplay3
 
@@ -81,7 +81,7 @@ class _swept_center_frequency(spectre_top_block):
         tag: str,
         parameters: Parameters
     ) -> None:
-        # Inline imports 
+        # OOT Module inline imports 
         from gnuradio import spectre
         from gnuradio import sdrplay3
 

@@ -41,8 +41,8 @@ class FrequencyCut:
     """A cut of a dynamic spectra, at a particular instant of time. Equivalently, some spectrum in 
     the spectrogram.
     
-    :ivar time: The relative time of the frequency cut, in seconds. With respect to the first
-    spectrum in the spectrogram it belonged to.
+    :ivar time: The time of the frequency cut, either in relative time (if time is a float)
+    or as a datetime.
     :ivar frequencies: The physical frequencies assigned to each spectral component, in Hz.
     :ivar cut: The spectrum values.
     :ivar spectrum_unit: The unit of each spectrum value.
@@ -59,7 +59,8 @@ class TimeCut:
     some spectral component in the spectrogram.
     
     :ivar frequency: The physical frequency assigned to the spectral component, in Hz.
-    :ivar times: The relative time of each cut value, in seconds.
+    :ivar times: The time for each time series value, either as a relative time (if 
+    the elements are floats) or as a datetimes.
     :ivar cut: The time series values of the spectral component.
     :ivar spectrum_unit: The unit of each time series value.
     """
@@ -95,11 +96,10 @@ class Spectrogram:
     ) -> None:
         """Initialise a Spectrogram instance.
 
-        :param dynamic_spectra: A 2D array of spectrogram data with shape (num_frequencies, num_times).
-        :param times: The physical times assigned to each spectrum in. 
-        Specifically, a 1D array of time values in seconds, starting at 0, with size num_times.
-        :param frequencies: The physical frequencies assigned to each spectral component. 
-        Specifically, a 1D array of frequency values in Hz, with size num_frequencies.
+        :param dynamic_spectra: A 2D array of spectrogram data.
+        :param times: A 1D array representing the elapsed time of each spectrum, in seconds, relative to the first
+        in the spectrogram.
+        :param frequencies: A 1D array representing the physical frequencies assigned to each spectral component, in Hz.
         :param tag: A string identifier for the spectrogram.
         :param spectrum_unit: The unit of the dynamic_spectra values.
         :param start_datetime: The datetime corresponding to the first spectrum, defaults to None.
@@ -144,11 +144,8 @@ class Spectrogram:
     def times(
         self
     ) -> npt.NDArray[np.float32]:
-        """The time values assigned to each spectrum, in seconds.
-
-        This 1D array represents the elapsed time since the first spectrum, 
-        with the first value conventionally set to 0.
-        """
+        """A 1D array representing the elapsed time of each spectrum, in seconds, relative to the first
+        in the spectrogram."""
         return self._times
     
     
@@ -188,7 +185,7 @@ class Spectrogram:
     def frequencies(
         self
     ) -> npt.NDArray[np.float32]:
-        """The physical frequencies assigned to each spectral component, in Hz."""
+        """A 1D array representing the physical frequencies assigned to each spectral component, in Hz."""
         return self._frequencies
 
 
@@ -320,7 +317,7 @@ class Spectrogram:
     ) -> npt.NDArray[np.float32]:
         """Compute the dynamic spectra in units of decibels above the background spectrum.
 
-        The computation applies logarithmic scaling based on the spectrum_unit. 
+        The computation applies logarithmic scaling based on the `spectrum_unit`. 
 
         :raises NotImplementedError: If the spectrum_unit is unrecognised.
         :return: A 2D array with the same shape as `dynamic_spectra`, representing 
@@ -339,12 +336,13 @@ class Spectrogram:
                 raise NotImplementedError(f"{self._spectrum_unit} is unrecognised; decibel conversion is uncertain!")
         return dynamic_spectra_dBb.astype(np.float32)
     
+    
     def format_start_time(
         self
     ) -> str:
         """Format the datetime assigned to the first spectrum in the dynamic spectra.
 
-        :return: A string representation of the start_datetime, up to seconds precision.
+        :return: A string representation of the `start_datetime`, up to seconds precision.
         """
         dt = self.start_datetime.astype(datetime)
         return datetime.strftime(dt, TimeFormat.DATETIME)
@@ -359,9 +357,9 @@ class Spectrogram:
         background subtractions.
 
         :param start_background: The start time of the background interval, formatted as 
-        a string in TimeFormat.DATETIME (up to seconds precision).
+        a string in the format `TimeFormat.DATETIME` (up to seconds precision).
         :param end_background: The end time of the background interval, formatted as 
-        a string in TimeFormat.DATETIME (up to seconds precision).
+        a string in the format `TimeFormat.DATETIME` (up to seconds precision).
         """
         self._start_background = start_background
         self._end_background   = end_background
@@ -405,7 +403,7 @@ class Spectrogram:
     def save(
         self
     ) -> None:
-        """Store the spectrogram and its associated metadata in a standard FITS file format."""
+        """Write the spectrogram and its associated metadata to a batch file in the FITS format."""
         _save_spectrogram(self)
     
 
@@ -423,7 +421,7 @@ class Spectrogram:
         :return: A 1D array containing each spectrum numerically integrated over the 
         frequency axis.
         """
-        # integrate over frequency
+        # numerically integrate over frequency
         I = np.trapz(self._dynamic_spectra, self._frequencies, axis=0)
 
         if correct_background:
