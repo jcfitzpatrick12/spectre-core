@@ -8,7 +8,7 @@ class PanelName(Enum):
     """Literal corresponding to a fully implemented `BasePanel` subclass.
     
     :ivar SPECTROGRAM: Panel for visualising the full spectrogram.
-    :ivar FREQUENCY_CUTS: Panel for visualising spectrogram data as frequency cuts.
+    :ivar FREQUENCY_CUTS: Panel for visualising individual spectrums in a spectrogram.
     :ivar TIME_CUTS: Panel for visualising spectrogram data as time series of spectral components.
     :ivar INTEGRAL_OVER_FREQUENCY: Panel for visualising the spectrogram integrated over frequency.
     """

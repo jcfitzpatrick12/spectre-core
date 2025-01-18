@@ -35,16 +35,6 @@ class BasePanel(ABC):
     `BasePanel` instances are designed to be part of a `PanelStack`, where multiple
     panels contribute to a composite plot. Subclasses must implement methods to define
     how the panel is drawn and annotated, and specify its x-axis type.
-
-    Subclasses must implement the following:
-    
-    :method draw: Define how to render the panel on its matplotlib `Axes`.
-    :method annotate_xaxis: Annotate the x-axis for the panel.
-    :method annotate_yaxis: Annotate the y-axis for the panel.
-    :method xaxis_type: A property specifying the type of x-axis (time or frequency).
-
-    :param name: The name of the panel.
-    :param spectrogram: The spectrogram to visualise.
     """
     def __init__(
         self, 
@@ -52,10 +42,6 @@ class BasePanel(ABC):
         spectrogram: Spectrogram
     ) -> None:
         """Initialize an instance of `BasePanel`.
-
-        This method sets up the panel with its name and associated spectrogram. 
-        Internal attributes for panel configuration are initialized and later set
-        by the `PanelStack`.
 
         :param name: The name of the panel.
         :param spectrogram: The spectrogram being visualised.
@@ -75,33 +61,21 @@ class BasePanel(ABC):
     def draw(
         self
     ) -> None:
-        """Modify the `ax` attribute to draw the panel's content on its matplotlib `Axes`.
-
-        This method must be implemented by subclasses to define the specific visual
-        elements to render on the panel.
-        """
+        """Modify the `ax` attribute to draw the panel contents."""
 
 
     @abstractmethod
     def annotate_xaxis(
         self
     ) -> None:
-        """Annotate the x-axis of the panel.
-
-        This method must be implemented by subclasses to define how the x-axis should 
-        be labeled or formatted.
-        """
+        """Modify the `ax` attribute to annotate the x-axis of the panel."""
 
 
     @abstractmethod
     def annotate_yaxis(
         self
     ) -> None:
-        """Annotate the y-axis of the panel.
-
-        This method must be implemented by subclasses to define how the y-axis should 
-        be labeled or formatted.
-        """
+        """Modify the `ax` attribute to annotate the y-axis of the panel."""
 
 
     @property
@@ -109,12 +83,8 @@ class BasePanel(ABC):
     def xaxis_type(
         self
     ) -> XAxisType:
-     """Specify the x-axis type for the panel.
-     
-     This property must be implemented by subclasses to define whether the panel 
-     uses a time-based or frequency-based x-axis. Shared axes in a `PanelStack` 
-     depend on this type.
-    """
+     """Specify the x-axis type for the panel."""
+
 
     @property
     def spectrogram(
@@ -268,8 +238,6 @@ class BasePanel(ABC):
         """Set the optional identifier for the panel.
         
         This can be used to distinguish panels or aid in superimposing panels.
-        
-        :param value: The identifier to assign to the panel.
         """
         self._identifier = value
     
@@ -277,20 +245,14 @@ class BasePanel(ABC):
     def hide_xaxis_labels(
         self
     ) -> None:
-        """Hide the x-axis labels for this panel.
-
-        This is used to reduce visual clutter when multiple panels are stacked.
-        """
+        """Hide the x-axis labels for this panel."""
         self.ax.tick_params(axis='x', labelbottom=False)
 
 
     def hide_yaxis_labels(
         self
     ) -> None:
-        """Hide the y-axis labels for this panel.
-    
-        This is used to reduce visual clutter when multiple panels are stacked.
-        """
+        """Hide the y-axis labels for this panel."""
         self.ax.tick_params(axis='y', labelbottom=False)
     
 
@@ -328,7 +290,7 @@ class BaseTimeSeriesPanel(BasePanel):
 
 
 class BaseSpectrumPanel(BasePanel):
-    """An abstract subclass of `BasePanel` tailored for visualising spectral data.
+    """An abstract subclass of `BasePanel` tailored for visualising spectrum data.
     
     Subclasses must implement any remaining abstract methods as described by `BasePanel`.
     """   

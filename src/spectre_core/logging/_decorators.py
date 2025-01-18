@@ -13,8 +13,8 @@ def log_call(
 ) -> Callable[..., RT]:
     """Decorator to log the execution of a function.
 
-    Logs an informational message when the decorated function is called
-    error message if the function raises an exception
+    Logs an informational message when the decorated function is called,
+    and an error message if the function raises an exception
 
     :param func: The function to be decorated.
     :return: The decorated function with added logging behaviour.

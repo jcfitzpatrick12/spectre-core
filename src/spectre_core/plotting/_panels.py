@@ -124,7 +124,7 @@ class FrequencyCutsPanel(BaseSpectrumPanel):
         """Annotate the y-axis of the panel based on the current state.
 
         The y-axis label reflects whether the data is in decibels above the background (`dBb`),
-        normalized to peak values, or the original units of the spectrogram.
+        normalized to peak values, or in the original units of the spectrogram.
         """
         if self._dBb:
             self.ax.set_ylabel('dBb')
@@ -213,7 +213,7 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
         self
     ) -> list[float]:
         """
-        Get the frequencies for the spectral components being plotted.
+        Get the exact frequencies for the spectral components being plotted.
 
         :return: A list of frequencies corresponding to the stored time cuts.
         """
@@ -241,7 +241,7 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
         Annotate the y-axis of the panel based on the current state.
 
         The y-axis label reflects whether the data is in decibels above the background (`dBb`),
-        normalized to peak values, or the original units of the spectrogram.
+        normalized to peak values, or in the original units of the spectrogram.
         """
         if self._dBb:
             self.ax.set_ylabel('dBb')
@@ -267,7 +267,7 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
 class IntegralOverFrequencyPanel(BaseTimeSeriesPanel):
     """Panel for visualising the spectrogram integrated over frequency.
 
-    This panel plots the spectrogram's numerical integral over frequency as a time 
+    This panel plots the spectrogram numerically integrated over frequency as a time 
     series. The result can be normalized to its peak value or adjusted by subtracting 
     the background.
     """
@@ -295,11 +295,7 @@ class IntegralOverFrequencyPanel(BaseTimeSeriesPanel):
  
 
     def annotate_yaxis(self):
-        """
-        Implement the abstract method for y-axis annotation.
-
-        This panel does not annotate the y-axis.
-        """
+        """This panel does not annotate the y-axis."""
     
     
 class SpectrogramPanel(BaseTimeSeriesPanel):

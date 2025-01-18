@@ -24,8 +24,8 @@ class Log(TextHandler):
     ) -> None:
         """Initialise a `Log` instance.
 
-        :param start_time: The timestamp when the log file was created, used in the log file name.
-        :param pid: The process ID of the process writing to the log file.
+        :param start_time: The timestamp when the log file was created.
+        :param pid: The ID of the process writing to the log file.
         :param process_type: Indicates the type of process, as defined by `ProcessType`.
         """
         self._start_time = start_time
@@ -43,7 +43,7 @@ class Log(TextHandler):
     def start_time(
         self
     ) -> str:
-        """The timestamp when the log was created."""
+        """The system time when the log was created."""
         return self._start_time
     
 
@@ -51,7 +51,7 @@ class Log(TextHandler):
     def pid(
         self
     ) -> str:
-        """The process ID of the process writing to the log file."""
+        """The ID of the process writing to the log file."""
         return self._pid
     
 

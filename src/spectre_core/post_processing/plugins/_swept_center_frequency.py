@@ -369,7 +369,11 @@ def _build_spectrogram(
 
 @register_event_handler(EventHandlerKey.SWEPT_CENTER_FREQUENCY)
 class SweptEventHandler(BaseEventHandler):
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self, 
+        *args, 
+        **kwargs
+    ) -> None:
         super().__init__(*args, **kwargs)
         self._previous_batch: Optional[IQStreamBatch] = None 
         
@@ -380,13 +384,13 @@ class SweptEventHandler(BaseEventHandler):
     ) -> None:
         """
         Compute a spectrogram using IQ samples from an `IQStreamBatch`, cache the results, and save them in the
-        FITS format. The IQ samples are assumed to be collected at a center frequency periodically swept through 
+        FITS format. The IQ samples are assumed to be collected at a center frequency periodically swept in
         fixed increments. Neighbouring IQ samples collected at the same frequency constitute a "step." Neighbouring 
         steps collected at incrementally increasing center frequencies form a "sweep." A new sweep begins when the 
         center frequency resets to its minimum value.
 
         The computed spectrogram is averaged in time and frequency based on user-configured settings in the capture 
-        configuration. The batch is cached after computation for use in subsequent processing steps, if applicable.
+        config. The batch is cached after computation for use in subsequent processing steps.
 
         :param absolute_file_path: The absolute path to the `.bin` file containing the IQ sample batch.
         """

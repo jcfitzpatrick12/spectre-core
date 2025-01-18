@@ -13,15 +13,7 @@ from .plugins._receiver_names import ReceiverName
 from ._spec_names import SpecName
 
 class BaseReceiver(ABC):
-    """Abstract base class for software-defined radio receivers.
-
-    Subclasses must implement the following:
-    
-    :method _add_specs: Use `add_spec` to add hardware specifications.
-    :method _add_capture_methods: Use `add_capture_method` to define a capture method per operating mode.
-    :method _add_capture_templates: Use `add_capture_template` to add a `CaptureTemplate` per operating mode.
-    :method _add_pvalidators: Use `add_pvalidator` to add a pvalidator per operating mode.
-    """
+    """Abstract base class for software-defined radio receivers."""
     def __init__(
         self, 
         name: ReceiverName, 
@@ -245,6 +237,7 @@ class BaseReceiver(ABC):
         self.specs[name] = value
 
 
+    # tell static type checkers the type of specification
     @overload
     def get_spec(self, spec_name: Literal[SpecName.API_RETUNING_LATENCY]) -> float: ...
     @overload
@@ -265,6 +258,7 @@ class BaseReceiver(ABC):
     def get_spec(self, spec_name: Literal[SpecName.IF_GAIN_UPPER_BOUND]) -> int: ...
     @overload
     def get_spec(self, spec_name: Literal[SpecName.BANDWIDTH_OPTIONS]) -> list[float]: ...
+    
     
     def get_spec(
         self, 
@@ -287,7 +281,7 @@ class BaseReceiver(ABC):
         self, 
         tag: str
     ) -> None:
-        """Start capturing data according to the active operating mode.
+        """Start capturing data in the active operating mode.
 
         :param tag: The tag of the capture config to load.
         """

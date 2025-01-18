@@ -48,8 +48,7 @@ class PanelStack:
         """Initialize an instance of `PanelStack`.
 
         :param panel_format: Formatting applied across all panels in the stack. Defaults to `PanelFormat()`.
-        :param time_type: The type of time assigned to spectrograms (e.g., relative or absolute). 
-        Defaults to `TimeType.RELATIVE`.
+        :param time_type: The type of time assigned to spectrograms, defaults to `TimeType.RELATIVE`.
         :param figsize: The size of the `matplotlib` figure as (width, height). Defaults to (10, 10).
         """
         self._panel_format = panel_format
@@ -84,7 +83,7 @@ class PanelStack:
         self
     ) -> Figure:
         """Get the shared `matplotlib` figure for the panel stack.
-        A
+
         :raises ValueError: If the axes have not been initialized.
         """
         if self._fig is None:

@@ -4,7 +4,6 @@
 
 from dataclasses import dataclass
 
-from spectre_core.capture_configs import CaptureMode
 from ._receiver_names import ReceiverName
 from .gr._rsp1a import CaptureMethod
 from .._spec_names import SpecName
@@ -14,8 +13,8 @@ from .._register import register_receiver
 @dataclass(frozen=True)
 class Mode:
     """An operating mode for the `RSP1A` receiver."""
-    FIXED_CENTER_FREQUENCY  = CaptureMode.FIXED_CENTER_FREQUENCY.value
-    SWEPT_CENTER_FREQUENCY  = CaptureMode.SWEPT_CENTER_FREQUENCY.value
+    FIXED_CENTER_FREQUENCY  = "fixed-center-frequency"
+    SWEPT_CENTER_FREQUENCY  = "swept-center-frequency"
 
 
 @register_receiver(ReceiverName.RSP1A)

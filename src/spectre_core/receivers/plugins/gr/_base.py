@@ -11,7 +11,7 @@ from gnuradio import gr
 from spectre_core.capture_configs import Parameters
 
 class spectre_top_block(gr.top_block):
-    """Thin wrapper around GNU Radio's `gr.top_block` class.
+    """A thin wrapper around GNU Radio's `gr.top_block` class.
     
     Propagate through the input tag and parameters to `flowgraph` in the constructor,
     to make the GNU Radio flow graphs easily configurable.
@@ -54,11 +54,11 @@ def capture(
     Run a GNU Radio flowgraph with the given number of output items.
 
     Typically, this should be used with `partial` from `functools` to create
-    a capture method:
+    a capture method. For example, 
 
     .. code-block:: python
         capture_method = partial(capture, top_block_cls=<your GNU Radio top block>)
-
+    
     :param tag: The capture config tag
     :param parameters: The parameters stored in the capture config
     :param top_block_cls: The subclass of `spectre_top_block`, defining the GNURadio flowgraph.

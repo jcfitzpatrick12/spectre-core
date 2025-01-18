@@ -38,12 +38,7 @@ def make_sft_instance(
 
 
 class BaseEventHandler(ABC, FileSystemEventHandler):
-    """An abstract base class for event-driven file post-processing.
-    
-    Subclasses must implement the following:    
-    
-    :method process: The post-processing to call on a freshly closed batch file.
-    """
+    """An abstract base class for event-driven file post-processing."""
     def __init__(
         self, 
         tag: str
@@ -70,10 +65,11 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         """
         Process a batch file at the given file path.
 
-        Called when a batch file is closed.
+        Called when a batch file opened for writing is closed.
 
-        :param absolute_file_path: The absolute path to the batch file.
+        :param absolute_file_path: The absolute path to the recently closed batch file.
         """
+
 
     def on_closed(
         self, 
@@ -86,7 +82,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
 
         :param event: The file system event containing the closed file's details.
         """
-        # the 'src_path' attribute holds the absolute path of the newly created file
+        # the `src_path`` attribute holds the absolute path of the freshly closed file
         absolute_file_path = event.src_path
         
         # only 'notice' a file if it ends with the appropriate extension as defined in the capture config

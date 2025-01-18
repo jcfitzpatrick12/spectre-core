@@ -5,11 +5,11 @@
 """
 File system path definitions.
 
-By default, `spectre` uses the required environment variable `SPECTRE_DATA_DIR_PATH`
+`spectre` uses the required environment variable `SPECTRE_DATA_DIR_PATH`
 and creates three directories inside it:  
 
 - `batches`: To hold the batched data files.
-- `logs`: To log files generated at runtime.
+- `logs`: To hold log files generated at runtime.
 - `configs`: To hold the capture config files.
 """
 
@@ -110,7 +110,7 @@ def get_logs_dir_path(
 
 def get_configs_dir_path(
 ) -> str:
-    """The directory in the file system containing the capture config files.
+    """The directory in the file system containing the capture configs.
 
     :return: The directory path for configuration files.
     """
