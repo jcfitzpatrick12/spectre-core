@@ -2,7 +2,6 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-
 """An intuitive API for plotting spectrogram data."""
 
 from ._format import PanelFormat

@@ -2,6 +2,8 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+"""A vendor-neutral interface for collecting data from SDRs."""
+
 from .plugins._receiver_names import ReceiverName
 from .plugins._test import Test
 from .plugins._rsp1a import RSP1A

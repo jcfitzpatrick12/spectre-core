@@ -2,9 +2,8 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# register decorators take effect on import.
-# we do not expose them publically, and instead the classes and instances
-# should be retrieved through the appropriate factory functions.
+"""Real-time, extensible post-processing of SDR data."""
+
 from .plugins._fixed_center_frequency import FixedEventHandler
 from .plugins._swept_center_frequency import SweptEventHandler
 

@@ -27,14 +27,12 @@ def _do_stfft(
 ) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]:
     """Do a Short-time Fast Fourier Transform on an array of complex IQ samples.
     
+    The computation requires extra metadata, which is extracted from the detached header in the batch 
+    and the capture config used to capture the data.
+    
     The current implementation relies heavily on the `ShortTimeFFT` implementation from 
     `scipy.signal` (https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.ShortTimeFFT.html)
     which takes up a lot of the compute time.
-    
-    :param iq_data: The complex IQ samples.
-    :param capture_config: The capture config used to capture the data.
-    :return: A tuple containing the relative times of each spectrum, the physical frequencies assigned to
-    each spectral component, and the dynamic spectra.
     """
 
     sft = make_sft_instance(capture_config)
@@ -70,17 +68,7 @@ def _build_spectrogram(
     batch: IQStreamBatch,
     capture_config: CaptureConfig
 ) -> Spectrogram:
-    """Generate a spectrogram using `IQStreamBatch` IQ samples.
-    
-    Perform a Short-time Fast Fourier Transform on the IQ samples stored in the `.bin` file,
-    collected at a fixed center frequency. The computation requires extra metadata, in the form of
-    the detached header in the batch and the capture config used to capture the data.
-
-    :param batch: The batch containing the IQ samples to process.
-    :param capture_config: The capture config used to capture the data.
-    :return: The computed spectrogram.
-    """
-
+    """Generate a spectrogram using `IQStreamBatch` IQ samples."""
     # read the data from the batch
     iq_metadata = batch.hdr_file.read()
     iq_samples  = batch.bin_file.read()
@@ -106,7 +94,7 @@ class FixedEventHandler(BaseEventHandler):
         absolute_file_path: str
     ) -> None:
         """Compute a spectrogram using `IQStreamBatch` IQ samples, cache it, then save it to file in the FITS
-        format.
+        format. The IQ samples are assumed to have been collected at a fixed center frequency.
         
         The computed spectrogram is averaged in time and frequency as per the user-configured capture config.
         Once the spectrogram has been computed successfully, the `.bin` and `.hdr` files are removed.

@@ -2,6 +2,8 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+"""Create and transform spectrogram data."""
+
 from ._analytical import (
     get_analytical_spectrogram, validate_analytically, TestResults
 )

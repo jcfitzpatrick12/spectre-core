@@ -116,11 +116,11 @@ class BaseFileHandler(ABC, Generic[T]):
 
     def read(
         self,
-        cache: bool = False
+        cache: bool = True
     ) -> T:
         """Read the file contents.
         
-        :param cache: If False, bypasses the cache and reads the file directly on each `read` call, defaults to False
+        :param cache: If False, bypasses the cache and reads the file directly on each `read` call, defaults to True
         :return: The file contents. If `cache` is False, always reads directly from the file. 
         Otherwise, uses the cache if available, or reads and caches the contents.
         """
