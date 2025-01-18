@@ -125,7 +125,7 @@ class Parameters:
     def to_dict(
         self
     ) -> dict[str, Optional[Any]]:
-        """Convert the `Parameters` instance to an equivalent dictionary representation.
+        """Convert the `Parameters` instance to a serialisable dictionary.
 
         :return: A dictionary representation of the stored parameters.
         """
@@ -137,7 +137,7 @@ def _parse_string_parameter(
 ) -> list[str]:
     """Parse string of the form `a=b` into a list of the form `[a, b]`.
 
-    :param string_parameter: A string representation of a capture configuration parameter.
+    :param string_parameter: A string representation of a capture config parameter.
     :raises ValueError: If the input parameter is not of the form `a=b`.
     :return: The parsed components of the input string parameter, using the `=` character as a separator.
     The return list will always contain two elements.

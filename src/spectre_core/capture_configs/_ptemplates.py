@@ -13,9 +13,7 @@ from ._parameters import Parameter
 # value type
 VT = TypeVar('VT')
 class PTemplate(Generic[VT]):
-    """Constrains the value and type of a capture configuration parameter 
-    associated with a given name.
-    """
+    """A template which constrains the value and type of a capture config parameter."""
     def __init__(
         self,
         name: PName,
@@ -26,7 +24,7 @@ class PTemplate(Generic[VT]):
         help: Optional[str] = None,
         pconstraints: Optional[list[BasePConstraint]] = None
     ) -> None:
-        """Initialise an instance of `PTemplate` and create a parameter template.
+        """Initialise an instance of `PTemplate`.
 
         :param name: The name of the parameter.
         :param ptype: The required type of the parameter value.

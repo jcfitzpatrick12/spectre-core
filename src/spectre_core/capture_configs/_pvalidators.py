@@ -17,14 +17,15 @@ from ._pnames import PName
 # 
 # This is okay, as whenever the validators are called, the parameter values 
 # have already been individually casted and constrained according to the 
-# parameter templates. There is negligible runtime impact.
+# parameter templates. There is negligible runtime impact. Though a bit
+# of a pain for maintenance.
 # ----------------------------------------------------------------------- # 
 
 
 def validate_window(
         parameters: Parameters
 ) -> None:
-    """Ensure that the capture configuration file describes a valid window.
+    """Ensure that the capture config describes a valid window.
 
     :param parameters: The parameters to be validated.
     :raises ValueError: If the window interval is greater than the batch size.
@@ -186,7 +187,7 @@ def validate_step_interval(
 def validate_fixed_center_frequency(
     parameters: Parameters
 ) -> None:
-    """Apply validators for capture configuration parameters describing fixed center frequency capture.
+    """Apply validators for capture config parameters describing fixed center frequency capture.
 
     :param parameters: The parameters to be validated.
     """
@@ -198,7 +199,7 @@ def validate_swept_center_frequency(
     parameters: Parameters,
     api_retuning_latency: Optional[float] = None,
 ) -> None:
-    """Apply validators for capture configuration parameters describing swept center frequency capture.
+    """Apply validators for capture config parameters describing swept center frequency capture.
 
     :param parameters: The parameters to be validated.
     :param api_retuning_latency: The empirically derived API retuning latency. Defaults to None.

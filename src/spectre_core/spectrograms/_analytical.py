@@ -90,12 +90,12 @@ class _AnalyticalFactory:
         capture_config: CaptureConfig
     ) -> Spectrogram:
         """
-        Generates an analytical spectrogram based on the capture configuration for a `Test` receiver.
+        Generates an analytical spectrogram based on the capture config for a `Test` receiver.
 
         :param num_spectrums: The number of spectrums to include in the output spectrogram.
         :param capture_config: The capture config specifying parameters for the session.
-        :raises ValueError: Raised if the capture configuration is not associated with a `Test` receiver.
-        :raises ModeNotFoundError: Raised if the specified `Test` mode in the capture configuration lacks
+        :raises ValueError: Raised if the capture config is not associated with a `Test` receiver.
+        :raises ModeNotFoundError: Raised if the specified `Test` mode in the capture config lacks
         a corresponding builder method.
         :return: The expected spectrogram for running a session with the `Test` receiver in the specified mode.
         """
@@ -115,7 +115,7 @@ class _AnalyticalFactory:
         capture_config: CaptureConfig
     ) -> Spectrogram:
         """Creates the expected spectrogram for the `Test` receiver operating in the `cosine-signal-1` mode."""
-        # Extract necessary parameters from the capture configuration.
+        # Extract necessary parameters from the capture config.
         window_size      = cast(int,   capture_config.get_parameter_value(PName.WINDOW_SIZE))
         sample_rate      = cast(int,   capture_config.get_parameter_value(PName.SAMPLE_RATE))
         frequency        = cast(int,   capture_config.get_parameter_value(PName.FREQUENCY))
@@ -161,9 +161,9 @@ class _AnalyticalFactory:
     ) -> Spectrogram:
         """Creates the expected spectrogram for the `Test` receiver operating in the `tagged-staircase` mode.
 
-        This method generates an analytical spectrogram using parameters specified in the capture configuration.
+        This method generates an analytical spectrogram using parameters specified in the capture config.
         """
-        # Extract necessary parameters from the capture configuration.
+        # Extract necessary parameters from the capture config.
         window_size          = cast(int, capture_config.get_parameter_value(PName.WINDOW_SIZE))
         min_samples_per_step = cast(int, capture_config.get_parameter_value(PName.MIN_SAMPLES_PER_STEP))
         max_samples_per_step = cast(int, capture_config.get_parameter_value(PName.MAX_SAMPLES_PER_STEP))
@@ -215,7 +215,7 @@ def get_analytical_spectrogram(
     """Each mode of the `Test` receiver generates a known synthetic signal. Based on this, we can 
     derive an analytical solution that predicts the expected spectrogram for a session in that mode. 
     
-    This function constructs the analytical spectrogram using the capture configuration for a `Test` 
+    This function constructs the analytical spectrogram using the capture config for a `Test` 
     receiver operating in a specific mode.
 
     :param num_spectrums: The number of spectrums in the output spectrogram.

@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Create, template and read capture configuration files."""
+"""Create, template and read capture config files."""
 
 from ._pnames import PName
 from ._capture_modes import CaptureMode

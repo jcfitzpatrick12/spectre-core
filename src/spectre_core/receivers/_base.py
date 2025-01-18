@@ -326,7 +326,7 @@ class BaseReceiver(ABC):
 
         The parameters are validated before being returned.
 
-        :param tag: The tag identifying the capture configuration.
+        :param tag: The tag identifying the capture config.
         :return: The validated parameters stored in the capture config.
         """
         capture_config = CaptureConfig(tag)

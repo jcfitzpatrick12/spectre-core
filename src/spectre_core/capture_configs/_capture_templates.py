@@ -13,7 +13,7 @@ from ._ptemplates import PName
 
 class CaptureTemplate:
     """A managed collection of parameter templates. Strictly defines what parameters are required
-    in a capture configuration file, and the values each parameter can take.
+    in a capture config, and the values each parameter can take.
     """
     def __init__(
         self
@@ -27,7 +27,7 @@ class CaptureTemplate:
     def name_list(
         self
     ) -> list[PName]:
-        """The names of all allowed parameters in the capture template."""
+        """The names of all required parameters in the capture template."""
         return list(self._ptemplates.keys())
     
 
@@ -65,7 +65,7 @@ class CaptureTemplate:
         """Apply the corresponding parameter template to the input parameter.
         
         As a side effect, the value of the input parameter will be type cast
-        appropriately.
+        according to the template.
         """
         ptemplate = self.get_ptemplate(parameter.name)
         parameter.value = ptemplate.apply_template(parameter.value)
@@ -84,8 +84,12 @@ class CaptureTemplate:
         self,
         parameters: Parameters
     ) -> None:
-        """For any missing parameters (with respect to the parameter template, add the
-        corresponding default parameter."""
+        """Add default parameters to `parameters` for any missing entries.
+
+        Missing parameters are identified by comparing `parameters` against the
+        current capture template. Defaults are derived from the corresponding
+        parameter templates.
+        """
         for ptemplate in self:
             if ptemplate.name not in parameters.name_list:
                 # no args for `make_parameter` implies the parameter with the default value will be used.
@@ -115,7 +119,7 @@ class CaptureTemplate:
     def __iter__(
         self
     ) -> Iterator[PTemplate]:
-        """Iterate over stored ptemplates"""
+        """Iterate over stored ptemplates."""
         yield from self._ptemplates.values() 
 
 
@@ -232,7 +236,7 @@ def _make_fixed_frequency_capture_template(
         PName.WINDOW_TYPE,
     )
     capture_template.set_defaults(
-            (PName.EVENT_HANDLER_KEY,     CaptureMode.FIXED_CENTER_FREQUENCY),
+            (PName.EVENT_HANDLER_KEY,     "fixed-center-frequency"),
             (PName.BATCH_KEY,             "IQStreamBatch"),
             (PName.WATCH_EXTENSION,       "bin")
     )
@@ -270,7 +274,7 @@ def _make_swept_frequency_capture_template(
         PName.WINDOW_SIZE,
         PName.WINDOW_TYPE)
     capture_template.set_defaults(
-            (PName.EVENT_HANDLER_KEY,     CaptureMode.SWEPT_CENTER_FREQUENCY),
+            (PName.EVENT_HANDLER_KEY,     "swept-center-frequency"),
             (PName.BATCH_KEY,             "IQStreamBatch"),
             (PName.WATCH_EXTENSION,       "bin")
     )
@@ -291,10 +295,10 @@ _base_capture_templates: dict[CaptureMode, CaptureTemplate] = {
 def get_base_capture_template(
     capture_mode: CaptureMode
 ) -> CaptureTemplate:
-    """Get a pre-defined capture template, to be configured according to the specific use case.
+    """Get a pre-defined capture template, to be configured according to the specific use-case.
 
     :param capture_mode: The mode used to retrieve the capture template.
-    :return: A `CaptureTemplate` instance for the specified mode.
+    :return: A deep copy of the template for the specified mode.
     :raises KeyError: If no capture template is found for the given mode.
     """
     if capture_mode not in _base_capture_templates:

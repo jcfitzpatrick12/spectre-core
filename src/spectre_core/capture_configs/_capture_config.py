@@ -18,7 +18,7 @@ from ._parameters import (
 
 @dataclass(frozen=True)
 class _CaptureConfigKey:
-    """Defined JSON keys for capture configuration files.
+    """Defined JSON keys for capture configs.
     
     :ivar RECEIVER_NAME: The name of the receiver used for capture.
     :ivar RECEIVER_MODE: The operating mode for the receiver to be used for capture.
@@ -30,14 +30,14 @@ class _CaptureConfigKey:
 
 
 class CaptureConfig(JsonHandler):
-    """Simple IO interface for a capture configuration file under a particular tag."""
+    """Simple IO interface for a capture configs under a particular tag."""
     def __init__(
         self,
         tag: str
     ) -> None:
         """Initialise an instance of `CaptureConfig`.
 
-        :param tag: The tag identifier for the capture configuration file.
+        :param tag: The tag identifier for the capture config.
         """
         self._validate_tag(tag)
         self._tag = tag
@@ -48,7 +48,7 @@ class CaptureConfig(JsonHandler):
     def tag(
         self
     ) -> str:
-        """The tag identifier for the capture configuration file."""
+        """The tag identifier for the capture config."""
         return self._tag
 
 
@@ -56,15 +56,9 @@ class CaptureConfig(JsonHandler):
         self, 
         tag: str
     ) -> None:
-        """Validate the tag of the capture configuration files.
-        
-        Some substrings are reserved for externally generated batch files.
-        """
+        """Validate the tag of the capture config."""
         if "_" in tag:
             raise InvalidTagError(f"Tags cannot contain an underscore. Received {tag}")
-        if "callisto" in tag:
-            raise InvalidTagError(f"'callisto' cannot be a substring in a capture config tag. "
-                                  f"Received '{tag}'")
     
 
     @property
@@ -72,7 +66,7 @@ class CaptureConfig(JsonHandler):
         self
     ) -> str:
         """The name of the receiver to be used for capture."""
-        d = self.read()
+        d = self.read(cache=True)
         return d[_CaptureConfigKey.RECEIVER_NAME]
     
 
@@ -81,7 +75,7 @@ class CaptureConfig(JsonHandler):
         self
     ) -> str:
         """The operating mode for the receiver to be used for capture."""
-        d = self.read()
+        d = self.read(cache=True)
         return d[_CaptureConfigKey.RECEIVER_MODE]
     
 
@@ -90,7 +84,7 @@ class CaptureConfig(JsonHandler):
         self
     ) -> Parameters:
         """The user-configured parameters provided to the receiver at the time of capture."""
-        d = self.read()
+        d = self.read(cache=True)
         return make_parameters( d[_CaptureConfigKey.PARAMETERS] )
 
 
@@ -129,7 +123,7 @@ class CaptureConfig(JsonHandler):
         parameters: Parameters,
         force: bool = False
     ):
-        """Write the input parameters to a capture configuration file.
+        """Write the input parameters to a capture config.
 
         :param receiver_name: The name of the receiver to be used for capture.
         :param receiver_mode: The operating mode for the receiver to be used for capture.
@@ -141,5 +135,4 @@ class CaptureConfig(JsonHandler):
             _CaptureConfigKey.RECEIVER_NAME: receiver_name,
             _CaptureConfigKey.PARAMETERS   : parameters.to_dict()
         }
-        self.save(d,
-                  force=force)
+        self.save(d, force=force)

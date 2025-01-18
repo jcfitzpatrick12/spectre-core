@@ -10,13 +10,7 @@ from typing import TypeVar, Optional, Any, Generic
 VT = TypeVar('VT')
 
 class BasePConstraint(ABC, Generic[VT]):
-    """An abstract base class for an arbitary parameter constraint.
-    
-    Subclasses must implement the following:
-    
-    :method constrain: Defines how the value of a parameter 
-    is to be constrainted.
-    """
+    """An abstract base class for an arbitary parameter constraint."""
     @abstractmethod
     def constrain(
         self, 
@@ -28,7 +22,7 @@ class BasePConstraint(ABC, Generic[VT]):
         :param value: The value to be constrained.
         """
         
-
+        
     def __format__(
         self, 
         format_spec: str = ""
@@ -87,7 +81,6 @@ class Bound(BasePConstraint[float | int]):
 OT = TypeVar('OT')
 class OneOf(BasePConstraint[OT]):
     """Constrain a parameter value to be one of a pre-defined list of options."""
-
     def __init__(
         self, 
         options: Optional[list[OT]] = None
