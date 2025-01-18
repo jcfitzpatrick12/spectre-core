@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Real-time, extensible post-processing of SDR data."""
+"""Real-time, extensible post-processing of SDR data into spectrograms."""
 
 from .plugins._fixed_center_frequency import FixedEventHandler
 from .plugins._swept_center_frequency import SweptEventHandler
