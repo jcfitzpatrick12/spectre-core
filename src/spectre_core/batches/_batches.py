@@ -7,13 +7,9 @@ from typing import Optional, TypeVar, Type, Generic, Iterator
 from collections import OrderedDict
 from datetime import datetime
 
-from spectre_core.exceptions import SpectrogramNotFoundError
 from spectre_core.config import TimeFormat
 from spectre_core.spectrograms import Spectrogram, time_chop, join_spectrograms
 from spectre_core.config import get_batches_dir_path
-from spectre_core.exceptions import (
-    BatchNotFoundError
-)
 from ._base import BaseBatch
 
 T = TypeVar('T', bound=BaseBatch)
@@ -175,7 +171,7 @@ class Batches(Generic[T]):
         try:
             return self._batch_map[start_time]
         except KeyError:
-            raise BatchNotFoundError(f"Batch with start time {start_time} could not be found within {self.batches_dir_path}")
+            raise FileNotFoundError(f"Batch with start time {start_time} could not be found within {self.batches_dir_path}")
 
 
     def _get_from_index(
@@ -188,7 +184,7 @@ class Batches(Generic[T]):
         `Batch` with respect to the start time.
         """
         if self.num_batches == 0:
-            raise BatchNotFoundError("No batches are available")
+            raise FileNotFoundError("No batches are available")
         elif index > self.num_batches:
             raise IndexError(f"Index '{index}' is greater than the number of batches '{self.num_batches}'")
         return self.batch_list[index]
@@ -220,7 +216,7 @@ class Batches(Generic[T]):
 
         :param start_time: The start time of the range (inclusive).
         :param end_time: The end time of the range (inclusive).
-        :raises SpectrogramNotFoundError: If no spectrogram data is available within the specified time range.
+        :raises FileNotFoundError: If no spectrogram data is available within the specified time range.
         :return: A spectrogram created by stitching together data from all matching batches.
         """
         # Convert input strings to datetime objects
@@ -244,4 +240,4 @@ class Batches(Generic[T]):
         if spectrograms:
             return join_spectrograms(spectrograms)
         else:
-            raise SpectrogramNotFoundError("No spectrogram data found for the given time range")
+            raise FileNotFoundError("No spectrogram data found for the given time range")
