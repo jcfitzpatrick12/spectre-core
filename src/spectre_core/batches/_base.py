@@ -21,9 +21,8 @@ class BatchFile(BaseFileHandler[T]):
 
         `<start time>_<tag>.<extension>`
 
-    Here, `<start time>_<tag>` is referred to as the batch name. Files with the same batch name 
-    belong to the same batch. Fully implement this subclass as needed based on `BaseFileHandler` 
-    requirements.
+    The substring `<start time>_<tag>` is referred to as the batch name. Files with the same batch name 
+    belong to the same batch.
     """
     def __init__(
         self, 
@@ -76,13 +75,7 @@ class BaseBatch(ABC):
     Subclasses of `BaseBatch` define the expected data for each file extension and 
     provide an API for accessing their contents using `BatchFile` subclasses.
 
-    Subclasses must implement the following:
-    
-    :method spectrogram_file: A property that returns the `BatchFile` instance
-    containing spectrogram data. All batches in SPECTRE must include a file containing
-    spectrogram data.
-
-    Additionally, you should expose `BatchFile` instances directly as attributes, which
+    Subclasses should expose `BatchFile` instances directly as attributes, which
     simplifies static typing.
     """
     def __init__(
@@ -148,7 +141,7 @@ class BaseBatch(ABC):
         self
     ) -> str:
         """Return the base file name shared by all files in the batch, 
-        composed of the start time and tag identifier."""
+        composed of the start time and the batch tag."""
         return f"{self._start_time}_{self._tag}"
     
 

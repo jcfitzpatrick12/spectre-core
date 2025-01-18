@@ -11,13 +11,9 @@ T = TypeVar('T')
 
 class BaseFileHandler(ABC, Generic[T]):
     """
-    Base class for handling file operations with type safety.
+    Base class for handling file operations.
 
-    Subclasses must implement the following:
-    
-    :method _read: Defines how to read the file's contents. 
-    
-    Additionally, when subclassing, specify the return type of `_read` 
+    When subclassing, specify the return type of `_read` 
     using `Generic[T]`. 
 
     Example:
@@ -121,8 +117,7 @@ class BaseFileHandler(ABC, Generic[T]):
         """Read the file contents.
         
         :param cache: If False, bypasses the cache and reads the file directly on each `read` call, defaults to True
-        :return: The file contents. If `cache` is False, always reads directly from the file. 
-        Otherwise, uses the cache if available, or reads and caches the contents.
+        :return: The file contents.
         """
         # if the user has specified to ignore the cache, simply read the file.
         if not cache:
@@ -166,7 +161,7 @@ class BaseFileHandler(ABC, Generic[T]):
 
 
 class JsonHandler(BaseFileHandler[dict[str, Any]]):
-    """File handler for JSON formatted files, with `_read` implemented.
+    """File handler for JSON formatted files.
     
     We assume that the files are of the form
     {
@@ -179,13 +174,11 @@ class JsonHandler(BaseFileHandler[dict[str, Any]]):
         self, 
         parent_dir_path: str, 
         base_file_name: str,
-        extension: str = "json",
-        **kwargs
+        extension: str = "json"
     ) -> None:
         super().__init__(parent_dir_path, 
                          base_file_name, 
-                         extension,
-                         **kwargs)
+                         extension)
     
     
     def _read(
@@ -221,20 +214,18 @@ class JsonHandler(BaseFileHandler[dict[str, Any]]):
     
 
 class TextHandler(BaseFileHandler[str]):
-    """File handler for text formatted files, with `_read` implemented."""
+    """File handler for text formatted files."""
     def __init__(
         self, 
         parent_dir_path: str,
         base_file_name: str, 
-        extension: str = "txt",
-        **kwargs
+        extension: str = "txt"
     ) -> None:
         super().__init__(parent_dir_path,
                          base_file_name,
-                         extension, 
-                         **kwargs)
+                         extension)
     
-
+    
     def _read(
         self
     ) -> str:

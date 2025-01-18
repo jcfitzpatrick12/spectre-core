@@ -35,7 +35,7 @@ class _BatchExtension:
     
     
 class _BinFile(BatchFile[npt.NDArray[np.complex64]]):
-    """Stores complex IQ samples in the binary format, as produced by the  `gr-spectre` 
+    """Stores complex IQ samples in the binary format, as produced by the `gr-spectre` 
     OOT module block `batched_file_sink`.
     """
     def __init__(
@@ -67,8 +67,10 @@ class IQMetadata:
     """Represents metadata for IQ samples produced by the `gr-spectre` OOT module block `batched_file_sink`.
 
     :ivar millisecond_correction: The millisecond component of the batch start time.
-    :ivar center_frequencies: Center frequencies for each IQ sample, if the stream was frequency tagged. None otherwise.
-    :ivar num_samples: Number of samples collected at each center frequency, if frequency tagging is used. None otherwise.
+    :ivar center_frequencies: Center frequencies for each IQ sample, if the stream was frequency tagged. 
+    None otherwise.
+    :ivar num_samples: Number of samples collected at each center frequency, if the stream was frequency 
+    tagged. None otherwise.
     """
     millisecond_correction: int
     center_frequencies: Optional[npt.NDArray[np.float32]] = None
@@ -227,7 +229,7 @@ class _FitsFile(BatchFile[Spectrogram]):
             times                      = self._get_times(bintable_hdu)
             frequencies                = self._get_frequencies(bintable_hdu)
             
-        # bunit is interpreted as a SpectrumUnit
+        # bunit is interpreted as a SpectrumUnit.
         spectrum_unit = SpectrumUnit(bunit)
         return Spectrogram(dynamic_spectra, 
                            times, 

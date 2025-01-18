@@ -14,8 +14,8 @@ from ._base import BaseBatch
 
 T = TypeVar('T', bound=BaseBatch)
 class Batches(Generic[T]):
-    """Managed collection of `Batch` instances for a given tag. Provides a simple
-    interface for read operations on batched data files."""
+    """A managed collection of `Batch` instances for a given tag. Provides a simple
+    interface for read operations on groups of batch data files."""
     def __init__(
         self, 
         tag: str,
