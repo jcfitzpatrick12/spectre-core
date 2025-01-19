@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""A simple wrapper for multi-processing."""
+"""Manage `spectre` jobs and workers."""
 
 from ._jobs import capture, post_process, session
 from ._workers import (
