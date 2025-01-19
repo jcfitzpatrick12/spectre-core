@@ -60,8 +60,8 @@ class _AnalyticalFactory:
     ) -> None:
         """Initialises an instance of the `_AnalyticalFactory` class."""
         self._builders: dict[str, Callable[[int, CaptureConfig], Spectrogram]] = {
-            "cosine-signal-1" : self._cosine_signal_1,
-            "tagged-staircase": self._tagged_staircase
+            "cosine_signal_1" : self._cosine_signal_1,
+            "tagged_staircase": self._tagged_staircase
         }
 
 

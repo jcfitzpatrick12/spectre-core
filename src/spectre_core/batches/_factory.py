@@ -52,7 +52,7 @@ def get_batch_cls(
 def get_batch_cls_from_tag(
     tag: str
 ) -> Type[BaseBatch]:
-    # if the tag is reserved (i.e., corresponds to third party spectrogram data)
+    # if the tag is reserved (i.e., corresponds to third-party spectrogram data)
     # directly fetch the right class.
     if "callisto" in tag:
         return get_batch_cls(BatchKey.CALLISTO)
