@@ -34,7 +34,7 @@ class Log(TextHandler):
 
         dt = datetime.strptime(start_time, TimeFormat.DATETIME)
         parent_path = get_logs_dir_path(dt.year, dt.month, dt.day)
-        base_file_name = f"{start_time}_{pid}_{process_type}"
+        base_file_name = f"{start_time}_{pid}_{process_type.value}"
 
         super().__init__(parent_path, base_file_name, "log")
     

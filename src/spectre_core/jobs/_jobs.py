@@ -15,6 +15,10 @@ from ._worker import as_worker
 def capture(
     tag: str,
 ) -> None:
+    """Start capturing data.
+
+    :param tag: The capture config tag.
+    """
     _LOGGER.info((f"Reading capture config with tag '{tag}'"))
 
     # load the receiver and mode from the capture config file
@@ -34,5 +38,10 @@ def capture(
 def post_process(
     tag: str,
 ) -> None:
+    """Start post processing data.
+
+    :param tag: The capture config tag.
+    """
     _LOGGER.info(f"Starting post processor with tag '{tag}'")
     start_post_processor(tag)
+

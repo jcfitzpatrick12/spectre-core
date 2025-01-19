@@ -27,7 +27,7 @@ class Worker:
         """
         self._name = name
         self._target_func = target_func
-        self._process = multiprocessing.Process(target_func=self._target_func,
+        self._process = multiprocessing.Process(target=self._target_func,
                                                 name=self._name,
                                                 daemon=True)
 
