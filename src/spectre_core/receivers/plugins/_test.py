@@ -148,8 +148,8 @@ class Test(BaseReceiver):
             (PName.WINDOW_HOP,            512),
             (PName.WINDOW_SIZE,           512),
             (PName.WINDOW_TYPE,           "boxcar"),
-            (PName.EVENT_HANDLER_KEY,     CaptureMode.SWEPT_CENTER_FREQUENCY),
-            (PName.BATCH_KEY,             CaptureMode.SWEPT_CENTER_FREQUENCY),
+            (PName.EVENT_HANDLER_KEY,     "swept_center_frequency"),
+            (PName.BATCH_KEY,             "iq_stream"),
             (PName.WATCH_EXTENSION,       "bin")
         )
 

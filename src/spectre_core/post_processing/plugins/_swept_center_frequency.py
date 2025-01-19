@@ -333,9 +333,12 @@ def _build_spectrogram(
     previous_batch: Optional[IQStreamBatch] = None
 ) -> Spectrogram:
     """Generate a spectrogram using `IQStreamBatch` IQ samples."""
-    # cache the results for later
+    # read the batch files.
     iq_data     = batch.bin_file.read()
     iq_metadata = batch.hdr_file.read()
+    
+    # extract the center frequencies and num samples
+    center_frequencies, num_samples = iq_metadata.center_frequencies, iq_metadata.num_samples
     
     # correct the batch start datetime with the millisecond correction stored in the detached header
     spectrogram_start_datetime = batch.start_datetime + timedelta(milliseconds=iq_metadata.millisecond_correction)
