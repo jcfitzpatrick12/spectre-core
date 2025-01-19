@@ -145,4 +145,4 @@ class _swept_center_frequency(spectre_top_block):
 @dataclass(frozen=True)
 class CaptureMethod:
     fixed_center_frequency  = partial(capture, top_block_cls=_fixed_center_frequency)
-    swept_center_frequency  = partial(capture, top_block_cls=_swept_center_frequency)
+    swept_center_frequency  = partial(capture, top_block_cls=_swept_center_frequency, max_noutput_items=1024)
