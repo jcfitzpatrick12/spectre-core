@@ -340,6 +340,10 @@ def _build_spectrogram(
     # extract the center frequencies and num samples
     center_frequencies, num_samples = iq_metadata.center_frequencies, iq_metadata.num_samples
     
+    if center_frequencies is None or num_samples is None:
+        raise ValueError(f"An unexpected error has occured, expected frequency tag metadata "
+                         f"in the detached header.")
+    
     # correct the batch start datetime with the millisecond correction stored in the detached header
     spectrogram_start_datetime = batch.start_datetime + timedelta(milliseconds=iq_metadata.millisecond_correction)
 
