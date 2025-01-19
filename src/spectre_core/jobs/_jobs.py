@@ -6,12 +6,19 @@ from logging import getLogger
 _LOGGER = getLogger(__name__)
 
 from spectre_core.capture_configs import CaptureConfig
+from spectre_core.logging import log_call
 from spectre_core.receivers import get_receiver, ReceiverName
 from spectre_core.post_processing import start_post_processor
-from ._worker import as_worker
+from ._worker import as_worker, Worker
+
+"""A job is a collection of one or more multiprocessing processes being executed by workers.
+
+Each function in this module should spawn some workers to execute processes, and return the workers
+managing them."""
 
 
 @as_worker("capture")
+@log_call
 def capture(
     tag: str,
 ) -> None:
@@ -35,6 +42,7 @@ def capture(
 
 
 @as_worker("post_processing")
+@log_call
 def post_process(
     tag: str,
 ) -> None:
@@ -44,4 +52,21 @@ def post_process(
     """
     _LOGGER.info(f"Starting post processor with tag '{tag}'")
     start_post_processor(tag)
+
+    
+@log_call
+def session(
+    tag: str,
+) -> list[Worker]:
+    """Start a session.
+    
+    When the function is called, two workers are started. One which captures the 
+    data, and one which post processes that data.
+
+    :param tag: The capture config tag.
+    :return: The workers managing the capture and postprocessing respectively.
+    """
+    post_process_worker = post_process(tag)
+    capture_worker      = capture(tag)
+    return [capture_worker, post_process_worker]
 

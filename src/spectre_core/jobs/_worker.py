@@ -7,13 +7,30 @@ _LOGGER = getLogger(__name__)
 
 from functools import wraps
 import time
-from typing import Callable
+from typing import Callable, TypeVar
 import multiprocessing
 
 from spectre_core.logging import configure_root_logger, ProcessType
 
+
+def make_daemon_process(
+    name: str, 
+    target_func: Callable[..., None]
+) -> multiprocessing.Process:
+    """
+    Creates and returns a daemon `multiprocessing.Process` instance.
+
+    :param name: The name to assign to the process.
+    :param target_func: The function to execute in the process.
+    :return: A `multiprocessing.Process` instance configured as a daemon.
+    """
+    return multiprocessing.Process(target=target_func,
+                                   name=name,
+                                   daemon=True)
+
+
 class Worker:
-    """A lightweight wrapper for a `multiprocessing.Process`."""
+    """A lightweight wrapper for a `multiprocessing.Process` daemon."""
     def __init__(
         self,
         name: str,
@@ -27,9 +44,7 @@ class Worker:
         """
         self._name = name
         self._target_func = target_func
-        self._process = multiprocessing.Process(target=self._target_func,
-                                                name=self._name,
-                                                daemon=True)
+        self._process = make_daemon_process(name, target_func)
 
 
     @property
@@ -53,7 +68,11 @@ class Worker:
         """
         return self._process
     
-        
+    def make_process(
+        self
+    ) -> None:
+        return 
+    
     def start(
         self
     ) -> None:
@@ -79,6 +98,8 @@ class Worker:
             self._process.join()
         # a moment of respite
         time.sleep(1)
+        # make a new process, as we can't start the same process again.
+        self._process = make_daemon_process(self._name, self._target_func)
         self.start()
 
 
@@ -91,7 +112,7 @@ def start_worker(
     
     The `target_func` must not take any arguments. If arguments need to be passed 
     to `target_func`, use `functools.partial` to preconfigure the callable with 
-    the required arguments.
+    the required arguments. Or, alternatively use the `as_worker` decorator.
 
     :param name: The name assigned to the worker.
     :param target_func: A callable with no arguments that the worker will execute.
@@ -183,19 +204,24 @@ def monitor_workers(
         _LOGGER.info("Keyboard interrupt detected. Terminating workers...")
         terminate_workers(workers)
 
-    
+
+T = TypeVar("T", bound=Callable[..., None])
 def as_worker(
     name: str
-) -> Callable[..., Worker]:
+) -> Callable[[T], Callable[..., Worker]]:
     """
     A decorator to run a function in a Worker process.
+    
+    Implicitly configures the root logger for the process to write
+    logs to file.
 
     :param name: The name of the worker process.
-    :return: The Worker instance managing the process.
+    :return: A decorator that transforms a function into one managed by a Worker.
     """
     def decorator(
-        func: Callable[..., None]
+        func: T
     ) -> Callable[..., Worker]:
+        
         @wraps(func)
         def wrapper(*args, **kwargs) -> Worker:
             def target_func():
@@ -203,4 +229,5 @@ def as_worker(
                 func(*args, **kwargs)
             return start_worker(name, target_func)
         return wrapper
+    
     return decorator

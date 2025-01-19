@@ -4,12 +4,12 @@
 
 """A simple wrapper for multi-processing."""
 
-from ._jobs import capture, post_process
+from ._jobs import capture, post_process, session
 from ._worker import (
     Worker, monitor_workers, terminate_workers, as_worker, calculate_total_runtime
 )
 
 __all__ = [
     "capture", "post_process", "Worker", "monitor_workers", "terminate_workers", "as_worker",
-    "calculate_total_runtime"
+    "calculate_total_runtime", "session"
 ]
