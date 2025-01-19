@@ -15,7 +15,7 @@ from spectre_core.logging import configure_root_logger, ProcessType
 
 def make_daemon_process(
     name: str, 
-    target_func: Callable[..., None]
+    target_func: Callable[[], None]
 ) -> multiprocessing.Process:
     """
     Creates and returns a daemon `multiprocessing.Process` instance.
@@ -34,13 +34,12 @@ class Worker:
     def __init__(
         self,
         name: str,
-        target_func: Callable[..., None]
+        target_func: Callable[[], None]
     ) -> None:
         """Initialise a `Worker` instance.
 
         :param name: The name assigned to the process.
-        :param target_func: The callable to be executed by the worker process. This must be 
-        a function with no arguments, that returns nothing.
+        :param target_func: The callable to be executed by the worker process.
         """
         self._name = name
         self._target_func = target_func
@@ -67,11 +66,7 @@ class Worker:
         :return: The wrapped `multiprocessing.Process` instance.
         """
         return self._process
-    
-    def make_process(
-        self
-    ) -> None:
-        return 
+
     
     def start(
         self
@@ -89,7 +84,7 @@ class Worker:
         """Restart the worker process.
 
         Terminates the existing process if it is alive and then starts a new process
-        after a brief pause.
+        after a brief pause. 
         """
         _LOGGER.info(f"Restarting {self.name} worker")
         if self._process.is_alive():

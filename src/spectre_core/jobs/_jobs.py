@@ -11,10 +11,14 @@ from spectre_core.receivers import get_receiver, ReceiverName
 from spectre_core.post_processing import start_post_processor
 from ._worker import as_worker, Worker
 
+
 """A job is a collection of one or more multiprocessing processes being executed by workers.
 
 Each function in this module should spawn some workers to execute processes, and return the workers
-managing them."""
+managing them.
+
+
+"""
 
 
 @as_worker("capture")
@@ -22,7 +26,7 @@ managing them."""
 def capture(
     tag: str,
 ) -> None:
-    """Start capturing data.
+    """Start capturing data from an SDR.
 
     :param tag: The capture config tag.
     """
@@ -46,7 +50,7 @@ def capture(
 def post_process(
     tag: str,
 ) -> None:
-    """Start post processing data.
+    """Start post processing SDR data into spectrograms.
 
     :param tag: The capture config tag.
     """
@@ -61,7 +65,7 @@ def session(
     """Start a session.
     
     When the function is called, two workers are started. One which captures the 
-    data, and one which post processes that data.
+    data from the SDR, and one which post processes that data into spectrograms.
 
     :param tag: The capture config tag.
     :return: The workers managing the capture and postprocessing respectively.
