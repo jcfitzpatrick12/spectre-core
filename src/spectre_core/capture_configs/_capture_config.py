@@ -56,9 +56,15 @@ class CaptureConfig(JsonHandler):
         self, 
         tag: str
     ) -> None:
-        """Validate the tag of the capture config."""
+        """Validate the tag of the capture config.
+        
+        Some substrings are reserved for third-party spectrogram data.
+        """
         if "_" in tag:
             raise InvalidTagError(f"Tags cannot contain an underscore. Received {tag}")
+        
+        if "callisto" in tag:
+            raise ValueError(f"The substring `callisto` is not allowed in a capture config tag.")
     
 
     @property

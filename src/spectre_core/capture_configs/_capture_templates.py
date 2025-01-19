@@ -236,8 +236,8 @@ def _make_fixed_frequency_capture_template(
         PName.WINDOW_TYPE,
     )
     capture_template.set_defaults(
-            (PName.EVENT_HANDLER_KEY,     "fixed-center-frequency"),
-            (PName.BATCH_KEY,             "IQStreamBatch"),
+            (PName.EVENT_HANDLER_KEY,     "fixed_center_frequency"),
+            (PName.BATCH_KEY,             "iq_stream"),
             (PName.WATCH_EXTENSION,       "bin")
     )
     capture_template.enforce_defaults(
@@ -274,8 +274,8 @@ def _make_swept_frequency_capture_template(
         PName.WINDOW_SIZE,
         PName.WINDOW_TYPE)
     capture_template.set_defaults(
-            (PName.EVENT_HANDLER_KEY,     "swept-center-frequency"),
-            (PName.BATCH_KEY,             "IQStreamBatch"),
+            (PName.EVENT_HANDLER_KEY,     "swept_center_frequency"),
+            (PName.BATCH_KEY,             "iq_stream"),
             (PName.WATCH_EXTENSION,       "bin")
     )
     capture_template.enforce_defaults(
