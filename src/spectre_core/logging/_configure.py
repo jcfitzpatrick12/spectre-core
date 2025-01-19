@@ -4,6 +4,7 @@
 
 import os
 import logging
+from typing import Tuple
 from datetime import datetime
 
 from spectre_core.config import TimeFormat
@@ -52,3 +53,15 @@ def configure_root_logger(
     logger.addHandler(file_handler)
 
     return log.file_path
+
+
+def get_root_logger_state(
+) -> Tuple[bool, int]:
+    """Get the state of the root logger.
+
+    :return: Whether the root logger has any handlers, and the level of the root logger.
+    """
+    root_logger = logging.getLogger()
+    if root_logger.handlers:
+        return True, root_logger.level
+    return False, logging.NOTSET
