@@ -58,7 +58,6 @@ class BatchFile(BaseFileHandler[T]):
         return datetime.strptime(self.start_time, TimeFormat.DATETIME)
 
     
-
     @property
     def tag(
         self
@@ -69,7 +68,7 @@ class BatchFile(BaseFileHandler[T]):
  
 class BaseBatch(ABC):
     """
-    Base class representing a group of data files over a common time interval.
+    An abstract base class representing a group of data files over a common time interval.
 
     All files in a batch share a base file name and differ only by their extension.
     Subclasses of `BaseBatch` define the expected data for each file extension and 
@@ -99,6 +98,14 @@ class BaseBatch(ABC):
         # internal register of batch files
         self._batch_files: dict[str, BatchFile] = {}
     
+    
+    @property
+    @abstractmethod
+    def spectrogram_file(
+        self
+    ) -> BatchFile:
+        """The batch file which contains spectrogram data."""
+        
     
     @property
     def start_time(
@@ -220,20 +227,6 @@ class BaseBatch(ABC):
             return False
         
         
-class SpectrogramBatch(BaseBatch):
-    """Abstract base class for `spectre` spectrogram batches.
-    
-    All `SpectrogramBatch` subclasses must contain exactly one batch file
-    which contains spectrogram data.
-    """
-    @property
-    @abstractmethod
-    def spectrogram_file(
-        self
-    ) -> BatchFile:
-        """The batch file which contains spectrogram data."""
-
-
     def read_spectrogram(
         self
     ) -> Spectrogram:
@@ -242,3 +235,4 @@ class SpectrogramBatch(BaseBatch):
         :return: The spectrogram stored by the batch `spectrogram_file`.
         """
         return self.spectrogram_file.read()
+    

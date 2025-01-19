@@ -10,14 +10,6 @@ from ._register import batch_map
 from .plugins._batch_keys import BatchKey
 from .plugins._callisto import CallistoBatch
 from .plugins._iq_stream import IQStreamBatch
-from .plugins._null_batch import NullBatch
-
-
-@overload
-def get_batch_cls(
-    batch_key: Literal[BatchKey.NULL_BATCH],
-) -> Type[NullBatch]:
-    ...
     
 
 @overload
@@ -31,6 +23,11 @@ def get_batch_cls(
 def get_batch_cls(
     batch_key: Literal[BatchKey.IQ_STREAM],
 ) -> Type[IQStreamBatch]:
+    ...
+    
+    
+@overload
+def get_batch_cls(batch_key: BatchKey) -> Type[BaseBatch]:
     ...
 
 

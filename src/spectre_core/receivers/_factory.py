@@ -37,6 +37,14 @@ def get_receiver(
     ...
 
 
+@overload
+def get_receiver(
+    receiver_name: ReceiverName,
+    mode: Optional[str] = None
+) -> BaseReceiver:
+    ...
+
+
 def get_receiver(
     receiver_name: ReceiverName, 
     mode: Optional[str] = None

@@ -10,14 +10,15 @@ from datetime import datetime
 from spectre_core.config import TimeFormat
 from spectre_core.spectrograms import Spectrogram, time_chop, join_spectrograms
 from spectre_core.config import get_batches_dir_path
-from ._base import BaseBatch, SpectrogramBatch
+from spectre_core.exceptions import (
+    BatchNotFoundError
+)
+from ._base import BaseBatch
 
-# Batch Type
 T = TypeVar('T', bound=BaseBatch)
-
 class Batches(Generic[T]):
-    """A managed collection of `Batch` instances for a given tag. Provides a simple
-    interface for read operations on groups of batch data files."""
+    """Managed collection of `Batch` instances for a given tag. Provides a simple
+    interface for read operations on batched data files."""
     def __init__(
         self, 
         tag: str,
@@ -29,8 +30,7 @@ class Batches(Generic[T]):
         """Initialise a `Batches` instance.
 
         :param tag: The batch name tag.
-        :param batch_cls: The `Batch` class used to read data files tagged by `tag`, defaults
-        to `BaseBatch`.
+        :param batch_cls: The `Batch` class used to read data files tagged by `tag`.
         :param year: Filter batch files under a numeric year. Defaults to None.
         :param month: Filter batch files under a numeric month. Defaults to None.
         :param day: Filter batch files under a numeric day. Defaults to None.
@@ -174,7 +174,7 @@ class Batches(Generic[T]):
         try:
             return self._batch_map[start_time]
         except KeyError:
-            raise FileNotFoundError(f"Batch with start time {start_time} could not be found within {self.batches_dir_path}")
+            raise BatchNotFoundError(f"Batch with start time {start_time} could not be found within {self.batches_dir_path}")
 
 
     def _get_from_index(
@@ -187,7 +187,7 @@ class Batches(Generic[T]):
         `Batch` with respect to the start time.
         """
         if self.num_batches == 0:
-            raise FileNotFoundError("No batches are available")
+            raise BatchNotFoundError("No batches are available")
         elif index > self.num_batches:
             raise IndexError(f"Index '{index}' is greater than the number of batches '{self.num_batches}'")
         return self.batch_list[index]
@@ -208,45 +208,40 @@ class Batches(Generic[T]):
         elif isinstance(subscript, int):
             return self._get_from_index(subscript)
 
-# Spectrogram batch type
-SB = TypeVar('SB', bound=SpectrogramBatch)
-def get_spectrogram_from_range(
-    tag,
-    spectrogram_batch_cls: Type[SB],
-    start_time: str, 
-    end_time: str
-) -> Spectrogram:
-    """
-    Retrieve a spectrogram spanning the specified time range. 
 
-    :param start_time: The start time of the range (inclusive).
-    :param end_time: The end time of the range (inclusive).
-    :raises FileNotFoundError: If no spectrogram data is available within the specified time range.
-    :return: A spectrogram created by stitching together data from all matching batches.
-    """
-    
-    # Convert input strings to datetime objects
-    start_datetime = datetime.strptime(start_time, TimeFormat.DATETIME)
-    end_datetime   = datetime.strptime(end_time,   TimeFormat.DATETIME)
-    
-    # create an instance of batches
-    batches = Batches(tag, spectrogram_batch_cls)
+    def get_spectrogram_from_range(
+        self,
+        start_time: str, 
+        end_time: str
+    ) -> Spectrogram:
+        """
+        Retrieve a spectrogram spanning the specified time range. 
 
-    spectrograms = []
-    for batch in batches:
-        # skip batches without spectrogram data
-        if not batch.spectrogram_file.exists:
-            continue
+        :param start_time: The start time of the range (inclusive).
+        :param end_time: The end time of the range (inclusive).
+        :raises FileNotFoundError: If no spectrogram data is available within the specified time range.
+        :return: A spectrogram created by stitching together data from all matching batches.
+        """
+        # Convert input strings to datetime objects
+        start_datetime = datetime.strptime(start_time, TimeFormat.DATETIME)
+        end_datetime   = datetime.strptime(end_time,   TimeFormat.DATETIME)
 
-        spectrogram = batch.read_spectrogram()
-        lower_bound = spectrogram.datetimes[0]
-        upper_bound = spectrogram.datetimes[-1]
+        spectrograms = []
+        for batch in self:
+            # skip batches without spectrogram data
+            if not batch.spectrogram_file.exists:
+                continue
 
-        # Check if the batch overlaps with the input time range
-        if start_datetime <= upper_bound and lower_bound <= end_datetime:
-            spectrograms.append( time_chop(spectrogram, start_time, end_time) )
+            spectrogram = batch.read_spectrogram()
+            lower_bound = spectrogram.datetimes[0]
+            upper_bound = spectrogram.datetimes[-1]
 
-    if spectrograms:
-        return join_spectrograms(spectrograms)
-    else:
-        raise FileNotFoundError("No spectrogram data found for the given time range")
+            # Check if the batch overlaps with the input time range
+            if start_datetime <= upper_bound and lower_bound <= end_datetime:
+                spectrograms.append( time_chop(spectrogram, start_time, end_time) )
+
+        if spectrograms:
+            return join_spectrograms(spectrograms)
+        else:
+            raise FileNotFoundError(f"No spectrogram data found for the time range "
+                                    f"{start_time} to {end_time}.")
