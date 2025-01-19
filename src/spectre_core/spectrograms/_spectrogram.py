@@ -262,7 +262,7 @@ class Spectrogram:
         Returns a list of datetime objects, calculated by adding the elapsed 
         times in the times array to the start_datetime.
         """
-        return self.start_datetime + self._times.astype('timedelta64[s]')
+        return self.start_datetime + (1e6*self._times).astype('timedelta64[us]')
     
 
     @property

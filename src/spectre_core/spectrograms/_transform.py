@@ -168,7 +168,7 @@ def time_average(
 
     # Update start datetime and adjust times to start at t=0
     transformed_start_datetime = (
-        spectrogram.datetimes[0] + transformed_times[0].astype("timedelta64[s]")
+        spectrogram.datetimes[0] + (transformed_times[0]*1e6).astype("timedelta64[us]")
     )
     transformed_times -= transformed_times[0]
 
@@ -254,7 +254,7 @@ def join_spectrograms(
 
     # Concatenate all dynamic spectra directly along the time axis
     transformed_dynamic_spectra = np.hstack([spectrogram.dynamic_spectra for spectrogram in spectrograms])
-
+    
     transformed_times = time_elapsed( np.concatenate([s.datetimes for s in spectrograms]) )
 
     return Spectrogram(transformed_dynamic_spectra, 

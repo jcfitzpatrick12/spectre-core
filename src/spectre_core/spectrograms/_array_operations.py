@@ -143,7 +143,6 @@ def compute_resolution(
     
     # Calculate differences between consecutive elements.
     resolutions = np.diff(array)
-
     return float( np.nanmedian(resolutions) )
 
 
@@ -187,5 +186,5 @@ def time_elapsed(
     datetimes: npt.NDArray[np.datetime64]
 ) -> npt.NDArray[np.float32]:
     """Convert an array of datetimes to seconds elapsed."""
-    return (datetimes - datetimes[0]).astype('timedelta64[s]').astype(np.float32)
+    return (datetimes - datetimes[0]).astype('timedelta64[us]').astype(np.float32)
 
