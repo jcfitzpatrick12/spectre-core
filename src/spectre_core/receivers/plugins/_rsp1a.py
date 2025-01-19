@@ -13,8 +13,8 @@ from .._register import register_receiver
 @dataclass(frozen=True)
 class Mode:
     """An operating mode for the `RSP1A` receiver."""
-    FIXED_CENTER_FREQUENCY  = "fixed-center-frequency"
-    SWEPT_CENTER_FREQUENCY  = "swept-center-frequency"
+    FIXED_CENTER_FREQUENCY  = "fixed_center_frequency"
+    SWEPT_CENTER_FREQUENCY  = "swept_center_frequency"
 
 
 @register_receiver(ReceiverName.RSP1A)

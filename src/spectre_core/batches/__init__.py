@@ -11,11 +11,11 @@ from .plugins._iq_stream import IQStreamBatch, IQMetadata
 from .plugins._callisto import CallistoBatch
 
 from ._base import BaseBatch, BatchFile
-from ._batches import Batches
+from ._batches import Batches, get_spectrogram_from_range
 from ._factory import get_batch_cls
 
 __all__ = [
     "IQStreamBatch", "IQMetadata", "CallistoBatch", "BaseBatch", "BatchFile", 
-    "Batches", "get_batch_cls", "BatchKey"
+    "Batches", "get_batch_cls", "BatchKey", "get_spectrogram_from_range"
 ]
 

@@ -10,9 +10,11 @@ from datetime import datetime
 from spectre_core.config import TimeFormat
 from spectre_core.spectrograms import Spectrogram, time_chop, join_spectrograms
 from spectre_core.config import get_batches_dir_path
-from ._base import BaseBatch
+from ._base import BaseBatch, SpectrogramBatch
 
+# Batch Type
 T = TypeVar('T', bound=BaseBatch)
+
 class Batches(Generic[T]):
     """A managed collection of `Batch` instances for a given tag. Provides a simple
     interface for read operations on groups of batch data files."""
@@ -27,7 +29,8 @@ class Batches(Generic[T]):
         """Initialise a `Batches` instance.
 
         :param tag: The batch name tag.
-        :param batch_cls: The `Batch` class used to read data files tagged by `tag`.
+        :param batch_cls: The `Batch` class used to read data files tagged by `tag`, defaults
+        to `BaseBatch`.
         :param year: Filter batch files under a numeric year. Defaults to None.
         :param month: Filter batch files under a numeric month. Defaults to None.
         :param day: Filter batch files under a numeric day. Defaults to None.
@@ -205,39 +208,45 @@ class Batches(Generic[T]):
         elif isinstance(subscript, int):
             return self._get_from_index(subscript)
 
+# Spectrogram batch type
+SB = TypeVar('SB', bound=SpectrogramBatch)
+def get_spectrogram_from_range(
+    tag,
+    spectrogram_batch_cls: Type[SB],
+    start_time: str, 
+    end_time: str
+) -> Spectrogram:
+    """
+    Retrieve a spectrogram spanning the specified time range. 
 
-    def get_spectrogram_from_range(
-        self,
-        start_time: str, 
-        end_time: str
-    ) -> Spectrogram:
-        """
-        Retrieve a spectrogram spanning the specified time range. 
+    :param start_time: The start time of the range (inclusive).
+    :param end_time: The end time of the range (inclusive).
+    :raises FileNotFoundError: If no spectrogram data is available within the specified time range.
+    :return: A spectrogram created by stitching together data from all matching batches.
+    """
+    
+    # Convert input strings to datetime objects
+    start_datetime = datetime.strptime(start_time, TimeFormat.DATETIME)
+    end_datetime   = datetime.strptime(end_time,   TimeFormat.DATETIME)
+    
+    # create an instance of batches
+    batches = Batches(tag, spectrogram_batch_cls)
 
-        :param start_time: The start time of the range (inclusive).
-        :param end_time: The end time of the range (inclusive).
-        :raises FileNotFoundError: If no spectrogram data is available within the specified time range.
-        :return: A spectrogram created by stitching together data from all matching batches.
-        """
-        # Convert input strings to datetime objects
-        start_datetime = datetime.strptime(start_time, TimeFormat.DATETIME)
-        end_datetime   = datetime.strptime(end_time,   TimeFormat.DATETIME)
+    spectrograms = []
+    for batch in batches:
+        # skip batches without spectrogram data
+        if not batch.spectrogram_file.exists:
+            continue
 
-        spectrograms = []
-        for batch in self:
-            # skip batches without spectrogram data
-            if not batch.spectrogram_file.exists:
-                continue
+        spectrogram = batch.read_spectrogram()
+        lower_bound = spectrogram.datetimes[0]
+        upper_bound = spectrogram.datetimes[-1]
 
-            spectrogram = batch.read_spectrogram()
-            lower_bound = spectrogram.datetimes[0]
-            upper_bound = spectrogram.datetimes[-1]
+        # Check if the batch overlaps with the input time range
+        if start_datetime <= upper_bound and lower_bound <= end_datetime:
+            spectrograms.append( time_chop(spectrogram, start_time, end_time) )
 
-            # Check if the batch overlaps with the input time range
-            if start_datetime <= upper_bound and lower_bound <= end_datetime:
-                spectrograms.append( time_chop(spectrogram, start_time, end_time) )
-
-        if spectrograms:
-            return join_spectrograms(spectrograms)
-        else:
-            raise FileNotFoundError("No spectrogram data found for the given time range")
+    if spectrograms:
+        return join_spectrograms(spectrograms)
+    else:
+        raise FileNotFoundError("No spectrogram data found for the given time range")

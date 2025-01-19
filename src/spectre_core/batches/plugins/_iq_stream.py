@@ -17,7 +17,7 @@ from spectre_core.exceptions import InvalidSweepMetadataError
 from spectre_core.config import TimeFormat
 from spectre_core.spectrograms import Spectrogram, SpectrumUnit
 from ._batch_keys import BatchKey
-from .._base import BaseBatch, BatchFile
+from .._base import SpectrogramBatch, BatchFile
 from .._register import register_batch
 
 
@@ -298,7 +298,7 @@ class _FitsFile(BatchFile[Spectrogram]):
     
  
 @register_batch(BatchKey.IQ_STREAM)
-class IQStreamBatch(BaseBatch):
+class IQStreamBatch(SpectrogramBatch):
     """A batch of data derived from a stream of IQ samples from some receiver.
     
     Supports the following extensions:
@@ -317,11 +317,17 @@ class IQStreamBatch(BaseBatch):
         :param tag: The batch name tag.
         """
         super().__init__(start_time, tag) 
+        self._batch_files = {}
         self._fits_file = _FitsFile(self.parent_dir_path, self.name)
         self._bin_file  = _BinFile (self.parent_dir_path, self.name)
         self._hdr_file  = _HdrFile (self.parent_dir_path, self.name)
+        
+        # add files formally to the batch
+        self.add_file( self.spectrogram_file )
+        self.add_file( self.bin_file )
+        self.add_file( self.hdr_file )
     
-    
+
     @property
     def spectrogram_file(
         self

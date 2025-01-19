@@ -18,5 +18,5 @@ class CaptureMode(Enum):
     :ivar SWEPT_CENTER_FREQUENCY: Indicates data capture where the center frequency is continually sweeping
     in fixed increments.
     """
-    FIXED_CENTER_FREQUENCY = "fixed-center-frequency"
-    SWEPT_CENTER_FREQUENCY = "swept-center-frequency"
+    FIXED_CENTER_FREQUENCY = "fixed_center_frequency"
+    SWEPT_CENTER_FREQUENCY = "swept_center_frequency"

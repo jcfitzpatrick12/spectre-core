@@ -14,9 +14,9 @@ from .._register import register_receiver
 @dataclass
 class Mode:
     """An operating mode for the `RSPduo` receiver."""
-    TUNER_1_FIXED_CENTER_FREQUENCY  = f"tuner-1-fixed-center-frequency"
-    TUNER_2_FIXED_CENTER_FREQUENCY  = f"tuner-2-fixed-center-frequency"
-    TUNER_1_SWEPT_CENTER_FREQUENCY  = f"tuner-1-swept-center-frequency"
+    TUNER_1_FIXED_CENTER_FREQUENCY  = f"tuner_1_fixed_center_frequency"
+    TUNER_2_FIXED_CENTER_FREQUENCY  = f"tuner_2_fixed_center_frequency"
+    TUNER_1_SWEPT_CENTER_FREQUENCY  = f"tuner_1_swept_center_frequency"
 
 
 @register_receiver(ReceiverName.RSPDUO)

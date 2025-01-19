@@ -20,8 +20,8 @@ from .._register import register_receiver
 @dataclass(frozen=True)
 class Mode:
     """An operating mode for the `Test` receiver."""
-    COSINE_SIGNAL_1  = "cosine-signal-1"
-    TAGGED_STAIRCASE = "tagged-staircase"
+    COSINE_SIGNAL_1  = "cosine_signal_1"
+    TAGGED_STAIRCASE = "tagged_staircase"
 
 
 @register_receiver(ReceiverName.TEST)

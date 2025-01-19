@@ -65,18 +65,19 @@ class BatchFile(BaseFileHandler[T]):
     ) -> str:
         """The batch name tag."""
         return self._tag
-         
+   
  
 class BaseBatch(ABC):
     """
-    Abstract base class representing a group of data files over a common time interval.
+    Base class representing a group of data files over a common time interval.
 
     All files in a batch share a base file name and differ only by their extension.
     Subclasses of `BaseBatch` define the expected data for each file extension and 
     provide an API for accessing their contents using `BatchFile` subclasses.
 
     Subclasses should expose `BatchFile` instances directly as attributes, which
-    simplifies static typing.
+    simplifies static typing. Additionally, they should call `add_file` in the constructor
+    to formally register each `BatchFile`.
     """
     def __init__(
         self, 
@@ -94,15 +95,10 @@ class BaseBatch(ABC):
         self._parent_dir_path = get_batches_dir_path(year  = self.start_datetime.year,
                                                      month = self.start_datetime.month,
                                                      day   = self.start_datetime.day)
-            
+        
+        # internal register of batch files
+        self._batch_files: dict[str, BatchFile] = {}
     
-    @property
-    @abstractmethod
-    def spectrogram_file(
-        self
-    ) -> BatchFile:
-        """The batch file which contains spectrogram data."""
- 
     
     @property
     def start_time(
@@ -144,6 +140,99 @@ class BaseBatch(ABC):
         composed of the start time and the batch tag."""
         return f"{self._start_time}_{self._tag}"
     
+    
+    @property
+    def extensions(
+        self
+    ) -> list[str]:
+        """All defined file extensions for the batch."""
+        return list(self._batch_files.keys())
+    
+    
+    @property
+    def batch_files(
+        self
+    ) -> dict[str, BatchFile]:
+        """Map each file extension in the batch to the corresponding batch file instance.
+        
+        Use `add_file` to add a file to the batch.
+        """
+        return self._batch_files
+    
+
+    def add_file(
+        self, 
+        batch_file: BatchFile
+    ) -> None:
+        """Add an instance of a batch file to the batch.
+
+        :param batch_file: The `BatchFile` instance to add to the batch.
+        :raises ValueError: If the `BatchFile` instance does not have a defined file extension.
+        """
+        if batch_file.extension is None:
+            raise ValueError(f"The `BatchFile` must have a defined file extension. "
+                             f"Received '{batch_file.extension}.")
+        self._batch_files[batch_file.extension] = batch_file
+    
+
+    def get_file(
+        self, 
+        extension: str
+    ) -> BatchFile:
+        """Get a batch file instance from the batch, according to the file extension.
+
+        :param extension: The file extension of the batch file.
+        :raises NotImplementedError: If the extension is undefined for the batch.
+        :return: The batch file instance registered under the input file extension.
+        """
+        try:
+            return self._batch_files[extension]
+        except KeyError:
+            raise NotImplementedError(f"A batch file with extension '{extension}' is not implemented for this batch.")
+
+
+    def delete_file(
+        self, 
+        extension: str
+    ) -> None:
+        """Delete a file from the batch, according to the file extension.
+
+        :param extension: The file extension of the batch file.
+        :raises FileNotFoundError: If the batch file does not exist in the file system.
+        """
+        batch_file = self.get_file(extension)
+        batch_file.delete()
+
+
+    def has_file(
+        self, 
+        extension: str
+    ) -> bool:
+        """Determine the existance of a batch file in the file system.
+
+        :param extension: The file extension of the batch file.
+        :return: True if the batch file exists in the file system, False otherwise.
+        """
+        try:
+            batch_file = self.get_file(extension)
+            return batch_file.exists
+        except FileNotFoundError:
+            return False
+        
+        
+class SpectrogramBatch(BaseBatch):
+    """Abstract base class for `spectre` spectrogram batches.
+    
+    All `SpectrogramBatch` subclasses must contain exactly one batch file
+    which contains spectrogram data.
+    """
+    @property
+    @abstractmethod
+    def spectrogram_file(
+        self
+    ) -> BatchFile:
+        """The batch file which contains spectrogram data."""
+
 
     def read_spectrogram(
         self
