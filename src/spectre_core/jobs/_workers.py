@@ -7,7 +7,7 @@ _LOGGER = getLogger(__name__)
 
 from functools import wraps
 import time
-from typing import Callable, TypeVar
+from typing import Callable, TypeVar, ParamSpec
 import multiprocessing
 
 from spectre_core.logging import configure_root_logger, ProcessType
@@ -15,35 +15,38 @@ from spectre_core.logging import configure_root_logger, ProcessType
 
 def make_daemon_process(
     name: str, 
-    target_func: Callable[[], None]
+    target: Callable[[], None]
 ) -> multiprocessing.Process:
     """
     Creates and returns a daemon `multiprocessing.Process` instance.
 
     :param name: The name to assign to the process.
-    :param target_func: The function to execute in the process.
+    :param target: The function to execute in the process.
     :return: A `multiprocessing.Process` instance configured as a daemon.
     """
-    return multiprocessing.Process(target=target_func,
+    return multiprocessing.Process(target=target,
                                    name=name,
                                    daemon=True)
 
 
 class Worker:
-    """A lightweight wrapper for a `multiprocessing.Process` daemon."""
+    """A lightweight wrapper for a `multiprocessing.Process` daemon.
+    
+    Provides a very simple API to start, and restart a multiprocessing process.
+    """
     def __init__(
         self,
         name: str,
-        target_func: Callable[[], None]
+        target: Callable[[], None]
     ) -> None:
         """Initialise a `Worker` instance.
 
         :param name: The name assigned to the process.
-        :param target_func: The callable to be executed by the worker process.
+        :param target: The callable to be executed by the worker process.
         """
         self._name = name
-        self._target_func = target_func
-        self._process = make_daemon_process(name, target_func)
+        self._target = target
+        self._process = make_daemon_process(name, target)
 
 
     @property
@@ -73,7 +76,7 @@ class Worker:
     ) -> None:
         """Start the worker process.
 
-        This method runs the `target_func` in the background as a daemon.
+        This method runs the `target` in the background as a daemon.
         """
         self._process.start()
 
@@ -94,28 +97,28 @@ class Worker:
         # a moment of respite
         time.sleep(1)
         # make a new process, as we can't start the same process again.
-        self._process = make_daemon_process(self._name, self._target_func)
+        self._process = make_daemon_process(self._name, self._target)
         self.start()
 
 
 def start_worker(
     name: str,
-    target_func: Callable[[], None],
+    target: Callable[[], None],
 ) -> Worker:
     """
-    Create and start a worker process to execute the specified `target_func`.
+    Create and start a worker process to execute the specified `target`.
     
-    The `target_func` must not take any arguments. If arguments need to be passed 
-    to `target_func`, use `functools.partial` to preconfigure the callable with 
+    The `target` must not take any arguments. If arguments need to be passed 
+    to `target`, use `functools.partial` to preconfigure the callable with 
     the required arguments. Or, alternatively use the `as_worker` decorator.
 
     :param name: The name assigned to the worker.
-    :param target_func: A callable with no arguments that the worker will execute.
+    :param target: A callable with no arguments that the worker will execute.
     :return: An instance of the `Worker` class managing the process.
     """
     _LOGGER.info(f"Starting {name} worker...")
-    worker =  Worker(name,
-                     target_func)
+    worker = Worker(name,
+                    target)
     worker.start()
     return worker
     
@@ -133,27 +136,6 @@ def terminate_workers(
            worker.process.terminate()
            worker.process.join()
     _LOGGER.info("All workers successfully terminated")
-
-
-def calculate_total_runtime(
-    seconds: int = 0, 
-    minutes: int = 0, 
-    hours: int = 0
-) -> float:
-    """Calculate the total runtime in seconds.
-
-    Combines hours, minutes, and seconds into a single total duration expressed in seconds.
-    
-    :param seconds: The seconds component of the runtime (default is 0).
-    :param minutes: The minutes component of the runtime (default is 0).
-    :param hours: The hours component of the runtime (default is 0).
-    :raises ValueError: If the calculated total runtime is not strictly positive.
-    :return: The total runtime in seconds as a float.
-    """
-    total_duration = seconds + (minutes * 60) + (hours * 3600) # [s]
-    if total_duration <= 0:
-        raise ValueError(f"Total duration must be strictly positive")
-    return total_duration
 
 
 def monitor_workers(
@@ -200,29 +182,50 @@ def monitor_workers(
         terminate_workers(workers)
 
 
+def calculate_total_runtime(
+    seconds: int = 0, 
+    minutes: int = 0, 
+    hours: int = 0
+) -> float:
+    """Calculate the total runtime in seconds.
+
+    Combines hours, minutes, and seconds into a single total duration expressed in seconds.
+    
+    :param seconds: The seconds component of the runtime (default is 0).
+    :param minutes: The minutes component of the runtime (default is 0).
+    :param hours: The hours component of the runtime (default is 0).
+    :raises ValueError: If the calculated total runtime is not strictly positive.
+    :return: The total runtime in seconds as a float.
+    """
+    total_duration = seconds + (minutes * 60) + (hours * 3600) # [s]
+    if total_duration <= 0:
+        raise ValueError(f"Total duration must be strictly positive")
+    return total_duration
+
+P = ParamSpec("P")
 T = TypeVar("T", bound=Callable[..., None])
+
 def as_worker(
     name: str
-) -> Callable[[T], Callable[..., Worker]]:
+) -> Callable[[Callable[P, None]], Callable[P, Worker]]:
     """
     A decorator to run a function in a Worker process.
-    
-    Implicitly configures the root logger for the process to write
+
+    Implicitly configures the root logger for the worker process to write
     logs to file.
 
     :param name: The name of the worker process.
     :return: A decorator that transforms a function into one managed by a Worker.
     """
     def decorator(
-        func: T
-    ) -> Callable[..., Worker]:
-        
+        func: Callable[P, None]
+    ) -> Callable[P, Worker]:
         @wraps(func)
-        def wrapper(*args, **kwargs) -> Worker:
-            def target_func():
-                configure_root_logger(ProcessType.WORKER) 
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> Worker:
+            # Worker target funcs must have no arguments
+            def target():
+                configure_root_logger(ProcessType.WORKER)
                 func(*args, **kwargs)
-            return start_worker(name, target_func)
+            return start_worker(name, target)
         return wrapper
-    
     return decorator
