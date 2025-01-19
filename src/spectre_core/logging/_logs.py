@@ -79,8 +79,7 @@ class Logs:
         :param month: Filter by the numeric month. Defaults to None.
         :param day: Filter by the numeric day. Defaults to None.
         """
-        if process_type is not None:
-            self._process_type = process_type.value
+        self._process_type = process_type.value if process_type is not None else None
             
         self._log_map: dict[str, Log] = OrderedDict()
         self.set_date(year, month, day)

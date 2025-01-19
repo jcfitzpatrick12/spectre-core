@@ -213,8 +213,8 @@ class PTemplate(Generic[VT]):
         :return: A dictionary representation of this parameter template with string formatted values.
         """
         d = {
-            "name": self._name,
-            "type": self._ptype,
+            "name": self._name.value,
+            "type": self._ptype.__name__,
             "default": self._default,
             "enforce_default": self._enforce_default,
             "help": self._help,
