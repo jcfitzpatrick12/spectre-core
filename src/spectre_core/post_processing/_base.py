@@ -128,7 +128,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         else:
             self._cached_spectrogram = join_spectrograms([self._cached_spectrogram, spectrogram])
   
-        time_range = self._capture_config.get_parameter(PName.TIME_RANGE) or 0.0
+        time_range = self._capture_config.get_parameter_value(PName.TIME_RANGE) or 0.0
         if self._cached_spectrogram.time_range >= cast(float, time_range):
             self._flush_cache()
     
