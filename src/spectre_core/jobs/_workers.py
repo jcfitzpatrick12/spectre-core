@@ -14,7 +14,6 @@ from spectre_core.logging import configure_root_logger, log_call, ProcessType
 from spectre_core.capture_configs import CaptureConfig
 from spectre_core.receivers import get_receiver, ReceiverName
 from spectre_core.post_processing import start_post_processor
-from ._workers import Worker, make_worker
 
 
 def _make_daemon_process(
@@ -137,7 +136,7 @@ def make_worker(
 
 @make_worker("capture")
 @log_call
-def capture(
+def do_capture(
     tag: str,
 ) -> None:
     """Start capturing data from an SDR in real time.
@@ -161,7 +160,7 @@ def capture(
 
 @make_worker("post_processing")
 @log_call
-def post_process(
+def do_post_processing(
     tag: str,
 ) -> None:
     """Start post processing SDR data into spectrograms in real time.

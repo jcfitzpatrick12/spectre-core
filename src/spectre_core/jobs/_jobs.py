@@ -27,7 +27,7 @@ class Job:
         self._workers = workers
 
 
-    def start_workers(
+    def start(
         self,
     ) -> None:
         """Tell each worker to call their functions in the background as multiprocessing processes."""
@@ -35,7 +35,7 @@ class Job:
             worker.start()
             
             
-    def terminate_workers(
+    def terminate(
         self,
     ) -> None:
         """Tell each worker to terminate their processes, if the processes are still running."""
@@ -47,7 +47,7 @@ class Job:
         _LOGGER.info("All workers successfully terminated")
         
         
-    def monitor_workers(
+    def monitor(
         self,
         total_runtime: float, 
         force_restart: bool = False
@@ -78,16 +78,16 @@ class Job:
                             for worker in self._workers:
                                 worker.restart()
                         else:
-                            self.terminate_workers()
+                            self.terminate()
                             raise RuntimeError(error_message)
                 time.sleep(1)  # Poll every second
 
             _LOGGER.info("Session duration reached. Terminating workers...")
-            self.terminate_workers()
+            self.terminate()
 
         except KeyboardInterrupt:
             _LOGGER.info("Keyboard interrupt detected. Terminating workers...")
-            self.terminate_workers()
+            self.terminate()
 
     
 def start_job(
@@ -106,6 +106,6 @@ def start_job(
     Defaults to False.
     """
     job = Job(workers)
-    job.start_workers()
-    job.monitor_workers(total_runtime, force_restart)
+    job.start()
+    job.monitor(total_runtime, force_restart)
 

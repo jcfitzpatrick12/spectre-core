@@ -4,11 +4,11 @@
 
 """Manage `spectre` jobs and workers."""
 
-from ._jobs import Job
+from ._jobs import Job, start_job
 from ._workers import (
-    Worker, make_worker
+    Worker, make_worker, do_capture, do_post_processing
 )
 
 __all__ = [
-    "Job", "Worker", "make_worker"
+    "Job", "Worker", "make_worker", "start_job", "do_capture", "do_post_processing"
 ]
