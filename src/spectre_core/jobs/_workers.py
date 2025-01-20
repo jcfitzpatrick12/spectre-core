@@ -10,10 +10,14 @@ import time
 from typing import Callable, TypeVar, ParamSpec
 import multiprocessing
 
-from spectre_core.logging import configure_root_logger, ProcessType
+from spectre_core.logging import configure_root_logger, log_call, ProcessType
+from spectre_core.capture_configs import CaptureConfig
+from spectre_core.receivers import get_receiver, ReceiverName
+from spectre_core.post_processing import start_post_processor
+from ._workers import Worker, make_worker
 
 
-def make_daemon_process(
+def _make_daemon_process(
     name: str, 
     target: Callable[[], None]
 ) -> multiprocessing.Process:
@@ -46,7 +50,7 @@ class Worker:
         """
         self._name = name
         self._target = target
-        self._process = make_daemon_process(name, target)
+        self._process = _make_daemon_process(name, target)
 
 
     @property
@@ -97,126 +101,26 @@ class Worker:
         # a moment of respite
         time.sleep(1)
         # make a new process, as we can't start the same process again.
-        self._process = make_daemon_process(self._name, self._target)
+        self._process = _make_daemon_process(self._name, self._target)
         self.start()
 
 
-def start_worker(
-    name: str,
-    target: Callable[[], None],
-) -> Worker:
-    """
-    Create and start a worker process to execute the specified `target`.
-    
-    The `target` must not take any arguments. If arguments need to be passed 
-    to `target`, use `functools.partial` to preconfigure the callable with 
-    the required arguments. Or, alternatively use the `as_worker` decorator.
-
-    :param name: The name assigned to the worker.
-    :param target: A callable with no arguments that the worker will execute.
-    :return: An instance of the `Worker` class managing the process.
-    """
-    _LOGGER.info(f"Starting {name} worker...")
-    worker = Worker(name,
-                    target)
-    worker.start()
-    return worker
-    
-
-def terminate_workers(
-    workers: list[Worker]
-) -> None:
-    """Terminate the processes of all provided workers.
-
-    :param workers: A list of `Worker` instances whose processes should be terminated.
-    """
-    _LOGGER.info("Terminating workers...")
-    for worker in workers:
-        if worker.process.is_alive():
-           worker.process.terminate()
-           worker.process.join()
-    _LOGGER.info("All workers successfully terminated")
-
-
-def monitor_workers(
-    workers: list[Worker], 
-    total_runtime: float, 
-    force_restart: bool = False
-) -> None:
-    """
-    Monitor the provided worker processes during their runtime.
-
-    Periodically checks if worker processes are alive within the specified runtime duration.
-    If a worker unexpectedly exits, the behaviour depends on the `force_restart` flag:
-    - If `force_restart` is True, all workers are restarted.
-    - If `force_restart` is False, all workers are terminated, and an exception is raised.
-
-    :param workers: A list of `Worker` instances to monitor.
-    :param total_runtime: The total duration to monitor the workers, in seconds.
-    :param force_restart: Whether to restart all workers if one unexpectedly exits.
-    :raises RuntimeError: If a worker unexpectedly exits and `force_restart` is False.
-    """
-    _LOGGER.info("Monitoring workers...")
-    start_time = time.time()
-
-    try:
-        while time.time() - start_time < total_runtime:
-            for worker in workers:
-                if not worker.process.is_alive():
-                    error_message = f"Worker with name `{worker.name}` unexpectedly exited."
-                    _LOGGER.error(error_message)
-                    if force_restart:
-                        # Restart all workers
-                        for worker in workers:
-                            worker.restart()
-                    else:
-                        terminate_workers(workers)
-                        raise RuntimeError(error_message)
-            time.sleep(1)  # Poll every second
-
-        _LOGGER.info("Session duration reached. Terminating workers...")
-        terminate_workers(workers)
-
-    except KeyboardInterrupt:
-        _LOGGER.info("Keyboard interrupt detected. Terminating workers...")
-        terminate_workers(workers)
-
-
-def calculate_total_runtime(
-    seconds: int = 0, 
-    minutes: int = 0, 
-    hours: int = 0
-) -> float:
-    """Calculate the total runtime in seconds.
-
-    Combines hours, minutes, and seconds into a single total duration expressed in seconds.
-    
-    :param seconds: The seconds component of the runtime (default is 0).
-    :param minutes: The minutes component of the runtime (default is 0).
-    :param hours: The hours component of the runtime (default is 0).
-    :raises ValueError: If the calculated total runtime is not strictly positive.
-    :return: The total runtime in seconds as a float.
-    """
-    total_duration = seconds + (minutes * 60) + (hours * 3600) # [s]
-    if total_duration <= 0:
-        raise ValueError(f"Total duration must be strictly positive")
-    return total_duration
-
 P = ParamSpec("P")
 T = TypeVar("T", bound=Callable[..., None])
-
-def as_worker(
+def make_worker(
     name: str
 ) -> Callable[[Callable[P, None]], Callable[P, Worker]]:
     """
-    A decorator to run a function in a Worker process.
+    Turns a function into a worker.
 
-    Implicitly configures the root logger for the worker process to write
-    logs to file.
+    This decorator wraps a function, allowing it to run in a separate process
+    managed by a `Worker` object. Use it to easily create long-running or
+    isolated tasks without directly handling multiprocessing.
 
-    :param name: The name of the worker process.
-    :return: A decorator that transforms a function into one managed by a Worker.
+    :param name: A human-readable name for the worker process.
+    :return: A decorator that creates a `Worker` to run the function in its own process.
     """
+
     def decorator(
         func: Callable[P, None]
     ) -> Callable[P, Worker]:
@@ -226,6 +130,43 @@ def as_worker(
             def target():
                 configure_root_logger(ProcessType.WORKER)
                 func(*args, **kwargs)
-            return start_worker(name, target)
+            return Worker(name, target)
         return wrapper
     return decorator
+
+
+@make_worker("capture")
+@log_call
+def capture(
+    tag: str,
+) -> None:
+    """Start capturing data from an SDR in real time.
+
+    :param tag: The capture config tag.
+    """
+    _LOGGER.info((f"Reading capture config with tag '{tag}'"))
+
+    # load the receiver and mode from the capture config file
+    capture_config = CaptureConfig(tag)
+
+    _LOGGER.info((f"Starting capture with the receiver '{capture_config.receiver_name}' "
+                  f"operating in mode '{capture_config.receiver_mode}' "
+                  f"with tag '{tag}'"))
+
+    name = ReceiverName( capture_config.receiver_name )
+    receiver = get_receiver(name,
+                            capture_config.receiver_mode)
+    receiver.start_capture(tag)
+
+
+@make_worker("post_processing")
+@log_call
+def post_process(
+    tag: str,
+) -> None:
+    """Start post processing SDR data into spectrograms in real time.
+
+    :param tag: The capture config tag.
+    """
+    _LOGGER.info(f"Starting post processor with tag '{tag}'")
+    start_post_processor(tag)

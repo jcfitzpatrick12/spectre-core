@@ -5,71 +5,107 @@
 from logging import getLogger
 _LOGGER = getLogger(__name__)
 
-from spectre_core.capture_configs import CaptureConfig
-from spectre_core.logging import log_call
-from spectre_core.receivers import get_receiver, ReceiverName
-from spectre_core.post_processing import start_post_processor
-from ._workers import as_worker, Worker
+import time
 
+from ._workers import Worker
 
-"""A job is a collection of one or more multiprocessing processes being executed by workers.
+class Job:
+    """Represents a collection of workers that run long-running tasks as 
+    multiprocessing processes.
 
-Each function in this module should create some workers to execute processes, and return the workers
-managing them.
-"""
-
-
-@as_worker("capture")
-@log_call
-def capture(
-    tag: str,
-) -> None:
-    """Start capturing data from an SDR in real time.
-
-    :param tag: The capture config tag.
+    A `Job` manages the lifecycle of its workers, including starting, 
+    monitoring, and terminating them.
     """
-    _LOGGER.info((f"Reading capture config with tag '{tag}'"))
+    def __init__(
+        self,
+        workers: list[Worker]
+    ) -> None:
+        """Initialise a `Job` with a list of workers.
 
-    # load the receiver and mode from the capture config file
-    capture_config = CaptureConfig(tag)
-
-    _LOGGER.info((f"Starting capture with the receiver '{capture_config.receiver_name}' "
-                  f"operating in mode '{capture_config.receiver_mode}' "
-                  f"with tag '{tag}'"))
-
-    name = ReceiverName( capture_config.receiver_name )
-    receiver = get_receiver(name,
-                            capture_config.receiver_mode)
-    receiver.start_capture(tag)
+        :param workers: A list of `Worker` instances to manage as part of the job.
+        """
+        self._workers = workers
 
 
-@as_worker("post_processing")
-@log_call
-def post_process(
-    tag: str,
-) -> None:
-    """Start post processing SDR data into spectrograms in real time.
+    def start_workers(
+        self,
+    ) -> None:
+        """Tell each worker to call their functions in the background as multiprocessing processes."""
+        for worker in self._workers:
+            worker.start()
+            
+            
+    def terminate_workers(
+        self,
+    ) -> None:
+        """Tell each worker to terminate their processes, if the processes are still running."""
+        _LOGGER.info("Terminating workers...")
+        for worker in self._workers:
+            if worker.process.is_alive():
+                worker.process.terminate()
+                worker.process.join()
+        _LOGGER.info("All workers successfully terminated")
+        
+        
+    def monitor_workers(
+        self,
+        total_runtime: float, 
+        force_restart: bool = False
+    ) -> None:
+        """
+        Monitor the workers during execution and handle unexpected exits.
 
-    :param tag: The capture config tag.
-    """
-    _LOGGER.info(f"Starting post processor with tag '{tag}'")
-    start_post_processor(tag)
+        Periodically checks worker processes within the specified runtime duration. 
+        If a worker exits unexpectedly:
+        - Restarts all workers if `force_restart` is True.
+        - Terminates all workers and raises an exception if `force_restart` is False.
+
+        :param total_runtime: Total time to monitor the workers, in seconds.
+        :param force_restart: Whether to restart all workers if one exits unexpectedly.
+        :raises RuntimeError: If a worker exits and `force_restart` is False.
+        """
+        _LOGGER.info("Monitoring workers...")
+        start_time = time.time()
+
+        try:
+            while time.time() - start_time < total_runtime:
+                for worker in self._workers:
+                    if not worker.process.is_alive():
+                        error_message = f"Worker with name `{worker.name}` unexpectedly exited."
+                        _LOGGER.error(error_message)
+                        if force_restart:
+                            # Restart all workers
+                            for worker in self._workers:
+                                worker.restart()
+                        else:
+                            self.terminate_workers()
+                            raise RuntimeError(error_message)
+                time.sleep(1)  # Poll every second
+
+            _LOGGER.info("Session duration reached. Terminating workers...")
+            self.terminate_workers()
+
+        except KeyboardInterrupt:
+            _LOGGER.info("Keyboard interrupt detected. Terminating workers...")
+            self.terminate_workers()
 
     
-@log_call
-def session(
-    tag: str,
-) -> list[Worker]:
-    """Start a session.
-    
-    When the function is called, two workers are started. One which captures the 
-    data from the SDR, and one which post processes that data in real time into 
-    spectrograms.
+def start_job(
+    workers: list[Worker],
+    total_runtime: float,
+    force_restart: bool = False
+) -> None:
+    """Create and run a job with the specified workers.
 
-    :param tag: The capture config tag.
-    :return: The workers managing the capture and postprocessing respectively.
+    Starts the workers, monitors them for the specified runtime, and handles 
+    unexpected exits according to the `force_restart` policy.
+
+    :param workers: A list of `Worker` instances to include in the job.
+    :param total_runtime: Total time to monitor the job, in seconds.
+    :param force_restart: Whether to restart all workers if one exits unexpectedly.
+    Defaults to False.
     """
-    post_process_worker = post_process(tag)
-    capture_worker      = capture(tag)
-    return [capture_worker, post_process_worker]
+    job = Job(workers)
+    job.start_workers()
+    job.monitor_workers(total_runtime, force_restart)
 
