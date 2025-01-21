@@ -4,7 +4,7 @@
   
 :loudspeaker: **This project is under active development. Contributors welcome.** :loudspeaker:  
 
-```spectre-core``` provides an extensible, SDR-agnostic toolkit for generating spectrograms in real-time. It is the core Python package used by the [`spectre`](https://github.com/jcfitzpatrick12/spectre.git) program.  
+```spectre-core``` provides an extensible, receiver-agnostic toolkit for generating radio spectrograms in real-time. It is the core Python package used by the [`spectre`](https://github.com/jcfitzpatrick12/spectre.git) program.   
 
 
 ## Installation
