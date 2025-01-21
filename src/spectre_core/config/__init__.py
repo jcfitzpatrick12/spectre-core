@@ -2,19 +2,17 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+
+"""General `spectre` package configurations."""
+
 from ._paths import (
     get_spectre_data_dir_path, get_batches_dir_path, get_configs_dir_path, get_logs_dir_path
 )
 from ._time_formats import (
-    TimeFormats
+    TimeFormat
 )
 
 __all__ = [
-    "get_spectre_data_dir_path",
-    "get_batches_dir_path",
-    "get_configs_dir_path",
-    "get_logs_dir_path",
-    "DEFAULT_DATE_FORMAT",
-    "DEFAULT_TIME_FORMAT",
-    "DEFAULT_DATETIME_FORMAT"
+    "get_spectre_data_dir_path", "get_batches_dir_path", "get_configs_dir_path", "get_logs_dir_path",
+    "TimeFormat"
 ]

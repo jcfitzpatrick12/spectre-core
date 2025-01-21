@@ -2,16 +2,19 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# register decorators take effect on import
-from .library._test import _Receiver
-from .library._rsp1a import _Receiver
-from .library._rspduo import _Receiver
+"""A vendor-neutral interface for collecting data from SDRs."""
+
+from .plugins._receiver_names import ReceiverName
+from .plugins._test import Test
+from .plugins._rsp1a import RSP1A
+from .plugins._rspduo import RSPduo
 
 from ._base import BaseReceiver
 from ._factory import get_receiver
-from ._register import list_all_receiver_names
-from ._spec_names import SpecNames
+from ._register import get_registered_receivers
+from ._spec_names import SpecName
 
 __all__ = [
-    "BaseReceiver", "get_receiver", "list_all_receiver_names", "SpecNames"
+    "Test", "RSP1A", "RSPduo", "BaseReceiver", "get_receiver", 
+    "get_registered_receivers", "SpecName", "ReceiverName"
 ]

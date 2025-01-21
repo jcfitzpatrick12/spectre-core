@@ -2,21 +2,20 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# register decorators are actioned on import
-from .library._fixed_center_frequency import _Batch
-from .library._swept_center_frequency import _Batch
-from .library._callisto import _Batch
+"""IO operations on batched data files."""
+
+from .plugins._batch_keys import BatchKey
+
+# register decorators take effect on import
+from .plugins._iq_stream import IQStreamBatch, IQMetadata
+from .plugins._callisto import CallistoBatch
 
 from ._base import BaseBatch, BatchFile
-from ._factory import get_batch_cls_from_tag
 from ._batches import Batches
-from .library._swept_center_frequency import SweepMetadata
+from ._factory import get_batch_cls, get_batch_cls_from_tag
 
 __all__ = [
-    "BaseBatch",
-    "BatchFile",
-    "get_batch_cls_from_tag",
-    "Batches",
-    "SweepMetadata"
+    "IQStreamBatch", "IQMetadata", "CallistoBatch", "BaseBatch", "BatchFile", 
+    "Batches", "get_batch_cls", "BatchKey", "get_batch_cls_from_tag"
 ]
 

@@ -3,212 +3,314 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from abc import ABC, abstractmethod
-from typing import Optional
-import numpy as np
-from dataclasses import dataclass
+from typing import Optional, Literal
+from enum import Enum
 
-from matplotlib import cm
+import numpy.typing as npt
+import numpy as np
 import matplotlib.dates as mdates
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from spectre_core.spectrograms import Spectrogram, TimeTypes
+from spectre_core.spectrograms import Spectrogram, TimeType
 from ._format import PanelFormat
+from ._panel_names import PanelName
 
 
-@dataclass(frozen=True)
-class XAxisTypes:
-    TIME     : str = "time"
-    FREQUENCY: str = "frequency"
+class XAxisType(Enum):
+    """The x-axis type for a panel.
+    
+    Axes are shared in a stack between panels with common `XAxisType`.
+    
+    :ivar TIME: The xaxis has units of time.
+    :ivar FREQUENCY: The xaxis has units of frequency.
+    """
+    TIME      = "time"
+    FREQUENCY = "frequency"
 
 
 class BasePanel(ABC):
-    def __init__(self, 
-                 name: str,
-                 spectrogram: Spectrogram):
+    """Abstract base class for a panel used to visualise spectrogram data.
+
+    `BasePanel` instances are designed to be part of a `PanelStack`, where multiple
+    panels contribute to a composite plot. Subclasses must implement methods to define
+    how the panel is drawn and annotated, and specify its x-axis type.
+    """
+    def __init__(
+        self, 
+        name: PanelName,
+        spectrogram: Spectrogram
+    ) -> None:
+        """Initialize an instance of `BasePanel`.
+
+        :param name: The name of the panel.
+        :param spectrogram: The spectrogram being visualised.
+        """
         self._name = name
         self._spectrogram = spectrogram
 
-        self._x_axis_type: Optional[str] = None
-        self._set_x_axis_type()
-
-        # defined while stacking
+        # internal attributes set by `PanelStack` during stacking.
         self._panel_format: Optional[PanelFormat] = None
-        self._time_type: Optional[str] = None
-        self._ax: Optional[Axes] = None
-        self._fig: Optional[Figure] = None
-         # defined if specified by the user
-        self._identifier: Optional[str] = None
+        self._time_type   : Optional[TimeType]    = None
+        self._ax          : Optional[Axes]        = None
+        self._fig         : Optional[Figure]      = None
+        self._identifier  : Optional[str]         = None
 
 
     @abstractmethod
-    def draw(self):
-        pass
+    def draw(
+        self
+    ) -> None:
+        """Modify the `ax` attribute to draw the panel contents."""
 
 
     @abstractmethod
-    def annotate_x_axis(self):
-        pass
+    def annotate_xaxis(
+        self
+    ) -> None:
+        """Modify the `ax` attribute to annotate the x-axis of the panel."""
 
 
     @abstractmethod
-    def annotate_y_axis(self):
-        pass
-
-
-    @abstractmethod
-    def _set_x_axis_type(self):
-        """Required to allow for axes sharing in the stack"""
-        pass
+    def annotate_yaxis(
+        self
+    ) -> None:
+        """Modify the `ax` attribute to annotate the y-axis of the panel."""
 
 
     @property
-    def spectrogram(self) -> Spectrogram:
+    @abstractmethod
+    def xaxis_type(
+        self
+    ) -> XAxisType:
+     """Specify the x-axis type for the panel."""
+
+
+    @property
+    def spectrogram(
+        self
+    ) -> Spectrogram:
+        """The spectrogram being visualised on this panel."""
         return self._spectrogram
     
 
     @property
-    def tag(self) -> str:
+    def tag(
+        self
+    ) -> str:
+        """The tag of the spectrogram being visualised."""
         return self._spectrogram.tag
     
 
     @property
-    def time_type(self) -> str:
+    def time_type(
+        self
+    ) -> TimeType:
+        """The time type of the spectrogram.
+
+        :raises ValueError: If the `time_type` has not been set.
+        """
+        if self._time_type is None:
+            raise ValueError(f"`time_type` for the panel '{self.name}' must be set.")
         return self._time_type
     
 
     @time_type.setter
-    def time_type(self, value: str) -> None:
-        self._validate_time_type(value)
+    def time_type(
+        self, 
+        value: TimeType
+    ) -> None:
+        """Set the `TimeType` for the spectrogram.
+
+        This controls how time is represented and annotated on the panel.
+
+        :param value: The `TimeType` to assign to the spectrogram.
+        """
         self._time_type = value
     
 
     @property
-    def name(self) -> str:
-        if self._name is None:
-            raise AttributeError(f"Name for this panel has not yet been set")
+    def name(
+        self
+    ) -> PanelName:
+        """The name of the panel."""
         return self._name
-    
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self._name = value
     
     
     @property
-    def panel_format(self) -> PanelFormat:
+    def panel_format(
+        self
+    ) -> PanelFormat:
+        """Retrieve the panel format, which controls the style of the panel.
+
+        :raises ValueError: If the `panel_format` has not been set.
+        """
         if self._panel_format is None:
-            raise AttributeError(f"Panel format has not yet been specified for this panel")
+            raise ValueError(f"`panel_format` for the panel '{self.name}' must be set.")
         return self._panel_format
 
 
     @panel_format.setter
-    def panel_format(self, value: PanelFormat):
+    def panel_format(
+        self, 
+        value: PanelFormat
+    ) -> None:
+        """Set the panel format to control the style of the panel.
+        
+        :param value: The `PanelFormat` to assign to the panel.
+        """
         self._panel_format = value
 
 
     @property
-    def ax(self) -> Axes:
+    def ax(
+        self
+    ) -> Axes:
+        """The `Axes` object bound to this panel.
+
+        :raises AttributeError: If the `Axes` object has not been set.
+        """
         if self._ax is None:
-            raise AttributeError(f"Axes have not yet been set for this panel")
+            raise AttributeError(f"`ax` must be set for the panel `{self.name}`")
         return self._ax
     
 
     @ax.setter
-    def ax(self, value: Axes) -> None:
+    def ax(
+        self, 
+        value: Axes
+    ) -> None:
+        """Assign a Matplotlib `Axes` object to this panel.
+
+        This `Axes` will be used for drawing and annotations.
+
+        :param value: The Matplotlib `Axes` to assign to the panel.
+        """
         self._ax = value
 
 
     @property
-    def fig(self) -> Figure:
+    def fig(
+        self
+    ) -> Figure:
+        """
+        The `Figure` object bound to this panel.
+
+        :raises AttributeError: If the `Figure` object has not been set.
+        """
         if self._fig is None:
-            raise AttributeError(f"Figure has not yet been set for this panel")
+            raise AttributeError(f"`fig` must be set for the panel `{self.name}`")
         return self._fig
     
 
     @fig.setter
-    def fig(self, value: Figure) -> None:
+    def fig(
+        self, 
+        value: Figure
+    ) -> None:
+        """
+        Assign a Matplotlib `Figure` object to this panel.
+
+        This `Figure` is shared across all panels in the `PanelStack`.
+
+        :param value: The Matplotlib `Figure` to assign to the panel.
+        """
         self._fig = value
     
-
-
-    @property
-    def x_axis_type(self) -> str:
-        if self._x_axis_type is None:
-            raise AttributeError(f"x-axis type has not been defined for this panel")
-        return self._x_axis_type
     
     @property
-    def identifier(self) -> Optional[str]:
+    def identifier(
+        self
+    ) -> Optional[str]:
+        """Optional identifier for the panel.
+
+        This identifier can be used to distinguish panels or aid in superimposing 
+        panels in a stack.
+        """
         return self._identifier
     
     
     @identifier.setter
-    def identifier(self, value: str) -> None:
+    def identifier(
+        self, 
+        value: str
+    ) -> None:
+        """Set the optional identifier for the panel.
+        
+        This can be used to distinguish panels or aid in superimposing panels.
+        """
         self._identifier = value
-
-
-    def _validate_time_type(self, 
-                            time_type: str):
-        valid_time_types = [TimeTypes.SECONDS, TimeTypes.DATETIMES]
-        if time_type not in valid_time_types:
-            raise ValueError(f"Invalid time type. "
-                             f"Expected one of {valid_time_types} "
-                             f"but received {time_type}")
     
 
-    def bind_to_colors(self, 
-                       values: np.ndarray, 
-                       cmap: str = "winter"): 
-        cmap = cm.get_cmap(cmap)
-        rgbas = cmap(np.linspace(0.1, 0.9, len(values)))
-        return zip(values, rgbas) # assign each RGBA array to each value
-    
-
-    def hide_x_axis_labels(self) -> None:
+    def hide_xaxis_labels(
+        self
+    ) -> None:
+        """Hide the x-axis labels for this panel."""
         self.ax.tick_params(axis='x', labelbottom=False)
 
 
-    def hide_y_axis_labels(self) -> None:
+    def hide_yaxis_labels(
+        self
+    ) -> None:
+        """Hide the y-axis labels for this panel."""
         self.ax.tick_params(axis='y', labelbottom=False)
     
 
 class BaseTimeSeriesPanel(BasePanel):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-    
+    """
+    Abstract subclass of `BasePanel` designed for visualising time series data.
 
+    Subclasses must implement any remaining abstract methods from `BasePanel`.
+    """   
     @property
-    def times(self):
-        return self.spectrogram.times if self.time_type == TimeTypes.SECONDS else self.spectrogram.datetimes
+    def xaxis_type(
+        self
+    ) -> Literal[XAxisType.TIME]:
+        return XAxisType.TIME
+    
+    
+    @property
+    def times(
+        self
+    ) -> npt.NDArray[np.float32 | np.datetime64]:
+        """The times assigned to each spectrum according to the `TimeType`."""
+        return self.spectrogram.times if self.time_type == TimeType.RELATIVE else self.spectrogram.datetimes
     
 
-    def annotate_x_axis(self):
-        if self.time_type == TimeTypes.SECONDS:
+    def annotate_xaxis(
+        self
+    ) -> None:
+        """Annotate the x-axis according to the specified `TimeType`."""
+        if self.time_type == TimeType.RELATIVE:
             self.ax.set_xlabel('Time [s]')
         else:
             self.ax.set_xlabel('Time [UTC]')
             self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
-        
-        
-    def _set_x_axis_type(self):
-        self._x_axis_type = XAxisTypes.TIME
 
 
 
 class BaseSpectrumPanel(BasePanel):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
+    """An abstract subclass of `BasePanel` tailored for visualising spectrum data.
+    
+    Subclasses must implement any remaining abstract methods as described by `BasePanel`.
+    """   
     @property
-    def frequencies(self):
+    def xaxis_type(
+        self
+    ) -> Literal[XAxisType.FREQUENCY]:
+        return XAxisType.FREQUENCY
+    
+    
+    @property
+    def frequencies(
+        self
+    ) -> npt.NDArray[np.float32]:
+        """The physical frequencies assigned to each spectral component."""
         return self._spectrogram.frequencies
 
 
-    def annotate_x_axis(self):
-        self.ax.set_xlabel('Frequency [MHz]')
-
-
-    def _set_x_axis_type(self):
-        self._x_axis_type = XAxisTypes.FREQUENCY
+    def annotate_xaxis(
+        self
+    ) -> None:
+        """Annotate the x-axis assuming frequency in units of Hz."""
+        self.ax.set_xlabel('Frequency [Hz]')

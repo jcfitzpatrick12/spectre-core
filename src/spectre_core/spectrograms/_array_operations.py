@@ -2,15 +2,28 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from datetime import datetime
+from typing import TypeVar
 
 import numpy as np
+import numpy.typing as npt
 
-def average_array(array: np.ndarray, average_over: int, axis=0) -> np.ndarray:
 
-    # Check if average_over is an integer
-    if type(average_over) != int:
-        raise TypeError(f"average_over must be an integer. Got {type(average_over)}")
+def average_array(
+    array: npt.NDArray[np.float32], 
+    average_over: int, 
+    axis: int = 0
+) -> npt.NDArray[np.float32]:
+    """
+    Averages elements of an array in blocks along a specified axis.
+
+    :param array: Input array to be averaged.
+    :param average_over: Number of elements in each averaging block.
+    :param axis: Axis along which to perform the averaging, defaults to 0.
+    :raises TypeError: If `average_over` is not an integer.
+    :raises ValueError: If `average_over` is not in the range [1, size of the axis].
+    :raises ValueError: If `axis` is out of bounds for the array.
+    :return: Array of averaged values along the specified axis.
+    """
 
     # Get the size of the specified axis which we will average over
     axis_size = array.shape[axis]
@@ -54,30 +67,39 @@ def average_array(array: np.ndarray, average_over: int, axis=0) -> np.ndarray:
     return averaged_array
 
 
-def is_close(ar: np.ndarray, 
-             ar_comparison: np.ndarray,
-             absolute_tolerance: float) -> bool:
-    """Close enough accounts for wiggle-room equating floats."""
-    return np.all(np.isclose(ar, 
-                             ar_comparison, 
-                             atol=absolute_tolerance))
+def is_close(
+    ar: npt.NDArray[np.float32], 
+    ar_comparison: npt.NDArray[np.float32],
+    absolute_tolerance: float
+) -> bool:
+    """
+    Checks if all elements in two arrays are element-wise close within a given tolerance.
 
+    :param ar: First array for comparison.
+    :param ar_comparison: Second array for comparison.
+    :param absolute_tolerance: Absolute tolerance for element-wise comparison.
+    :return: `True` if all elements are close within the specified tolerance, otherwise `False`.
+    """
+    return bool(np.all(np.isclose(ar, 
+                                  ar_comparison, 
+                                  atol=absolute_tolerance)))
+
+
+T = TypeVar('T', np.float32, np.datetime64)
 def find_closest_index(
-    target_value: float | datetime, 
-    array: np.ndarray, 
+    target_value: T,
+    array: npt.NDArray[T],
     enforce_strict_bounds: bool = False
 ) -> int:
-    # Ensure input array is a numpy array
-    array = np.asarray(array)
+    """
+    Finds the index of the closest value to a target in a given array, with optional bounds enforcement.
 
-    # Convert to datetime64 if necessary
-    if isinstance(target_value, datetime) or np.issubdtype(array.dtype, np.datetime64):
-        target_value = np.datetime64(target_value)
-        array = array.astype('datetime64[ns]')
-    else:
-        target_value = float(target_value)
-        array = array.astype(float)
-
+    :param target_value: The value to find the closest match for.
+    :param array: The array to search within.
+    :param enforce_strict_bounds: If True, raises an error if the target value is outside the array bounds. Defaults to False.
+    :return: The index of the closest value in the array.
+    :raises ValueError: If `enforce_strict_bounds` is True and `target_value` is outside the array bounds.
+    """
     # Check bounds if strict enforcement is required
     if enforce_strict_bounds:
         max_value, min_value = np.nanmax(array), np.nanmin(array)
@@ -87,14 +109,31 @@ def find_closest_index(
             raise ValueError(f"Target value {target_value} is less than min array value {min_value}")
 
     # Find the index of the closest value
-    return np.argmin(np.abs(array - target_value))
+    return int( np.argmin(np.abs(array - target_value)) )
 
 
-def normalise_peak_intensity(array: np.ndarray) -> np.ndarray:
+def normalise_peak_intensity(
+    array: npt.NDArray[np.float32]
+) -> npt.NDArray[np.float32]:
+    """
+    Normalises an array by its peak intensity.
+
+    :param array: Input array to normalise.
+    :return: Array normalised such that its maximum value is 1. NaN values are ignored.
+    """
     return array/np.nanmax(array)
 
 
-def compute_resolution(array: np.ndarray) -> float:
+def compute_resolution(
+    array: npt.NDArray[np.float32]
+) -> float:
+    """
+    Computes the median resolution of a one-dimensional array.
+
+    :param array: Input one-dimensional array of values.
+    :return: The median of differences between consecutive elements in the array.
+    :raises ValueError: If the input array is not one-dimensional or contains fewer than two elements.
+    """
     # Check that the array is one-dimensional
     if array.ndim != 1:
         raise ValueError("Input array must be one-dimensional")
@@ -104,20 +143,48 @@ def compute_resolution(array: np.ndarray) -> float:
     
     # Calculate differences between consecutive elements.
     resolutions = np.diff(array)
+    return float( np.nanmedian(resolutions) )
 
-    return np.nanmedian(resolutions)
 
+def compute_range(
+    array: npt.NDArray[np.float32]
+) -> float:
+    """
+    Computes the range of a one-dimensional array as the difference between its last and first elements.
 
-def compute_range(array: np.ndarray) -> float:
+    :param array: Input one-dimensional array of values.
+    :return: The range of the array (last element minus first element).
+    :raises ValueError: If the input array is not one-dimensional or contains fewer than two elements.
+    """
     # Check that the array is one-dimensional
     if array.ndim != 1:
         raise ValueError("Input array must be one-dimensional")
     
     if len(array) < 2:
         raise ValueError("Input array must contain at least two elements")
-    return array[-1] - array[0]
+    return float( array[-1] - array[0] )
 
 
-def subtract_background(array: np.ndarray, start_index: int, end_index: int) -> np.ndarray:
+def subtract_background(
+    array: npt.NDArray[np.float32], 
+    start_index: int, 
+    end_index: int
+) -> npt.NDArray[np.float32]:
+    """
+    Subtracts the mean of a specified background range from all elements in an array.
+
+    :param array: Input array from which the background mean will be subtracted.
+    :param start_index: Start index of the background range (inclusive).
+    :param end_index: End index of the background range (inclusive).
+    :return: Array with the background mean subtracted.
+    """
     array -= np.nanmean(array[start_index:end_index+1])
     return array
+
+
+def time_elapsed(
+    datetimes: npt.NDArray[np.datetime64]
+) -> npt.NDArray[np.float32]:
+    """Convert an array of datetimes to seconds elapsed."""
+    return (datetimes - datetimes[0]).astype('timedelta64[us]').astype(np.float32)
+
