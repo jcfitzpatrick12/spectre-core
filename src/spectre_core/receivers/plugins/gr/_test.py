@@ -17,7 +17,7 @@
 #
 
 from functools import partial
-from typing import Callable, cast, Type
+from typing import Callable
 from dataclasses import dataclass
 
 from gnuradio import gr

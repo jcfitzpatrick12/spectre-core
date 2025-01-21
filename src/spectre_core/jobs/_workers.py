@@ -10,7 +10,7 @@ import time
 from typing import Callable, TypeVar, ParamSpec
 import multiprocessing
 
-from spectre_core.logging import configure_root_logger, log_call, ProcessType
+from spectre_core.logs import configure_root_logger, log_call, ProcessType
 from spectre_core.capture_configs import CaptureConfig
 from spectre_core.receivers import get_receiver, ReceiverName
 from spectre_core.post_processing import start_post_processor
