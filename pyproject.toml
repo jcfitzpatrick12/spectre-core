@@ -21,7 +21,8 @@ dependencies = [
     'scipy==1.12.0',
     'astropy==6.0.1',
     'matplotlib==3.5.0',
-    'watchdog==4.0.0'
+    'watchdog==4.0.0',
+    'mypy==1.14.1',
 ]
 license = { file = "LICENSE" }
 
