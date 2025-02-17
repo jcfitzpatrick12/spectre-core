@@ -7,7 +7,7 @@ from textwrap import dedent
 from copy import deepcopy
 
 from ._pnames import PName
-from ._pconstraints import BasePConstraint, EnforceSign, PowerOfTwo
+from ._pconstraints import BasePConstraint, EnforceSign, PowerOfTwo, Bound
 from ._parameters import Parameter
     
 # value type
@@ -299,6 +299,14 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                 """,
                                             pconstraints=[
                                                 EnforceSign.non_positive
+                                                ]),
+    PName.NORMALISED_GAIN:                  PTemplate(PName.NORMALISED_GAIN,
+                                            str,
+                                            help = """
+                                                 The normalised gain value, where 1.0 is mapped to the max gain of the receiver being used.
+                                                 """,
+                                            pconstraints=[
+                                                Bound(0.0, 1.0)
                                                 ]),
     PName.EVENT_HANDLER_KEY:      PTemplate(PName.EVENT_HANDLER_KEY,      
                                             str,
