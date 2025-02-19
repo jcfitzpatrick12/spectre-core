@@ -40,8 +40,16 @@ class B200mini(BaseReceiver):
        self.add_capture_method(Mode.FIXED_CENTER_FREQUENCY,
                                CaptureMethod.fixed_center_frequency)
 
-    
-    def _add_pvalidator(
+   
+    def _add_capture_templates(
+        self
+    ) -> None:
+        self.add_capture_template(Mode.FIXED_CENTER_FREQUENCY,
+                                  get_capture_template_fixed_center_frequency(self)
+                                 )
+
+
+    def _add_pvalidators(
         self
     ) -> None:
         self.add_pvalidator(Mode.FIXED_CENTER_FREQUENCY,

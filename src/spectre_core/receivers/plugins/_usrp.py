@@ -27,8 +27,7 @@ def get_capture_template_fixed_center_frequency(
     
     capture_template = get_base_capture_template( CaptureMode.FIXED_CENTER_FREQUENCY )
     capture_template.add_ptemplate( get_base_ptemplate(PName.BANDWIDTH) )
-    capture_template.add_ptemplate( get_base_ptemplate(PName.IF_GAIN) )
-    capture_template.add_ptemplate( get_base_ptemplate(PName.RF_GAIN) )
+    capture_template.add_ptemplate( get_base_ptemplate(PName.NORMALISED_GAIN) )
 
     capture_template.set_defaults(
         (PName.BATCH_SIZE,            3.0),

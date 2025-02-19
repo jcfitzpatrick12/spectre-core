@@ -301,7 +301,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                                 EnforceSign.non_positive
                                                 ]),
     PName.NORMALISED_GAIN:                  PTemplate(PName.NORMALISED_GAIN,
-                                            str,
+                                            float,
                                             help = """
                                                  The normalised gain value, where 1.0 is mapped to the max gain of the receiver being used.
                                                  """,
