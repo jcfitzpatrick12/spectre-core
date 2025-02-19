@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, Literal, overload
+from typing import Callable, Optional, Literal, overload, Any
 
 from spectre_core.exceptions import ModeNotFoundError
 from spectre_core.capture_configs import (
@@ -236,34 +236,11 @@ class BaseReceiver(ABC):
         """
         self.specs[name] = value
 
-
-    # tell static type checkers the type of specification
-    @overload
-    def get_spec(self, spec_name: Literal[SpecName.API_RETUNING_LATENCY]) -> float: ...
-    @overload
-    def get_spec(self, spec_name: Literal[SpecName.FREQUENCY_LOWER_BOUND]) -> float: ...
-    @overload
-    def get_spec(self, spec_name: Literal[SpecName.FREQUENCY_UPPER_BOUND]) -> float: ...
-    @overload
-    def get_spec(self, spec_name: Literal[SpecName.SAMPLE_RATE_LOWER_BOUND]) -> int: ...
-    @overload
-    def get_spec(self, spec_name: Literal[SpecName.SAMPLE_RATE_UPPER_BOUND]) -> int: ...
-    @overload
-    def get_spec(self, spec_name: Literal[SpecName.BANDWIDTH_LOWER_BOUND]) -> float: ...
-    @overload
-    def get_spec(self, spec_name: Literal[SpecName.BANDWIDTH_UPPER_BOUND]) -> float: ...
-    @overload
-    def get_spec(self, spec_name: Literal[SpecName.RF_GAIN_UPPER_BOUND]) -> int: ...
-    @overload
-    def get_spec(self, spec_name: Literal[SpecName.IF_GAIN_UPPER_BOUND]) -> int: ...
-    @overload
-    def get_spec(self, spec_name: Literal[SpecName.BANDWIDTH_OPTIONS]) -> list[float]: ...
-    
     
     def get_spec(
         self, 
         spec_name: SpecName
-    ) -> float|int|list[float|int]:
+    ) -> Any:
         """
         Retrieve a hardware specification.
 
