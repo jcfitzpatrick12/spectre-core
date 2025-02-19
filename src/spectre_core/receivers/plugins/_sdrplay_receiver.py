@@ -16,7 +16,7 @@ from .._spec_names import SpecName
 def get_pvalidator_fixed_center_frequency(
     sdrplay_receiver: BaseReceiver 
 ) -> Callable[[Parameters], None]:
-    def pvalidator(parameters: Parameters):
+    def pvalidator(parameters: Parameters) -> None:
         validate_fixed_center_frequency(parameters)
     return pvalidator
 
@@ -24,7 +24,7 @@ def get_pvalidator_fixed_center_frequency(
 def get_pvalidator_swept_center_frequency(
     sdrplay_receiver: BaseReceiver 
 ) -> Callable[[Parameters], None]:
-    def pvalidator(parameters: Parameters):
+    def pvalidator(parameters: Parameters) -> None:
         validate_swept_center_frequency(parameters,
                                         sdrplay_receiver.get_spec(SpecName.API_RETUNING_LATENCY))
     return pvalidator
