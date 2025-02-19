@@ -44,7 +44,7 @@ class _fixed_center_frequency(spectre_top_block):
         self.uhd_usrp_source_0.set_antenna("RX2", 0)
         self.uhd_usrp_source_0.set_bandwidth(bandwidth, 0)
         self.uhd_usrp_source_0.set_rx_agc(False, 0)
-        self.uhd_usrp_source_0.set_normalised_gain(normalised_gain, 0)
+        self.uhd_usrp_source_0.set_normalized_gain(normalised_gain, 0)
         self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_batches_dir_path(), 
                                                                      tag, 
                                                                      batch_size, 
