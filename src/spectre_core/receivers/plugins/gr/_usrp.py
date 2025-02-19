@@ -28,9 +28,7 @@ class _fixed_center_frequency(spectre_top_block):
         batch_size       = parameters.get_parameter_value(PName.BATCH_SIZE)
         bandwidth        = parameters.get_parameter_value(PName.BANDWIDTH) 
 
-        ##################################################
         # Blocks
-        ##################################################
         self.uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", '')),
             uhd.stream_args(
@@ -46,8 +44,8 @@ class _fixed_center_frequency(spectre_top_block):
         self.uhd_usrp_source_0.set_antenna("RX2", 0)
         self.uhd_usrp_source_0.set_bandwidth(bandwidth, 0)
         self.uhd_usrp_source_0.set_rx_agc(False, 0)
-        self.uhd_usrp_source_0.set_normalised_gain(gain_value, 0)
-        self.spectre_batched_file_sink_0 = spectre.batched_file_sink(batches_dir_path, 
+        self.uhd_usrp_source_0.set_normalised_gain(normalised_gain, 0)
+        self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_batches_dir_path(), 
                                                                      tag, 
                                                                      batch_size, 
                                                                      sample_rate, False, 
@@ -55,9 +53,7 @@ class _fixed_center_frequency(spectre_top_block):
                                                                      0)
 
 
-        ##################################################
         # Connections
-        ##################################################
         self.connect((self.uhd_usrp_source_0, 0), (self.spectre_batched_file_sink_0, 0))
 
 

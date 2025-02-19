@@ -11,6 +11,7 @@ class ReceiverName(Enum):
     :ivar RSPDUO: SDRPlay RSPduo
     :ivar TEST: `spectre` test receiver.
     """
-    RSP1A  = "rsp1a"
-    RSPDUO = "rspduo"
-    TEST   = "test"
+    RSP1A     = "rsp1a"
+    RSPDUO    = "rspduo"
+    TEST      = "test"
+    B200_MINI = "b200_mini"
