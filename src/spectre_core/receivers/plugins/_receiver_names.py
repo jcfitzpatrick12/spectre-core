@@ -14,4 +14,4 @@ class ReceiverName(Enum):
     RSP1A     = "rsp1a"
     RSPDUO    = "rspduo"
     TEST      = "test"
-    B200_MINI = "b200_mini"
+    B200MINI =  "b200mini"

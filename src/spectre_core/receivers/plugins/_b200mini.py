@@ -20,8 +20,8 @@ class Mode:
     FIXED_CENTER_FREQUENCY = "fixed_center_frequency"
 
 
-@register_receiver(ReceiverName.B200_MINI)
-class B200Mini(BaseReceiver):
+@register_receiver(ReceiverName.B200MINI)
+class B200mini(BaseReceiver):
     """Receiver implementation for the USRP B200 Mini (https://www.ettus.com/all-products/usrp-b200mini/)"""
     def _add_specs(
         self

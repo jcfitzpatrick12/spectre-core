@@ -11,7 +11,7 @@ from .plugins._receiver_names import ReceiverName
 from .plugins._rsp1a import RSP1A
 from .plugins._rspduo import RSPduo
 from .plugins._test import Test
-from .plugins._b200_mini import B200Mini
+from .plugins._b200mini import B200mini
 
 
 @overload
@@ -40,9 +40,9 @@ def get_receiver(
 
 @overload
 def get_receiver(
-    receiver_name: Literal[ReceiverName.B200_MINI],
+    receiver_name: Literal[ReceiverName.B200MINI],
     mode: Optional[str] = None
-) -> B200Mini:
+) -> B200mini:
     ...
 
 
