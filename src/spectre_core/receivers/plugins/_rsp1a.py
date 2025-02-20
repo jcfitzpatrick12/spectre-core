@@ -6,8 +6,12 @@ from dataclasses import dataclass
 
 from ._receiver_names import ReceiverName
 from .gr._rsp1a import CaptureMethod
+from ._sdrplay_receiver import (
+    get_pvalidator_fixed_center_frequency, get_pvalidator_swept_center_frequency,
+    get_capture_template_fixed_center_frequency, get_capture_template_swept_center_frequency
+)
 from .._spec_names import SpecName
-from ._sdrplay_receiver import SDRPlayReceiver
+from .._base import BaseReceiver
 from .._register import register_receiver
 
 @dataclass(frozen=True)
@@ -18,9 +22,11 @@ class Mode:
 
 
 @register_receiver(ReceiverName.RSP1A)
-class RSP1A(SDRPlayReceiver):
+class RSP1A(BaseReceiver):
     """Receiver implementation for the SDRPlay RSP1A (https://www.sdrplay.com/rsp1a/)"""
-    def _add_specs(self) -> None:
+    def _add_specs(
+            self
+    ) -> None:
         self.add_spec( SpecName.SAMPLE_RATE_LOWER_BOUND, 200e3     )
         self.add_spec( SpecName.SAMPLE_RATE_UPPER_BOUND, 10e6      )
         self.add_spec( SpecName.FREQUENCY_LOWER_BOUND  , 1e3       )
@@ -45,15 +51,15 @@ class RSP1A(SDRPlayReceiver):
         self
     ) -> None:
         self.add_capture_template(Mode.FIXED_CENTER_FREQUENCY,
-                                  self._get_capture_template_fixed_center_frequency())
+                                  get_capture_template_fixed_center_frequency(self))
         self.add_capture_template(Mode.SWEPT_CENTER_FREQUENCY,
-                                  self._get_capture_template_swept_center_frequency())
+                                  get_capture_template_swept_center_frequency(self))
         
     
     def _add_pvalidators(
         self
     ) -> None:
         self.add_pvalidator(Mode.FIXED_CENTER_FREQUENCY,
-                            self._get_pvalidator_fixed_center_frequency())
+                            get_pvalidator_fixed_center_frequency(self))
         self.add_pvalidator(Mode.SWEPT_CENTER_FREQUENCY,
-                            self._get_pvalidator_swept_center_frequency())
+                            get_pvalidator_swept_center_frequency(self))

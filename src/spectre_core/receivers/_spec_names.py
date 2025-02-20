@@ -18,6 +18,8 @@ class SpecName(Enum):
     Negative values indicate attenuation.
     :ivar RF_GAIN_UPPER_BOUND: The upper bound for the radio frequency gain, in dB. 
     Negative values indicate attenuation.
+    :ivar API_RETUNING_LATENCY: An empirical estimate of the delay between issuing a command
+    for a receiver to retune its center frequency and the actual physical update of the center frequency. 
     """
     FREQUENCY_LOWER_BOUND    = "frequency_lower_bound"
     FREQUENCY_UPPER_BOUND    = "frequency_upper_bound"

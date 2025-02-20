@@ -47,3 +47,4 @@ class PName(Enum):
     OBS_LAT              = "obs_lat"
     OBS_LON              = "obs_lon"
     OBS_ALT              = "obs_alt"
+    NORMALISED_GAIN      = "normalised_gain"

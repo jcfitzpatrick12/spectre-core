@@ -1,17 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-#
-# SPDX-License-Identifier: GPL-3.0
-#
-# GNU Radio Python Flow Graph
-# Title: Test receiver
-# GNU Radio version: 3.10.1.1
-
-# SPDX-FileCopyrightText: © 2024 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
-# This file is part of SPECTRE
-# SPDX-License-Identifier: GPL-3.0-or-later
-
 #
 # RSP1A receiver top blocks
 #
