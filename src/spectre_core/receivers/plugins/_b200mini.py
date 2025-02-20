@@ -16,13 +16,13 @@ from .._register import register_receiver
 
 @dataclass(frozen=True)
 class Mode:
-    """An operating mode for the `b200-mini` receiver."""
+    """An operating mode for the `B200mini` receiver."""
     FIXED_CENTER_FREQUENCY = "fixed_center_frequency"
 
 
 @register_receiver(ReceiverName.B200MINI)
 class B200mini(BaseReceiver):
-    """Receiver implementation for the USRP B200 Mini (https://www.ettus.com/all-products/usrp-b200mini/)"""
+    """Receiver implementation for the USRP B200mini (https://www.ettus.com/all-products/usrp-b200mini/)"""
     def _add_specs(
         self
     ) -> None:
@@ -45,8 +45,7 @@ class B200mini(BaseReceiver):
         self
     ) -> None:
         self.add_capture_template(Mode.FIXED_CENTER_FREQUENCY,
-                                  get_capture_template_fixed_center_frequency(self)
-                                 )
+                                  get_capture_template_fixed_center_frequency(self))
 
 
     def _add_pvalidators(
