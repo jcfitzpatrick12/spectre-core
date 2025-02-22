@@ -44,12 +44,14 @@ class _fixed_center_frequency(spectre_top_block):
         self.uhd_usrp_source_0.set_antenna("RX2", 0)
         self.uhd_usrp_source_0.set_bandwidth(bandwidth, 0)
         self.uhd_usrp_source_0.set_rx_agc(False, 0)
+        self.uhd_usrp_source_0.set_auto_dc_offset(False, 0)
+        self.uhd_usrp_source_0.set_auto_iq_balance(False, 0)
         self.uhd_usrp_source_0.set_normalized_gain(normalised_gain, 0)
         self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_batches_dir_path(), 
                                                                      tag, 
                                                                      batch_size, 
                                                                      sample_rate, False, 
-                                                                     'freq', 
+                                                                     'rx_freq', 
                                                                      0)
 
 
@@ -57,6 +59,67 @@ class _fixed_center_frequency(spectre_top_block):
         self.connect((self.uhd_usrp_source_0, 0), (self.spectre_batched_file_sink_0, 0))
 
 
+class _swept_center_frequency(spectre_top_block):
+    def flowgraph(
+        self,
+        tag: str,
+        parameters: Parameters
+    ) -> None:
+        # OOT module inline imports
+        from gnuradio import spectre
+        from gnuradio import uhd
+
+        # Unpack capture config parameters
+        sample_rate      = parameters.get_parameter_value(PName.SAMPLE_RATE)
+        bandwidth        = parameters.get_parameter_value(PName.BANDWIDTH)
+        min_frequency    = parameters.get_parameter_value(PName.MIN_FREQUENCY)
+        max_frequency    = parameters.get_parameter_value(PName.MAX_FREQUENCY)
+        frequency_step   = parameters.get_parameter_value(PName.FREQUENCY_STEP)
+        samples_per_step = parameters.get_parameter_value(PName.SAMPLES_PER_STEP)
+        normalised_gain  = parameters.get_parameter_value(PName.NORMALISED_GAIN)
+        batch_size       = parameters.get_parameter_value(PName.BATCH_SIZE)
+
+        # Blocks
+        self.uhd_usrp_source_0 = uhd.usrp_source(
+            ",".join(("", '')),
+            uhd.stream_args(
+                cpu_format="fc32",
+                args='',
+                channels=list(range(0,1)),
+            ),
+        )
+        self.uhd_usrp_source_0.set_samp_rate(sample_rate)
+        self.uhd_usrp_source_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
+        self.uhd_usrp_source_0.set_center_freq(min_frequency, 0)
+        self.uhd_usrp_source_0.set_antenna("RX2", 0)
+        self.uhd_usrp_source_0.set_bandwidth(bandwidth, 0)
+        self.uhd_usrp_source_0.set_rx_agc(False, 0)
+        self.uhd_usrp_source_0.set_auto_dc_offset(False, 0)
+        self.uhd_usrp_source_0.set_auto_iq_balance(False, 0)
+        self.uhd_usrp_source_0.set_gain(50, 0)
+
+        self.spectre_sweep_driver_0 = spectre.sweep_driver(min_frequency, 
+                                                           max_frequency, 
+                                                           frequency_step, 
+                                                           sample_rate, 
+                                                           samples_per_step, 
+                                                           'freq')
+       
+        self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_batches_dir_path(), 
+                                                                     tag, 
+                                                                     batch_size, 
+                                                                     sample_rate,
+                                                                     True, 
+                                                                     'rx_freq', 
+                                                                     min_frequency)
+
+        # Connections
+        self.msg_connect((self.spectre_sweep_driver_0, 'freq'), (self.uhd_usrp_source_0, 'command'))
+        self.connect((self.uhd_usrp_source_0, 0), (self.spectre_batched_file_sink_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.spectre_sweep_driver_0, 0))
+
+
 @dataclass(frozen=True)
 class CaptureMethod:
     fixed_center_frequency = partial(capture, top_block_cls=_fixed_center_frequency)
+    swept_center_frequency = partial(capture, top_block_cls=_swept_center_frequency, max_noutput_items=1024)
