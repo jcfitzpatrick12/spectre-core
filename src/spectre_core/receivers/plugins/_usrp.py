@@ -36,7 +36,9 @@ def get_capture_template_fixed_center_frequency(
     
     capture_template = get_base_capture_template( CaptureMode.FIXED_CENTER_FREQUENCY )
     capture_template.add_ptemplate( get_base_ptemplate(PName.BANDWIDTH) )
-    capture_template.add_ptemplate( get_base_ptemplate(PName.NORMALISED_GAIN) )
+    capture_template.add_ptemplate( get_base_ptemplate(PName.GAIN) )
+    capture_template.add_ptemplate( get_base_ptemplate(PName.WIRE_FORMAT) )
+    capture_template.add_ptemplate( get_base_ptemplate(PName.MASTER_CLOCK_RATE) ) 
 
     capture_template.set_defaults(
         (PName.BATCH_SIZE,            3.0),
@@ -46,7 +48,8 @@ def get_capture_template_fixed_center_frequency(
         (PName.WINDOW_HOP,            512),
         (PName.WINDOW_SIZE,           1024),
         (PName.WINDOW_TYPE,           "blackman"),
-        (PName.NORMALISED_GAIN,       0.3),
+        (PName.GAIN,                  20),
+        (PName.WIRE_FORMAT,           "sc16"),
     )   
 
     capture_template.add_pconstraint(
@@ -76,6 +79,31 @@ def get_capture_template_fixed_center_frequency(
             )
         ]
     )
+    capture_template.add_pconstraint(
+        PName.GAIN,
+        [
+            Bound(
+                lower_bound=0,
+                upper_bound=usrp_receiver.get_spec( SpecName.GAIN_UPPER_BOUND )
+            )
+        ]
+    )
+    capture_template.add_pconstraint(
+        PName.WIRE_FORMAT,
+        [
+            OneOf(
+                usrp_receiver.get_spec( SpecName.WIRE_FORMATS )
+            )
+        ]
+    )
+    capture_template.add_pconstraint(
+        PName.MASTER_CLOCK_RATE,
+        [
+            OneOf(
+                usrp_receiver.get_spec( SpecName.MASTER_CLOCK_RATES )
+            )
+        ]
+    )
     return capture_template
 
 
@@ -85,8 +113,10 @@ def get_capture_template_swept_center_frequency(
 
     capture_template = get_base_capture_template( CaptureMode.SWEPT_CENTER_FREQUENCY )
     capture_template.add_ptemplate( get_base_ptemplate(PName.BANDWIDTH) )
-    capture_template.add_ptemplate( get_base_ptemplate(PName.NORMALISED_GAIN) )
-
+    capture_template.add_ptemplate( get_base_ptemplate(PName.GAIN) )
+    capture_template.add_ptemplate( get_base_ptemplate(PName.WIRE_FORMAT) )
+    capture_template.add_ptemplate( get_base_ptemplate(PName.MASTER_CLOCK_RATE) ) 
+    
     capture_template.set_defaults(
         (PName.BATCH_SIZE,            4.0),
         (PName.MIN_FREQUENCY,         95000000),
@@ -98,7 +128,8 @@ def get_capture_template_swept_center_frequency(
         (PName.WINDOW_HOP,            512),
         (PName.WINDOW_SIZE,           1024),
         (PName.WINDOW_TYPE,           "blackman"),
-        (PName.NORMALISED_GAIN,       0.3)
+        (PName.GAIN,                  20),
+        (PName.WIRE_FORMAT,           "sc16"),
     )   
 
     capture_template.add_pconstraint(
@@ -134,6 +165,31 @@ def get_capture_template_swept_center_frequency(
             Bound(
                 lower_bound=usrp_receiver.get_spec(SpecName.BANDWIDTH_LOWER_BOUND),
                 upper_bound=usrp_receiver.get_spec(SpecName.BANDWIDTH_UPPER_BOUND),
+            )
+        ]
+    )
+    capture_template.add_pconstraint(
+        PName.GAIN,
+        [
+            Bound(
+                lower_bound=0,
+                upper_bound=usrp_receiver.get_spec( SpecName.GAIN_UPPER_BOUND )
+            )
+        ]
+    )
+    capture_template.add_pconstraint(
+        PName.WIRE_FORMAT,
+        [
+            OneOf(
+                usrp_receiver.get_spec( SpecName.WIRE_FORMATS )
+            )
+        ]
+    )
+    capture_template.add_pconstraint(
+        PName.MASTER_CLOCK_RATE,
+        [
+            OneOf(
+                usrp_receiver.get_spec( SpecName.MASTER_CLOCK_RATES )
             )
         ]
     )

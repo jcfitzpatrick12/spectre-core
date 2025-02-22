@@ -33,6 +33,9 @@ class B200mini(BaseReceiver):
         self.add_spec( SpecName.FREQUENCY_UPPER_BOUND  , 6e9   )
         self.add_spec( SpecName.BANDWIDTH_LOWER_BOUND  , 200e3 ) 
         self.add_spec( SpecName.BANDWIDTH_UPPER_BOUND  , 56e6  )
+        self.add_spec( SpecName.GAIN_UPPER_BOUND       , 76    )
+        self.add_spec( SpecName.WIRE_FORMATS           , ["sc8", "sc12", "sc16"])
+        self.add_spec( SpecName.MASTER_CLOCK_RATES     , [30.72e6, 120e6, 122.88e6, 125e6, 153.6e6, 184.32e6, 200e6] )
         self.add_spec( SpecName.API_RETUNING_LATENCY   , 1e-5  ) # Ballpark, pending empirical testing
 
    

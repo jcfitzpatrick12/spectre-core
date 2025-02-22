@@ -18,6 +18,9 @@ class SpecName(Enum):
     Negative values indicate attenuation.
     :ivar RF_GAIN_UPPER_BOUND: The upper bound for the radio frequency gain, in dB. 
     Negative values indicate attenuation.
+    :ivar GAIN_UPPER_BOUND: The upper bound for the gain, in dB.
+    :ivar WIRE_FORMATS: Supported data types transferred over the bus/network.
+    :ivar MASTER_CLOCK_RATES: Supported reference clock rates, in Hz.
     :ivar API_RETUNING_LATENCY: An empirical estimate of the delay between issuing a command
     for a receiver to retune its center frequency and the actual physical update of the center frequency. 
     """
@@ -30,4 +33,7 @@ class SpecName(Enum):
     BANDWIDTH_OPTIONS        = "bandwidth_options"
     IF_GAIN_UPPER_BOUND      = "if_gain_upper_bound"
     RF_GAIN_UPPER_BOUND      = "rf_gain_upper_bound"
+    GAIN_UPPER_BOUND         = "gain_upper_bound"
+    WIRE_FORMATS             = "wire_formats"
+    MASTER_CLOCK_RATES       = "master_clock_rates"
     API_RETUNING_LATENCY     = "api_retuning_latency"

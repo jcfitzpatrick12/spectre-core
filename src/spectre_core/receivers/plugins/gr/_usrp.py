@@ -22,19 +22,23 @@ class _fixed_center_frequency(spectre_top_block):
         from gnuradio import uhd
 
         # Variables
-        sample_rate      = parameters.get_parameter_value(PName.SAMPLE_RATE)
-        normalised_gain  = parameters.get_parameter_value(PName.NORMALISED_GAIN)
-        center_freq      = parameters.get_parameter_value(PName.CENTER_FREQUENCY)
-        batch_size       = parameters.get_parameter_value(PName.BATCH_SIZE)
-        bandwidth        = parameters.get_parameter_value(PName.BANDWIDTH) 
+        sample_rate       = parameters.get_parameter_value(PName.SAMPLE_RATE)
+        gain              = parameters.get_parameter_value(PName.GAIN)
+        center_freq       = parameters.get_parameter_value(PName.CENTER_FREQUENCY)
+        master_clock_rate = parameters.get_parameter_value(PName.MASTER_CLOCK_RATE)
+        master_clock_rate = f"master_clock_rate={master_clock_rate}" if master_clock_rate is not None else "" 
+        wire_format       = parameters.get_parameter_value(PName.WIRE_FORMAT)
+        batch_size        = parameters.get_parameter_value(PName.BATCH_SIZE)
+        bandwidth         = parameters.get_parameter_value(PName.BANDWIDTH) 
 
         # Blocks
         self.uhd_usrp_source_0 = uhd.usrp_source(
-            ",".join(("", '')),
+            ",".join(("", '', master_clock_rate)),
             uhd.stream_args(
                 cpu_format="fc32",
+                otw_format=wire_format,
                 args='',
-                channels=list(range(0,1)),
+                channels=[0],
             ),
         )
         self.uhd_usrp_source_0.set_samp_rate(sample_rate)
@@ -46,7 +50,7 @@ class _fixed_center_frequency(spectre_top_block):
         self.uhd_usrp_source_0.set_rx_agc(False, 0)
         self.uhd_usrp_source_0.set_auto_dc_offset(False, 0)
         self.uhd_usrp_source_0.set_auto_iq_balance(False, 0)
-        self.uhd_usrp_source_0.set_normalized_gain(normalised_gain, 0)
+        self.uhd_usrp_source_0.set_gain(gain, 0)
         self.spectre_batched_file_sink_0 = spectre.batched_file_sink(get_batches_dir_path(), 
                                                                      tag, 
                                                                      batch_size, 
@@ -70,22 +74,27 @@ class _swept_center_frequency(spectre_top_block):
         from gnuradio import uhd
 
         # Unpack capture config parameters
-        sample_rate      = parameters.get_parameter_value(PName.SAMPLE_RATE)
-        bandwidth        = parameters.get_parameter_value(PName.BANDWIDTH)
-        min_frequency    = parameters.get_parameter_value(PName.MIN_FREQUENCY)
-        max_frequency    = parameters.get_parameter_value(PName.MAX_FREQUENCY)
-        frequency_step   = parameters.get_parameter_value(PName.FREQUENCY_STEP)
-        samples_per_step = parameters.get_parameter_value(PName.SAMPLES_PER_STEP)
-        normalised_gain  = parameters.get_parameter_value(PName.NORMALISED_GAIN)
-        batch_size       = parameters.get_parameter_value(PName.BATCH_SIZE)
+        sample_rate       = parameters.get_parameter_value(PName.SAMPLE_RATE)
+        bandwidth         = parameters.get_parameter_value(PName.BANDWIDTH)
+        min_frequency     = parameters.get_parameter_value(PName.MIN_FREQUENCY)
+        max_frequency     = parameters.get_parameter_value(PName.MAX_FREQUENCY)
+        frequency_step    = parameters.get_parameter_value(PName.FREQUENCY_STEP)
+        samples_per_step  = parameters.get_parameter_value(PName.SAMPLES_PER_STEP)
+        master_clock_rate = parameters.get_parameter_value(PName.MASTER_CLOCK_RATE)
+        master_clock_rate = master_clock_rate = parameters.get_parameter_value(PName.MASTER_CLOCK_RATE)
+        master_clock_rate = f"master_clock_rate={master_clock_rate}" if master_clock_rate is not None else "" 
+        wire_format       = parameters.get_parameter_value(PName.WIRE_FORMAT)
+        gain              = parameters.get_parameter_value(PName.GAIN)
+        batch_size        = parameters.get_parameter_value(PName.BATCH_SIZE)
 
         # Blocks
         self.uhd_usrp_source_0 = uhd.usrp_source(
-            ",".join(("", '')),
+            ",".join(("", '', master_clock_rate)),
             uhd.stream_args(
                 cpu_format="fc32",
+                otw_format=wire_format,
                 args='',
-                channels=list(range(0,1)),
+                channels=[0],
             ),
         )
         self.uhd_usrp_source_0.set_samp_rate(sample_rate)
@@ -96,7 +105,7 @@ class _swept_center_frequency(spectre_top_block):
         self.uhd_usrp_source_0.set_rx_agc(False, 0)
         self.uhd_usrp_source_0.set_auto_dc_offset(False, 0)
         self.uhd_usrp_source_0.set_auto_iq_balance(False, 0)
-        self.uhd_usrp_source_0.set_gain(50, 0)
+        self.uhd_usrp_source_0.set_gain(gain, 0)
 
         self.spectre_sweep_driver_0 = spectre.sweep_driver(min_frequency, 
                                                            max_frequency, 

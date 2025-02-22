@@ -300,14 +300,25 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                             pconstraints=[
                                                 EnforceSign.non_positive
                                                 ]),
-    PName.NORMALISED_GAIN:                  PTemplate(PName.NORMALISED_GAIN,
+    PName.GAIN:                   PTemplate(PName.GAIN,
                                             float,
                                             help = """
-                                                 The normalised gain value, where 1.0 is mapped to the max gain of the receiver being used.
-                                                 """,
-                                            pconstraints=[
-                                                Bound(0.0, 1.0)
-                                                ]),
+                                                 The gain value for the SDR, in dB 
+                                                 """
+                                           ),
+    PName.MASTER_CLOCK_RATE:      PTemplate(PName.MASTER_CLOCK_RATE,
+                                            int,
+                                            nullable=True,
+                                            help = """
+                                                 The primary reference clock for the SDR, specified in Hz. 
+                                                 """
+                                           ),
+    PName.WIRE_FORMAT:            PTemplate(PName.WIRE_FORMAT,
+                                            str,
+                                            help = """
+                                                 This parameter controls the form of the data over the bus/network.
+                                                 """
+                                            ),
     PName.EVENT_HANDLER_KEY:      PTemplate(PName.EVENT_HANDLER_KEY,      
                                             str,
                                             help = """
