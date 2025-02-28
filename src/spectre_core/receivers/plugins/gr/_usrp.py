@@ -6,6 +6,9 @@ from functools import partial
 from dataclasses import dataclass
 import time
 
+from logging import getLogger
+_LOGGER = getLogger(__name__)
+
 from spectre_core.capture_configs import Parameters, PName
 from spectre_core.config import get_batches_dir_path
 from ._base import capture, spectre_top_block
@@ -87,6 +90,8 @@ class _swept_center_frequency(spectre_top_block):
         batch_size        = parameters.get_parameter_value(PName.BATCH_SIZE)
 
         # Blocks
+        _LOGGER.warning(f"USRP frequency sweep modes will not work as expected until a known bug is fixed in the USRP source block. "
+                        f"Please refer to this GitHub issue for more information: https://github.com/gnuradio/gnuradio/issues/7725")
         master_clock_rate = f"master_clock_rate={master_clock_rate}" 
         self.uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", '', master_clock_rate)),
