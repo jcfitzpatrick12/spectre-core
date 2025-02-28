@@ -43,6 +43,7 @@ def get_capture_template_fixed_center_frequency(
     capture_template.add_ptemplate( get_base_ptemplate(PName.WIRE_FORMAT) )
     capture_template.add_ptemplate( get_base_ptemplate(PName.MASTER_CLOCK_RATE) ) 
 
+    # TODO: Delegate defaults to receiver subclasses. Currently, these are sensible defaults for the b200mini
     capture_template.set_defaults(
         (PName.BATCH_SIZE,            4.0),
         (PName.CENTER_FREQUENCY,      95800000),
@@ -51,9 +52,9 @@ def get_capture_template_fixed_center_frequency(
         (PName.WINDOW_HOP,            512),
         (PName.WINDOW_SIZE,           1024),
         (PName.WINDOW_TYPE,           "blackman"),
-        (PName.GAIN,                  20),
+        (PName.GAIN,                  35),
         (PName.WIRE_FORMAT,           "sc16"),
-        (PName.MASTER_CLOCK_RATE,     120e6)
+        (PName.MASTER_CLOCK_RATE,     40e6)
     )   
 
     capture_template.add_pconstraint(
@@ -103,8 +104,9 @@ def get_capture_template_fixed_center_frequency(
     capture_template.add_pconstraint(
         PName.MASTER_CLOCK_RATE,
         [
-            OneOf(
-                usrp_receiver.get_spec( SpecName.MASTER_CLOCK_RATES )
+            Bound(
+                lower_bound=usrp_receiver.get_spec( SpecName.MASTER_CLOCK_RATE_LOWER_BOUND ),
+                upper_bound=usrp_receiver.get_spec( SpecName.MASTER_CLOCK_RATE_UPPER_BOUND )
             )
         ]
     )
@@ -120,11 +122,12 @@ def get_capture_template_swept_center_frequency(
     capture_template.add_ptemplate( get_base_ptemplate(PName.GAIN) )
     capture_template.add_ptemplate( get_base_ptemplate(PName.WIRE_FORMAT) )
     capture_template.add_ptemplate( get_base_ptemplate(PName.MASTER_CLOCK_RATE) ) 
-    
+
+    # TODO: Delegate defaults to receiver subclasses. Currently, these are sensible defaults for the b200mini
     capture_template.set_defaults(
         (PName.BATCH_SIZE,            4.0),
-        (PName.MIN_FREQUENCY,         90000000),
-        (PName.MAX_FREQUENCY,         110000000),
+        (PName.MIN_FREQUENCY,         95000000),
+        (PName.MAX_FREQUENCY,         105000000),
         (PName.SAMPLES_PER_STEP,      20000),
         (PName.FREQUENCY_STEP,        2000000),
         (PName.SAMPLE_RATE,           2000000),
@@ -132,9 +135,9 @@ def get_capture_template_swept_center_frequency(
         (PName.WINDOW_HOP,            512),
         (PName.WINDOW_SIZE,           1024),
         (PName.WINDOW_TYPE,           "blackman"),
-        (PName.GAIN,                  20),
-        (PName.WIRE_FORMAT,           "sc8"),
-        (PName.MASTER_CLOCK_RATE,     120e6)
+        (PName.GAIN,                  35),
+        (PName.WIRE_FORMAT,           "sc16"),
+        (PName.MASTER_CLOCK_RATE,     40e6)
     )   
 
     capture_template.add_pconstraint(
@@ -190,12 +193,13 @@ def get_capture_template_swept_center_frequency(
             )
         ]
     )
-    capture_template.add_pconstraint(
+    capture_template.add_pconstraint(                                                           
         PName.MASTER_CLOCK_RATE,
         [
-            OneOf(
-                usrp_receiver.get_spec( SpecName.MASTER_CLOCK_RATES )
-            )
-        ]
-    )
+            Bound(                                                                              
+                lower_bound=usrp_receiver.get_spec( SpecName.MASTER_CLOCK_RATE_LOWER_BOUND ),   
+                upper_bound=usrp_receiver.get_spec( SpecName.MASTER_CLOCK_RATE_UPPER_BOUND )    
+            )                                                                                   
+        ]                                                                                       
+    )                                                                                           
     return capture_template

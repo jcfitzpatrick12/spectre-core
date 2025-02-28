@@ -21,7 +21,7 @@ class _fixed_center_frequency(spectre_top_block):
         from gnuradio import spectre
         from gnuradio import uhd
 
-        # Variables
+        # Unpack capture config parameters 
         sample_rate       = parameters.get_parameter_value(PName.SAMPLE_RATE)
         gain              = parameters.get_parameter_value(PName.GAIN)
         center_freq       = parameters.get_parameter_value(PName.CENTER_FREQUENCY)

@@ -20,20 +20,22 @@ class SpecName(Enum):
     Negative values indicate attenuation.
     :ivar GAIN_UPPER_BOUND: The upper bound for the gain, in dB.
     :ivar WIRE_FORMATS: Supported data types transferred over the bus/network.
-    :ivar MASTER_CLOCK_RATES: Supported reference clock rates, in Hz.
+    :ivar MASTER_CLOCK_RATE_LOWER_BOUND:  The lower bound for the SDR reference clock rate, in Hz.
+    :ivar MASTER_CLOCK_RATE_UPPER_BOUND:  The upper bound for the SDR reference clock rate, in Hz.
     :ivar API_RETUNING_LATENCY: An empirical estimate of the delay between issuing a command
     for a receiver to retune its center frequency and the actual physical update of the center frequency. 
     """
-    FREQUENCY_LOWER_BOUND    = "frequency_lower_bound"
-    FREQUENCY_UPPER_BOUND    = "frequency_upper_bound"
-    SAMPLE_RATE_LOWER_BOUND  = "sample_rate_lower_bound"
-    SAMPLE_RATE_UPPER_BOUND  = "sample_rate_upper_bound"
-    BANDWIDTH_LOWER_BOUND    = "bandwidth_lower_bound"
-    BANDWIDTH_UPPER_BOUND    = "bandwidth_upper_bound"
-    BANDWIDTH_OPTIONS        = "bandwidth_options"
-    IF_GAIN_UPPER_BOUND      = "if_gain_upper_bound"
-    RF_GAIN_UPPER_BOUND      = "rf_gain_upper_bound"
-    GAIN_UPPER_BOUND         = "gain_upper_bound"
-    WIRE_FORMATS             = "wire_formats"
-    MASTER_CLOCK_RATES       = "master_clock_rates"
-    API_RETUNING_LATENCY     = "api_retuning_latency"
+    FREQUENCY_LOWER_BOUND         = "frequency_lower_bound"
+    FREQUENCY_UPPER_BOUND         = "frequency_upper_bound"
+    SAMPLE_RATE_LOWER_BOUND       = "sample_rate_lower_bound"
+    SAMPLE_RATE_UPPER_BOUND       = "sample_rate_upper_bound"
+    BANDWIDTH_LOWER_BOUND         = "bandwidth_lower_bound"
+    BANDWIDTH_UPPER_BOUND         = "bandwidth_upper_bound"
+    BANDWIDTH_OPTIONS             = "bandwidth_options"
+    IF_GAIN_UPPER_BOUND           = "if_gain_upper_bound"
+    RF_GAIN_UPPER_BOUND           = "rf_gain_upper_bound"
+    GAIN_UPPER_BOUND              = "gain_upper_bound"
+    WIRE_FORMATS                  = "wire_formats"
+    MASTER_CLOCK_RATE_LOWER_BOUND = "master_clock_rate_lower_bound"
+    MASTER_CLOCK_RATE_UPPER_BOUND = "master_clock_rate_upper_bound"
+    API_RETUNING_LATENCY          = "api_retuning_latency"
