@@ -184,6 +184,22 @@ def validate_step_interval(
                          f"derived api latency {api_retuning_latency} [s]; you may experience undefined behaviour!")
 
 
+def validate_sample_rate_with_master_clock_rate(
+    parameters: Parameters,
+) -> None:
+    """Ensure that the master clock rate is an integer multiple of the sample rate.
+
+    :param parameters: The parameters to be validated.
+    :raises ValueError: If the master clock rate is not an integer multiple of the sample rate
+    """
+    master_clock_rate = cast(int, parameters.get_parameter_value(PName.MASTER_CLOCK_RATE))
+    sample_rate       = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
+
+    if master_clock_rate % sample_rate != 0:
+        raise ValueError(f"The master clock rate of {master_clock_rate} [Hz] is not an integer "
+                         f"multiple of the sample rate {sample_rate} [Hz].")
+
+
 def validate_fixed_center_frequency(
     parameters: Parameters
 ) -> None:
