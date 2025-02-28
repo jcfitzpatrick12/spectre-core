@@ -308,7 +308,6 @@ _base_ptemplates: dict[PName, PTemplate] = {
                                            ),
     PName.MASTER_CLOCK_RATE:      PTemplate(PName.MASTER_CLOCK_RATE,
                                             int,
-                                            nullable=True,
                                             help = """
                                                  The primary reference clock for the SDR, specified in Hz. 
                                                  """
@@ -316,7 +315,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
     PName.WIRE_FORMAT:            PTemplate(PName.WIRE_FORMAT,
                                             str,
                                             help = """
-                                                 This parameter controls the form of the data over the bus/network.
+                                                 Controls the form of the data over the bus/network.
                                                  """
                                             ),
     PName.EVENT_HANDLER_KEY:      PTemplate(PName.EVENT_HANDLER_KEY,      

@@ -7,6 +7,7 @@ from typing import Callable, overload
 from spectre_core.capture_configs import (
     CaptureTemplate, CaptureMode, Parameters, Bound, PName,
     get_base_capture_template, get_base_ptemplate, OneOf,
+    validate_sample_rate_with_master_clock_rate,
     validate_fixed_center_frequency, validate_swept_center_frequency
 )
 from .._base import BaseReceiver
@@ -18,6 +19,7 @@ def get_pvalidator_fixed_center_frequency(
 ) -> Callable[[Parameters], None]:
     def pvalidator(parameters: Parameters) -> None:
         validate_fixed_center_frequency(parameters)
+        validate_sample_rate_with_master_clock_rate(parameters)
     return pvalidator
 
 
@@ -27,6 +29,7 @@ def get_pvalidator_swept_center_frequency(
     def pvalidator(parameters: Parameters) -> None:
         validate_swept_center_frequency(parameters,
                                         usrp_receiver.get_spec(SpecName.API_RETUNING_LATENCY))
+        validate_sample_rate_with_master_clock_rate(parameters)
     return pvalidator
 
 
@@ -41,15 +44,16 @@ def get_capture_template_fixed_center_frequency(
     capture_template.add_ptemplate( get_base_ptemplate(PName.MASTER_CLOCK_RATE) ) 
 
     capture_template.set_defaults(
-        (PName.BATCH_SIZE,            3.0),
+        (PName.BATCH_SIZE,            4.0),
         (PName.CENTER_FREQUENCY,      95800000),
-        (PName.SAMPLE_RATE,           1000000),
-        (PName.BANDWIDTH,             1000000),
+        (PName.SAMPLE_RATE,           2000000),
+        (PName.BANDWIDTH,             2000000),
         (PName.WINDOW_HOP,            512),
         (PName.WINDOW_SIZE,           1024),
         (PName.WINDOW_TYPE,           "blackman"),
         (PName.GAIN,                  20),
         (PName.WIRE_FORMAT,           "sc16"),
+        (PName.MASTER_CLOCK_RATE,     120e6)
     )   
 
     capture_template.add_pconstraint(
@@ -119,17 +123,18 @@ def get_capture_template_swept_center_frequency(
     
     capture_template.set_defaults(
         (PName.BATCH_SIZE,            4.0),
-        (PName.MIN_FREQUENCY,         95000000),
-        (PName.MAX_FREQUENCY,         100000000),
-        (PName.SAMPLES_PER_STEP,      80000),
-        (PName.FREQUENCY_STEP,        1536000),
-        (PName.SAMPLE_RATE,           1536000),
-        (PName.BANDWIDTH,             1536000),
+        (PName.MIN_FREQUENCY,         90000000),
+        (PName.MAX_FREQUENCY,         110000000),
+        (PName.SAMPLES_PER_STEP,      20000),
+        (PName.FREQUENCY_STEP,        2000000),
+        (PName.SAMPLE_RATE,           2000000),
+        (PName.BANDWIDTH,             2000000),
         (PName.WINDOW_HOP,            512),
         (PName.WINDOW_SIZE,           1024),
         (PName.WINDOW_TYPE,           "blackman"),
         (PName.GAIN,                  20),
-        (PName.WIRE_FORMAT,           "sc16"),
+        (PName.WIRE_FORMAT,           "sc8"),
+        (PName.MASTER_CLOCK_RATE,     120e6)
     )   
 
     capture_template.add_pconstraint(

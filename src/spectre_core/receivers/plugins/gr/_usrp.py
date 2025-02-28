@@ -26,12 +26,12 @@ class _fixed_center_frequency(spectre_top_block):
         gain              = parameters.get_parameter_value(PName.GAIN)
         center_freq       = parameters.get_parameter_value(PName.CENTER_FREQUENCY)
         master_clock_rate = parameters.get_parameter_value(PName.MASTER_CLOCK_RATE)
-        master_clock_rate = f"master_clock_rate={master_clock_rate}" if master_clock_rate is not None else "" 
         wire_format       = parameters.get_parameter_value(PName.WIRE_FORMAT)
         batch_size        = parameters.get_parameter_value(PName.BATCH_SIZE)
         bandwidth         = parameters.get_parameter_value(PName.BANDWIDTH) 
 
         # Blocks
+        master_clock_rate = f"master_clock_rate={master_clock_rate}" 
         self.uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", '', master_clock_rate)),
             uhd.stream_args(
@@ -82,12 +82,12 @@ class _swept_center_frequency(spectre_top_block):
         samples_per_step  = parameters.get_parameter_value(PName.SAMPLES_PER_STEP)
         master_clock_rate = parameters.get_parameter_value(PName.MASTER_CLOCK_RATE)
         master_clock_rate = master_clock_rate = parameters.get_parameter_value(PName.MASTER_CLOCK_RATE)
-        master_clock_rate = f"master_clock_rate={master_clock_rate}" if master_clock_rate is not None else "" 
         wire_format       = parameters.get_parameter_value(PName.WIRE_FORMAT)
         gain              = parameters.get_parameter_value(PName.GAIN)
         batch_size        = parameters.get_parameter_value(PName.BATCH_SIZE)
 
         # Blocks
+        master_clock_rate = f"master_clock_rate={master_clock_rate}" 
         self.uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", '', master_clock_rate)),
             uhd.stream_args(

@@ -226,7 +226,7 @@ class BaseReceiver(ABC):
     def add_spec(
         self,
         name: SpecName,
-        value: float|int|list[float|int]
+        value: Any 
     ) -> None:
         """
         Add a hardware specification.
