@@ -128,7 +128,7 @@ def get_capture_template_swept_center_frequency(
         (PName.BATCH_SIZE,            4.0),
         (PName.MIN_FREQUENCY,         95000000),
         (PName.MAX_FREQUENCY,         105000000),
-        (PName.SAMPLES_PER_STEP,      20000),
+        (PName.SAMPLES_PER_STEP,      30000),
         (PName.FREQUENCY_STEP,        2000000),
         (PName.SAMPLE_RATE,           2000000),
         (PName.BANDWIDTH,             2000000),
