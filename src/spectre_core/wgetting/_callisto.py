@@ -136,7 +136,7 @@ def _unzip_file_to_batches(
     Decompress a `.fit.gz` file and save it as a `.fits` batch file.
 
     :param gz_path: Path to the `.fit.gz` file.
-    :return: The file path of the newly created batch file, relative to `SPECTRE_DATA_DIR_PATH`.
+    :return: The file path of the newly created batch file, relative to the mounted volume.
     """
     fits_path = _get_batch_path(gz_path)
     with gzip.open(gz_path, "rb") as f_in, open(fits_path, "wb") as f_out:
@@ -152,7 +152,7 @@ def _unzip_to_batches(
     batch files.
 
     :param tmp_dir: Path to the temporary directory containing `.gz` files.
-    :return: A list of file names of all newly created batch files, relative to `SPECTRE_DATA_DIR_PATH`.
+    :return: A list of file names of all newly created batch files, relative to the mounted volume.
     """
     batch_file_names = []
     for entry in os.scandir(tmp_dir):
@@ -203,7 +203,7 @@ def download_callisto_data(
     :param year: Year of the observation.
     :param month: Month of the observation.
     :param day: Day of the observation.
-    :return: A list of file names of all newly created batch files, relative to `SPECTRE_DATA_DIR_PATH`.
+    :return: A list of file names of all newly created batch files, relative to the mounted volume.
     """
     tmp_dir = os.path.join(get_spectre_data_dir_path(), "tmp")
     # if there are any residual files in the temporary directory, remove them.
