@@ -8,7 +8,9 @@ import shutil
 import gzip
 from datetime import datetime
 
-from spectre_core.config import get_spectre_data_dir_path, get_batches_dir_path, TimeFormat
+from spectre_core.config import (
+    get_spectre_data_dir_path, get_batches_dir_path, TimeFormat, trim_spectre_data_dir_path
+)
 
 from enum import Enum
 
@@ -129,30 +131,37 @@ def _get_batch_path(
 
 def _unzip_file_to_batches(
     gz_path: str
-) -> None:
+) -> str:
     """
     Decompress a `.fit.gz` file and save it as a `.fits` batch file.
 
     :param gz_path: Path to the `.fit.gz` file.
+    :return: The file path of the newly created batch file, relative to the mounted volume.
     """
     fits_path = _get_batch_path(gz_path)
     with gzip.open(gz_path, "rb") as f_in, open(fits_path, "wb") as f_out:
         shutil.copyfileobj(f_in, f_out)
+        return trim_spectre_data_dir_path(f_out.name)
 
 
 def _unzip_to_batches(
     tmp_dir: str
-) -> None:
+) -> list[str]:
     """
     Decompress all `.gz` files in a temporary directory and save them as `spectre`
     batch files.
 
     :param tmp_dir: Path to the temporary directory containing `.gz` files.
+    :return: A list of file names of all newly created batch files, relative to the mounted volume.
     """
+    batch_file_names = []
     for entry in os.scandir(tmp_dir):
         if entry.is_file() and entry.name.endswith(".gz"):
-            _unzip_file_to_batches(entry.path)
+            batch_file_names.append( _unzip_file_to_batches(entry.path) )
             os.remove(entry.path)
+    shutil.rmtree(tmp_dir)
+    return batch_file_names
+            
 
 
 def _wget_callisto_data(
@@ -186,7 +195,7 @@ def download_callisto_data(
     year: int, 
     month: int, 
     day: int
-) -> None:
+) -> list[str]:
     """
     Download and decompress e-Callisto FITS files, saving them as `spectre` batch files.
 
@@ -194,6 +203,7 @@ def download_callisto_data(
     :param year: Year of the observation.
     :param month: Month of the observation.
     :param day: Day of the observation.
+    :return: A list of file names of all newly created batch files, relative to the mounted volume.
     """
     tmp_dir = os.path.join(get_spectre_data_dir_path(), "tmp")
     # if there are any residual files in the temporary directory, remove them.
@@ -202,5 +212,4 @@ def download_callisto_data(
     os.makedirs(tmp_dir, exist_ok=True)
     
     _wget_callisto_data(instrument_code.value, year, month, day, tmp_dir)
-    _unzip_to_batches(tmp_dir)
-    shutil.rmtree(tmp_dir)
+    return sorted( _unzip_to_batches(tmp_dir) )

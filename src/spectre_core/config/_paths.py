@@ -115,3 +115,35 @@ def get_configs_dir_path(
     :return: The directory path for configuration files.
     """
     return _CONFIGS_DIR_PATH
+
+
+def trim_spectre_data_dir_path(
+    full_path: str
+) -> str:
+    """Remove the `SPECTRE_DATA_DIR_PATH` prefix from a full file path.
+
+    This function returns the relative path of `full_path` with respect to
+    `SPECTRE_DATA_DIR_PATH`. It is useful for trimming absolute paths
+    to maintain consistency across different environments where the base
+    directory might differ.
+
+    :param full_path: The full file path to be trimmed.
+    :return: The relative path with `SPECTRE_DATA_DIR_PATH` removed.
+    """
+    return os.path.relpath(full_path, _SPECTRE_DATA_DIR_PATH)
+
+
+def add_spectre_data_dir_path(
+    rel_path: str
+) -> str:
+    """Prepend the `SPECTRE_DATA_DIR_PATH` prefix to a relative file path.
+
+    This function constructs an absolute path by joining the given relative
+    path with `SPECTRE_DATA_DIR_PATH`. It is useful for converting stored
+    relative paths back into full paths within the mounted directory.
+
+    :param rel_path: The relative file path to be appended.
+    :return: The full file path prefixed with `SPECTRE_DATA_DIR_PATH`.
+    """
+    return os.path.join(_SPECTRE_DATA_DIR_PATH, rel_path)
+
