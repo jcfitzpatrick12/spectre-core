@@ -2,17 +2,21 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import os
 import numpy as np
-import numpy.typing as npt
 from typing import Optional, Tuple, cast
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+from datetime import datetime
 
 from spectre_core.spectrograms import TimeType
+from spectre_core.config import TimeFormat, get_batches_dir_path
 from ._base import BasePanel, XAxisType
 from ._format import PanelFormat
-from ._panels import PanelName, SpectrogramPanel, TimeCutsPanel, FrequencyCutsPanel
+from ._panels import (
+    PanelName, SpectrogramPanel, TimeCutsPanel, FrequencyCutsPanel
+)
 
 
 def _is_cuts_panel(
@@ -43,7 +47,7 @@ class PanelStack:
         self, 
         panel_format: PanelFormat = PanelFormat(),
         time_type: TimeType = TimeType.RELATIVE,
-        figsize: Tuple[int, int] = (10, 10)
+        figsize: Tuple[int, int] = (15, 8)
     ) -> None:
         """Initialize an instance of `PanelStack`.
 
@@ -116,14 +120,15 @@ class PanelStack:
     def add_panel(
         self, 
         panel: BasePanel,
-        identifier: Optional[str] = None
+        identifier: Optional[str] = None,
+        panel_format: Optional[PanelFormat] = None
     ) -> None:
         """Add a panel to the stack.
 
         :param panel: An instance of a `BasePanel` subclass to be added to the stack.
         :param identifier: An optional string to link the panel with others for superimposing.
         """
-        panel.panel_format = self._panel_format
+        panel.panel_format = panel_format or self._panel_format 
         panel.time_type    = self._time_type
         if identifier: 
             panel.identifier = identifier
@@ -133,7 +138,8 @@ class PanelStack:
     def superimpose_panel(
         self, 
         panel: BasePanel,
-        identifier: Optional[str] = None
+        identifier: Optional[str] = None,
+        panel_format: Optional[PanelFormat] = None
     ) -> None:
         """Superimpose a panel onto an existing panel in the stack.
 
@@ -142,7 +148,8 @@ class PanelStack:
         """
         if identifier:
             panel.identifier = identifier
-        panel.panel_format = self._panel_format
+        panel.panel_format = panel_format or self._panel_format
+        panel.time_type    = self._time_type
         self._superimposed_panels.append(panel)
 
 
@@ -234,11 +241,13 @@ class PanelStack:
                     if _is_cuts_panel(super_panel):
                         self._overlay_cuts(super_panel)
 
-
-    def show(
+    def _make_figure(
         self
     ) -> None:
-        """Display the panel stack figure."""
+        """Make the panel stack figure."""
+        if self.num_panels < 1:
+            raise ValueError(f"There must be at least one panel in the stack.")
+        
         self._init_plot_style()
         self._create_figure_and_axes()
         self._assign_axes()
@@ -258,4 +267,31 @@ class PanelStack:
                 self._overlay_cuts(panel)
                 
         self._overlay_superimposed_panels()
+
+    def show(
+        self
+    ) -> None:
+        """Display the panel stack figure."""
+        self._make_figure()
         plt.show()
+        
+        
+    def save(
+        self,
+    ) -> None:
+        """Save the panel stack figure as a batch file under the tag of the first 
+        panel in the stack. The file format is `png`. 
+        """
+        self._make_figure()
+        first_panel = self._panels[0]
+        
+        start_dt = cast(datetime, first_panel.spectrogram.start_datetime.astype(datetime))
+        batch_name = f"{start_dt.strftime(TimeFormat.DATETIME)}_{first_panel.spectrogram.tag}"
+        batch_file_path = os.path.join(
+            get_batches_dir_path(start_dt.year, start_dt.month, start_dt.day),
+            f"{batch_name}.png"
+        )
+        plt.savefig(batch_file_path)
+        
+        
+
