@@ -58,21 +58,21 @@ def frequency_chop(
 
 def time_chop(
     spectrogram: Spectrogram, 
-    start_time: str, 
-    end_time: str
+    start_datetime: datetime, 
+    end_datetime: datetime
 ) -> Spectrogram:
     """
     Extracts a portion of the spectrogram within the specified time range.
 
     :param spectrogram: The input spectrogram to process.
-    :param start_time: The starting time of the desired range.
-    :param end_time: The ending time of the desired range.
+    :param start_datetime: The starting time of the desired range.
+    :param end_datetime: The ending time of the desired range.
     :raises ValueError: If the specified time range is entirely outside the spectrogram's time range.
     :raises ValueError: If the start and end indices for the time range are identical.
     :return: A new spectrogram containing only the specified time range.
     """
-    start_datetime = np.datetime64( datetime.strptime(start_time, TimeFormat.DATETIME) )
-    end_datetime   = np.datetime64( datetime.strptime(end_time  , TimeFormat.DATETIME) )
+    start_datetime = np.datetime64(start_datetime)
+    end_datetime   = np.datetime64(end_datetime)
 
     is_entirely_below_time_range = (start_datetime < spectrogram.datetimes[0] and end_datetime < spectrogram.datetimes[0])
     is_entirely_above_time_range = (start_datetime > spectrogram.datetimes[-1] and end_datetime > spectrogram.datetimes[-1])
