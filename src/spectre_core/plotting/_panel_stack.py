@@ -287,7 +287,7 @@ class PanelStack:
         """Save the panel stack figure as a batch file under the tag of the first 
         panel in the stack. The file format is `png`. 
         
-        :return: The file path of the newly created batch file.
+        :return: The file path of the newly created batch file containing the figure.
         """
         self._make_figure()
         first_panel = self._panels[0]
