@@ -18,6 +18,9 @@ from ._panels import (
     PanelName, SpectrogramPanel, TimeCutsPanel, FrequencyCutsPanel
 )
 
+# Use a non-interactive backend, which can only write files.
+from matplotlib import use
+use('agg')
 
 def _is_cuts_panel(
     panel: BasePanel
@@ -278,9 +281,11 @@ class PanelStack:
         
     def save(
         self,
-    ) -> None:
+    ) -> str:
         """Save the panel stack figure as a batch file under the tag of the first 
         panel in the stack. The file format is `png`. 
+        
+        :return: The file path of the newly created batch file.
         """
         self._make_figure()
         first_panel = self._panels[0]
@@ -292,6 +297,7 @@ class PanelStack:
             f"{batch_name}.png"
         )
         plt.savefig(batch_file_path)
+        return batch_file_path
         
         
 
