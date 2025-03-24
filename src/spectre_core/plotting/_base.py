@@ -5,6 +5,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional, Literal
 from enum import Enum
+from datetime import datetime
 
 import numpy.typing as npt
 import numpy as np
@@ -13,6 +14,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 from spectre_core.spectrograms import Spectrogram, TimeType
+from spectre_core.config import TimeFormat
 from ._format import PanelFormat
 from ._panel_names import PanelName
 
@@ -284,8 +286,11 @@ class BaseTimeSeriesPanel(BasePanel):
         if self.time_type == TimeType.RELATIVE:
             self.ax.set_xlabel('Time [s]')
         else:
-            self.ax.set_xlabel('Time [UTC]')
-            self.ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
+            #TODO: Adapt for time ranges greater than one day
+            start_date = datetime.strftime(self.spectrogram.start_datetime.astype(datetime),
+                                           TimeFormat.DATE)
+            self.ax.set_xlabel(f'Time [UTC] - Start Date: {start_date}')
+            self.ax.xaxis.set_major_formatter(mdates.DateFormatter(TimeFormat.TIME))
 
 
 
