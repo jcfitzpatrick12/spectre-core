@@ -8,6 +8,7 @@ from typing import Optional, Tuple, cast
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+from matplotlib import use
 from datetime import datetime
 
 from spectre_core.spectrograms import TimeType
@@ -17,10 +18,6 @@ from ._format import PanelFormat
 from ._panels import (
     PanelName, SpectrogramPanel, TimeCutsPanel, FrequencyCutsPanel
 )
-
-# Use a non-interactive backend, which can only write files.
-from matplotlib import use
-use('agg')
 
 def _is_cuts_panel(
     panel: BasePanel
@@ -50,7 +47,8 @@ class PanelStack:
         self, 
         panel_format: PanelFormat = PanelFormat(),
         time_type: TimeType = TimeType.RELATIVE,
-        figsize: Tuple[int, int] = (15, 8)
+        figsize: Tuple[int, int] = (15, 8),
+        non_interactive: bool = False
     ) -> None:
         """Initialize an instance of `PanelStack`.
 
@@ -61,6 +59,10 @@ class PanelStack:
         self._panel_format = panel_format
         self._time_type = time_type
         self._figsize = figsize
+        
+        if non_interactive:
+            # Use a non-interactive matplotlib backend, which can only write files.
+            use('agg')
 
         self._panels             : list[BasePanel] = []
         self._superimposed_panels: list[BasePanel] = []
