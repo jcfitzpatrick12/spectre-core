@@ -42,7 +42,7 @@ class CaptureConfig(JsonHandler):
         self._validate_tag(tag)
         self._tag = tag
         super().__init__(get_configs_dir_path(),
-                         f"capture_{tag}")
+                         tag)
         
     @property
     def tag(
@@ -60,11 +60,8 @@ class CaptureConfig(JsonHandler):
         
         Some substrings are reserved for third-party spectrogram data.
         """
-        if "_" in tag:
-            raise InvalidTagError(f"Tags cannot contain an underscore. Received {tag}")
-        
         if "callisto" in tag:
-            raise ValueError(f"The substring `callisto` is not allowed in a capture config tag.")
+            raise ValueError(f"The substring `callisto` is reserved, and is not allowed in a capture config tag.")
     
 
     @property
