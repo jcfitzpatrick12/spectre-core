@@ -54,7 +54,7 @@ class PanelStack:
 
         :param panel_format: Formatting applied across all panels in the stack. Defaults to `PanelFormat()`.
         :param time_type: The type of time assigned to spectrograms, defaults to `TimeType.RELATIVE`.
-        :param figsize: The size of the `matplotlib` figure as (width, height). Defaults to (10, 10).
+        :param figsize: The size of the `matplotlib` figure as (width, height). Defaults to (15, 8).
         """
         self._panel_format = panel_format
         self._time_type = time_type
