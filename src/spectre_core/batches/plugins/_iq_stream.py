@@ -317,7 +317,6 @@ class IQStreamBatch(BaseBatch):
         :param tag: The batch name tag.
         """
         super().__init__(start_time, tag) 
-        self._batch_files = {}
         self._fits_file = _FitsFile(self.parent_dir_path, self.name)
         self._bin_file  = _BinFile (self.parent_dir_path, self.name)
         self._hdr_file  = _HdrFile (self.parent_dir_path, self.name)

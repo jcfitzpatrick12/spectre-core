@@ -4,8 +4,10 @@
 
 from datetime import datetime
 from typing import TypeVar
+from base64 import b64encode
 from functools import cached_property
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 from spectre_core._file_io import BaseFileHandler
 from spectre_core.config import get_batches_dir_path, TimeFormat
@@ -64,6 +66,40 @@ class BatchFile(BaseFileHandler[T]):
     ) -> str:
         """The batch name tag."""
         return self._tag
+  
+  
+@dataclass(frozen=True)
+class _BatchExtension:
+    """Supported extensions for a `BaseBatch`, inherited by all derived classes.
+    
+    :ivar PNG: Corresponds to the `.png` file extension.
+    """
+    PNG: str = "png"
+      
+    
+class _PngFile(BatchFile[str]):
+    """Stores an image visualising the data for the batch."""
+    def __init__(
+        self, 
+        batch_parent_dir_path: str, 
+        batch_name: str
+    ) -> None:
+        """Initialise a `_PngFile` instance.
+
+        :param batch_parent_dir_path: The parent directory for the batch.
+        :param batch_name: The batch name.
+        """
+        super().__init__(batch_parent_dir_path, batch_name, _BatchExtension.PNG)
+
+
+    def _read(self) -> str:
+        """Reads the PNG file and returns it base64-encoded.
+
+        :return: Base64-encoded string representation of the image.
+        """
+        with open(self.file_path, "rb") as f:
+            encoded = b64encode(f.read())
+            return encoded.decode("ascii")
    
  
 class BaseBatch(ABC):
@@ -97,6 +133,10 @@ class BaseBatch(ABC):
         
         # internal register of batch files
         self._batch_files: dict[str, BatchFile] = {}
+    
+        # Add the files shared by all derived classes
+        self._png_file  = _PngFile(self.parent_dir_path, self.name)
+        self.add_file( self._png_file ) 
     
     
     @property
@@ -165,6 +205,14 @@ class BaseBatch(ABC):
         Use `add_file` to add a file to the batch.
         """
         return self._batch_files
+    
+    
+    @property
+    def png_file(
+        self
+    ) -> _PngFile:
+        """The batch file corresponding to the `.png` extension."""
+        return self._png_file
     
 
     def add_file(
