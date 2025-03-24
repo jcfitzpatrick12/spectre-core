@@ -289,7 +289,7 @@ class BaseTimeSeriesPanel(BasePanel):
             #TODO: Adapt for time ranges greater than one day
             start_date = datetime.strftime(self.spectrogram.start_datetime.astype(datetime),
                                            TimeFormat.DATE)
-            self.ax.set_xlabel(f'Time [UTC] - Start Date: {start_date}')
+            self.ax.set_xlabel(f'Time [UTC] (Start Date: {start_date})')
             self.ax.xaxis.set_major_formatter(mdates.DateFormatter(TimeFormat.TIME))
 
 
