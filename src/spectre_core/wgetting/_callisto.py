@@ -9,7 +9,7 @@ import gzip
 from datetime import datetime
 
 from spectre_core.config import (
-    get_spectre_data_dir_path, get_batches_dir_path, TimeFormat, trim_spectre_data_dir_path
+    get_spectre_data_dir_path, get_batches_dir_path, TimeFormat
 )
 
 from enum import Enum
