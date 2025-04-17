@@ -6,7 +6,8 @@ import os
 import subprocess
 import shutil
 import gzip
-from datetime import datetime
+from datetime import datetime, date
+from typing import Tuple
 
 from spectre_core.config import (
     get_spectre_data_dir_path, get_batches_dir_path, TimeFormat
@@ -195,7 +196,7 @@ def download_callisto_data(
     year: int, 
     month: int, 
     day: int
-) -> list[str]:
+) -> Tuple[list[str], date]:
     """
     Download and decompress e-Callisto FITS files, saving them as `spectre` batch files.
 
@@ -203,7 +204,7 @@ def download_callisto_data(
     :param year: Year of the observation.
     :param month: Month of the observation.
     :param day: Day of the observation.
-    :return: A list of file names of all newly created batch files, as absolute paths within the container's file system.
+    :return: A list of file names of all newly created batch files, as absolute paths within the container's file system. Additionally, return the start date shared by all batch files. 
     """
     tmp_dir = os.path.join(get_spectre_data_dir_path(), "tmp")
     # if there are any residual files in the temporary directory, remove them.
@@ -212,4 +213,4 @@ def download_callisto_data(
     os.makedirs(tmp_dir, exist_ok=True)
     
     _wget_callisto_data(instrument_code.value, year, month, day, tmp_dir)
-    return sorted( _unzip_to_batches(tmp_dir) )
+    return sorted( _unzip_to_batches(tmp_dir) ), date(year, month, day)
