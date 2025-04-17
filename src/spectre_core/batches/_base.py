@@ -3,18 +3,32 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from datetime import datetime
-from typing import TypeVar
+from typing import TypeVar, Tuple
 from base64 import b64encode
 from functools import cached_property
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from os.path import splitext
 
 from spectre_core._file_io import BaseFileHandler
 from spectre_core.config import get_batches_dir_path, TimeFormat
 from spectre_core.spectrograms import Spectrogram
 
 
+def parse_batch_file_name(
+    batch_file_name: str
+) -> Tuple[str, str, str]:
+    """Parse a batch file name into a start time, tag and extension.
+    """
+    batch_name, extension = splitext(batch_file_name)
+    # strip the dot from the extension
+    extension = extension.lstrip('.')
+    start_time, tag = batch_name.split("_", 1)
+    return start_time, tag, extension
+
+
 T = TypeVar('T')
+
 
 class BatchFile(BaseFileHandler[T]):
     """Abstract base class for files belonging to a batch, identified by their file extension.
@@ -284,3 +298,11 @@ class BaseBatch(ABC):
         """
         return self.spectrogram_file.read()
     
+
+
+
+
+
+
+
+

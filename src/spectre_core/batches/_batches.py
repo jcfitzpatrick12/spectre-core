@@ -13,7 +13,7 @@ from spectre_core.config import get_batches_dir_path
 from spectre_core.exceptions import (
     BatchNotFoundError
 )
-from ._base import BaseBatch
+from ._base import BaseBatch, parse_batch_file_name
 
 T = TypeVar('T', bound=BaseBatch)
 class Batches(Generic[T]):
@@ -144,9 +144,7 @@ class Batches(Generic[T]):
         # get a list of all batch file names in the batches directory path
         batch_file_names = [f for (_, _, files) in os.walk(self.batches_dir_path) for f in files]
         for batch_file_name in batch_file_names:
-            # strip the extension
-            batch_name, _ = os.path.splitext(batch_file_name)
-            start_time, tag = batch_name.split("_", 1)
+            start_time, tag, extension = parse_batch_file_name(batch_file_name) 
             if tag == self._tag:
                 self._batch_map[start_time] = self.batch_cls(start_time, tag)
         
@@ -207,7 +205,7 @@ class Batches(Generic[T]):
             return self._get_from_start_time(subscript)
         elif isinstance(subscript, int):
             return self._get_from_index(subscript)
-
+   
 
     def get_spectrogram(
         self,
