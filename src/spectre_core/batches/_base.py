@@ -15,12 +15,12 @@ from spectre_core.config import get_batches_dir_path, TimeFormat
 from spectre_core.spectrograms import Spectrogram
 
 
-def parse_batch_file_name(
-    batch_file_name: str
+def parse_batch_base_file_name(
+    base_file_name: str
 ) -> Tuple[str, str, str]:
-    """Parse a batch file name into a start time, tag and extension.
+    """Parse the base file name of a batch file into a start time, tag and extension.
     """
-    batch_name, extension = splitext(batch_file_name)
+    batch_name, extension = splitext(base_file_name)
     # strip the dot from the extension
     extension = extension.lstrip('.')
     start_time, tag = batch_name.split("_", 1)

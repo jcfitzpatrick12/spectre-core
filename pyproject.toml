@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spectre-core"
-version = "0.0.20"
+version = "0.0.21"
 maintainers = [
   { name="Jimmy Fitzpatrick", email="jcfitzpatrick12@gmail.com" },
 ]
@@ -22,7 +22,6 @@ dependencies = [
     'astropy==6.0.1',
     'matplotlib==3.5.0',
     'watchdog==4.0.0',
-    'mypy==1.14.1',
 ]
 license = { file = "LICENSE" }
 
