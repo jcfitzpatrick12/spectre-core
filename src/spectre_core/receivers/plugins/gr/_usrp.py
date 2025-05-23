@@ -128,7 +128,7 @@ class _swept_center_frequency(spectre_top_block):
                                                                      min_frequency)
 
         # Connections
-        self.msg_connect((self.spectre_sweep_driver_0, 'freq'), (self.uhd_usrp_source_0, 'command'))
+        self.msg_connect((self.spectre_sweep_driver_0, 'retune_command'), (self.uhd_usrp_source_0, 'command'))
         self.connect((self.uhd_usrp_source_0, 0), (self.spectre_batched_file_sink_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.spectre_sweep_driver_0, 0))
 
