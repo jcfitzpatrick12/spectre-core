@@ -202,7 +202,7 @@ class _tuner_1_swept_center_frequency(spectre_top_block):
 
 
         # Connections
-        self.msg_connect((self.spectre_sweep_driver_0, 'freq'), (self.sdrplay3_rspduo_0, 'freq'))
+        self.msg_connect((self.spectre_sweep_driver_0, 'retune_command'), (self.sdrplay3_rspduo_0, 'command'))
         self.connect((self.sdrplay3_rspduo_0, 0), (self.spectre_batched_file_sink_0, 0))
         self.connect((self.sdrplay3_rspduo_0, 0), (self.spectre_sweep_driver_0, 0))
         
