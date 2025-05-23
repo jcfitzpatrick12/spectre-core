@@ -84,29 +84,43 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
 
         :param event: The file system event containing the file details.
         """
-        # the `src_path`` attribute holds the absolute path of the freshly closed file
+        # The `src_path`` attribute holds the absolute path of the freshly closed file
         absolute_file_path = event.src_path
         
-        # only 'notice' a file if it ends with the appropriate extension as defined in the capture config
+        # Only process a file if:
+        #
+        # - It's extension matches the `watch_extension` as defined in the capture config.
+        # - It's tag matches the current sessions tag.
+        #
+        # This is important for two reasons. 
+        # 
+        # In the case of one session, the capture worker may write to two batch files simultaneously 
+        # (e.g., raw data file + seperate metadata file). We want to process them together - but this method will get called 
+        # seperately for both file creation events. So, we filter by extension to account for this.
+        #
+        # Additionally in the case of multiple sessions, the capture workers will create batch files in the same directory concurrently.
+        # This method is triggered for all file creation events, so we ensure the batch file tag matches the session tag and early return
+        # otherwise. This way, each post processor worker picks up the right files to process.
         watch_extension = cast(str, self._capture_config.get_parameter_value(PName.WATCH_EXTENSION))
+        if not absolute_file_path.endswith(f"{self._tag}.{watch_extension}"):
+            return
         
-        if absolute_file_path.endswith( watch_extension ):
-            _LOGGER.info(f"Noticed {absolute_file_path}")
-            # If there exists a queued file, try and process it
-            if self._queued_file is not None:
-                try:
-                    self.process(self._queued_file)
-                except Exception:
-                    _LOGGER.error(f"An error has occured while processing {self._queued_file}",
-                                  exc_info=True)
-                     # flush any internally stored spectrogram on error to avoid lost data
-                    self._flush_cache()
-                    # re-raise the exception to the main thread
-                    raise
-            
-            # Queue the current file for processing next
-            _LOGGER.info(f"Queueing {absolute_file_path} for post processing")
-            self._queued_file = absolute_file_path
+        _LOGGER.info(f"Noticed {absolute_file_path}")
+        # If there exists a queued file, try and process it
+        if self._queued_file is not None:
+            try:
+                self.process(self._queued_file)
+            except Exception:
+                _LOGGER.error(f"An error has occured while processing {self._queued_file}",
+                                exc_info=True)
+                # Flush any internally stored spectrogram on error to avoid lost data
+                self._flush_cache()
+                # re-raise the exception to the main thread
+                raise
+        
+        # Queue the current file for processing next
+        _LOGGER.info(f"Queueing {absolute_file_path} for post processing")
+        self._queued_file = absolute_file_path
 
 
     def _cache_spectrogram(
