@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from logging import getLogger
+
 _LOGGER = getLogger(__name__)
 
 from functools import wraps
@@ -17,8 +18,7 @@ from spectre_core.post_processing import start_post_processor
 
 
 def _make_daemon_process(
-    name: str, 
-    target: Callable[[], None]
+    name: str, target: Callable[[], None]
 ) -> multiprocessing.Process:
     """
     Creates and returns a daemon `multiprocessing.Process` instance.
@@ -27,21 +27,16 @@ def _make_daemon_process(
     :param target: The function to execute in the process.
     :return: A `multiprocessing.Process` instance configured as a daemon.
     """
-    return multiprocessing.Process(target=target,
-                                   name=name,
-                                   daemon=True)
+    return multiprocessing.Process(target=target, name=name, daemon=True)
 
 
 class Worker:
     """A lightweight wrapper for a `multiprocessing.Process` daemon.
-    
+
     Provides a very simple API to start, and restart a multiprocessing process.
     """
-    def __init__(
-        self,
-        name: str,
-        target: Callable[[], None]
-    ) -> None:
+
+    def __init__(self, name: str, target: Callable[[], None]) -> None:
         """Initialise a `Worker` instance.
 
         :param name: The name assigned to the process.
@@ -51,46 +46,34 @@ class Worker:
         self._target = target
         self._process = _make_daemon_process(name, target)
 
-
     @property
-    def name(
-        self
-    ) -> str:
+    def name(self) -> str:
         """Get the name of the worker process.
 
         :return: The name of the multiprocessing process.
         """
         return self._process.name
-    
-    
+
     @property
-    def process(
-        self
-    ) -> multiprocessing.Process:
+    def process(self) -> multiprocessing.Process:
         """Access the underlying multiprocessing process.
 
         :return: The wrapped `multiprocessing.Process` instance.
         """
         return self._process
 
-    
-    def start(
-        self
-    ) -> None:
+    def start(self) -> None:
         """Start the worker process.
 
         This method runs the `target` in the background as a daemon.
         """
         self._process.start()
 
-
-    def restart(
-        self
-    ) -> None:
+    def restart(self) -> None:
         """Restart the worker process.
 
         Terminates the existing process if it is alive and then starts a new process
-        after a brief pause. 
+        after a brief pause.
         """
         _LOGGER.info(f"Restarting {self.name} worker")
         if self._process.is_alive():
@@ -106,9 +89,9 @@ class Worker:
 
 P = ParamSpec("P")
 T = TypeVar("T", bound=Callable[..., None])
-def make_worker(
-    name: str
-) -> Callable[[Callable[P, None]], Callable[P, Worker]]:
+
+
+def make_worker(name: str) -> Callable[[Callable[P, None]], Callable[P, Worker]]:
     """
     Turns a function into a worker.
 
@@ -120,17 +103,18 @@ def make_worker(
     :return: A decorator that creates a `Worker` to run the function in its own process.
     """
 
-    def decorator(
-        func: Callable[P, None]
-    ) -> Callable[P, Worker]:
+    def decorator(func: Callable[P, None]) -> Callable[P, Worker]:
         @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> Worker:
             # Worker target funcs must have no arguments
             def target():
                 configure_root_logger(ProcessType.WORKER)
                 func(*args, **kwargs)
+
             return Worker(name, target)
+
         return wrapper
+
     return decorator
 
 
@@ -148,13 +132,16 @@ def do_capture(
     # load the receiver and mode from the capture config file
     capture_config = CaptureConfig(tag)
 
-    _LOGGER.info((f"Starting capture with the receiver '{capture_config.receiver_name}' "
-                  f"operating in mode '{capture_config.receiver_mode}' "
-                  f"with tag '{tag}'"))
+    _LOGGER.info(
+        (
+            f"Starting capture with the receiver '{capture_config.receiver_name}' "
+            f"operating in mode '{capture_config.receiver_mode}' "
+            f"with tag '{tag}'"
+        )
+    )
 
-    name = ReceiverName( capture_config.receiver_name )
-    receiver = get_receiver(name,
-                            capture_config.receiver_mode)
+    name = ReceiverName(capture_config.receiver_name)
+    receiver = get_receiver(name, capture_config.receiver_mode)
     receiver.start_capture(tag)
 
 

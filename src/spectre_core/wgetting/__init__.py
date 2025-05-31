@@ -6,6 +6,4 @@
 
 from ._callisto import download_callisto_data, CallistoInstrumentCode
 
-__all__ = [
-    "download_callisto_data", "CallistoInstrumentCode"
-]
+__all__ = ["download_callisto_data", "CallistoInstrumentCode"]

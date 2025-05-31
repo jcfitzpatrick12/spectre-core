@@ -16,6 +16,13 @@ from ._register import get_registered_receivers
 from ._spec_names import SpecName
 
 __all__ = [
-    "Test", "RSP1A", "RSPduo", "B200mini",  "BaseReceiver", "get_receiver", 
-    "get_registered_receivers", "SpecName", "ReceiverName"
+    "Test",
+    "RSP1A",
+    "RSPduo",
+    "B200mini",
+    "BaseReceiver",
+    "get_receiver",
+    "get_registered_receivers",
+    "SpecName",
+    "ReceiverName",
 ]

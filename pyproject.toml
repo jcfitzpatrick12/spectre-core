@@ -29,3 +29,6 @@ license = { file = "LICENSE" }
 Homepage = "https://github.com/jcfitzpatrick12/spectre-core"
 Issues = "https://github.com/jcfitzpatrick12/spectre-core/issues"
 
+[project.optional-dependencies]
+test = ["pytest", "mypy", "black"]
+

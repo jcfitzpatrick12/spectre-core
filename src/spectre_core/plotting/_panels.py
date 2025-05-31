@@ -15,15 +15,16 @@ from ._base import BaseSpectrumPanel, BaseTimeSeriesPanel
 from ._panel_names import PanelName
 
 
-T = TypeVar('T')
+T = TypeVar("T")
+
+
 def _bind_to_colors(
-    values: list[T], 
-    cmap: str = "winter"
-) -> Iterator[Tuple[T, npt.NDArray[np.float32]]]: 
+    values: list[T], cmap: str = "winter"
+) -> Iterator[Tuple[T, npt.NDArray[np.float32]]]:
     """
     Assign RGBA colors to a list of values using a colormap.
 
-    Each value is mapped linearly to a subset of the unit interval and then converted 
+    Each value is mapped linearly to a subset of the unit interval and then converted
     to an RGBA color using the specified colormap.
 
     :param values: List of values to map to colors.
@@ -39,61 +40,57 @@ class FrequencyCutsPanel(BaseSpectrumPanel):
     """
     Panel for visualising spectrogram data as frequency cuts.
 
-    This panel plots spectrums corresponding to specific time instances 
-    in the spectrogram. Each cut is drawn as a line plot, optionally normalized 
+    This panel plots spectrums corresponding to specific time instances
+    in the spectrogram. Each cut is drawn as a line plot, optionally normalized
     or converted to decibels above the background.
     """
+
     def __init__(
-        self, 
-        spectrogram: Spectrogram, 
+        self,
+        spectrogram: Spectrogram,
         *times: float | str,
         dBb: bool = False,
-        peak_normalise: bool = False
+        peak_normalise: bool = False,
     ) -> None:
         """Initialise an instance of `FrequencyCutsPanel`.
 
         :param spectrogram: The spectrogram to be visualised.
-        :param *times: Times at which to take frequency cuts. Can be floats (relative time) or 
+        :param *times: Times at which to take frequency cuts. Can be floats (relative time) or
         strings (formatted datetimes).
         :param dBb: If True, plots the spectrums in decibels above the background. Defaults to False.
-        :param peak_normalise: If True, normalizes each spectrum such that its peak value is 1. 
+        :param peak_normalise: If True, normalizes each spectrum such that its peak value is 1.
         Ignored if `dBb` is True. Defaults to False.
         """
-        super().__init__(PanelName.FREQUENCY_CUTS,
-                         spectrogram)
-        
+        super().__init__(PanelName.FREQUENCY_CUTS, spectrogram)
+
         if len(times) == 0:
-            raise ValueError(f"You must specify the time of at least one cut in `*times`")
+            raise ValueError(
+                f"You must specify the time of at least one cut in `*times`"
+            )
         self._times = times
-        
+
         self._dBb = dBb
         self._peak_normalise = peak_normalise
         self._frequency_cuts: dict[float | datetime, FrequencyCut] = {}
 
-
-    def get_frequency_cuts(
-        self
-    ) -> dict[float | datetime, FrequencyCut]:
+    def get_frequency_cuts(self) -> dict[float | datetime, FrequencyCut]:
         """
         Get the frequency cuts for the specified times.
 
-        Computes and caches the spectrum for each requested time. The results are 
+        Computes and caches the spectrum for each requested time. The results are
         stored as a mapping from time to the corresponding `FrequencyCut`.
 
         :return: A dictionary mapping each time to its corresponding frequency cut.
         """
         if not self._frequency_cuts:
             for time in self._times:
-                frequency_cut = self._spectrogram.get_frequency_cut(time,
-                                                                    dBb=self._dBb,
-                                                                    peak_normalise=self._peak_normalise)
+                frequency_cut = self._spectrogram.get_frequency_cut(
+                    time, dBb=self._dBb, peak_normalise=self._peak_normalise
+                )
                 self._frequency_cuts[frequency_cut.time] = frequency_cut
         return self._frequency_cuts
-    
 
-    def get_cut_times(
-        self
-    ) -> list[float | datetime]:
+    def get_cut_times(self) -> list[float | datetime]:
         """
         Get the exact times of the frequency cuts.
 
@@ -103,40 +100,35 @@ class FrequencyCutsPanel(BaseSpectrumPanel):
         """
         frequency_cuts = self.get_frequency_cuts()
         return list(frequency_cuts.keys())
-    
 
-    def draw(
-        self
-    ) -> None:
+    def draw(self) -> None:
         """Draw the frequency cuts onto the panel."""
         frequency_cuts = self.get_frequency_cuts()
         for time, color in self.bind_to_colors():
             frequency_cut = frequency_cuts[time]
-            self.ax.step(self.frequencies, # convert to MHz
-                         frequency_cut.cut, 
-                         where='mid', 
-                         color = color)
-    
+            self.ax.step(
+                self.frequencies,  # convert to MHz
+                frequency_cut.cut,
+                where="mid",
+                color=color,
+            )
 
-    def annotate_yaxis(
-        self
-    ) -> None:
+    def annotate_yaxis(self) -> None:
         """Annotate the y-axis of the panel based on the current state.
 
         The y-axis label reflects whether the data is in decibels above the background (`dBb`),
         normalized to peak values, or in the original units of the spectrogram.
         """
         if self._dBb:
-            self.ax.set_ylabel('dBb')
+            self.ax.set_ylabel("dBb")
         elif self._peak_normalise:
             # no y-axis label if we are peak normalising
-            return 
+            return
         else:
-            self.ax.set_ylabel(f'{self._spectrogram.spectrum_unit.value.capitalize()}')
+            self.ax.set_ylabel(f"{self._spectrogram.spectrum_unit.value.capitalize()}")
 
-    
     def bind_to_colors(
-        self
+        self,
     ) -> Iterator[Tuple[float | datetime, npt.NDArray[np.float32]]]:
         """
         Bind each frequency cut time to an RGBA color.
@@ -145,73 +137,71 @@ class FrequencyCutsPanel(BaseSpectrumPanel):
 
         :return: An iterator of tuples, each containing a cut time and its corresponding RGBA color.
         """
-        return _bind_to_colors(self.get_cut_times(), cmap = self.panel_format.line_cmap)
-    
-    
+        return _bind_to_colors(self.get_cut_times(), cmap=self.panel_format.line_cmap)
+
+
 class TimeCutsPanel(BaseTimeSeriesPanel):
     """
     Panel for visualising spectrogram data as time series of spectral components.
 
-    This panel plots the time evolution of spectral components at specific 
-    frequencies in the spectrogram. Each time series is drawn as a line plot, 
+    This panel plots the time evolution of spectral components at specific
+    frequencies in the spectrogram. Each time series is drawn as a line plot,
     optionally normalized, background-subtracted, or converted to decibels above the background.
     """
+
     def __init__(
-        self, 
-        spectrogram: Spectrogram, 
+        self,
+        spectrogram: Spectrogram,
         *frequencies: float,
         dBb: bool = False,
         peak_normalise: bool = False,
-        background_subtract: bool = False
+        background_subtract: bool = False,
     ) -> None:
         """Initialise an instance of `TimeCutsPanel`.
 
         :param spectrogram: The spectrogram to be visualised.
         :param *frequencies: Frequencies at which to extract time series.
         :param dBb: If True, returns the cuts in decibels above the background. Defaults to False.
-        :param peak_normalise: If True, normalizes each time series so its peak value is 1. 
+        :param peak_normalise: If True, normalizes each time series so its peak value is 1.
         Ignored if `dBb` is True. Defaults to False.
-        :param background_subtract: If True, subtracts the background from each time series. 
+        :param background_subtract: If True, subtracts the background from each time series.
         Ignored if `dBb` is True. Defaults to False.
         """
-        super().__init__(PanelName.TIME_CUTS, 
-                         spectrogram)
-        
+        super().__init__(PanelName.TIME_CUTS, spectrogram)
+
         if len(frequencies) == 0:
-            raise ValueError(f"You must specify the frequency of at least one cut in `*frequencies`.")
+            raise ValueError(
+                f"You must specify the frequency of at least one cut in `*frequencies`."
+            )
         self._frequencies = frequencies
-        
+
         self._dBb = dBb
         self._peak_normalise = peak_normalise
         self._background_subtract = background_subtract
-        self._time_cuts: dict[float, TimeCut] = {} 
-    
+        self._time_cuts: dict[float, TimeCut] = {}
 
-    def get_time_cuts(
-        self
-    ) -> dict[float, TimeCut]:
+    def get_time_cuts(self) -> dict[float, TimeCut]:
         """
         Get the time cuts for the specified frequencies.
 
-        Computes and caches the time series for each requested frequency. The results 
+        Computes and caches the time series for each requested frequency. The results
         are stored as a mapping from frequency to `TimeCut`.
 
         :return: A dictionary mapping each frequency to its corresponding time cut.
         """
         if not self._time_cuts:
             for frequency in self._frequencies:
-                time_cut =  self._spectrogram.get_time_cut(frequency,
-                                                           dBb=self._dBb,
-                                                           peak_normalise=self._peak_normalise,
-                                                           correct_background=self._background_subtract,
-                                                           return_time_type=self.time_type)
+                time_cut = self._spectrogram.get_time_cut(
+                    frequency,
+                    dBb=self._dBb,
+                    peak_normalise=self._peak_normalise,
+                    correct_background=self._background_subtract,
+                    return_time_type=self.time_type,
+                )
                 self._time_cuts[time_cut.frequency] = time_cut
         return self._time_cuts
-    
 
-    def get_frequencies(
-        self
-    ) -> list[float]:
+    def get_frequencies(self) -> list[float]:
         """
         Get the exact frequencies for the spectral components being plotted.
 
@@ -220,23 +210,14 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
         time_cuts = self.get_time_cuts()
         return list(time_cuts.keys())
 
-
-    def draw(
-        self
-    ) -> None:
+    def draw(self) -> None:
         """Draw the time series for each spectral component onto the panel."""
         time_cuts = self.get_time_cuts()
         for frequency, color in self.bind_to_colors():
             time_cut = time_cuts[frequency]
-            self.ax.step(self.times, 
-                         time_cut.cut, 
-                         where='mid', 
-                         color = color)
-    
+            self.ax.step(self.times, time_cut.cut, where="mid", color=color)
 
-    def annotate_yaxis(
-        self
-    ) -> None:
+    def annotate_yaxis(self) -> None:
         """
         Annotate the y-axis of the panel based on the current state.
 
@@ -244,16 +225,13 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
         normalized to peak values, or in the original units of the spectrogram.
         """
         if self._dBb:
-            self.ax.set_ylabel('dBb')
+            self.ax.set_ylabel("dBb")
         elif self._peak_normalise:
-            return # no y-axis label if we are peak normalising.
+            return  # no y-axis label if we are peak normalising.
         else:
-            self.ax.set_ylabel(f'{self._spectrogram.spectrum_unit.value.capitalize()}')
+            self.ax.set_ylabel(f"{self._spectrogram.spectrum_unit.value.capitalize()}")
 
-    
-    def bind_to_colors(
-        self
-    ) -> Iterator[Tuple[float, npt.NDArray[np.float32]]]:
+    def bind_to_colors(self) -> Iterator[Tuple[float, npt.NDArray[np.float32]]]:
         """
         Bind each spectral component's frequency to an RGBA color.
 
@@ -261,53 +239,56 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
 
         :return: An iterator of tuples, each containing a frequency and its corresponding RGBA color.
         """
-        return _bind_to_colors(self.get_frequencies(), cmap = self.panel_format.line_cmap)
-    
+        return _bind_to_colors(self.get_frequencies(), cmap=self.panel_format.line_cmap)
+
 
 class IntegralOverFrequencyPanel(BaseTimeSeriesPanel):
     """Panel for visualising the spectrogram integrated over frequency.
 
-    This panel plots the spectrogram numerically integrated over frequency as a time 
-    series. The result can be normalized to its peak value or adjusted by subtracting 
+    This panel plots the spectrogram numerically integrated over frequency as a time
+    series. The result can be normalized to its peak value or adjusted by subtracting
     the background.
     """
-    def __init__(self, 
-                 spectrogram: Spectrogram, 
-                 peak_normalise: bool = False,
-                 background_subtract: bool = False):
+
+    def __init__(
+        self,
+        spectrogram: Spectrogram,
+        peak_normalise: bool = False,
+        background_subtract: bool = False,
+    ):
         """Initialise an instance of `IntegralOverFrequencyPanel`.
-        
+
         :param spectrogram: The spectrogram to be visualised.
         :param peak_normalise: If True, normalizes the integral so its peak value is 1. Defaults to False.
         :param background_subtract: If True, subtracts the background after computing the integral. Defaults to False.
         """
-        super().__init__(PanelName.INTEGRAL_OVER_FREQUENCY,
-                         spectrogram)
+        super().__init__(PanelName.INTEGRAL_OVER_FREQUENCY, spectrogram)
         self._peak_normalise = peak_normalise
         self._background_subtract = background_subtract
 
-
     def draw(self):
         """Integrate the spectrogram over frequency and plot the result."""
-        I = self._spectrogram.integrate_over_frequency(correct_background=self._background_subtract,
-                                                       peak_normalise=self._peak_normalise)
-        self.ax.step(self.times, I, where="mid", color = self.panel_format.line_color)
- 
+        I = self._spectrogram.integrate_over_frequency(
+            correct_background=self._background_subtract,
+            peak_normalise=self._peak_normalise,
+        )
+        self.ax.step(self.times, I, where="mid", color=self.panel_format.line_color)
 
     def annotate_yaxis(self):
         """This panel does not annotate the y-axis."""
-    
-    
+
+
 class SpectrogramPanel(BaseTimeSeriesPanel):
     """
     Panel for visualising the full spectrogram.
 
-    This panel plots the spectrogram as a colormap, with optional log normalization or 
+    This panel plots the spectrogram as a colormap, with optional log normalization or
     in units of decibels above the background.
     """
+
     def __init__(
-        self, 
-        spectrogram: Spectrogram, 
+        self,
+        spectrogram: Spectrogram,
         log_norm: bool = False,
         dBb: bool = False,
         vmin: Optional[float] = None,
@@ -321,25 +302,23 @@ class SpectrogramPanel(BaseTimeSeriesPanel):
         :param vmin: Minimum value for the colormap. Only applies if `dBb` is True. Defaults to None.
         :param vmax: Maximum value for the colormap. Only applies if `dBb` is True. Defaults to None.
         """
-        super().__init__(PanelName.SPECTROGRAM,
-                         spectrogram)
+        super().__init__(PanelName.SPECTROGRAM, spectrogram)
         self._log_norm = log_norm
         self._dBb = dBb
         self._vmin = vmin
         self._vmax = vmax
 
-
     def _draw_dBb(self) -> None:
         """Plot the spectrogram in decibels above the background (dBb).
 
-        This method handles plotting the spectrogram with dBb scaling, applying 
+        This method handles plotting the spectrogram with dBb scaling, applying
         colormap bounds (`vmin` and `vmax`) and adding a colorbar to the panel.
         """
         dynamic_spectra = self._spectrogram.compute_dynamic_spectra_dBb()
-        
+
         # use defaults if neither vmin or vmax is specified
         vmin = self._vmin or -1
-        vmax = self._vmax or  2
+        vmax = self._vmax or 2
 
         # Plot the spectrogram
         pcm = self.ax.pcolormesh(
@@ -356,19 +335,19 @@ class SpectrogramPanel(BaseTimeSeriesPanel):
         cbar = self.fig.colorbar(pcm, ax=self.ax, ticks=cbar_ticks)
         cbar.set_label("dBb")
 
-
     def _draw_normal(self) -> None:
         """Plot the spectrogram with optional logarithmic normalization.
 
-        This method handles plotting the spectrogram without dBb scaling, using 
+        This method handles plotting the spectrogram without dBb scaling, using
         linear or log normalization based on the `log_norm` attribute.
         """
         dynamic_spectra = self._spectrogram.dynamic_spectra
-        
 
         if self._log_norm:
-            norm = LogNorm(vmin=np.nanmin(dynamic_spectra[dynamic_spectra > 0]),
-                           vmax=np.nanmax(dynamic_spectra))
+            norm = LogNorm(
+                vmin=np.nanmin(dynamic_spectra[dynamic_spectra > 0]),
+                vmax=np.nanmax(dynamic_spectra),
+            )
         else:
             norm = None
 
@@ -381,7 +360,6 @@ class SpectrogramPanel(BaseTimeSeriesPanel):
             norm=norm,
         )
 
-
     def draw(self) -> None:
         """Draw the spectrogram onto the panel."""
         if self._dBb:
@@ -389,46 +367,33 @@ class SpectrogramPanel(BaseTimeSeriesPanel):
         else:
             self._draw_normal()
 
-
-    def annotate_yaxis(
-        self
-    ) -> None:
+    def annotate_yaxis(self) -> None:
         """Annotate the yaxis, assuming units of Hz."""
-        self.ax.set_ylabel('Frequency [Hz]')
+        self.ax.set_ylabel("Frequency [Hz]")
         return
-    
-    
-    def overlay_time_cuts(
-        self, 
-        cuts_panel: TimeCutsPanel
-    ) -> None:
+
+    def overlay_time_cuts(self, cuts_panel: TimeCutsPanel) -> None:
         """
         Overlay horizontal lines on the spectrogram to indicate time cuts.
 
-        The lines correspond to the frequencies of the cuts on a `TimeCutsPanel`. 
+        The lines correspond to the frequencies of the cuts on a `TimeCutsPanel`.
         Colors are matched to the lines on the `TimeCutsPanel`.
 
         :param cuts_panel: The `TimeCutsPanel` containing the cut frequencies to overlay.
         """
         for frequency, color in cuts_panel.bind_to_colors():
-            self.ax.axhline(frequency,
-                            color = color,
-                            linewidth=self.panel_format.line_width)
-            
-            
-    def overlay_frequency_cuts(
-        self, 
-        cuts_panel: FrequencyCutsPanel
-    ) -> None:
+            self.ax.axhline(
+                frequency, color=color, linewidth=self.panel_format.line_width
+            )
+
+    def overlay_frequency_cuts(self, cuts_panel: FrequencyCutsPanel) -> None:
         """
         Overlay vertical lines on the spectrogram to indicate frequency cuts.
 
-        The lines correspond to the times of the cuts on a `FrequencyCutsPanel`. 
+        The lines correspond to the times of the cuts on a `FrequencyCutsPanel`.
         Colors are matched to the lines on the `FrequencyCutsPanel`.
 
         :param cuts_panel: The `FrequencyCutsPanel` containing the cut times to overlay.
         """
         for time, color in cuts_panel.bind_to_colors():
-            self.ax.axvline(time,
-                            color = color,
-                            linewidth=self.panel_format.line_width)
+            self.ax.axvline(time, color=color, linewidth=self.panel_format.line_width)

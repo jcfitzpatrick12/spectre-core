@@ -15,7 +15,14 @@ from ._batches import Batches
 from ._factory import get_batch_cls, get_batch_cls_from_tag
 
 __all__ = [
-    "IQStreamBatch", "IQMetadata", "CallistoBatch", "BaseBatch", "BatchFile", 
-    "Batches", "get_batch_cls", "BatchKey", "get_batch_cls_from_tag", "parse_batch_base_file_name"
+    "IQStreamBatch",
+    "IQMetadata",
+    "CallistoBatch",
+    "BaseBatch",
+    "BatchFile",
+    "Batches",
+    "get_batch_cls",
+    "BatchKey",
+    "get_batch_cls_from_tag",
+    "parse_batch_base_file_name",
 ]
-

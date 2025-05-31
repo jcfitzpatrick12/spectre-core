@@ -9,9 +9,7 @@ import numpy.typing as npt
 
 
 def average_array(
-    array: npt.NDArray[np.float32], 
-    average_over: int, 
-    axis: int = 0
+    array: npt.NDArray[np.float32], average_over: int, axis: int = 0
 ) -> npt.NDArray[np.float32]:
     """
     Averages elements of an array in blocks along a specified axis.
@@ -29,11 +27,15 @@ def average_array(
     axis_size = array.shape[axis]
     # Check if average_over is within the valid range
     if not 1 <= average_over <= axis_size:
-        raise ValueError(f"average_over must be between 1 and the length of the axis ({axis_size})")
-    
+        raise ValueError(
+            f"average_over must be between 1 and the length of the axis ({axis_size})"
+        )
+
     max_axis_index = len(np.shape(array)) - 1
-    if axis > max_axis_index: # zero indexing on specifying axis, so minus one
-        raise ValueError(f"Requested axis is out of range of array dimensions. Axis: {axis}, max axis index: {max_axis_index}")
+    if axis > max_axis_index:  # zero indexing on specifying axis, so minus one
+        raise ValueError(
+            f"Requested axis is out of range of array dimensions. Axis: {axis}, max axis index: {max_axis_index}"
+        )
 
     # find the number of elements in the requested axis
     num_elements = array.shape[axis]
@@ -43,7 +45,7 @@ def average_array(
     # if num_elements is not exactly divisible by average_over, we will have some elements left over
     # these remaining elements will be padded with nans to become another full block
     remainder = num_elements % average_over
-    
+
     # if there exists a remainder, pad the last block
     if remainder != 0:
         # initialise an array to hold the padding shape
@@ -51,8 +53,8 @@ def average_array(
         # pad after the last column in the requested axis
         padding_shape[axis] = (0, average_over - remainder)
         # pad with nan values (so to not contribute towards the mean computation)
-        array = np.pad(array, padding_shape, mode='constant', constant_values=np.nan)
-    
+        array = np.pad(array, padding_shape, mode="constant", constant_values=np.nan)
+
     # initalise a list to hold the new shape
     new_shape = list(array.shape)
     # update the shape on the requested access (to the number of blocks we will average over)
@@ -68,9 +70,9 @@ def average_array(
 
 
 def is_close(
-    ar: npt.NDArray[np.float32], 
+    ar: npt.NDArray[np.float32],
     ar_comparison: npt.NDArray[np.float32],
-    absolute_tolerance: float
+    absolute_tolerance: float,
 ) -> bool:
     """
     Checks if all elements in two arrays are element-wise close within a given tolerance.
@@ -80,16 +82,14 @@ def is_close(
     :param absolute_tolerance: Absolute tolerance for element-wise comparison.
     :return: `True` if all elements are close within the specified tolerance, otherwise `False`.
     """
-    return bool(np.all(np.isclose(ar, 
-                                  ar_comparison, 
-                                  atol=absolute_tolerance)))
+    return bool(np.all(np.isclose(ar, ar_comparison, atol=absolute_tolerance)))
 
 
-T = TypeVar('T', np.float32, np.datetime64)
+T = TypeVar("T", np.float32, np.datetime64)
+
+
 def find_closest_index(
-    target_value: T,
-    array: npt.NDArray[T],
-    enforce_strict_bounds: bool = False
+    target_value: T, array: npt.NDArray[T], enforce_strict_bounds: bool = False
 ) -> int:
     """
     Finds the index of the closest value to a target in a given array, with optional bounds enforcement.
@@ -104,29 +104,29 @@ def find_closest_index(
     if enforce_strict_bounds:
         max_value, min_value = np.nanmax(array), np.nanmin(array)
         if target_value > max_value:
-            raise ValueError(f"Target value {target_value} exceeds max array value {max_value}")
+            raise ValueError(
+                f"Target value {target_value} exceeds max array value {max_value}"
+            )
         if target_value < min_value:
-            raise ValueError(f"Target value {target_value} is less than min array value {min_value}")
+            raise ValueError(
+                f"Target value {target_value} is less than min array value {min_value}"
+            )
 
     # Find the index of the closest value
-    return int( np.argmin(np.abs(array - target_value)) )
+    return int(np.argmin(np.abs(array - target_value)))
 
 
-def normalise_peak_intensity(
-    array: npt.NDArray[np.float32]
-) -> npt.NDArray[np.float32]:
+def normalise_peak_intensity(array: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]:
     """
     Normalises an array by its peak intensity.
 
     :param array: Input array to normalise.
     :return: Array normalised such that its maximum value is 1. NaN values are ignored.
     """
-    return array/np.nanmax(array)
+    return array / np.nanmax(array)
 
 
-def compute_resolution(
-    array: npt.NDArray[np.float32]
-) -> float:
+def compute_resolution(array: npt.NDArray[np.float32]) -> float:
     """
     Computes the median resolution of a one-dimensional array.
 
@@ -137,18 +137,16 @@ def compute_resolution(
     # Check that the array is one-dimensional
     if array.ndim != 1:
         raise ValueError("Input array must be one-dimensional")
-    
+
     if len(array) < 2:
         raise ValueError("Input array must contain at least two elements")
-    
+
     # Calculate differences between consecutive elements.
     resolutions = np.diff(array)
-    return float( np.nanmedian(resolutions) )
+    return float(np.nanmedian(resolutions))
 
 
-def compute_range(
-    array: npt.NDArray[np.float32]
-) -> float:
+def compute_range(array: npt.NDArray[np.float32]) -> float:
     """
     Computes the range of a one-dimensional array as the difference between its last and first elements.
 
@@ -159,16 +157,14 @@ def compute_range(
     # Check that the array is one-dimensional
     if array.ndim != 1:
         raise ValueError("Input array must be one-dimensional")
-    
+
     if len(array) < 2:
         raise ValueError("Input array must contain at least two elements")
-    return float( array[-1] - array[0] )
+    return float(array[-1] - array[0])
 
 
 def subtract_background(
-    array: npt.NDArray[np.float32], 
-    start_index: int, 
-    end_index: int
+    array: npt.NDArray[np.float32], start_index: int, end_index: int
 ) -> npt.NDArray[np.float32]:
     """
     Subtracts the mean of a specified background range from all elements in an array.
@@ -178,13 +174,10 @@ def subtract_background(
     :param end_index: End index of the background range (inclusive).
     :return: Array with the background mean subtracted.
     """
-    array -= np.nanmean(array[start_index:end_index+1])
+    array -= np.nanmean(array[start_index : end_index + 1])
     return array
 
 
-def time_elapsed(
-    datetimes: npt.NDArray[np.datetime64]
-) -> npt.NDArray[np.float32]:
+def time_elapsed(datetimes: npt.NDArray[np.datetime64]) -> npt.NDArray[np.float32]:
     """Convert an array of datetimes to seconds elapsed."""
-    return (datetimes - datetimes[0]).astype('timedelta64[us]') / np.timedelta64(1, 's')
-
+    return (datetimes - datetimes[0]).astype("timedelta64[us]") / np.timedelta64(1, "s")

@@ -10,9 +10,11 @@ from ._base import BaseEventHandler
 # Map populated at runtime via the `register_event_handler` decorator.
 event_handler_map: dict[EventHandlerKey, Type[BaseEventHandler]] = {}
 
-T = TypeVar('T', bound=BaseEventHandler)
+T = TypeVar("T", bound=BaseEventHandler)
+
+
 def register_event_handler(
-    event_handler_key: EventHandlerKey
+    event_handler_key: EventHandlerKey,
 ) -> Callable[[Type[T]], Type[T]]:
     """Decorator to register a `BaseEventHandler` subclass under a specified `EventHandlerKey`.
 
@@ -20,12 +22,13 @@ def register_event_handler(
     :raises ValueError: If the provided `event_handler_key` is already registered.
     :return: A decorator that registers the `BaseBatch` subclass under the given `batch_key`.
     """
-    def decorator(
-        cls: Type[T]
-    ) -> Type[T]:
+
+    def decorator(cls: Type[T]) -> Type[T]:
         if event_handler_key in event_handler_map:
-            raise ValueError(f"An event handler with key '{event_handler_key}' is already registered!")
+            raise ValueError(
+                f"An event handler with key '{event_handler_key}' is already registered!"
+            )
         event_handler_map[event_handler_key] = cls
         return cls
-    return decorator
 
+    return decorator

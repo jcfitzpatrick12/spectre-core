@@ -15,8 +15,9 @@ class TimeFormat:
     :ivar PRECISE_TIME: Format for times with microseconds (e.g., '23:59:59.123456').
     :ivar PRECISE_DATETIME: Combined date and precise time format (e.g., '2025-01-11T23:59:59.123456').
     """
-    DATE              = "%Y-%m-%d"
-    TIME              = "%H:%M:%S"
-    DATETIME          = f"{DATE}T{TIME}"
-    PRECISE_TIME      = "%H:%M:%S.%f"
-    PRECISE_DATETIME  = f"{DATE}T{PRECISE_TIME}"
+
+    DATE = "%Y-%m-%d"
+    TIME = "%H:%M:%S"
+    DATETIME = f"{DATE}T{TIME}"
+    PRECISE_TIME = "%H:%M:%S.%f"
+    PRECISE_DATETIME = f"{DATE}T{PRECISE_TIME}"

@@ -6,9 +6,20 @@
 `spectre` custom exceptions.
 """
 
+
 class BatchNotFoundError(KeyError): ...
+
+
 class ModeNotFoundError(KeyError): ...
+
+
 class EventHandlerNotFoundError(KeyError): ...
+
+
 class ReceiverNotFoundError(KeyError): ...
+
+
 class InvalidTagError(ValueError): ...
+
+
 class InvalidSweepMetadataError(ValueError): ...

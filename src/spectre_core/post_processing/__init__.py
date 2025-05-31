@@ -11,6 +11,9 @@ from ._factory import get_event_handler, get_event_handler_cls_from_tag
 from ._post_processor import start_post_processor
 
 __all__ = [
-    "FixedEventHandler", "SweptEventHandler", "start_post_processor", 
-    "get_event_handler", "get_event_handler_cls_from_tag"
+    "FixedEventHandler",
+    "SweptEventHandler",
+    "start_post_processor",
+    "get_event_handler",
+    "get_event_handler_cls_from_tag",
 ]

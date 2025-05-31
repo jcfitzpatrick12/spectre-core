@@ -10,7 +10,9 @@ from ._base import BaseReceiver
 # map populated at runtime via the `register_receiver` decorator.
 receivers: dict[ReceiverName, Type[BaseReceiver]] = {}
 
-T = TypeVar('T', bound=BaseReceiver)
+T = TypeVar("T", bound=BaseReceiver)
+
+
 def register_receiver(
     receiver_name: ReceiverName,
 ) -> Callable[[Type[T]], Type[T]]:
@@ -20,24 +22,19 @@ def register_receiver(
     :raises ValueError: If the provided `receiver_name` is already registered.
     :return: A decorator that registers the `BaseReceiver` subclass under the given `receiver_name`.
     """
-    def decorator(
-        cls: Type[T]
-    ) -> Type[T]:
+
+    def decorator(cls: Type[T]) -> Type[T]:
         if receiver_name in receivers:
             raise ValueError(f"The receiver '{receiver_name}' is already registered!")
         receivers[receiver_name] = cls
         return cls
+
     return decorator
 
 
-def get_registered_receivers(
-) -> list[str]:
+def get_registered_receivers() -> list[str]:
     """List all registered receivers.
 
     :return: The string values of all registered `ReceiverName` enum keys.
     """
     return [k.value for k in receivers.keys()]
-
-
-
-
