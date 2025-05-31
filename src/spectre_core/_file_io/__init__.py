@@ -5,9 +5,9 @@
 """Basic internal file handling capabilities."""
 
 from .file_handlers import (
-    BaseFileHandler, JsonHandler, TextHandler,
+    BaseFileHandler,
+    JsonHandler,
+    TextHandler,
 )
 
-__all__ = [ 
-    "BaseFileHandler", "JsonHandler", "TextHandler"
-]
+__all__ = ["BaseFileHandler", "JsonHandler", "TextHandler"]

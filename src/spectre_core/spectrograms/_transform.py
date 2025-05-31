@@ -12,10 +12,9 @@ from spectre_core.config import TimeFormat
 from ._array_operations import find_closest_index, average_array, time_elapsed
 from ._spectrogram import Spectrogram
 
+
 def frequency_chop(
-    spectrogram: Spectrogram, 
-    start_frequency  : float, 
-    end_frequency    : float
+    spectrogram: Spectrogram, start_frequency: float, end_frequency: float
 ) -> Spectrogram:
     """
     Extracts a portion of the spectrogram within the specified frequency range.
@@ -27,39 +26,53 @@ def frequency_chop(
     :raises ValueError: If the start and end indices for the frequency range are identical.
     :return: A new spectrogram containing only the specified frequency range.
     """
-    is_entirely_below_frequency_range = (start_frequency < spectrogram.frequencies[0] and end_frequency < spectrogram.frequencies[0])
-    is_entirely_above_frequency_range = (start_frequency > spectrogram.frequencies[-1] and end_frequency > spectrogram.frequencies[-1])
+    is_entirely_below_frequency_range = (
+        start_frequency < spectrogram.frequencies[0]
+        and end_frequency < spectrogram.frequencies[0]
+    )
+    is_entirely_above_frequency_range = (
+        start_frequency > spectrogram.frequencies[-1]
+        and end_frequency > spectrogram.frequencies[-1]
+    )
     if is_entirely_below_frequency_range or is_entirely_above_frequency_range:
-        raise ValueError(f"The requested frequency interval is entirely out of range of the input spectrogram.")
-    
+        raise ValueError(
+            f"The requested frequency interval is entirely out of range of the input spectrogram."
+        )
+
     # find the index of the nearest matching frequency bins in the spectrogram
-    start_index = find_closest_index(np.float32(start_frequency), spectrogram.frequencies)
-    end_index   = find_closest_index(np.float32(end_frequency)  , spectrogram.frequencies)
-    
+    start_index = find_closest_index(
+        np.float32(start_frequency), spectrogram.frequencies
+    )
+    end_index = find_closest_index(np.float32(end_frequency), spectrogram.frequencies)
+
     # enforce distinct start and end indices
     if start_index == end_index:
-        raise ValueError(f"Start and end indices are equal! Got start_index: {start_index} and end_index: {end_index}")  
-    
+        raise ValueError(
+            f"Start and end indices are equal! Got start_index: {start_index} and end_index: {end_index}"
+        )
+
     # if start index is more than end index, swap the ordering so to enforce start_index <= end_index
     if start_index > end_index:
         start_index, end_index = end_index, start_index
-    
+
     # chop the spectrogram accordingly
-    transformed_dynamic_spectra = spectrogram.dynamic_spectra[start_index:end_index+1, :]
-    transformed_frequencies     = spectrogram.frequencies[start_index:end_index+1]
-    
-    return Spectrogram(transformed_dynamic_spectra,
-                       spectrogram.times,
-                       transformed_frequencies,
-                       spectrogram.tag,
-                       spectrogram.spectrum_unit,
-                       spectrogram.start_datetime)
+    transformed_dynamic_spectra = spectrogram.dynamic_spectra[
+        start_index : end_index + 1, :
+    ]
+    transformed_frequencies = spectrogram.frequencies[start_index : end_index + 1]
+
+    return Spectrogram(
+        transformed_dynamic_spectra,
+        spectrogram.times,
+        transformed_frequencies,
+        spectrogram.tag,
+        spectrogram.spectrum_unit,
+        spectrogram.start_datetime,
+    )
 
 
 def time_chop(
-    spectrogram: Spectrogram, 
-    start_datetime: datetime, 
-    end_datetime: datetime
+    spectrogram: Spectrogram, start_datetime: datetime, end_datetime: datetime
 ) -> Spectrogram:
     """
     Extracts a portion of the spectrogram within the specified time range.
@@ -72,45 +85,57 @@ def time_chop(
     :return: A new spectrogram containing only the specified time range.
     """
     start_datetime64 = np.datetime64(start_datetime)
-    end_datetime64   = np.datetime64(end_datetime)
+    end_datetime64 = np.datetime64(end_datetime)
 
-    is_entirely_below_time_range = (start_datetime64 < spectrogram.datetimes[0] and end_datetime64 < spectrogram.datetimes[0])
-    is_entirely_above_time_range = (start_datetime64 > spectrogram.datetimes[-1] and end_datetime64 > spectrogram.datetimes[-1])
+    is_entirely_below_time_range = (
+        start_datetime64 < spectrogram.datetimes[0]
+        and end_datetime64 < spectrogram.datetimes[0]
+    )
+    is_entirely_above_time_range = (
+        start_datetime64 > spectrogram.datetimes[-1]
+        and end_datetime64 > spectrogram.datetimes[-1]
+    )
     if is_entirely_below_time_range or is_entirely_above_time_range:
-        raise ValueError(f"Requested time interval is entirely out of range of the input spectrogram.")
-    
+        raise ValueError(
+            f"Requested time interval is entirely out of range of the input spectrogram."
+        )
+
     # find the index of the nearest matching spectrums in the spectrogram.
     start_index = find_closest_index(start_datetime64, spectrogram.datetimes)
-    end_index   = find_closest_index(end_datetime64, spectrogram.datetimes)
-    
+    end_index = find_closest_index(end_datetime64, spectrogram.datetimes)
+
     # enforce distinct start and end indices
     if start_index == end_index:
-        raise ValueError(f"Start and end indices are equal! Got start_index: {start_index} and end_index: {end_index}")
-    
+        raise ValueError(
+            f"Start and end indices are equal! Got start_index: {start_index} and end_index: {end_index}"
+        )
+
     # if start index is more than end index, swap the ordering so to enforce start_index <= end_index
     if start_index > end_index:
         start_index, end_index = end_index, start_index
 
     # chop the spectrogram accordingly
-    transformed_dynamic_spectra = spectrogram.dynamic_spectra[:, start_index:end_index+1]
+    transformed_dynamic_spectra = spectrogram.dynamic_spectra[
+        :, start_index : end_index + 1
+    ]
     transformed_start_datetime = spectrogram.datetimes[start_index]
 
     # chop the times array and translate such that the first spectrum to t=0 [s]
-    transformed_times  = spectrogram.times[start_index:end_index+1]
+    transformed_times = spectrogram.times[start_index : end_index + 1]
     transformed_times -= transformed_times[0]
 
-    return Spectrogram(transformed_dynamic_spectra, 
-                       transformed_times, 
-                       spectrogram.frequencies, 
-                       spectrogram.tag, 
-                       spectrogram.spectrum_unit,
-                       transformed_start_datetime)
+    return Spectrogram(
+        transformed_dynamic_spectra,
+        transformed_times,
+        spectrogram.frequencies,
+        spectrogram.tag,
+        spectrogram.spectrum_unit,
+        transformed_start_datetime,
+    )
 
 
 def _validate_and_compute_average_over(
-    original_resolution: float,
-    resolution: Optional[float], 
-    average_over: int
+    original_resolution: float, resolution: Optional[float], average_over: int
 ) -> int:
     """
     Validates the input parameters and computes `average_over` if `resolution` is specified.
@@ -125,7 +150,9 @@ def _validate_and_compute_average_over(
         return average_over
 
     if not (resolution is not None) ^ (average_over != 1):
-        raise ValueError("Exactly one of 'resolution' or 'average_over' must be specified.")
+        raise ValueError(
+            "Exactly one of 'resolution' or 'average_over' must be specified."
+        )
 
     if resolution is not None:
         return max(1, floor(resolution / original_resolution))
@@ -155,9 +182,7 @@ def time_average(
         )
 
     average_over = _validate_and_compute_average_over(
-        spectrogram.time_resolution,
-        resolution, 
-        average_over
+        spectrogram.time_resolution, resolution, average_over
     )
 
     # Perform averaging
@@ -167,9 +192,9 @@ def time_average(
     transformed_times = average_array(spectrogram.times, average_over)
 
     # Update start datetime and adjust times to start at t=0
-    transformed_start_datetime = (
-        spectrogram.datetimes[0] + (transformed_times[0]*1e6).astype("timedelta64[us]")
-    )
+    transformed_start_datetime = spectrogram.datetimes[0] + (
+        transformed_times[0] * 1e6
+    ).astype("timedelta64[us]")
     transformed_times -= transformed_times[0]
 
     return Spectrogram(
@@ -197,9 +222,7 @@ def frequency_average(
     :return: A new spectrogram with frequency-averaged data.
     """
     average_over = _validate_and_compute_average_over(
-        spectrogram.frequency_resolution,
-        resolution, 
-        average_over
+        spectrogram.frequency_resolution, resolution, average_over
     )
 
     # Perform averaging
@@ -218,9 +241,7 @@ def frequency_average(
     )
 
 
-def join_spectrograms(
-    spectrograms: list[Spectrogram]
-) -> Spectrogram:
+def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
     """
     Joins multiple spectrograms into a single spectrogram along the time axis.
 
@@ -236,30 +257,42 @@ def join_spectrograms(
     num_spectrograms = len(spectrograms)
     if num_spectrograms == 0:
         raise ValueError(f"Input list of spectrograms is empty!")
-    
+
     # extract the first element of the list, and use this as a reference for comparison
     # input validations.
-    reference_spectrogram = spectrograms[0] 
+    reference_spectrogram = spectrograms[0]
 
     # perform checks on each spectrogram in teh list
     for spectrogram in spectrograms:
-        if not np.all(np.equal(spectrogram.frequencies, reference_spectrogram.frequencies)):
+        if not np.all(
+            np.equal(spectrogram.frequencies, reference_spectrogram.frequencies)
+        ):
             raise ValueError(f"All spectrograms must have identical frequency ranges")
         if spectrogram.tag != reference_spectrogram.tag:
-            raise ValueError(f"All tags must be equal for each spectrogram in the input list!")
+            raise ValueError(
+                f"All tags must be equal for each spectrogram in the input list!"
+            )
         if spectrogram.spectrum_unit != reference_spectrogram.spectrum_unit:
-            raise ValueError(f"All units must be equal for each spectrogram in the input list!")
+            raise ValueError(
+                f"All units must be equal for each spectrogram in the input list!"
+            )
         if not spectrogram.start_datetime_is_set:
             raise ValueError(f"All spectrograms must have their start datetime set.")
 
     # Concatenate all dynamic spectra directly along the time axis
-    transformed_dynamic_spectra = np.hstack([spectrogram.dynamic_spectra for spectrogram in spectrograms])
-    
-    transformed_times = time_elapsed( np.concatenate([s.datetimes for s in spectrograms]) )
+    transformed_dynamic_spectra = np.hstack(
+        [spectrogram.dynamic_spectra for spectrogram in spectrograms]
+    )
 
-    return Spectrogram(transformed_dynamic_spectra, 
-                       transformed_times, 
-                       reference_spectrogram.frequencies, 
-                       reference_spectrogram.tag, 
-                       reference_spectrogram.spectrum_unit,
-                       reference_spectrogram.start_datetime) 
+    transformed_times = time_elapsed(
+        np.concatenate([s.datetimes for s in spectrograms])
+    )
+
+    return Spectrogram(
+        transformed_dynamic_spectra,
+        transformed_times,
+        reference_spectrogram.frequencies,
+        reference_spectrogram.tag,
+        reference_spectrogram.spectrum_unit,
+        reference_spectrogram.start_datetime,
+    )

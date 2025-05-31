@@ -16,47 +16,36 @@ from .plugins._b200mini import B200mini
 
 @overload
 def get_receiver(
-    receiver_name: Literal[ReceiverName.RSP1A],
-    mode: Optional[str] = None
-) -> RSP1A:
-    ...
-    
-    
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.RSPDUO],
-    mode: Optional[str] = None
-) -> RSPduo:
-    ...
-    
-    
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.TEST],
-    mode: Optional[str] = None
-) -> Test:
-    ...
+    receiver_name: Literal[ReceiverName.RSP1A], mode: Optional[str] = None
+) -> RSP1A: ...
 
 
 @overload
 def get_receiver(
-    receiver_name: Literal[ReceiverName.B200MINI],
-    mode: Optional[str] = None
-) -> B200mini:
-    ...
+    receiver_name: Literal[ReceiverName.RSPDUO], mode: Optional[str] = None
+) -> RSPduo: ...
 
 
 @overload
 def get_receiver(
-    receiver_name: ReceiverName,
-    mode: Optional[str] = None
-) -> BaseReceiver:
-    ...
+    receiver_name: Literal[ReceiverName.TEST], mode: Optional[str] = None
+) -> Test: ...
+
+
+@overload
+def get_receiver(
+    receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
+) -> B200mini: ...
+
+
+@overload
+def get_receiver(
+    receiver_name: ReceiverName, mode: Optional[str] = None
+) -> BaseReceiver: ...
 
 
 def get_receiver(
-    receiver_name: ReceiverName, 
-    mode: Optional[str] = None
+    receiver_name: ReceiverName, mode: Optional[str] = None
 ) -> BaseReceiver:
     """Get a registered receiver.
 
@@ -68,7 +57,8 @@ def get_receiver(
     receiver_cls = receivers.get(receiver_name)
     if receiver_cls is None:
         valid_receivers = list(receivers.keys())
-        raise ReceiverNotFoundError(f"No class found for the receiver: {receiver_name}. "
-                                    f"Please specify one of the following receivers {valid_receivers}")
-    return receiver_cls(receiver_name, 
-                        mode = mode)
+        raise ReceiverNotFoundError(
+            f"No class found for the receiver: {receiver_name}. "
+            f"Please specify one of the following receivers {valid_receivers}"
+        )
+    return receiver_cls(receiver_name, mode=mode)

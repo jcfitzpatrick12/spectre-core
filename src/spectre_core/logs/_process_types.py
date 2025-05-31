@@ -4,11 +4,13 @@
 
 from enum import Enum
 
+
 class ProcessType(Enum):
     """The origin of a `spectre` process.
-    
+
     :ivar USER: A process is one initiated directly by the user, or part of the main user session.
     :ivar WORKER: A process is one which is created and managed internally by `spectre`.
     """
-    USER   = "user"
+
+    USER = "user"
     WORKER = "worker"

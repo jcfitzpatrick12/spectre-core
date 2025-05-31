@@ -10,91 +10,69 @@ from spectre_core._file_io import JsonHandler
 from spectre_core.config import get_configs_dir_path
 from spectre_core.exceptions import InvalidTagError
 from ._ptemplates import PName
-from ._parameters import (
-    Parameter, 
-    Parameters,
-    make_parameters
-)
+from ._parameters import Parameter, Parameters, make_parameters
+
 
 @dataclass(frozen=True)
 class _CaptureConfigKey:
     """Defined JSON keys for capture configs.
-    
+
     :ivar RECEIVER_NAME: The name of the receiver used for capture.
     :ivar RECEIVER_MODE: The operating mode for the receiver to be used for capture.
     :ivar PARAMETERS: The user configured parameters given to the receiver at the time of capture.
     """
+
     RECEIVER_NAME = "receiver_name"
     RECEIVER_MODE = "receiver_mode"
-    PARAMETERS    = "parameters"
+    PARAMETERS = "parameters"
 
 
 class CaptureConfig(JsonHandler):
     """Simple IO interface for a capture configs under a particular tag."""
-    def __init__(
-        self,
-        tag: str
-    ) -> None:
+
+    def __init__(self, tag: str) -> None:
         """Initialise an instance of `CaptureConfig`.
 
         :param tag: The tag identifier for the capture config.
         """
         self._validate_tag(tag)
         self._tag = tag
-        super().__init__(get_configs_dir_path(),
-                         tag)
-        
+        super().__init__(get_configs_dir_path(), tag)
+
     @property
-    def tag(
-        self
-    ) -> str:
+    def tag(self) -> str:
         """The tag identifier for the capture config."""
         return self._tag
 
-
-    def _validate_tag(
-        self, 
-        tag: str
-    ) -> None:
+    def _validate_tag(self, tag: str) -> None:
         """Validate the tag of the capture config.
-        
+
         Some substrings are reserved for third-party spectrogram data.
         """
         if "callisto" in tag:
-            raise ValueError(f"The substring `callisto` is reserved, and is not allowed in a capture config tag.")
-    
+            raise ValueError(
+                f"The substring `callisto` is reserved, and is not allowed in a capture config tag."
+            )
 
     @property
-    def receiver_name(
-        self
-    ) -> str:
+    def receiver_name(self) -> str:
         """The name of the receiver to be used for capture."""
         d = self.read(cache=True)
         return d[_CaptureConfigKey.RECEIVER_NAME]
-    
 
     @property
-    def receiver_mode(
-        self
-    ) -> str:
+    def receiver_mode(self) -> str:
         """The operating mode for the receiver to be used for capture."""
         d = self.read(cache=True)
         return d[_CaptureConfigKey.RECEIVER_MODE]
-    
 
     @cached_property
-    def parameters(
-        self
-    ) -> Parameters:
+    def parameters(self) -> Parameters:
         """The user-configured parameters provided to the receiver at the time of capture."""
         d = self.read(cache=True)
-        return make_parameters( d[_CaptureConfigKey.PARAMETERS] )
+        return make_parameters(d[_CaptureConfigKey.PARAMETERS])
 
-
-    def get_parameter(
-        self, 
-        name: PName
-    ) -> Parameter:
+    def get_parameter(self, name: PName) -> Parameter:
         """Get a parameter stored by the capture config.
 
         :param name: The name of the parameter.
@@ -102,14 +80,10 @@ class CaptureConfig(JsonHandler):
                 configuration file.
         """
         return self.parameters.get_parameter(name)
-    
 
-    def get_parameter_value(
-        self,
-        name: PName
-    ) -> Optional[Any]:
+    def get_parameter_value(self, name: PName) -> Optional[Any]:
         """Get the value of a parameter stored by the capture config.
-        
+
         For static typing, should be `cast` after return according to the corresponding `PTemplate`.
 
         :param name: The name of the parameter.
@@ -118,13 +92,12 @@ class CaptureConfig(JsonHandler):
         """
         return self.parameters.get_parameter_value(name)
 
-
     def save_parameters(
         self,
         receiver_name: str,
         receiver_mode: str,
         parameters: Parameters,
-        force: bool = False
+        force: bool = False,
     ):
         """Write the input parameters to a capture config.
 
@@ -136,6 +109,6 @@ class CaptureConfig(JsonHandler):
         d = {
             _CaptureConfigKey.RECEIVER_MODE: receiver_mode,
             _CaptureConfigKey.RECEIVER_NAME: receiver_name,
-            _CaptureConfigKey.PARAMETERS   : parameters.to_dict()
+            _CaptureConfigKey.PARAMETERS: parameters.to_dict(),
         }
         self.save(d, force=force)

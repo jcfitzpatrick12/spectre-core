@@ -11,25 +11,22 @@ from ._register import batch_map
 from .plugins._batch_keys import BatchKey
 from .plugins._callisto import CallistoBatch
 from .plugins._iq_stream import IQStreamBatch
-    
+
 
 @overload
 def get_batch_cls(
     batch_key: Literal[BatchKey.CALLISTO],
-) -> Type[CallistoBatch]:
-    ...
+) -> Type[CallistoBatch]: ...
 
 
 @overload
 def get_batch_cls(
     batch_key: Literal[BatchKey.IQ_STREAM],
-) -> Type[IQStreamBatch]:
-    ...
-    
-    
+) -> Type[IQStreamBatch]: ...
+
+
 @overload
-def get_batch_cls(batch_key: BatchKey) -> Type[BaseBatch]:
-    ...
+def get_batch_cls(batch_key: BatchKey) -> Type[BaseBatch]: ...
 
 
 def get_batch_cls(
@@ -44,14 +41,14 @@ def get_batch_cls(
     batch_cls = batch_map.get(batch_key)
     if batch_cls is None:
         valid_batch_keys = list(batch_map.keys())
-        raise BatchNotFoundError(f"No batch found for the batch key: {batch_key}. "
-                                 f"Valid batch keys are: {valid_batch_keys}")
+        raise BatchNotFoundError(
+            f"No batch found for the batch key: {batch_key}. "
+            f"Valid batch keys are: {valid_batch_keys}"
+        )
     return batch_cls
 
 
-def get_batch_cls_from_tag(
-    tag: str
-) -> Type[BaseBatch]:
+def get_batch_cls_from_tag(tag: str) -> Type[BaseBatch]:
     # if the tag is reserved (i.e., corresponds to third-party spectrogram data)
     # directly fetch the right class.
     if "callisto" in tag:
@@ -61,9 +58,13 @@ def get_batch_cls_from_tag(
     else:
         capture_config = CaptureConfig(tag)
         if PName.BATCH_KEY not in capture_config.parameters.name_list:
-            raise ValueError(f"Could not infer batch class from the tag 'tag'. "
-                             f"A parameter with name `{PName.BATCH_KEY.value}` "
-                             f"does not exist.")
-        
-        batch_key = BatchKey( cast(str, capture_config.get_parameter_value( PName.BATCH_KEY) ) )
-        return get_batch_cls( batch_key )
+            raise ValueError(
+                f"Could not infer batch class from the tag 'tag'. "
+                f"A parameter with name `{PName.BATCH_KEY.value}` "
+                f"does not exist."
+            )
+
+        batch_key = BatchKey(
+            cast(str, capture_config.get_parameter_value(PName.BATCH_KEY))
+        )
+        return get_batch_cls(batch_key)

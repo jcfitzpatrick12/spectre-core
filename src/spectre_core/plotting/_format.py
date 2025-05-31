@@ -4,9 +4,10 @@
 
 from dataclasses import dataclass
 
+
 @dataclass
 class PanelFormat:
-    """Specifies formatting options for a panel, including font sizes, line styles, 
+    """Specifies formatting options for a panel, including font sizes, line styles,
     colour maps, and general visual settings.
 
     These formatting values can be applied consistently across all panels within a `PanelStack`,
@@ -21,11 +22,12 @@ class PanelFormat:
     :ivar style: Matplotlib style applied to the panel, defaults to "dark_background".
     :ivar spectrogram_cmap: Colormap applied to spectrogram plots, defaults to "gnuplot2".
     """
-    small_size      : int = 18
-    medium_size     : int = 21
-    large_size      : int = 24
-    line_width      : int = 3
-    line_color      : str = "lime"
-    line_cmap       : str = "winter"
-    style           : str = "dark_background"
+
+    small_size: int = 18
+    medium_size: int = 21
+    large_size: int = 24
+    line_width: int = 3
+    line_color: str = "lime"
+    line_cmap: str = "winter"
+    style: str = "dark_background"
     spectrogram_cmap: str = "gnuplot2"
