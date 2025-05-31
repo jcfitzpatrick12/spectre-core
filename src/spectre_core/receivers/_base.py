@@ -34,9 +34,7 @@ class BaseReceiver(ABC):
         self._pvalidators: dict[str, Callable[[Parameters], None]] = {}
         self._add_pvalidators()
 
-        self._mode: Optional[str] = None
-        if mode is not None:
-            self.mode = mode
+        self._mode: Optional[str] = mode
 
     @abstractmethod
     def _add_specs(self) -> None:
