@@ -34,7 +34,7 @@ class BaseReceiver(ABC):
         self._pvalidators: dict[str, Callable[[Parameters], None]] = {}
         self._add_pvalidators()
 
-        self._mode = None
+        self._mode: Optional[str] = None
         if mode is not None:
             self.mode = mode
 
@@ -97,19 +97,12 @@ class BaseReceiver(ABC):
         return capture_method_modes
 
     @property
-    def mode(self) -> str:
-        """The active operating mode for the receiver."""
-        if self._mode is None:
-            raise ValueError(
-                f"The operating mode for the receiver `{self.name.value}` is not set."
-            )
+    def mode(self) -> Optional[str]:
+        """The active operating mode for the receiver, if set."""
         return self._mode
 
     @mode.setter
-    def mode(
-        self,
-        value: str,
-    ) -> None:
+    def mode(self, value: str) -> None:
         """Set the active operating mode.
 
         :param value: The new operating mode to activate.
@@ -117,27 +110,37 @@ class BaseReceiver(ABC):
         """
         if value not in self.modes:
             raise ModeNotFoundError(
-                (
-                    f"{value} is not a defined mode for the receiver {self.name}. "
-                    f"Expected one of {self.modes}"
-                )
+                f"{value} is not a defined mode for the receiver {self.name}. "
+                f"Expected one of {self.modes}"
             )
         self._mode = value
+
+    def _get_active_mode(self) -> str:
+        """Get the current mode, raising an error if none is set.
+
+        :raises ValueError: If no mode is currently set
+        :return: The current mode
+        """
+        if self._mode is None:
+            raise ValueError(
+                f"This operation requires an active mode for receiver `{self.name.value}`"
+            )
+        return self._mode
 
     @property
     def capture_method(self) -> Callable[[str, Parameters], None]:
         """Start capturing data under the active operating mode."""
-        return self.capture_methods[self.mode]
+        return self.capture_methods[self._get_active_mode()]
 
     @property
     def pvalidator(self) -> Callable[[Parameters], None]:
         """The parameter validation function for the active operating mode."""
-        return self.pvalidators[self.mode]
+        return self.pvalidators[self._get_active_mode()]
 
     @property
     def capture_template(self) -> CaptureTemplate:
         """The `CaptureTemplate` for the active operating mode."""
-        return self._capture_templates[self.mode]
+        return self._capture_templates[self._get_active_mode()]
 
     def add_capture_method(
         self, mode: str, capture_method: Callable[[str, Parameters], None]
@@ -200,8 +203,10 @@ class BaseReceiver(ABC):
         """Start capturing data in the active operating mode.
 
         :param tag: The tag of the capture config to load.
+        :raises ValueError: If no mode is currently set
         """
-        self.capture_method(tag, self.load_parameters(tag))
+        active_mode = self._get_active_mode()
+        self.capture_methods[active_mode](tag, self.load_parameters(tag))
 
     def save_parameters(
         self, tag: str, parameters: Parameters, force: bool = False
@@ -209,29 +214,31 @@ class BaseReceiver(ABC):
         """Create a capture config according to the active operating mode and save the
         input parameters.
 
-        The input parameters are validated before being written to file.
-
         :param tag: The tag identifying the capture config.
         :param parameters: The parameters to save in the capture config.
-        :param force: If True, overwrites the existing file if it already exists. Defaults to False.
+        :param force: If True, overwrites existing file if it exists.
+        :raises ValueError: If no mode is currently set
         """
-        parameters = self.capture_template.apply_template(parameters)
-        self.pvalidator(parameters)
+        active_mode = self._get_active_mode()
+        parameters = self.capture_templates[active_mode].apply_template(parameters)
+        self.pvalidators[active_mode](parameters)
 
         capture_config = CaptureConfig(tag)
-        capture_config.save_parameters(self.name.value, self.mode, parameters, force)
+        capture_config.save_parameters(self.name.value, active_mode, parameters, force)
 
     def load_parameters(self, tag: str) -> Parameters:
         """Load a capture config, and return the parameters it stores.
 
-        The parameters are validated before being returned.
-
         :param tag: The tag identifying the capture config.
+        :raises ValueError: If no mode is currently set
         :return: The validated parameters stored in the capture config.
         """
+        active_mode = self._get_active_mode()
         capture_config = CaptureConfig(tag)
 
-        parameters = self.capture_template.apply_template(capture_config.parameters)
-        self.pvalidator(parameters)
+        parameters = self.capture_templates[active_mode].apply_template(
+            capture_config.parameters
+        )
+        self.pvalidators[active_mode](parameters)
 
         return parameters
