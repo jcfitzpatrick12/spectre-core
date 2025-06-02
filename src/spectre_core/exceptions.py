@@ -18,6 +18,7 @@ def deprecated(message: str) -> Callable[[F], F]:
 
     :param message: Warning message explaining what to use instead
     """
+
     def decorator(func: F) -> F:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -27,7 +28,7 @@ def deprecated(message: str) -> Callable[[F], F]:
                 stacklevel=2,
             )
             return func(*args, **kwargs)
-        
+
         return cast(F, wrapper)
 
     return decorator
