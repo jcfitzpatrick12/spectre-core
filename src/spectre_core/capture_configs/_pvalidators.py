@@ -10,17 +10,6 @@ from scipy.signal import get_window
 from ._parameters import Parameters
 from ._pnames import PName
 
-# ----------------------------------------------------------------------- #
-# Throughout this module, repeated calls to `cast` will be seen on using the
-# `get_parameter_value` method. This is purely to signify intent and keep
-# the static type checkers happy.
-#
-# This is okay, as whenever the validators are called, the parameter values
-# have already been individually casted and constrained according to the
-# parameter templates. There is negligible runtime impact. Though a bit
-# of a pain for maintenance.
-# ----------------------------------------------------------------------- #
-
 
 def validate_window(parameters: Parameters) -> None:
     """Ensure that the capture config describes a valid window.

@@ -13,11 +13,33 @@ from os.path import splitext
 from spectre_core._file_io import BaseFileHandler
 from spectre_core.config import get_batches_dir_path, TimeFormat
 from spectre_core.spectrograms import Spectrogram
+from spectre_core.exceptions import deprecated
 
 
+@deprecated(
+    "The terminology (base file name) is inconsistent with the `_file_io` submodule. "
+    f"Please use `parse_batch_file_name` instead."
+)
 def parse_batch_base_file_name(base_file_name: str) -> Tuple[str, str, str]:
-    """Parse the base file name of a batch file into a start time, tag and extension."""
-    batch_name, extension = splitext(base_file_name)
+    """Included for backwards compatability - please use `parse_batch_file_name` instead."""
+    return parse_batch_file_name(base_file_name)
+
+
+def parse_batch_file_name(file_name: str) -> Tuple[str, str, str]:
+    """Parse the base file name of a batch file into a start time, tag and extension.
+
+    :param file_name: The file name of the batch file, with optional extension.
+    :return: The file name decomposed into its start time, tag and extension. If no extension is present,
+    the final element of the tuple will be an empty string.
+    """
+    batch_name, extension = splitext(file_name)
+
+    num_underscores = batch_name.count("_")
+    if num_underscores != 1:
+        raise ValueError(
+            f"Expected exactly one underscore in the batch name '{batch_name}'. Found {num_underscores}"
+        )
+
     # strip the dot from the extension
     extension = extension.lstrip(".")
     start_time, tag = batch_name.split("_", 1)
