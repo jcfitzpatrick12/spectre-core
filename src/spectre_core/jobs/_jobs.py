@@ -9,6 +9,7 @@ _LOGGER = getLogger(__name__)
 import time
 
 from ._workers import Worker
+from ._duration import Duration
 
 
 class Job:
@@ -25,6 +26,11 @@ class Job:
         :param workers: A list of `Worker` instances to manage as part of the job.
         """
         self._workers = workers
+
+    @property
+    def workers_are_alive(self) -> bool:
+        """Returns True if all managed workers are alive, and False otherwise."""
+        return all([worker.is_alive() for worker in self._workers])
 
     def start(
         self,
@@ -43,8 +49,18 @@ class Job:
                 worker.kill()
 
         _LOGGER.info("All workers successfully killed")
+        
+    def restart(
+        self,
+    ) -> None:
+        """Tell each worker to restart it's process."""
+        for worker in self._workers:
+            worker.restart()
 
-    def monitor(self, total_runtime: float, force_restart: bool = False) -> None:
+
+    def monitor(
+        self, total_runtime: float, force_restart: bool = False, max_restarts: int = 3
+    ) -> None:
         """
         Monitor the workers during execution and handle unexpected exits.
 
@@ -55,12 +71,15 @@ class Job:
 
         :param total_runtime: Total time to monitor the workers, in seconds.
         :param force_restart: Whether to restart all workers if one exits unexpectedly.
+        :param max_restarts: Puts an upper bound on how many times workers can be restarted. If the number of 
         :raises RuntimeError: If a worker exits and `force_restart` is False.
         """
         _LOGGER.info("Monitoring workers...")
         start_time = time.time()
 
+        restarts_remaining = max_restarts
         try:
+            # Check that the elapsed time since the job started is within the total runtime configured by the user.
             while time.time() - start_time < total_runtime:
                 for worker in self._workers:
                     if not worker.is_alive():
@@ -69,17 +88,27 @@ class Job:
                         )
                         _LOGGER.error(error_message)
                         if force_restart:
-                            # Restart all workers
-                            for worker in self._workers:
-                                worker.restart()
+                            if restarts_remaining > 0:
+                                _LOGGER.info(f"Attempting restart ({restarts_remaining} restarts remaining)...")
+                                restarts_remaining -= 1
+                                self.restart()
+                                
+                            else:
+                                error_message = (
+                                    f"Maximum number of restarts has been reached: {max_restarts}"
+                                    f"Killing all workers."
+                                )
+                                self.kill()
+                                raise RuntimeError(error_message)
                         else:
                             self.kill()
                             raise RuntimeError(error_message)
-                time.sleep(1)  # Poll every second
-
-            _LOGGER.info("Session duration reached. Killing workers...")
+                time.sleep(Duration.ONE_DECISECOND) # Poll every 0.1 seconds
+            
+            # If the jobs total runtime has elapsed, kill all the workers
+            _LOGGER.info("Job complete. Killing workers... ")
             self.kill()
-
+            
         except KeyboardInterrupt:
             _LOGGER.info("Keyboard interrupt detected. Killing workers...")
             self.kill()
