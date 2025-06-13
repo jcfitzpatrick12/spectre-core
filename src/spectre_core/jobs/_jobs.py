@@ -16,7 +16,7 @@ class Job:
     multiprocessing processes.
 
     A `Job` manages the lifecycle of its workers, including starting,
-    monitoring, and terminating them.
+    monitoring, and killing them.
     """
 
     def __init__(self, workers: list[Worker]) -> None:
@@ -33,16 +33,16 @@ class Job:
         for worker in self._workers:
             worker.start()
 
-    def terminate(
+    def kill(
         self,
     ) -> None:
-        """Tell each worker to terminate their processes, if the processes are still running."""
-        _LOGGER.info("Terminating workers...")
+        """Tell each worker to kill their processes, if the processes are still running."""
+        _LOGGER.info("Killing workers...")
         for worker in self._workers:
-            if worker.process.is_alive():
-                worker.process.terminate()
-                worker.process.join()
-        _LOGGER.info("All workers successfully terminated")
+            if worker.is_alive():
+                worker.kill()
+
+        _LOGGER.info("All workers successfully killed")
 
     def monitor(self, total_runtime: float, force_restart: bool = False) -> None:
         """
@@ -51,7 +51,7 @@ class Job:
         Periodically checks worker processes within the specified runtime duration.
         If a worker exits unexpectedly:
         - Restarts all workers if `force_restart` is True.
-        - Terminates all workers and raises an exception if `force_restart` is False.
+        - Kills all workers and raises an exception if `force_restart` is False.
 
         :param total_runtime: Total time to monitor the workers, in seconds.
         :param force_restart: Whether to restart all workers if one exits unexpectedly.
@@ -63,7 +63,7 @@ class Job:
         try:
             while time.time() - start_time < total_runtime:
                 for worker in self._workers:
-                    if not worker.process.is_alive():
+                    if not worker.is_alive():
                         error_message = (
                             f"Worker with name `{worker.name}` unexpectedly exited."
                         )
@@ -73,16 +73,16 @@ class Job:
                             for worker in self._workers:
                                 worker.restart()
                         else:
-                            self.terminate()
+                            self.kill()
                             raise RuntimeError(error_message)
                 time.sleep(1)  # Poll every second
 
-            _LOGGER.info("Session duration reached. Terminating workers...")
-            self.terminate()
+            _LOGGER.info("Session duration reached. Killing workers...")
+            self.kill()
 
         except KeyboardInterrupt:
-            _LOGGER.info("Keyboard interrupt detected. Terminating workers...")
-            self.terminate()
+            _LOGGER.info("Keyboard interrupt detected. Killing workers...")
+            self.kill()
 
 
 def start_job(

@@ -54,14 +54,6 @@ class Worker:
         """
         return self._process.name
 
-    @property
-    def process(self) -> multiprocessing.Process:
-        """Access the underlying multiprocessing process.
-
-        :return: The wrapped `multiprocessing.Process` instance.
-        """
-        return self._process
-
     def start(self) -> None:
         """Start the worker process.
 
@@ -69,17 +61,25 @@ class Worker:
         """
         self._process.start()
 
+    def is_alive(self) -> bool:
+        """Return whether the managed process is alive."""
+        return self._process.is_alive()
+
+    def kill(self) -> None:
+        """Kill the managed process."""
+        self._process.kill()
+
     def restart(self) -> None:
         """Restart the worker process.
 
-        Terminates the existing process if it is alive and then starts a new process
+        Kills the existing process if it is alive and then starts a new process
         after a brief pause.
         """
         _LOGGER.info(f"Restarting {self.name} worker")
-        if self._process.is_alive():
+        if self.is_alive():
             # forcibly stop if it is still alive
-            self._process.terminate()
-            self._process.join()
+            self.kill()
+
         # a moment of respite
         time.sleep(1)
         # make a new process, as we can't start the same process again.
