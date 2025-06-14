@@ -71,7 +71,7 @@ class Job:
         - Kills all workers and raises an exception if `force_restart` is False.
 
         :param total_runtime: Total time to monitor the workers, in seconds.
-        :param force_restart: Whether to restart all workers if one exits unexpectedly.
+        :param force_restart: Whether to restart all workers if one dies unexpectedly.
         :param max_restarts: Maximum number of times workers can be restarted before giving up and killing all workers. 
         Only applies when force_restart is True. Defaults to 5.
         :raises RuntimeError: If a worker exits and `force_restart` is False.
@@ -128,7 +128,7 @@ def start_job(
 
     :param workers: A list of `Worker` instances to include in the job.
     :param total_runtime: Total time to monitor the workers, in seconds.
-    :param force_restart: Whether to restart all workers if one exits unexpectedly.
+    :param force_restart: Whether to restart all workers if one dies unexpectedly.
     :param max_restarts: Maximum number of times workers can be restarted before giving up and killing all workers. 
     Only applies when force_restart is True. Defaults to 5.
     """
