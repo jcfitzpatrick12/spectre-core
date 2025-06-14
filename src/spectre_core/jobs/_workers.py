@@ -111,6 +111,7 @@ def make_worker(
     :param configure_root_logger: If True, configure the root logger to write log events to file. Defaults to True.
     :return: A `Worker` instance managing the background process (not started).
     """
+
     def _worker_target() -> None:
         if configure_logging:
             configure_root_logger(ProcessType.WORKER)
