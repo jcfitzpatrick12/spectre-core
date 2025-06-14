@@ -70,7 +70,7 @@ class Worker:
         """Kill the managed process."""
         if not self.is_alive:
             raise RuntimeError("Cannot kill a process which is not alive.")
-        
+
         self._process.kill()
 
     def restart(self) -> None:
@@ -96,7 +96,7 @@ class Worker:
 def make_worker(
     name: str,
     target: Callable[..., None],
-    args = (),
+    args=(),
     configure_logging: bool = True,
 ) -> Worker:
     """Create a `Worker` instance to manage a target function in a multiprocessing background daemon process.
