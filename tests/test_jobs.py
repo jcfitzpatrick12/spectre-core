@@ -192,7 +192,7 @@ class TestJobs:
         # Check all the workers are not alive.
         assert partially_failing_job.workers_are_alive == False
 
-    def test_multiple_restarts(self, successful_runtime_job: Job) -> None:
+    def test_single_restart(self, successful_runtime_job: Job) -> None:
         """Check that we can restart a job multiple once, and the workers are alive afterwards."""
         successful_runtime_job.start()
         successful_runtime_job.restart()
