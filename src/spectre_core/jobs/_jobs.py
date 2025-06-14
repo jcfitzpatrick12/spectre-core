@@ -134,4 +134,4 @@ def start_job(
     """
     job = Job(workers)
     job.start()
-    job.monitor(total_runtime, force_restart)
+    job.monitor(total_runtime, force_restart, max_restarts)
