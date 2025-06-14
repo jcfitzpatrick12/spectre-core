@@ -98,7 +98,7 @@ class Job:
 
                             else:
                                 error_message = (
-                                    f"Maximum number of restarts has been reached: {max_restarts}"
+                                    f"Maximum number of restarts has been reached: {max_restarts}. "
                                     f"Killing all workers."
                                 )
                                 self.kill()
