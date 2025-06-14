@@ -6,9 +6,8 @@ from logging import getLogger
 
 _LOGGER = getLogger(__name__)
 
-from functools import wraps
 import time
-from typing import Callable, TypeVar, Any
+from typing import Callable, ParamSpec
 import multiprocessing
 
 from spectre_core.logs import configure_root_logger, ProcessType
@@ -86,18 +85,20 @@ class Worker:
         self.start()
 
 
-T = TypeVar("T", bound=Any)
+P = ParamSpec("P")
 
 
 def make_worker(
-    name: str, target: Callable[[T], None], args: T = (), configure_logging: bool = True
+    name: str,
+    target: Callable[P, None],
+    *args: P.args,
+    configure_logging: bool = True,
 ) -> Worker:
     """Create a `Worker` instance to manage a target function in a multiprocessing background daemon process.
 
     This function returns a `Worker` that is configured to run the given target function with the provided arguments
-    in a separate process. The worker is not started automatically; you must call `worker.start()` to call the target. Additionally,
-    the target function will be called with logging configured. The target should not return anything, as its return value will be discarded.
-    Arguments to the target function are passed via `args`.
+    in a separate process. The worker is not started automatically; you must call `start()` to call the target.  The target should not return anything,
+    as its return value will be discarded.
 
     :param name: Human-readable name for the worker process.
     :param target: The function to be executed by the worker process.
