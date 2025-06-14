@@ -72,7 +72,8 @@ class Job:
 
         :param total_runtime: Total time to monitor the workers, in seconds.
         :param force_restart: Whether to restart all workers if one exits unexpectedly.
-        :param max_restarts: Puts an upper bound on how many times workers can be restarted. If the number of
+        :param max_restarts: Maximum number of times workers can be restarted before giving up and killing all workers. 
+        Only applies when force_restart is True. Defaults to 5.
         :raises RuntimeError: If a worker exits and `force_restart` is False.
         """
         _LOGGER.info("Monitoring workers...")
@@ -118,7 +119,7 @@ class Job:
 
 
 def start_job(
-    workers: list[Worker], total_runtime: float, force_restart: bool = False
+    workers: list[Worker], total_runtime: float, force_restart: bool = False, max_restarts: int = 5
 ) -> None:
     """Create and run a job with the specified workers.
 
@@ -126,9 +127,10 @@ def start_job(
     unexpected exits according to the `force_restart` policy.
 
     :param workers: A list of `Worker` instances to include in the job.
-    :param total_runtime: Total time to monitor the job, in seconds.
+    :param total_runtime: Total time to monitor the workers, in seconds.
     :param force_restart: Whether to restart all workers if one exits unexpectedly.
-    Defaults to False.
+    :param max_restarts: Maximum number of times workers can be restarted before giving up and killing all workers. 
+    Only applies when force_restart is True. Defaults to 5.
     """
     job = Job(workers)
     job.start()
