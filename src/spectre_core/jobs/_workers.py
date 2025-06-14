@@ -85,7 +85,7 @@ class Worker:
             self.kill()
 
         # a moment of respite
-        time.sleep(Duration.ONE_DECISECOND)
+        time.sleep(0.5 * Duration.ONE_SECOND)
 
         # make a new process, as we can't start the same process again.
         self._process = _make_daemon_process(self._name, self._target)
