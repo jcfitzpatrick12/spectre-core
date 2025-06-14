@@ -30,12 +30,14 @@ class Job:
     @property
     def workers_are_alive(self) -> bool:
         """Returns True if all managed workers are alive, and False otherwise."""
-        return all([worker.is_alive() for worker in self._workers])
+        return all([worker.is_alive for worker in self._workers])
 
     def start(
         self,
     ) -> None:
         """Tell each worker to call their functions in the background as multiprocessing processes."""
+        if self.workers_are_alive:
+            raise RuntimeError("A job cannot be started twice.")
         for worker in self._workers:
             worker.start()
 
@@ -45,7 +47,7 @@ class Job:
         """Tell each worker to kill their processes, if the processes are still running."""
         _LOGGER.info("Killing workers...")
         for worker in self._workers:
-            if worker.is_alive():
+            if worker.is_alive:
                 worker.kill()
 
         _LOGGER.info("All workers successfully killed")
@@ -81,7 +83,7 @@ class Job:
             # Check that the elapsed time since the job started is within the total runtime configured by the user.
             while time.time() - start_time < total_runtime:
                 for worker in self._workers:
-                    if not worker.is_alive():
+                    if not worker.is_alive:
                         error_message = (
                             f"Worker with name `{worker.name}` unexpectedly exited."
                         )

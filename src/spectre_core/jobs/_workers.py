@@ -51,19 +51,26 @@ class Worker:
         """
         return self._process.name
 
+    @property
+    def is_alive(self) -> bool:
+        """Return whether the managed process is alive."""
+        return self._process.is_alive()
+
     def start(self) -> None:
         """Start the worker process.
 
         This method runs the `target` in the background as a daemon.
         """
-        self._process.start()
+        if self.is_alive:
+            raise RuntimeError("A worker cannot be started twice.")
 
-    def is_alive(self) -> bool:
-        """Return whether the managed process is alive."""
-        return self._process.is_alive()
+        self._process.start()
 
     def kill(self) -> None:
         """Kill the managed process."""
+        if not self.is_alive:
+            raise RuntimeError("Cannot kill a process which is not alive.")
+        
         self._process.kill()
 
     def restart(self) -> None:
@@ -73,7 +80,7 @@ class Worker:
         after a brief pause.
         """
         _LOGGER.info(f"Restarting {self.name} worker")
-        if self.is_alive():
+        if self.is_alive:
             # forcibly stop if it is still alive
             self.kill()
 
