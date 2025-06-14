@@ -9,6 +9,7 @@ _LOGGER = getLogger(__name__)
 import time
 
 from ._workers import Worker
+from ._duration import Duration
 
 
 class Job:
@@ -16,7 +17,7 @@ class Job:
     multiprocessing processes.
 
     A `Job` manages the lifecycle of its workers, including starting,
-    monitoring, and terminating them.
+    monitoring, and killing them.
     """
 
     def __init__(self, workers: list[Worker]) -> None:
@@ -26,63 +27,94 @@ class Job:
         """
         self._workers = workers
 
+    @property
+    def workers_are_alive(self) -> bool:
+        """Returns True if all managed workers are alive, and False otherwise."""
+        return all([worker.is_alive for worker in self._workers])
+
     def start(
         self,
     ) -> None:
         """Tell each worker to call their functions in the background as multiprocessing processes."""
+        if self.workers_are_alive:
+            raise RuntimeError("A job cannot be started twice.")
         for worker in self._workers:
             worker.start()
 
-    def terminate(
+    def kill(
         self,
     ) -> None:
-        """Tell each worker to terminate their processes, if the processes are still running."""
-        _LOGGER.info("Terminating workers...")
+        """Tell each worker to kill their processes, if the processes are still running."""
+        _LOGGER.info("Killing workers...")
         for worker in self._workers:
-            if worker.process.is_alive():
-                worker.process.terminate()
-                worker.process.join()
-        _LOGGER.info("All workers successfully terminated")
+            if worker.is_alive:
+                worker.kill()
 
-    def monitor(self, total_runtime: float, force_restart: bool = False) -> None:
+        _LOGGER.info("All workers successfully killed")
+
+    def restart(
+        self,
+    ) -> None:
+        """Tell each worker to restart it's process."""
+        for worker in self._workers:
+            worker.restart()
+
+    def monitor(
+        self, total_runtime: float, force_restart: bool = False, max_restarts: int = 3
+    ) -> None:
         """
         Monitor the workers during execution and handle unexpected exits.
 
         Periodically checks worker processes within the specified runtime duration.
         If a worker exits unexpectedly:
         - Restarts all workers if `force_restart` is True.
-        - Terminates all workers and raises an exception if `force_restart` is False.
+        - Kills all workers and raises an exception if `force_restart` is False.
 
         :param total_runtime: Total time to monitor the workers, in seconds.
         :param force_restart: Whether to restart all workers if one exits unexpectedly.
+        :param max_restarts: Puts an upper bound on how many times workers can be restarted. If the number of
         :raises RuntimeError: If a worker exits and `force_restart` is False.
         """
         _LOGGER.info("Monitoring workers...")
         start_time = time.time()
 
+        restarts_remaining = max_restarts
         try:
+            # Check that the elapsed time since the job started is within the total runtime configured by the user.
             while time.time() - start_time < total_runtime:
                 for worker in self._workers:
-                    if not worker.process.is_alive():
+                    if not worker.is_alive:
                         error_message = (
                             f"Worker with name `{worker.name}` unexpectedly exited."
                         )
                         _LOGGER.error(error_message)
                         if force_restart:
-                            # Restart all workers
-                            for worker in self._workers:
-                                worker.restart()
-                        else:
-                            self.terminate()
-                            raise RuntimeError(error_message)
-                time.sleep(1)  # Poll every second
+                            if restarts_remaining > 0:
+                                _LOGGER.info(
+                                    f"Attempting restart ({restarts_remaining} restarts remaining)..."
+                                )
+                                restarts_remaining -= 1
+                                self.restart()
 
-            _LOGGER.info("Session duration reached. Terminating workers...")
-            self.terminate()
+                            else:
+                                error_message = (
+                                    f"Maximum number of restarts has been reached: {max_restarts}. "
+                                    f"Killing all workers."
+                                )
+                                self.kill()
+                                raise RuntimeError(error_message)
+                        else:
+                            self.kill()
+                            raise RuntimeError(error_message)
+                time.sleep(Duration.ONE_DECISECOND)  # Poll every 0.1 seconds
+
+            # If the jobs total runtime has elapsed, kill all the workers
+            _LOGGER.info("Job complete. Killing workers... ")
+            self.kill()
 
         except KeyboardInterrupt:
-            _LOGGER.info("Keyboard interrupt detected. Terminating workers...")
-            self.terminate()
+            _LOGGER.info("Keyboard interrupt detected. Killing workers...")
+            self.kill()
 
 
 def start_job(

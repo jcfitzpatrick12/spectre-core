@@ -6,15 +6,12 @@ from logging import getLogger
 
 _LOGGER = getLogger(__name__)
 
-from functools import wraps
 import time
-from typing import Callable, TypeVar, ParamSpec
+from typing import Callable
 import multiprocessing
 
-from spectre_core.logs import configure_root_logger, log_call, ProcessType
-from spectre_core.capture_configs import CaptureConfig
-from spectre_core.receivers import get_receiver, ReceiverName
-from spectre_core.post_processing import start_post_processor
+from spectre_core.logs import configure_root_logger, ProcessType
+from ._duration import Duration
 
 
 def _make_daemon_process(
@@ -55,104 +52,70 @@ class Worker:
         return self._process.name
 
     @property
-    def process(self) -> multiprocessing.Process:
-        """Access the underlying multiprocessing process.
-
-        :return: The wrapped `multiprocessing.Process` instance.
-        """
-        return self._process
+    def is_alive(self) -> bool:
+        """Return whether the managed process is alive."""
+        return self._process.is_alive()
 
     def start(self) -> None:
         """Start the worker process.
 
         This method runs the `target` in the background as a daemon.
         """
+        if self.is_alive:
+            raise RuntimeError("A worker cannot be started twice.")
+
         self._process.start()
+
+    def kill(self) -> None:
+        """Kill the managed process."""
+        if not self.is_alive:
+            raise RuntimeError("Cannot kill a process which is not alive.")
+
+        self._process.kill()
 
     def restart(self) -> None:
         """Restart the worker process.
 
-        Terminates the existing process if it is alive and then starts a new process
+        Kills the existing process if it is alive and then starts a new process
         after a brief pause.
         """
         _LOGGER.info(f"Restarting {self.name} worker")
-        if self._process.is_alive():
+        if self.is_alive:
             # forcibly stop if it is still alive
-            self._process.terminate()
-            self._process.join()
+            self.kill()
+
         # a moment of respite
-        time.sleep(1)
+        time.sleep(Duration.ONE_DECISECOND)
+
         # make a new process, as we can't start the same process again.
         self._process = _make_daemon_process(self._name, self._target)
         self.start()
 
 
-P = ParamSpec("P")
-T = TypeVar("T", bound=Callable[..., None])
+# TODO: Somehow statically type check that `args` match the arguments to `target`
+def make_worker(
+    name: str,
+    target: Callable[..., None],
+    args: tuple = (),
+    configure_logging: bool = True,
+) -> Worker:
+    """Create a `Worker` instance to manage a target function in a multiprocessing background daemon process.
 
+    This function returns a `Worker` that is configured to run the given target function with the provided arguments
+    in a separate process. The worker is not started automatically; you must call `start()` to call the target.  The target should not return anything,
+    as its return value will be discarded.
 
-def make_worker(name: str) -> Callable[[Callable[P, None]], Callable[P, Worker]]:
+    :param name: Human-readable name for the worker process.
+    :param target: The function to be executed by the worker process.
+    :param args: Arguments to pass to the target function.
+    :param configure_root_logger: If True, configure the root logger to write log events to file. Defaults to True.
+    :return: A `Worker` instance managing the background process (not started).
     """
-    Turns a function into a worker.
 
-    This decorator wraps a function, allowing it to run in a separate process
-    managed by a `Worker` object. Use it to easily create long-running or
-    isolated tasks without directly handling multiprocessing.
+    def _worker_target() -> None:
+        if configure_logging:
+            configure_root_logger(ProcessType.WORKER)
+        _LOGGER.info(args)
+        target(*args)
 
-    :param name: A human-readable name for the worker process.
-    :return: A decorator that creates a `Worker` to run the function in its own process.
-    """
-
-    def decorator(func: Callable[P, None]) -> Callable[P, Worker]:
-        @wraps(func)
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> Worker:
-            # Worker target funcs must have no arguments
-            def target():
-                configure_root_logger(ProcessType.WORKER)
-                func(*args, **kwargs)
-
-            return Worker(name, target)
-
-        return wrapper
-
-    return decorator
-
-
-@make_worker("capture")
-@log_call
-def do_capture(
-    tag: str,
-) -> None:
-    """Start capturing data from an SDR in real time.
-
-    :param tag: The capture config tag.
-    """
-    _LOGGER.info((f"Reading capture config with tag '{tag}'"))
-
-    # load the receiver and mode from the capture config file
-    capture_config = CaptureConfig(tag)
-
-    _LOGGER.info(
-        (
-            f"Starting capture with the receiver '{capture_config.receiver_name}' "
-            f"operating in mode '{capture_config.receiver_mode}' "
-            f"with tag '{tag}'"
-        )
-    )
-
-    name = ReceiverName(capture_config.receiver_name)
-    receiver = get_receiver(name, capture_config.receiver_mode)
-    receiver.start_capture(tag)
-
-
-@make_worker("post_processing")
-@log_call
-def do_post_processing(
-    tag: str,
-) -> None:
-    """Start post processing SDR data into spectrograms in real time.
-
-    :param tag: The capture config tag.
-    """
-    _LOGGER.info(f"Starting post processor with tag '{tag}'")
-    start_post_processor(tag)
+    return Worker(name, _worker_target)
