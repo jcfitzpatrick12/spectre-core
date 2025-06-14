@@ -96,7 +96,7 @@ class Worker:
 def make_worker(
     name: str,
     target: Callable[..., None],
-    args=(),
+    args: tuple = (),
     configure_logging: bool = True,
 ) -> Worker:
     """Create a `Worker` instance to manage a target function in a multiprocessing background daemon process.
@@ -111,10 +111,10 @@ def make_worker(
     :param configure_root_logger: If True, configure the root logger to write log events to file. Defaults to True.
     :return: A `Worker` instance managing the background process (not started).
     """
-
     def _worker_target() -> None:
         if configure_logging:
             configure_root_logger(ProcessType.WORKER)
+        _LOGGER.info(args)
         target(*args)
 
     return Worker(name, _worker_target)
