@@ -36,7 +36,7 @@ class RSP1A(BaseReceiver):
         self.add_spec(SpecName.FREQUENCY_UPPER_BOUND, 2e9)
         self.add_spec(SpecName.IF_GAIN_UPPER_BOUND, -20)
         self.add_spec(SpecName.RF_GAIN_UPPER_BOUND, 0)
-        self.add_spec(SpecName.API_RETUNING_LATENCY, 50 * 1e-3)
+        self.add_spec(SpecName.API_RETUNING_LATENCY, 25 * 1e-3)
         self.add_spec(
             SpecName.BANDWIDTH_OPTIONS,
             [200000, 300000, 600000, 1536000, 5000000, 6000000, 7000000, 8000000],
