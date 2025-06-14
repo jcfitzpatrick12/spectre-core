@@ -4,7 +4,6 @@
 
 import pytest
 from time import sleep
-from enum import Enum
 
 from spectre_core.jobs import Worker, Job, make_worker, Duration
 
