@@ -60,7 +60,7 @@ class Job:
             worker.restart()
 
     def monitor(
-        self, total_runtime: float, force_restart: bool = False, max_restarts: int = 3
+        self, total_runtime: float, force_restart: bool = False, max_restarts: int = 5
     ) -> None:
         """
         Monitor the workers during execution and handle unexpected exits.
