@@ -7,7 +7,7 @@ from logging import getLogger
 _LOGGER = getLogger(__name__)
 
 import time
-from typing import Callable, ParamSpec
+from typing import Callable
 import multiprocessing
 
 from spectre_core.logs import configure_root_logger, ProcessType
@@ -92,13 +92,11 @@ class Worker:
         self.start()
 
 
-P = ParamSpec("P")
-
-
+# TODO: Somehow statically type check that `args` match the arguments to `target`
 def make_worker(
     name: str,
-    target: Callable[P, None],
-    *args: P.args,
+    target: Callable[..., None],
+    args = (),
     configure_logging: bool = True,
 ) -> Worker:
     """Create a `Worker` instance to manage a target function in a multiprocessing background daemon process.
