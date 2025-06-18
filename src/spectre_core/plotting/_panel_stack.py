@@ -268,5 +268,7 @@ class PanelStack:
             get_batches_dir_path(start_dt.year, start_dt.month, start_dt.day),
             f"{batch_name}.png",
         )
+        # If the parent directory does not exist, create it.
+        os.makedirs(os.path.dirname(batch_file_path), exist_ok=True)
         self._fig.savefig(batch_file_path)
         return batch_file_path
