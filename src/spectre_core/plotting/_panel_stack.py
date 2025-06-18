@@ -245,7 +245,7 @@ class PanelStack:
     def show(self) -> None:
         """Display the panel stack figure."""
         self._make_figure()
-        plt.show()
+        self._fig.show()
 
     def save(
         self,
@@ -268,5 +268,5 @@ class PanelStack:
             get_batches_dir_path(start_dt.year, start_dt.month, start_dt.day),
             f"{batch_name}.png",
         )
-        plt.savefig(batch_file_path)
+        self._fig.savefig(batch_file_path)
         return batch_file_path
