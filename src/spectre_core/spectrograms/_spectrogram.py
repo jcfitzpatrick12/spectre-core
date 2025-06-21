@@ -120,7 +120,9 @@ class Spectrogram:
         self._frequencies = frequencies
         self._tag = tag
         self._spectrum_unit = spectrum_unit
-        self._start_datetime = np.datetime64(start_datetime) if start_datetime is not None else None
+        self._start_datetime = (
+            np.datetime64(start_datetime) if start_datetime is not None else None
+        )
 
         # by default, the background is evaluated over the whole spectrogram
         self._start_background_index = 0
