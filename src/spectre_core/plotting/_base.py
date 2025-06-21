@@ -48,10 +48,12 @@ class BasePanel(ABC):
         """
         self._name = name
         self._spectrogram = spectrogram
-
-        # internal attributes set by `PanelStack` during stacking.
+        
+        # Use some sensible default values
+        self._time_type: TimeType = TimeType.RELATIVE
+        
+        # These attributes can be set by instances of `PanelStack`.
         self._panel_format: Optional[PanelFormat] = None
-        self._time_type: Optional[TimeType] = None
         self._ax: Optional[Axes] = None
         self._fig: Optional[Figure] = None
         self._identifier: Optional[str] = None
@@ -89,8 +91,6 @@ class BasePanel(ABC):
 
         :raises ValueError: If the `time_type` has not been set.
         """
-        if self._time_type is None:
-            raise ValueError(f"`time_type` for the panel '{self.name}' must be set.")
         return self._time_type
 
     @time_type.setter
@@ -115,7 +115,7 @@ class BasePanel(ABC):
         :raises ValueError: If the `panel_format` has not been set.
         """
         if self._panel_format is None:
-            raise ValueError(f"`panel_format` for the panel '{self.name}' must be set.")
+            raise ValueError(f"`panel_format` must be set for the panel `{self.name}`")
         return self._panel_format
 
     @panel_format.setter
@@ -130,10 +130,10 @@ class BasePanel(ABC):
     def ax(self) -> Axes:
         """The `Axes` object bound to this panel.
 
-        :raises AttributeError: If the `Axes` object has not been set.
+        :raises ValueError: If the `Axes` object has not been set.
         """
         if self._ax is None:
-            raise AttributeError(f"`ax` must be set for the panel `{self.name}`")
+            raise ValueError(f"`ax` must be set for the panel `{self.name}`")
         return self._ax
 
     @ax.setter
@@ -151,10 +151,10 @@ class BasePanel(ABC):
         """
         The `Figure` object bound to this panel.
 
-        :raises AttributeError: If the `Figure` object has not been set.
+        :raises ValueError: If the `Figure` object has not been set.
         """
         if self._fig is None:
-            raise AttributeError(f"`fig` must be set for the panel `{self.name}`")
+            raise ValueError(f"`fig` must be set for the panel `{self.name}`")
         return self._fig
 
     @fig.setter
@@ -191,7 +191,7 @@ class BasePanel(ABC):
 
     def hide_yaxis_labels(self) -> None:
         """Hide the y-axis labels for this panel."""
-        self.ax.tick_params(axis="y", labelbottom=False)
+        self.ax.tick_params(axis="y", labelleft=False)
 
 
 class BaseTimeSeriesPanel(BasePanel):
@@ -225,23 +225,3 @@ class BaseTimeSeriesPanel(BasePanel):
             )
             self.ax.set_xlabel(f"Time [UTC] (Start Date: {start_date})")
             self.ax.xaxis.set_major_formatter(mdates.DateFormatter(TimeFormat.TIME))
-
-
-class BaseSpectrumPanel(BasePanel):
-    """An abstract subclass of `BasePanel` tailored for visualising spectrum data.
-
-    Subclasses must implement any remaining abstract methods as described by `BasePanel`.
-    """
-
-    @property
-    def xaxis_type(self) -> Literal[XAxisType.FREQUENCY]:
-        return XAxisType.FREQUENCY
-
-    @property
-    def frequencies(self) -> npt.NDArray[np.float32]:
-        """The physical frequencies assigned to each spectral component."""
-        return self._spectrogram.frequencies
-
-    def annotate_xaxis(self) -> None:
-        """Annotate the x-axis assuming frequency in units of Hz."""
-        self.ax.set_xlabel("Frequency [Hz]")

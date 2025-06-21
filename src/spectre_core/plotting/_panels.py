@@ -2,16 +2,17 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import TypeVar, Tuple, Iterator, Optional
+from typing import TypeVar, Tuple, Iterator, Optional, Literal
 from datetime import datetime
 
 from matplotlib.colors import LogNorm
 from matplotlib import cm
+from matplotlib.colorbar import Colorbar
 import numpy as np
 import numpy.typing as npt
 
 from spectre_core.spectrograms import Spectrogram, FrequencyCut, TimeCut
-from ._base import BaseSpectrumPanel, BaseTimeSeriesPanel
+from ._base import BasePanel, BaseTimeSeriesPanel, XAxisType
 from ._panel_names import PanelName
 
 
@@ -36,7 +37,7 @@ def _bind_to_colors(
     return zip(values, rgbas)
 
 
-class FrequencyCutsPanel(BaseSpectrumPanel):
+class FrequencyCutsPanel(BasePanel):
     """
     Panel for visualising spectrogram data as frequency cuts.
 
@@ -72,6 +73,19 @@ class FrequencyCutsPanel(BaseSpectrumPanel):
         self._dBb = dBb
         self._peak_normalise = peak_normalise
         self._frequency_cuts: dict[float | datetime, FrequencyCut] = {}
+
+    @property
+    def xaxis_type(self) -> Literal[XAxisType.FREQUENCY]:
+        return XAxisType.FREQUENCY
+
+    @property
+    def frequencies(self) -> npt.NDArray[np.float32]:
+        """The physical frequencies assigned to each spectral component."""
+        return self._spectrogram.frequencies
+
+    def annotate_xaxis(self) -> None:
+        """Annotate the x-axis assuming frequency in units of Hz."""
+        self.ax.set_xlabel("Frequency [Hz]")
 
     def get_frequency_cuts(self) -> dict[float | datetime, FrequencyCut]:
         """

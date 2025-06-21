@@ -65,16 +65,20 @@ class PanelStack:
 
         self._fig: Optional[Figure] = None
         self._axs: Optional[np.ndarray] = None
+        
 
-    @property
-    def time_type(self) -> TimeType:
-        """The type of time we assign to the spectrograms"""
-        return self._time_type
-
+    def _sort_by_xaxis_type(self, panels: list[BasePanel]) -> list[BasePanel]:
+        return list(sorted(panels, key=lambda panel: panel.xaxis_type.value))
+    
     @property
     def panels(self) -> list[BasePanel]:
         """Get the panels in the stack, sorted by their `XAxisType`."""
-        return list(sorted(self._panels, key=lambda panel: panel.xaxis_type.value))
+        return self._sort_by_xaxis_type(self._panels)
+
+    @property
+    def superimposed_panels(self) -> list[BasePanel]:
+        """Get the superimposed panels in the stack, sorted by their `XAxisType"""
+        return self._sort_by_xaxis_type(self._superimposed_panels)
 
     @property
     def fig(self) -> Figure:
@@ -105,7 +109,12 @@ class PanelStack:
     def num_panels(self) -> int:
         """Get the number of panels in the stack."""
         return len(self._panels)
-
+    
+    @property
+    def num_superimposed_panels(self) -> int:
+        """Get the number of superimposed panels in the stack."""
+        return len(self._superimposed_panels)
+    
     def add_panel(
         self,
         panel: BasePanel,
@@ -118,9 +127,14 @@ class PanelStack:
         :param identifier: An optional string to link the panel with others for superimposing.
         """
         panel.panel_format = panel_format or self._panel_format
-        panel.time_type = self._time_type
+        
+        if panel.time_type != self._time_type:
+            raise ValueError(f"Cannot add a panel with inconsistent time type. "
+                             f"Expected {self._time_type.value}, but got {panel.time_type.value}")
+        
         if identifier:
             panel.identifier = identifier
+            
         self._panels.append(panel)
 
     def superimpose_panel(
@@ -137,7 +151,11 @@ class PanelStack:
         if identifier:
             panel.identifier = identifier
         panel.panel_format = panel_format or self._panel_format
-        panel.time_type = self._time_type
+        
+        if panel.time_type != self._time_type:
+            raise ValueError(f"Cannot add a panel with inconsistent time type. "
+                             f"Expected {self._time_type.value}, but got {panel.time_type.value}")
+            
         self._superimposed_panels.append(panel)
 
     def _init_plot_style(self) -> None:
