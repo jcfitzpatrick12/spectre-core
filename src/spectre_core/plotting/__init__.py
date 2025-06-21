@@ -5,7 +5,7 @@
 """An intuitive API for plotting spectrogram data."""
 
 from ._format import PanelFormat
-from ._base import BasePanel
+from ._base import BasePanel, XAxisType
 from ._panels import (
     SpectrogramPanel,
     FrequencyCutsPanel,
@@ -15,6 +15,7 @@ from ._panels import (
 from ._panel_stack import PanelStack
 
 __all__ = [
+    "XAxisType",
     "BasePanel",
     "PanelFormat",
     "PanelStack",
