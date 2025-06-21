@@ -81,7 +81,7 @@ class TestWorker:
         """Check that a worker which is successfully running is alive."""
         successful_runtime_worker.start()
         _short_sleep()
-        assert successful_runtime_worker.is_alive == True
+        assert successful_runtime_worker.is_alive
 
         # Kill the process, since otherwise they would keep running until the parent process terminates.
         successful_runtime_worker.kill()
@@ -90,21 +90,21 @@ class TestWorker:
         """Check that a worker which instantly failed, is not alive."""
         instantly_failing_runtime_worker.start()
         _short_sleep()
-        assert instantly_failing_runtime_worker.is_alive == False
+        assert not instantly_failing_runtime_worker.is_alive
 
     def test_kill(self, successful_runtime_worker: Worker) -> None:
         """Check that killing the worker, results in it not being alive."""
         successful_runtime_worker.start()
         successful_runtime_worker.kill()
         _short_sleep()
-        assert successful_runtime_worker.is_alive == False
+        assert not successful_runtime_worker.is_alive
 
     def test_restart(self, successful_runtime_worker: Worker) -> None:
         """Check that a restarted worker evaluates as alive."""
         successful_runtime_worker.start()
         successful_runtime_worker.restart()
         _short_sleep()
-        assert successful_runtime_worker.is_alive == True
+        assert successful_runtime_worker.is_alive
 
         # Kill the process, since otherwise they would keep running until the parent process terminates.
         successful_runtime_worker.kill()
@@ -117,7 +117,7 @@ class TestWorker:
 
         _short_sleep()
 
-        assert successful_runtime_worker.is_alive == True
+        assert successful_runtime_worker.is_alive
 
         # Kill the process, since otherwise they would keep running until the parent process terminates.
         successful_runtime_worker.kill()
@@ -143,7 +143,7 @@ class TestJobs:
         """Check that when a job starts, the workers are all alive."""
         successful_runtime_job.start()
         _short_sleep()
-        assert successful_runtime_job.workers_are_alive == True
+        assert successful_runtime_job.workers_are_alive
 
         # Kill the workers, since otherwise they would keep running until the parent process terminates.
         successful_runtime_job.kill()
@@ -155,7 +155,7 @@ class TestJobs:
         _short_sleep()
 
         # Check all the workers are not alive.
-        assert successful_runtime_job.workers_are_alive == False
+        assert not successful_runtime_job.workers_are_alive
 
     def test_monitor_successful_job(self, successful_runtime_job: Job) -> None:
         """Check that once the total runtime of a job is complete, the workers are no longer alive."""
@@ -166,7 +166,7 @@ class TestJobs:
         _short_sleep()
 
         # Check all the workers are not alive.
-        assert successful_runtime_job.workers_are_alive == False
+        assert not successful_runtime_job.workers_are_alive
 
     def test_monitor_failed_job(self, partially_failing_job: Job) -> None:
         """Check that if a worker fails, and force restart is false, that the main process raises a `RuntimeError`."""
@@ -175,7 +175,7 @@ class TestJobs:
             partially_failing_job.monitor(Duration.ONE_SECOND)
 
         # Check all the workers are not alive.
-        assert partially_failing_job.workers_are_alive == False
+        assert not partially_failing_job.workers_are_alive
 
     def test_max_restarts(self, partially_failing_job: Job) -> None:
         """Check that we don't get any neverending force restart loops."""
@@ -190,14 +190,14 @@ class TestJobs:
             )
 
         # Check all the workers are not alive.
-        assert partially_failing_job.workers_are_alive == False
+        assert not partially_failing_job.workers_are_alive
 
     def test_single_restart(self, successful_runtime_job: Job) -> None:
         """Check that we can restart a job multiple once, and the workers are alive afterwards."""
         successful_runtime_job.start()
         successful_runtime_job.restart()
         _short_sleep()
-        assert successful_runtime_job.workers_are_alive == True
+        assert successful_runtime_job.workers_are_alive
 
         # Kill the workers, since otherwise they would keep running until the parent process terminates.
         successful_runtime_job.kill()
@@ -208,7 +208,7 @@ class TestJobs:
         successful_runtime_job.restart()
         successful_runtime_job.restart()
         _short_sleep()
-        assert successful_runtime_job.workers_are_alive == True
+        assert successful_runtime_job.workers_are_alive
 
         # Kill the workers, since otherwise they would keep running until the parent process terminates.
         successful_runtime_job.kill()
