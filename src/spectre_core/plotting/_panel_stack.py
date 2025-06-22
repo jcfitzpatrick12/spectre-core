@@ -145,13 +145,14 @@ class PanelStack:
         panel_format: Optional[PanelFormat] = None,
     ) -> None:
         """Add a panel to the stack.
+        
+        Overrides the time type of the panel, to the time type of the stack.
 
         :param panel: An instance of a `BasePanel` subclass to be added to the stack.
         :param identifier: An optional string to link the panel with others for superimposing.
         """
-        self._validate_time_type(panel)
-
         panel.set_panel_format(panel_format or self._panel_format)
+        panel.set_time_type(self._time_type)
         if identifier:
             panel.set_identifier(identifier)
 
@@ -164,15 +165,16 @@ class PanelStack:
         panel_format: Optional[PanelFormat] = None,
     ) -> None:
         """Superimpose a panel onto an existing panel in the stack.
+        
+        Overrides the time type of the panel, to the time type of the stack.
 
         :param panel: The panel to superimpose.
         :param identifier: An optional identifier to link panels during superimposing, defaults to None
         """
-        self._validate_time_type(panel)
-
         if identifier:
             panel.set_identifier(identifier)
         panel.set_panel_format(panel_format or self._panel_format)
+        panel.set_time_type(self._time_type)
 
         self._superimposed_panels.append(panel)
 

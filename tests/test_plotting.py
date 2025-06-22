@@ -455,15 +455,12 @@ class TestPanelStack:
     def test_incompatible_time_types(
         self, panel_stack: PanelStack, spectrogram_panel: SpectrogramPanel
     ) -> None:
-        """Check that two panels cannot be added to the stack with incompatible time types.
-
-        The motivation is that to "line up" time series plots between panels in a stack, they all must have the same time
-        type.
+        """Check that the panel stack overrides the time type of the panel, if they are incompatible.
         """
         panel_stack.time_type = TimeType.RELATIVE
         spectrogram_panel.set_time_type(TimeType.DATETIMES)
-        with pytest.raises(ValueError):
-            panel_stack.add_panel(spectrogram_panel)
+        panel_stack.add_panel(spectrogram_panel)
+        assert spectrogram_panel.get_time_type() == TimeType.RELATIVE
 
     def test_save_creates_file(
         self, panel_stack: PanelStack, spectrogram_panel: SpectrogramPanel
