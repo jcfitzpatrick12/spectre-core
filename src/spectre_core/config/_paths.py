@@ -16,24 +16,17 @@ and creates three directories inside it:
 import os
 from typing import Optional
 
-_SPECTRE_DATA_DIR_PATH = os.environ.get("SPECTRE_DATA_DIR_PATH", "NOTSET")
-if _SPECTRE_DATA_DIR_PATH == "NOTSET":
-    raise ValueError("The environment variable `SPECTRE_DATA_DIR_PATH` must be set.")
-
-_BATCHES_DIR_PATH = os.path.join(_SPECTRE_DATA_DIR_PATH, "batches")
-_LOGS_DIR_PATH = os.path.join(_SPECTRE_DATA_DIR_PATH, "logs")
-_CONFIGS_DIR_PATH = os.path.join(_SPECTRE_DATA_DIR_PATH, "configs")
-
-os.makedirs(_BATCHES_DIR_PATH, exist_ok=True)
-os.makedirs(_LOGS_DIR_PATH, exist_ok=True)
-os.makedirs(_CONFIGS_DIR_PATH, exist_ok=True)
-
 
 def get_spectre_data_dir_path() -> str:
     """The default ancestral path for all `spectre` file system data.
 
     :return: The value stored by the `SPECTRE_DATA_DIR_PATH` environment variable.
     """
+    _SPECTRE_DATA_DIR_PATH = os.environ.get("SPECTRE_DATA_DIR_PATH", "NOTSET")
+    if _SPECTRE_DATA_DIR_PATH == "NOTSET":
+        raise ValueError(
+            "The environment variable `SPECTRE_DATA_DIR_PATH` must be set."
+        )
     return _SPECTRE_DATA_DIR_PATH
 
 
@@ -80,7 +73,8 @@ def get_batches_dir_path(
     :param day: The numeric day. Defaults to None.
     :return: The directory path for batched data files, optionally with a date-based subdirectory.
     """
-    return _get_date_based_dir_path(_BATCHES_DIR_PATH, year, month, day)
+    batches_dir_path = os.path.join(get_spectre_data_dir_path(), "batches")
+    return _get_date_based_dir_path(batches_dir_path, year, month, day)
 
 
 def get_logs_dir_path(
@@ -94,7 +88,8 @@ def get_logs_dir_path(
     :param day: The numeric day. Defaults to None.
     :return: The directory path for log files, optionally with a date-based subdirectory.
     """
-    return _get_date_based_dir_path(_LOGS_DIR_PATH, year, month, day)
+    logs_dir_path = os.path.join(get_spectre_data_dir_path(), "logs")
+    return _get_date_based_dir_path(logs_dir_path, year, month, day)
 
 
 def get_configs_dir_path() -> str:
@@ -102,7 +97,7 @@ def get_configs_dir_path() -> str:
 
     :return: The directory path for configuration files.
     """
-    return _CONFIGS_DIR_PATH
+    return os.path.join(get_spectre_data_dir_path(), "configs")
 
 
 def trim_spectre_data_dir_path(full_path: str) -> str:
@@ -116,7 +111,7 @@ def trim_spectre_data_dir_path(full_path: str) -> str:
     :param full_path: The full file path to be trimmed.
     :return: The relative path with `SPECTRE_DATA_DIR_PATH` removed.
     """
-    return os.path.relpath(full_path, _SPECTRE_DATA_DIR_PATH)
+    return os.path.relpath(full_path, get_spectre_data_dir_path())
 
 
 def add_spectre_data_dir_path(rel_path: str) -> str:
@@ -129,4 +124,4 @@ def add_spectre_data_dir_path(rel_path: str) -> str:
     :param rel_path: The relative file path to be appended.
     :return: The full file path prefixed with `SPECTRE_DATA_DIR_PATH`.
     """
-    return os.path.join(_SPECTRE_DATA_DIR_PATH, rel_path)
+    return os.path.join(get_spectre_data_dir_path(), rel_path)
