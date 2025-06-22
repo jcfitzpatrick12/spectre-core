@@ -285,6 +285,8 @@ class PanelStack:
         """Display the panel stack figure."""
         self._make_figure()
         self._get_fig().show()
+        self._fig.clear()
+        plt.close(self._fig)
 
     def save(
         self,
@@ -310,4 +312,6 @@ class PanelStack:
         # If the parent directory does not exist, create it.
         os.makedirs(os.path.dirname(batch_file_path), exist_ok=True)
         self._get_fig().savefig(batch_file_path)
+        self._fig.clear()
+        plt.close(self._fig)
         return batch_file_path
