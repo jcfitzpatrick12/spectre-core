@@ -5,6 +5,8 @@
 
 """General `spectre` package configurations."""
 
+import os
+
 from ._paths import (
     get_spectre_data_dir_path,
     get_batches_dir_path,
@@ -13,6 +15,10 @@ from ._paths import (
     trim_spectre_data_dir_path,
 )
 from ._time_formats import TimeFormat
+
+os.makedirs(get_batches_dir_path(), exist_ok=True)
+os.makedirs(get_logs_dir_path(), exist_ok=True)
+os.makedirs(get_configs_dir_path(), exist_ok=True)
 
 __all__ = [
     "get_spectre_data_dir_path",
