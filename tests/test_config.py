@@ -13,7 +13,7 @@ from spectre_core.config import (
 
 @pytest.fixture(autouse=True)
 def patch_spectre_data_dir_path():
-    """Patch the environment which dictates the shared ancestral path of all log, batch and config files."""
+    """Patch the environment which defines the shared ancestral path of all log, batch and config files."""
     pytest.MonkeyPatch().setenv(
         "SPECTRE_DATA_DIR_PATH", os.path.join("/tmp", ".spectre-data")
     )
@@ -39,7 +39,7 @@ def test_get_batches_dir_path(
     day: int,
     expected_dir_path: str,
 ) -> None:
-    """Test get_batches_dir_path with various date arguments."""
+    """Check that the batches directory paths are created as expected."""
     result = get_batches_dir_path(year, month, day)
     assert result == expected_dir_path
 
@@ -64,11 +64,11 @@ def test_get_logs_dir_path(
     day: int,
     expected_dir_path: str,
 ) -> None:
-    """Check that the logs directory path is created, as expected."""
+    """Check that the logs directory paths are created as expected."""
     result = get_logs_dir_path(year, month, day)
     assert result == expected_dir_path
 
 
 def test_get_configs_dir_path():
-    """Check that the logs directory path is created, as expected."""
+    """Check that the configs directory path is created as expected."""
     assert get_configs_dir_path() == os.path.join("/tmp", ".spectre-data", "configs")
