@@ -145,7 +145,7 @@ class PanelStack:
         panel_format: Optional[PanelFormat] = None,
     ) -> None:
         """Add a panel to the stack.
-        
+
         Overrides the time type of the panel, to the time type of the stack.
 
         :param panel: An instance of a `BasePanel` subclass to be added to the stack.
@@ -165,7 +165,7 @@ class PanelStack:
         panel_format: Optional[PanelFormat] = None,
     ) -> None:
         """Superimpose a panel onto an existing panel in the stack.
-        
+
         Overrides the time type of the panel, to the time type of the stack.
 
         :param panel: The panel to superimpose.

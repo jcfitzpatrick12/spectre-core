@@ -455,8 +455,7 @@ class TestPanelStack:
     def test_incompatible_time_types(
         self, panel_stack: PanelStack, spectrogram_panel: SpectrogramPanel
     ) -> None:
-        """Check that the panel stack overrides the time type of the panel, if they are incompatible.
-        """
+        """Check that the panel stack overrides the time type of the panel, if they are incompatible."""
         panel_stack.time_type = TimeType.RELATIVE
         spectrogram_panel.set_time_type(TimeType.DATETIMES)
         panel_stack.add_panel(spectrogram_panel)
