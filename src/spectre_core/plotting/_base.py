@@ -20,7 +20,7 @@ from ._panel_names import PanelName
 
 
 class XAxisType(Enum):
-    """The x-axis type for a panel.
+    """The xaxis type for a panel.
 
     Axes are shared in a stack between panels with common `XAxisType`.
 
@@ -37,25 +37,30 @@ class BasePanel(ABC):
 
     `BasePanel` instances are designed to be part of a `PanelStack`, where multiple
     panels contribute to a composite plot. Subclasses must implement methods to define
-    how the panel is drawn and annotated, and specify its x-axis type.
+    how the panel is drawn and annotated, and specify its xaxis type.
     """
 
-    def __init__(self, name: PanelName, spectrogram: Spectrogram) -> None:
+    def __init__(
+        self,
+        name: PanelName,
+        spectrogram: Spectrogram,
+        time_type: TimeType = TimeType.RELATIVE,
+    ) -> None:
         """Initialize an instance of `BasePanel`.
 
         :param name: The name of the panel.
         :param spectrogram: The spectrogram being visualised.
+        :param time_type: Indicates whether the times of each spectrum are relative to the first
+        spectrum in the spectrogram, or datetimes.
         """
         self._name = name
         self._spectrogram = spectrogram
-        
-        # Use some sensible default values
-        self._time_type: TimeType = TimeType.RELATIVE
-        
-        # These attributes can be set by instances of `PanelStack`.
-        self._panel_format: Optional[PanelFormat] = None
+        self._time_type = time_type
+
+        # These attributes should be set by instances of `PanelStack`.
         self._ax: Optional[Axes] = None
         self._fig: Optional[Figure] = None
+        self._panel_format: Optional[PanelFormat] = None
         self._identifier: Optional[str] = None
 
     @abstractmethod
@@ -64,16 +69,16 @@ class BasePanel(ABC):
 
     @abstractmethod
     def annotate_xaxis(self) -> None:
-        """Modify the `ax` attribute to annotate the x-axis of the panel."""
+        """Modify the `ax` attribute to annotate the xaxis of the panel."""
 
     @abstractmethod
     def annotate_yaxis(self) -> None:
-        """Modify the `ax` attribute to annotate the y-axis of the panel."""
+        """Modify the `ax` attribute to annotate the yaxis of the panel."""
 
     @property
     @abstractmethod
     def xaxis_type(self) -> XAxisType:
-        """Specify the x-axis type for the panel."""
+        """Specify the xaxis type for the panel."""
 
     @property
     def spectrogram(self) -> Spectrogram:
@@ -86,15 +91,18 @@ class BasePanel(ABC):
         return self._spectrogram.tag
 
     @property
-    def time_type(self) -> TimeType:
+    def name(self) -> PanelName:
+        """The name of the panel."""
+        return self._name
+
+    def get_time_type(self) -> TimeType:
         """The time type of the spectrogram.
 
         :raises ValueError: If the `time_type` has not been set.
         """
         return self._time_type
 
-    @time_type.setter
-    def time_type(self, value: TimeType) -> None:
+    def set_time_type(self, value: TimeType) -> None:
         """Set the `TimeType` for the spectrogram.
 
         This controls how time is represented and annotated on the panel.
@@ -103,13 +111,7 @@ class BasePanel(ABC):
         """
         self._time_type = value
 
-    @property
-    def name(self) -> PanelName:
-        """The name of the panel."""
-        return self._name
-
-    @property
-    def panel_format(self) -> PanelFormat:
+    def get_panel_format(self) -> PanelFormat:
         """Retrieve the panel format, which controls the style of the panel.
 
         :raises ValueError: If the `panel_format` has not been set.
@@ -118,17 +120,18 @@ class BasePanel(ABC):
             raise ValueError(f"`panel_format` must be set for the panel `{self.name}`")
         return self._panel_format
 
-    @panel_format.setter
-    def panel_format(self, value: PanelFormat) -> None:
+    def set_panel_format(self, value: PanelFormat) -> None:
         """Set the panel format to control the style of the panel.
 
         :param value: The `PanelFormat` to assign to the panel.
         """
         self._panel_format = value
 
-    @property
-    def ax(self) -> Axes:
-        """The `Axes` object bound to this panel.
+    def _get_ax(self) -> Axes:
+        """Return the `Axes` object bound to this panel.
+
+        This method is protected to restrict direct access to `matplotlib` functionality,
+        promoting encapsulation, promoting encapsulation.
 
         :raises ValueError: If the `Axes` object has not been set.
         """
@@ -136,8 +139,7 @@ class BasePanel(ABC):
             raise ValueError(f"`ax` must be set for the panel `{self.name}`")
         return self._ax
 
-    @ax.setter
-    def ax(self, value: Axes) -> None:
+    def set_ax(self, value: Axes) -> None:
         """Assign a Matplotlib `Axes` object to this panel.
 
         This `Axes` will be used for drawing and annotations.
@@ -146,10 +148,11 @@ class BasePanel(ABC):
         """
         self._ax = value
 
-    @property
-    def fig(self) -> Figure:
-        """
-        The `Figure` object bound to this panel.
+    def _get_fig(self) -> Figure:
+        """Return the `Figure` object bound to this panel.
+
+        This method is protected to restrict direct access to `matplotlib` functionality,
+        promoting encapsulation, promoting encapsulation.
 
         :raises ValueError: If the `Figure` object has not been set.
         """
@@ -157,8 +160,7 @@ class BasePanel(ABC):
             raise ValueError(f"`fig` must be set for the panel `{self.name}`")
         return self._fig
 
-    @fig.setter
-    def fig(self, value: Figure) -> None:
+    def set_fig(self, value: Figure) -> None:
         """
         Assign a Matplotlib `Figure` object to this panel.
 
@@ -168,8 +170,7 @@ class BasePanel(ABC):
         """
         self._fig = value
 
-    @property
-    def identifier(self) -> Optional[str]:
+    def get_identifier(self) -> Optional[str]:
         """Optional identifier for the panel.
 
         This identifier can be used to distinguish panels or aid in superimposing
@@ -177,8 +178,7 @@ class BasePanel(ABC):
         """
         return self._identifier
 
-    @identifier.setter
-    def identifier(self, value: str) -> None:
+    def set_identifier(self, value: str) -> None:
         """Set the optional identifier for the panel.
 
         This can be used to distinguish panels or aid in superimposing panels.
@@ -186,12 +186,40 @@ class BasePanel(ABC):
         self._identifier = value
 
     def hide_xaxis_labels(self) -> None:
-        """Hide the x-axis labels for this panel."""
-        self.ax.tick_params(axis="x", labelbottom=False)
+        """Hide the labels for xaxis ticks in the panel."""
+        self._get_ax().tick_params(axis="x", labelbottom=False)
 
     def hide_yaxis_labels(self) -> None:
-        """Hide the y-axis labels for this panel."""
-        self.ax.tick_params(axis="y", labelleft=False)
+        """Hide the labels for yaxis ticks in the panel."""
+        self._get_ax().tick_params(axis="y", labelleft=False)
+
+    def sharex(self, axes: Axes):
+        """Share the xaxis with another axes."""
+        self._get_ax().sharex(axes)
+
+    def get_xaxis_labels(self) -> list[str]:
+        """Get the text string of all xaxis tick labels."""
+        tick_labels = self._get_ax().get_xaxis().get_ticklabels(which="both")
+        return [tick_label.get_text() for tick_label in tick_labels]
+
+    def get_yaxis_labels(self) -> list[str]:
+        """Get the text string of all yaxis tick labels."""
+        tick_labels = self._get_ax().get_yaxis().get_ticklabels(which="both")
+        return [tick_label.get_text() for tick_label in tick_labels]
+
+    def get_xlabel(self) -> str:
+        """Get the xlabel text string."""
+        return self._get_ax().get_xlabel()
+
+    def get_ylabel(self) -> str:
+        """Get the ylabel text string."""
+        return self._get_ax().get_ylabel()
+
+    def share_axes(self, panel: "BasePanel") -> None:
+        # TODO: More elegantly share axes, rather than access protected method from
+        # another instance. Probably, this should just be entirely managed by the `PanelStack`
+        self.set_ax(panel._get_ax())
+        self.set_fig(panel._get_fig())
 
 
 class BaseTimeSeriesPanel(BasePanel):
@@ -210,18 +238,19 @@ class BaseTimeSeriesPanel(BasePanel):
         """The times assigned to each spectrum according to the `TimeType`."""
         return (
             self.spectrogram.times
-            if self.time_type == TimeType.RELATIVE
+            if self.get_time_type() == TimeType.RELATIVE
             else self.spectrogram.datetimes
         )
 
     def annotate_xaxis(self) -> None:
-        """Annotate the x-axis according to the specified `TimeType`."""
-        if self.time_type == TimeType.RELATIVE:
-            self.ax.set_xlabel("Time [s]")
+        """Annotate the xaxis according to the specified `TimeType`."""
+        ax = self._get_ax()
+        if self.get_time_type() == TimeType.RELATIVE:
+            ax.set_xlabel("Time [s]")
         else:
             # TODO: Adapt for time ranges greater than one day
             start_date = datetime.strftime(
                 self.spectrogram.start_datetime.astype(datetime), TimeFormat.DATE
             )
-            self.ax.set_xlabel(f"Time [UTC] (Start Date: {start_date})")
-            self.ax.xaxis.set_major_formatter(mdates.DateFormatter(TimeFormat.TIME))
+            ax.set_xlabel(f"Time [UTC] (Start Date: {start_date})")
+            ax.xaxis.set_major_formatter(mdates.DateFormatter(TimeFormat.TIME))

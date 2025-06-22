@@ -65,11 +65,10 @@ class PanelStack:
 
         self._fig: Optional[Figure] = None
         self._axs: Optional[np.ndarray] = None
-        
 
     def _sort_by_xaxis_type(self, panels: list[BasePanel]) -> list[BasePanel]:
         return list(sorted(panels, key=lambda panel: panel.xaxis_type.value))
-    
+
     @property
     def panels(self) -> list[BasePanel]:
         """Get the panels in the stack, sorted by their `XAxisType`."""
@@ -81,7 +80,34 @@ class PanelStack:
         return self._sort_by_xaxis_type(self._superimposed_panels)
 
     @property
-    def fig(self) -> Figure:
+    def num_panels(self) -> int:
+        """Get the number of panels in the stack."""
+        return len(self._panels)
+
+    @property
+    def num_superimposed_panels(self) -> int:
+        """Get the number of superimposed panels in the stack."""
+        return len(self._superimposed_panels)
+
+    @property
+    def time_type(self) -> TimeType:
+        """The imposed time type on all time series panels in the stack.
+
+        :raises ValueError: If the `time_type` has not been set.
+        """
+        return self._time_type
+
+    @time_type.setter
+    def time_type(self, value: TimeType) -> None:
+        """Set the `TimeType` for all time series panels in the stack.
+
+        This controls how time is represented and annotated on the panel.
+
+        :param value: The `TimeType` to impose on all time series panels in the stack.
+        """
+        self._time_type = value
+
+    def _get_fig(self) -> Figure:
         """Get the shared `matplotlib` figure for the panel stack.
 
         :raises ValueError: If the axes have not been initialized.
@@ -92,8 +118,7 @@ class PanelStack:
             )
         return self._fig
 
-    @property
-    def axs(self) -> np.ndarray:
+    def _get_axes(self) -> np.ndarray:
         """Get the `matplotlib` axes in the stack.
 
         :return: An array of `matplotlib.axes.Axes`, one for each panel in the stack.
@@ -105,16 +130,14 @@ class PanelStack:
             )
         return np.atleast_1d(self._axs)
 
-    @property
-    def num_panels(self) -> int:
-        """Get the number of panels in the stack."""
-        return len(self._panels)
-    
-    @property
-    def num_superimposed_panels(self) -> int:
-        """Get the number of superimposed panels in the stack."""
-        return len(self._superimposed_panels)
-    
+    def _validate_time_type(self, panel: BasePanel) -> None:
+        """Check that the time type of the input panel, is consistent with the time type of the stack."""
+        if panel.get_time_type() != self._time_type:
+            raise ValueError(
+                f"Cannot add a panel with inconsistent time type. "
+                f"Expected {self._time_type.value}, but got {panel.get_time_type().value}"
+            )
+
     def add_panel(
         self,
         panel: BasePanel,
@@ -126,15 +149,12 @@ class PanelStack:
         :param panel: An instance of a `BasePanel` subclass to be added to the stack.
         :param identifier: An optional string to link the panel with others for superimposing.
         """
-        panel.panel_format = panel_format or self._panel_format
-        
-        if panel.time_type != self._time_type:
-            raise ValueError(f"Cannot add a panel with inconsistent time type. "
-                             f"Expected {self._time_type.value}, but got {panel.time_type.value}")
-        
+        self._validate_time_type(panel)
+
+        panel.set_panel_format(panel_format or self._panel_format)
         if identifier:
-            panel.identifier = identifier
-            
+            panel.set_identifier(identifier)
+
         self._panels.append(panel)
 
     def superimpose_panel(
@@ -148,14 +168,12 @@ class PanelStack:
         :param panel: The panel to superimpose.
         :param identifier: An optional identifier to link panels during superimposing, defaults to None
         """
+        self._validate_time_type(panel)
+
         if identifier:
-            panel.identifier = identifier
-        panel.panel_format = panel_format or self._panel_format
-        
-        if panel.time_type != self._time_type:
-            raise ValueError(f"Cannot add a panel with inconsistent time type. "
-                             f"Expected {self._time_type.value}, but got {panel.time_type.value}")
-            
+            panel.set_identifier(identifier)
+        panel.set_panel_format(panel_format or self._panel_format)
+
         self._superimposed_panels.append(panel)
 
     def _init_plot_style(self) -> None:
@@ -191,16 +209,17 @@ class PanelStack:
     def _assign_axes(self) -> None:
         """Assign each axes in the figure to some panel in the stack.
 
-        Axes are shared between panels with common `xaxis_type`.
+        Axes are shared between panels with common `XAxisType`.
         """
         shared_axes: dict[XAxisType, Axes] = {}
         for i, panel in enumerate(self.panels):
-            panel.ax = self.axs[i]
-            panel.fig = self._fig
+            ax = self._get_axes()[i]
+            panel.set_ax(ax)
+            panel.set_fig(self._fig)
             if panel.xaxis_type in shared_axes:
-                panel.ax.sharex(shared_axes[panel.xaxis_type])
+                panel.sharex(shared_axes[panel.xaxis_type])
             else:
-                shared_axes[panel.xaxis_type] = panel.ax
+                shared_axes[panel.xaxis_type] = ax
 
     def _overlay_cuts(self, cuts_panel: BasePanel) -> None:
         """Overlay cuts onto corresponding spectrogram panels.
@@ -228,9 +247,9 @@ class PanelStack:
         for super_panel in self._superimposed_panels:
             for panel in self._panels:
                 if panel.name == super_panel.name and (
-                    panel.identifier == super_panel.identifier
+                    panel.set_identifier(super_panel.get_identifier())
                 ):
-                    super_panel.ax, super_panel.fig = panel.ax, self._fig
+                    super_panel.share_axes(panel)
                     super_panel.draw()
                     if _is_cuts_panel(super_panel):
                         self._overlay_cuts(super_panel)
@@ -263,7 +282,7 @@ class PanelStack:
     def show(self) -> None:
         """Display the panel stack figure."""
         self._make_figure()
-        self._fig.show()
+        self._get_fig().show()
 
     def save(
         self,
@@ -288,5 +307,5 @@ class PanelStack:
         )
         # If the parent directory does not exist, create it.
         os.makedirs(os.path.dirname(batch_file_path), exist_ok=True)
-        self._fig.savefig(batch_file_path)
+        self._get_fig().savefig(batch_file_path)
         return batch_file_path

@@ -2,12 +2,18 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+# TODO:
+# - Make sure docstrings are filled in.
+# - Make the tests more clear... Some seem opaque, and rely on particular properties of the fixtures.
+# - Write a test for saving the batch file to a temp directory and making sure the filename is right etc.
+
 import pytest
+import tempfile
 import numpy as np
+import os
 from datetime import datetime, timedelta
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from copy import deepcopy
 
 from spectre_core.plotting import (
     BasePanel,
@@ -19,7 +25,6 @@ from spectre_core.plotting import (
     TimeCutsPanel,
     IntegralOverFrequencyPanel,
     PanelStack,
-    PanelFormat,
 )
 from spectre_core.config import TimeFormat
 from spectre_core.spectrograms import Spectrogram, SpectrumUnit, TimeType
@@ -177,29 +182,22 @@ class TestBasePanel:
         assert base_panel.name == PanelName.SPECTROGRAM
         assert base_panel.spectrogram == spectrogram
         assert base_panel.tag == spectrogram.tag
-        assert base_panel.identifier is None
-
-        # Test that unset properties raise appropriate errors
-        with pytest.raises(ValueError):
-            _ = base_panel.ax
+        assert base_panel.get_identifier() is None
 
         with pytest.raises(ValueError):
-            _ = base_panel.fig
-
-        with pytest.raises(ValueError):
-            _ = base_panel.panel_format
+            _ = base_panel.get_panel_format()
 
     def test_xaxis_hidden(self, base_panel: BasePanel, axes: Axes) -> None:
         """Check that calling for the xaxis labels to be hidden, actually hides them."""
-        base_panel.ax = axes
+        base_panel.set_ax(axes)
         base_panel.hide_xaxis_labels()
-        assert not axes.get_xaxis().get_ticklabels(which="both")
+        assert not base_panel.get_xaxis_labels()
 
     def test_yaxis_hidden(self, base_panel: BasePanel, axes: Axes) -> None:
         """Check that calling for the yaxis labels to be hidden, actually hides them."""
-        base_panel.ax = axes
+        base_panel.set_ax(axes)
         base_panel.hide_yaxis_labels()
-        assert not axes.get_yaxis().get_ticklabels(which="both")
+        assert not base_panel.get_yaxis_labels()
 
 
 class TestBaseTimeSeriesPanel:
@@ -216,10 +214,10 @@ class TestBaseTimeSeriesPanel:
         """
 
         # Check both cases of time type.
-        base_time_series_panel.time_type = TimeType.RELATIVE
+        base_time_series_panel.set_time_type(TimeType.RELATIVE)
         assert np.array_equal(base_time_series_panel.times, spectrogram.times)
 
-        base_time_series_panel.time_type = TimeType.DATETIMES
+        base_time_series_panel.set_time_type(TimeType.DATETIMES)
         assert np.array_equal(base_time_series_panel.times, spectrogram.datetimes)
 
     @pytest.mark.parametrize(
@@ -237,10 +235,10 @@ class TestBaseTimeSeriesPanel:
         expected_label: str,
     ) -> None:
         """Check axis labeling for different time types."""
-        base_time_series_panel.ax = axes
-        base_time_series_panel.time_type = time_type
+        base_time_series_panel.set_ax(axes)
+        base_time_series_panel.set_time_type(time_type)
         base_time_series_panel.annotate_xaxis()
-        assert base_time_series_panel.ax.get_xlabel() == expected_label
+        assert base_time_series_panel.get_xlabel() == expected_label
 
 
 class TestFrequencyCutsPanel:
@@ -267,13 +265,13 @@ class TestFrequencyCutsPanel:
             frequency_cuts_panel_relative_cuts.frequencies, spectrogram.frequencies
         )
 
-    def test_annotate_xaxis(
+    def test_xaxis_annotation(
         self, frequency_cuts_panel_relative_cuts: FrequencyCutsPanel, axes: Axes
     ) -> None:
         """Check that the xaxis gets annotated appropriately."""
-        frequency_cuts_panel_relative_cuts.ax = axes
+        frequency_cuts_panel_relative_cuts.set_ax(axes)
         frequency_cuts_panel_relative_cuts.annotate_xaxis()
-        assert frequency_cuts_panel_relative_cuts.ax.get_xlabel() == "Frequency [Hz]"
+        assert frequency_cuts_panel_relative_cuts.get_xlabel() == "Frequency [Hz]"
 
     def test_no_times_specified(self, spectrogram: Spectrogram) -> None:
         """Check that an error is raised when the class is instantiated with no times specified."""
@@ -281,24 +279,24 @@ class TestFrequencyCutsPanel:
         with pytest.raises(ValueError):
             FrequencyCutsPanel(spectrogram, *times)
 
-    def test_annotate_yaxis_dBb(
+    def test_yaxis_annotation_dBb(
         self, frequency_cuts_panel_dBb: FrequencyCutsPanel, axes: Axes
     ) -> None:
         """Check that the ylabel is annotated appropriately, in the case where the spectrum units are `dBb`."""
-        frequency_cuts_panel_dBb.ax = axes
+        frequency_cuts_panel_dBb.set_ax(axes)
         frequency_cuts_panel_dBb.annotate_yaxis()
-        assert frequency_cuts_panel_dBb.ax.get_ylabel() == "dBb"
+        assert frequency_cuts_panel_dBb.get_ylabel() == "dBb"
 
-    def test_annotate_yaxis_peak_normalised(
+    def test_yaxis_annotation_peak_normalised(
         self, frequency_cuts_panel_peak_normalised: FrequencyCutsPanel, axes: Axes
     ) -> None:
         """Check that the ylabel is annotated appropriately, in the case where the spectrum units are normalised to their peak values, respectively."""
-        frequency_cuts_panel_peak_normalised.ax = axes
+        frequency_cuts_panel_peak_normalised.set_ax(axes)
         frequency_cuts_panel_peak_normalised.annotate_yaxis()
         # We don't expect any label in this case
-        assert not frequency_cuts_panel_peak_normalised.ax.get_ylabel()
+        assert not frequency_cuts_panel_peak_normalised.get_ylabel()
 
-    def test_annotate_yaxis(
+    def test_yaxis_annotation(
         self,
         frequency_cuts_panel_relative_cuts: FrequencyCutsPanel,
         axes: Axes,
@@ -307,10 +305,10 @@ class TestFrequencyCutsPanel:
         """Check that the ylabel is annotated appropriately, when the spectrum units are those defined by the spectrogram used to construct
         the panel.
         """
-        frequency_cuts_panel_relative_cuts.ax = axes
+        frequency_cuts_panel_relative_cuts.set_ax(axes)
         frequency_cuts_panel_relative_cuts.annotate_yaxis()
         assert (
-            frequency_cuts_panel_relative_cuts.ax.get_ylabel()
+            frequency_cuts_panel_relative_cuts.get_ylabel()
             == f"{spectrogram.spectrum_unit.value}".capitalize()
         )
 
@@ -322,26 +320,26 @@ class TestTimeCutsPanel:
         with pytest.raises(ValueError):
             TimeCutsPanel(spectrogram, *frequencies)
 
-    def test_annotate_yaxis_dBb(
+    def test_yaxis_annotation_dBb(
         self, time_cuts_panel_dBb: TimeCutsPanel, axes: Axes
     ) -> None:
         """Check that the ylabel is annotated appropriately, in the case where the spectrum units are `dBb`."""
         # Arbitrarily set the time type (it has to be set)
-        time_cuts_panel_dBb.time_type = TimeType.RELATIVE
-        time_cuts_panel_dBb.ax = axes
+        time_cuts_panel_dBb.set_time_type(TimeType.RELATIVE)
+        time_cuts_panel_dBb.set_ax(axes)
         time_cuts_panel_dBb.annotate_yaxis()
-        assert time_cuts_panel_dBb.ax.get_ylabel() == "dBb"
+        assert time_cuts_panel_dBb.get_ylabel() == "dBb"
 
-    def test_annotate_yaxis_peak_normalised(
+    def test_yaxis_annotation_peak_normalised(
         self, time_cuts_panel_peak_normalised: TimeCutsPanel, axes: Axes
     ) -> None:
         """Check that the ylabel is annotated appropriately, in the case where the spectrum units are normalised to their peak values, respectively."""
-        time_cuts_panel_peak_normalised.ax = axes
+        time_cuts_panel_peak_normalised.set_ax(axes)
         time_cuts_panel_peak_normalised.annotate_yaxis()
         # We don't expected any label in this case
-        assert not time_cuts_panel_peak_normalised.ax.get_ylabel()
+        assert not time_cuts_panel_peak_normalised.get_ylabel()
 
-    def test_annotate_yaxis(
+    def test_yaxis_annotation(
         self,
         time_cuts_panel: TimeCutsPanel,
         axes: Axes,
@@ -350,48 +348,46 @@ class TestTimeCutsPanel:
         """Check that the ylabel is annotated appropriately, when the spectrum units are those defined by the spectrogram used to construct
         the panel.
         """
-        time_cuts_panel.ax = axes
+        time_cuts_panel.set_ax(axes)
         time_cuts_panel.annotate_yaxis()
         assert (
-            time_cuts_panel.ax.get_ylabel()
+            time_cuts_panel.get_ylabel()
             == f"{spectrogram.spectrum_unit.value}".capitalize()
         )
 
 
 class TestIntegralOverFrequencyPanel:
-    def test_annotate_yaxis(
+    def test_yaxis_annotation(
         self, integral_over_frequency_panel: IntegralOverFrequencyPanel, axes: Axes
     ) -> None:
         """Check that the yaxis is not annotated."""
-        integral_over_frequency_panel.ax = axes
+        integral_over_frequency_panel.set_ax(axes)
         integral_over_frequency_panel.annotate_yaxis()
         # We don't expect any label in this case
-        assert not integral_over_frequency_panel.ax.get_ylabel()
+        assert not integral_over_frequency_panel.get_ylabel()
 
 
 class TestSpectrogramPanel:
     """Test functionality specific to SpectrogramPanel."""
 
-    def test_annotate_yaxis(
+    def test_yaxis_annotation(
         self, spectrogram_panel: SpectrogramPanel, axes: Axes
     ) -> None:
         """Check that the yaxis is annotated appropriately."""
-        spectrogram_panel.ax = axes
+        spectrogram_panel.set_ax(axes)
         spectrogram_panel.annotate_yaxis()
-        assert spectrogram_panel.ax.get_ylabel() == "Frequency [Hz]"
+        assert spectrogram_panel.get_ylabel() == "Frequency [Hz]"
 
 
 class TestPanelStack:
-    def test_default_initialization(self, panel_stack: PanelStack) -> None:
-        """Test initialization with default parameters."""
-        assert panel_stack.num_panels == 0
 
-        # Test that unset properties raise appropriate errors
-        with pytest.raises(ValueError):
-            _ = panel_stack.fig
+    def test_time_type_getter_setters(self, panel_stack: PanelStack) -> None:
+        """Check that the time type getters and setters work as expected."""
+        panel_stack.time_type = TimeType.RELATIVE
+        assert panel_stack.time_type == TimeType.RELATIVE
 
-        with pytest.raises(ValueError):
-            _ = panel_stack.axs
+        panel_stack.time_type = TimeType.DATETIMES
+        assert panel_stack.time_type == TimeType.DATETIMES
 
     def test_adding_panel_increments_panel_count(
         self, panel_stack: PanelStack, spectrogram_panel: SpectrogramPanel
@@ -437,22 +433,72 @@ class TestPanelStack:
         self,
         panel_stack: PanelStack,
         spectrogram_panel: SpectrogramPanel,
+        time_cuts_panel: TimeCutsPanel,
         frequency_cuts_panel_relative_cuts: FrequencyCutsPanel,
     ) -> None:
-        """Check that panels are ordered by their `XAxisType`"""
+        """Check that panels are ordered by their `XAxisType`.
+
+        Frequency cut panels should always be first, at the top of the plot.
+        Regardless of the order in which they were added to the stack. Time series
+        panels, on the other hand, should respect the order they were added to the stack.
+        """
         panel_stack.add_panel(spectrogram_panel)
         panel_stack.add_panel(frequency_cuts_panel_relative_cuts)
+        panel_stack.add_panel(time_cuts_panel)
         # Frequency cut panels should be first, at the top of the plot.
         assert panel_stack.panels == [
             frequency_cuts_panel_relative_cuts,
             spectrogram_panel,
+            time_cuts_panel,
         ]
 
     def test_incompatible_time_types(
         self, panel_stack: PanelStack, spectrogram_panel: SpectrogramPanel
     ) -> None:
-        """Check that two panels cannot be added to the stack with incompatible time types."""
-        # Add a spectrogram with time type `DATETIMES` to the stack.
-        spectrogram_panel.time_type = TimeType.DATETIMES
+        """Check that two panels cannot be added to the stack with incompatible time types.
+
+        The motivation is that to "line up" time series plots between panels in a stack, they all must have the same time
+        type.
+        """
+        panel_stack.time_type = TimeType.RELATIVE
+        spectrogram_panel.set_time_type(TimeType.DATETIMES)
         with pytest.raises(ValueError):
             panel_stack.add_panel(spectrogram_panel)
+
+    def test_save_creates_file(
+        self, panel_stack: PanelStack, spectrogram_panel: SpectrogramPanel
+    ) -> None:
+        """Test that saving a panel stack, creates a file in the filesystem with the appropriate path."""
+        # Add a panel to the stack, so there's something in the figure.
+        panel_stack.add_panel(spectrogram_panel)
+
+        # Create a temporary directory
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Assign this to be the directory where `batches` are stored.
+            pytest.MonkeyPatch().setenv("SPECTRE_DATA_DIR_PATH", temp_dir)
+
+            # Save the figure to this temporary directory.
+            file_path = panel_stack.save()
+
+            # Check that the file path is as expected.
+            assert file_path == os.path.join(
+                temp_dir,
+                "batches",
+                "2025",
+                "02",
+                "13",
+                "2025-02-13T06:00:00_mock-amplitude-spectrogram.png",
+            )
+
+            # Check that the file was actually created.
+            assert os.path.exists(file_path)
+
+    def test_save_no_panels(self, panel_stack: PanelStack) -> None:
+        """Check that trying to save a plot with no panels raises an error."""
+        with pytest.raises(ValueError):
+            panel_stack.save()
+
+    def test_show_no_panels(self, panel_stack: PanelStack) -> None:
+        """Check that trying to show a plot with no panels raises an error."""
+        with pytest.raises(ValueError):
+            panel_stack.show()
