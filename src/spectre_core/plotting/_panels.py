@@ -213,7 +213,7 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
                     dBb=self._dBb,
                     peak_normalise=self._peak_normalise,
                     correct_background=self._background_subtract,
-                    return_time_type=self.time_type,
+                    return_time_type=self.get_time_type(),
                 )
                 self._time_cuts[time_cut.frequency] = time_cut
         return self._time_cuts

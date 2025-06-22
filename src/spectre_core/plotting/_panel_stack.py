@@ -249,7 +249,7 @@ class PanelStack:
         for super_panel in self._superimposed_panels:
             for panel in self._panels:
                 if panel.name == super_panel.name and (
-                    panel.set_identifier(super_panel.get_identifier())
+                    panel.get_identifier() == super_panel.get_identifier()
                 ):
                     super_panel.share_axes(panel)
                     super_panel.draw()
