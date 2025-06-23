@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Callable, overload
+from typing import Callable
 
 from spectre_core.capture_configs import (
     CaptureTemplate,
@@ -16,12 +16,11 @@ from spectre_core.capture_configs import (
     validate_fixed_center_frequency,
     validate_swept_center_frequency,
 )
-from .._base import BaseReceiver
-from .._spec_names import SpecName
+from .._receiver import Specs, SpecName
 
 
 def get_pvalidator_fixed_center_frequency(
-    sdrplay_receiver: BaseReceiver,
+    specs: Specs,
 ) -> Callable[[Parameters], None]:
     def pvalidator(parameters: Parameters) -> None:
         validate_fixed_center_frequency(parameters)
@@ -30,18 +29,18 @@ def get_pvalidator_fixed_center_frequency(
 
 
 def get_pvalidator_swept_center_frequency(
-    sdrplay_receiver: BaseReceiver,
+    specs: Specs,
 ) -> Callable[[Parameters], None]:
     def pvalidator(parameters: Parameters) -> None:
         validate_swept_center_frequency(
-            parameters, sdrplay_receiver.get_spec(SpecName.API_RETUNING_LATENCY)
+            parameters, specs.get(SpecName.API_RETUNING_LATENCY)
         )
 
     return pvalidator
 
 
 def get_capture_template_fixed_center_frequency(
-    sdrplay_receiver: BaseReceiver,
+    specs: Specs,
 ) -> CaptureTemplate:
 
     capture_template = get_base_capture_template(CaptureMode.FIXED_CENTER_FREQUENCY)
@@ -65,8 +64,8 @@ def get_capture_template_fixed_center_frequency(
         PName.CENTER_FREQUENCY,
         [
             Bound(
-                lower_bound=sdrplay_receiver.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
-                upper_bound=sdrplay_receiver.get_spec(SpecName.FREQUENCY_UPPER_BOUND),
+                lower_bound=specs.get(SpecName.FREQUENCY_LOWER_BOUND),
+                upper_bound=specs.get(SpecName.FREQUENCY_UPPER_BOUND),
             )
         ],
     )
@@ -74,28 +73,26 @@ def get_capture_template_fixed_center_frequency(
         PName.SAMPLE_RATE,
         [
             Bound(
-                lower_bound=sdrplay_receiver.get_spec(SpecName.SAMPLE_RATE_LOWER_BOUND),
-                upper_bound=sdrplay_receiver.get_spec(SpecName.SAMPLE_RATE_UPPER_BOUND),
+                lower_bound=specs.get(SpecName.SAMPLE_RATE_LOWER_BOUND),
+                upper_bound=specs.get(SpecName.SAMPLE_RATE_UPPER_BOUND),
             )
         ],
     )
     capture_template.add_pconstraint(
-        PName.BANDWIDTH, [OneOf(sdrplay_receiver.get_spec(SpecName.BANDWIDTH_OPTIONS))]
+        PName.BANDWIDTH, [OneOf(specs.get(SpecName.BANDWIDTH_OPTIONS))]
     )
     capture_template.add_pconstraint(
         PName.IF_GAIN,
-        [Bound(upper_bound=sdrplay_receiver.get_spec(SpecName.IF_GAIN_UPPER_BOUND))],
+        [Bound(upper_bound=specs.get(SpecName.IF_GAIN_UPPER_BOUND))],
     )
     capture_template.add_pconstraint(
         PName.RF_GAIN,
-        [Bound(upper_bound=sdrplay_receiver.get_spec(SpecName.RF_GAIN_UPPER_BOUND))],
+        [Bound(upper_bound=specs.get(SpecName.RF_GAIN_UPPER_BOUND))],
     )
     return capture_template
 
 
-def get_capture_template_swept_center_frequency(
-    sdrplay_receiver: BaseReceiver,
-) -> CaptureTemplate:
+def get_capture_template_swept_center_frequency(specs: Specs) -> CaptureTemplate:
 
     capture_template = get_base_capture_template(CaptureMode.SWEPT_CENTER_FREQUENCY)
     capture_template.add_ptemplate(get_base_ptemplate(PName.BANDWIDTH))
@@ -121,8 +118,8 @@ def get_capture_template_swept_center_frequency(
         PName.MIN_FREQUENCY,
         [
             Bound(
-                lower_bound=sdrplay_receiver.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
-                upper_bound=sdrplay_receiver.get_spec(SpecName.FREQUENCY_UPPER_BOUND),
+                lower_bound=specs.get(SpecName.FREQUENCY_LOWER_BOUND),
+                upper_bound=specs.get(SpecName.FREQUENCY_UPPER_BOUND),
             )
         ],
     )
@@ -130,8 +127,8 @@ def get_capture_template_swept_center_frequency(
         PName.MAX_FREQUENCY,
         [
             Bound(
-                lower_bound=sdrplay_receiver.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
-                upper_bound=sdrplay_receiver.get_spec(SpecName.FREQUENCY_UPPER_BOUND),
+                lower_bound=specs.get(SpecName.FREQUENCY_LOWER_BOUND),
+                upper_bound=specs.get(SpecName.FREQUENCY_UPPER_BOUND),
             )
         ],
     )
@@ -139,20 +136,20 @@ def get_capture_template_swept_center_frequency(
         PName.SAMPLE_RATE,
         [
             Bound(
-                lower_bound=sdrplay_receiver.get_spec(SpecName.SAMPLE_RATE_LOWER_BOUND),
-                upper_bound=sdrplay_receiver.get_spec(SpecName.SAMPLE_RATE_UPPER_BOUND),
+                lower_bound=specs.get(SpecName.SAMPLE_RATE_LOWER_BOUND),
+                upper_bound=specs.get(SpecName.SAMPLE_RATE_UPPER_BOUND),
             )
         ],
     )
     capture_template.add_pconstraint(
-        PName.BANDWIDTH, [OneOf(sdrplay_receiver.get_spec(SpecName.BANDWIDTH_OPTIONS))]
+        PName.BANDWIDTH, [OneOf(specs.get(SpecName.BANDWIDTH_OPTIONS))]
     )
     capture_template.add_pconstraint(
         PName.IF_GAIN,
-        [Bound(upper_bound=sdrplay_receiver.get_spec(SpecName.IF_GAIN_UPPER_BOUND))],
+        [Bound(upper_bound=specs.get(SpecName.IF_GAIN_UPPER_BOUND))],
     )
     capture_template.add_pconstraint(
         PName.RF_GAIN,
-        [Bound(upper_bound=sdrplay_receiver.get_spec(SpecName.RF_GAIN_UPPER_BOUND))],
+        [Bound(upper_bound=specs.get(SpecName.RF_GAIN_UPPER_BOUND))],
     )
     return capture_template

@@ -2,20 +2,17 @@
 # RSP1A receiver top blocks
 #
 
-from functools import partial
-from dataclasses import dataclass
 
 from spectre_core.capture_configs import Parameters, PName
 from spectre_core.config import get_batches_dir_path
-from ._base import capture, spectre_top_block
+from ._base import spectre_top_block
+
+from gnuradio import spectre
+from gnuradio import sdrplay3
 
 
-class _fixed_center_frequency(spectre_top_block):
+class fixed_center_frequency(spectre_top_block):
     def flowgraph(self, tag: str, parameters: Parameters) -> None:
-        # OOT Module inline imports
-        from gnuradio import spectre
-        from gnuradio import sdrplay3
-
         # Unpack the capture config parameters
         sample_rate = parameters.get_parameter_value(PName.SAMPLE_RATE)
         batch_size = parameters.get_parameter_value(PName.BATCH_SIZE)
@@ -53,12 +50,8 @@ class _fixed_center_frequency(spectre_top_block):
         self.connect((self.sdrplay3_rsp1a_0, 0), (self.spectre_batched_file_sink_0, 0))
 
 
-class _swept_center_frequency(spectre_top_block):
+class swept_center_frequency(spectre_top_block):
     def flowgraph(self, tag: str, parameters: Parameters) -> None:
-        # OOT Module inline imports
-        from gnuradio import spectre
-        from gnuradio import sdrplay3
-
         # Unpack the capture config parameters
         sample_rate = parameters.get_parameter_value(PName.SAMPLE_RATE)
         bandwidth = parameters.get_parameter_value(PName.BANDWIDTH)
@@ -117,11 +110,3 @@ class _swept_center_frequency(spectre_top_block):
         )
         self.connect((self.sdrplay3_rsp1a_0, 0), (self.spectre_batched_file_sink_0, 0))
         self.connect((self.sdrplay3_rsp1a_0, 0), (self.spectre_sweep_driver_0, 0))
-
-
-@dataclass(frozen=True)
-class CaptureMethod:
-    fixed_center_frequency = partial(capture, top_block_cls=_fixed_center_frequency)
-    swept_center_frequency = partial(
-        capture, top_block_cls=_swept_center_frequency, max_noutput_items=1024
-    )

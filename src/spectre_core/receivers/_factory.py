@@ -6,12 +6,13 @@ from typing import Optional, overload, Literal, TypeVar
 
 from spectre_core.exceptions import ReceiverNotFoundError
 from ._register import receivers
-from ._base import BaseReceiver
+from ._receiver import Receiver
 from .plugins._receiver_names import ReceiverName
 from .plugins._rsp1a import RSP1A
-from .plugins._rspduo import RSPduo
-from .plugins._test import Test
-from .plugins._b200mini import B200mini
+
+# from .plugins._rspduo import RSPduo
+# from .plugins._test import Test
+# from .plugins._b200mini import B200mini
 
 
 @overload
@@ -20,33 +21,31 @@ def get_receiver(
 ) -> RSP1A: ...
 
 
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.RSPDUO], mode: Optional[str] = None
-) -> RSPduo: ...
+# @overload
+# def get_receiver(
+#     receiver_name: Literal[ReceiverName.RSPDUO], mode: Optional[str] = None
+# ) -> RSPduo: ...
 
 
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.TEST], mode: Optional[str] = None
-) -> Test: ...
+# @overload
+# def get_receiver(
+#     receiver_name: Literal[ReceiverName.TEST], mode: Optional[str] = None
+# ) -> Test: ...
 
 
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
-) -> B200mini: ...
+# @overload
+# def get_receiver(
+#     receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
+# ) -> B200mini: ...
 
 
 @overload
 def get_receiver(
     receiver_name: ReceiverName, mode: Optional[str] = None
-) -> BaseReceiver: ...
+) -> Receiver: ...
 
 
-def get_receiver(
-    receiver_name: ReceiverName, mode: Optional[str] = None
-) -> BaseReceiver:
+def get_receiver(receiver_name: ReceiverName, mode: Optional[str] = None) -> Receiver:
     """Get a registered receiver.
 
     :param receiver_name: The name of the receiver.
@@ -61,4 +60,4 @@ def get_receiver(
             f"No class found for the receiver: {receiver_name}. "
             f"Please specify one of the following receivers {valid_receivers}"
         )
-    return receiver_cls(receiver_name, mode=mode)
+    return receiver_cls(mode=mode)
