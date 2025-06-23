@@ -60,4 +60,4 @@ def get_receiver(receiver_name: ReceiverName, mode: Optional[str] = None) -> Rec
             f"No class found for the receiver: {receiver_name}. "
             f"Please specify one of the following receivers {valid_receivers}"
         )
-    return receiver_cls(mode=mode)
+    return receiver_cls(receiver_name, mode=mode)

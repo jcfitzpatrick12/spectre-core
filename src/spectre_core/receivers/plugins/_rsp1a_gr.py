@@ -5,7 +5,7 @@
 
 from spectre_core.capture_configs import Parameters, PName
 from spectre_core.config import get_batches_dir_path
-from ._base import spectre_top_block
+from ._gr import spectre_top_block
 
 from gnuradio import spectre
 from gnuradio import sdrplay3

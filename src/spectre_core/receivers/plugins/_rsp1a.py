@@ -7,7 +7,7 @@ from typing import Optional
 from functools import partial
 
 from ._receiver_names import ReceiverName
-from .gr._rsp1a import swept_center_frequency, fixed_center_frequency
+from .gr._gr_rsp1a import swept_center_frequency, fixed_center_frequency
 from .gr._base import capture
 from ._sdrplay_receiver import (
     get_pvalidator_fixed_center_frequency,
@@ -32,8 +32,8 @@ class Mode:
 class RSP1A(Receiver):
     """Receiver implementation for the SDRPlay RSP1A (https://www.sdrplay.com/rsp1a/)"""
 
-    def __init__(self, mode: Optional[str] = None) -> None:
-        super().__init__(ReceiverName.RSP1A, mode)
+    def __init__(self, name: ReceiverName, mode: Optional[str] = None) -> None:
+        super().__init__(name, mode)
 
         self.add_spec(SpecName.SAMPLE_RATE_LOWER_BOUND, 200e3)
         self.add_spec(SpecName.SAMPLE_RATE_UPPER_BOUND, 10e6)

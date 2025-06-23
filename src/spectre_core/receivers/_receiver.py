@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Callable, Optional
+from typing import Callable, Optional, Any
 from enum import Enum
 
 from spectre_core.exceptions import ModeNotFoundError
@@ -50,9 +50,9 @@ class Specs:
 
     def __init__(self) -> None:
         """Initialize an empty collection of specifications."""
-        self._specs: dict[SpecName, float | int | list[float | int]] = {}
+        self._specs: dict[SpecName, Any] = {}
 
-    def add(self, name: SpecName, value: float | int | list[float | int]) -> None:
+    def add(self, name: SpecName, value: Any) -> None:
         """Add a hardware specification.
 
         :param name: The specification's name.
@@ -60,7 +60,7 @@ class Specs:
         """
         self._specs[name] = value
 
-    def get(self, name: SpecName) -> float | int | list[float | int]:
+    def get(self, name: SpecName) -> Any:
         """Get a hardware specification.
 
         :param name: The specification's name.
@@ -71,7 +71,7 @@ class Specs:
             raise KeyError(f"Specification `{name}` not found.")
         return self._specs[name]
 
-    def all(self) -> dict[SpecName, float | int | list[float | int]]:
+    def all(self) -> dict[SpecName, Any]:
         """Retrieve all hardware specifications.
 
         :return: A dictionary of all specifications.
@@ -312,7 +312,7 @@ class Receiver:
         self._capture_templates.add(mode, capture_template)
         self._pvalidators.add(mode, pvalidator)
 
-    def add_spec(self, name: SpecName, value: float | int | list[float | int]) -> None:
+    def add_spec(self, name: SpecName, value: Any) -> None:
         """Add a hardware specification.
 
         :param name: The specification's name.
@@ -320,7 +320,7 @@ class Receiver:
         """
         self._specs.add(name, value)
 
-    def get_spec(self, name: SpecName) -> float | int | list[float | int]:
+    def get_spec(self, name: SpecName) -> Any:
         """Retrieve a specific hardware specification.
 
         :param name: The specification's name.
