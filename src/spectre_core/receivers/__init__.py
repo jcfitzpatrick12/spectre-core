@@ -16,11 +16,8 @@ from ._factory import get_receiver
 from ._register import get_registered_receivers
 
 __all__ = [
-    "Test",
-    "RSP1A",
-    "RSPduo",
-    "B200mini",
     "Receiver",
+    "RSP1A",
     "get_receiver",
     "get_registered_receivers",
     "SpecName",

@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Optional, overload, Literal, TypeVar
+from typing import Optional, overload, Literal
 
 from spectre_core.exceptions import ReceiverNotFoundError
 from ._register import receivers
@@ -13,13 +13,6 @@ from .plugins._rsp1a import RSP1A
 # from .plugins._rspduo import RSPduo
 # from .plugins._test import Test
 # from .plugins._b200mini import B200mini
-
-
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.RSP1A], mode: Optional[str] = None
-) -> RSP1A: ...
-
 
 # @overload
 # def get_receiver(
@@ -37,6 +30,12 @@ def get_receiver(
 # def get_receiver(
 #     receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
 # ) -> B200mini: ...
+
+
+@overload
+def get_receiver(
+    receiver_name: Literal[ReceiverName.RSP1A], mode: Optional[str] = None
+) -> RSP1A: ...
 
 
 @overload

@@ -46,10 +46,10 @@ class SpecName(Enum):
 
 
 class Specs:
-    """Encapsulation for hardware specifications."""
+    """Define hardware specifications."""
 
     def __init__(self) -> None:
-        """Initialize an empty collection of specifications."""
+        """Initialise an instance of `Specs`."""
         self._specs: dict[SpecName, Any] = {}
 
     def add(self, name: SpecName, value: Any) -> None:
@@ -68,19 +68,18 @@ class Specs:
         :raises KeyError: If the specification is not found.
         """
         if name not in self._specs:
-            raise KeyError(f"Specification `{name}` not found.")
+            raise KeyError(
+                f"Specification `{name}` not found. Expected one of {list(self._specs.keys())}"
+            )
         return self._specs[name]
 
     def all(self) -> dict[SpecName, Any]:
-        """Retrieve all hardware specifications.
-
-        :return: A dictionary of all specifications.
-        """
+        """Retrieve all hardware specifications."""
         return self._specs
 
 
 def _ensure_mode_exists(mode: str, d: dict) -> None:
-    """Ensure the mode exists in the collection.
+    """Ensure a mode exists in the input dictionary.
 
     :param mode: The mode to check.
     :param collection: The dictionary containing modes.
@@ -93,82 +92,86 @@ def _ensure_mode_exists(mode: str, d: dict) -> None:
 
 
 class CaptureMethods:
-    """Defines data capture methods for each operating mode."""
+    """Per operating mode, define how the receiver captures data."""
 
     def __init__(self) -> None:
-        """Initialise an empty collection of capture methods."""
+        """Initialise an instance of `CaptureMethods`."""
         self._capture_methods: dict[str, Callable[[str, Parameters], None]] = {}
 
     def add(self, mode: str, capture_method: Callable[[str, Parameters], None]) -> None:
-        """Add a capture method for a specific operating mode.
+        """Add a capture method a particular operating mode.
 
         :param mode: The operating mode for the receiver.
-        :param capture_method: The function defining how data is captured in this mode.
+        :param capture_method: The function defining how data is captured in this mode. Typically,
+        the capture method will call a GNU Radio flowgraph.
         """
         self._capture_methods[mode] = capture_method
 
     def get(self, mode: str) -> Callable[[str, Parameters], None]:
-        """Retrieve the capture method for a specific operating mode.
+        """Retrieve the capture method for a particular operating mode.
 
         :param mode: The operating mode for the receiver.
-        :return: The function to capture data in this mode.
+        :return: The function to call, to capture data in this mode.
         """
         _ensure_mode_exists(mode, self._capture_methods)
         return self._capture_methods[mode]
 
 
 class CaptureTemplates:
-    """Defines parameter templates for each operating mode."""
+    """Per operating mode, define what parameters are required in a capture config, and the values each parameter can take."""
 
     def __init__(self) -> None:
-        """Initialise an empty collection of capture templates."""
+        """Initialise an instance of `CaptureTemplates`."""
         self._capture_templates: dict[str, CaptureTemplate] = {}
 
     def add(self, mode: str, capture_template: CaptureTemplate) -> None:
-        """Add a capture template for a specific operating mode.
+        """Add a capture template a particular operating mode.
 
         :param mode: The operating mode for the receiver.
-        :param capture_template: The template defining required parameters for this mode.
+        :param capture_template: The capture template for this mode.
         """
         self._capture_templates[mode] = capture_template
 
     def get(self, mode: str) -> CaptureTemplate:
-        """Retrieve the capture template for a specific operating mode.
+        """Retrieve the capture template a particular operating mode.
 
         :param mode: The operating mode for the receiver.
-        :return: The template for this mode.
+        :return: The capture template for this mode.
         """
         _ensure_mode_exists(mode, self._capture_templates)
         return self._capture_templates[mode]
 
 
-def default_pvalidator(parameters: Parameters) -> None:
-    """Default, noop, parameter validator. Doesn't check anything at all."""
-
-
 class PValidators:
-    """Defines parameter validation functions for each operating mode."""
+    """Validate capture config parameters, per operating mode.
+
+    Typically, each `pvalidator` function validates parameters en groupe, while the capture template validates each parameter individually.
+    """
 
     def __init__(self) -> None:
-        """Initialise an empty collection of parameter validators."""
+        """Initialise an instance of `PValidators`."""
         self._pvalidators: dict[str, Callable[[Parameters], None]] = {}
 
     def add(self, mode: str, pvalidator: Callable[[Parameters], None]) -> None:
-        """Add a parameter validator for a specific operating mode.
+        """Add a parameter validator a particular operating mode.
 
         :param mode: The operating mode for the receiver.
-        :param pvalidator: The function to validate parameters for this mode.
+        :param pvalidator: The function to validate parameters in this mode.
         """
         self._pvalidators[mode] = pvalidator
 
     def get(self, mode: str) -> Callable[[Parameters], None]:
-        """Retrieve the parameter validator for a specific operating mode.
+        """Retrieve the parameter validator a particular operating mode.
 
         :param mode: The operating mode for the receiver.
-        :return: The function to validate parameters for this mode.
+        :return: The function to validate parameters in this mode.
         """
         _ensure_mode_exists(mode, self._pvalidators)
         return self._pvalidators[mode]
+
+
+def default_pvalidator(parameters: Parameters) -> None:
+    """A noop parameter validator. Doesn't check anything at all."""
 
 
 class Receiver:
@@ -218,7 +221,7 @@ class Receiver:
         """
         if self._mode is None:
             raise ValueError(
-                f"This operation requires an active mode for receiver `{self.name.value}`. Currently, the mode is {self._mode}"
+                f"An active mode is not set for the receiver `{self.name.value}`. Currently, the mode is {self._mode}"
             )
         return self._mode
 
@@ -248,7 +251,7 @@ class Receiver:
     def start_capture(self, tag: str) -> None:
         """Start capturing data using the active operating mode.
 
-        :param tag: The tag identifying the capture configuration.
+        :param tag: The tag identifying the capture config.
         :raises ValueError: If no mode is currently set.
         """
         self.capture_method(tag, self.load_parameters(tag))
@@ -260,12 +263,12 @@ class Receiver:
         force: bool = False,
         validate: bool = False,
     ) -> None:
-        """Save parameters to a capture configuration.
+        """Save parameters to a capture config.
 
-        :param tag: The tag identifying the capture configuration.
+        :param tag: The tag identifying the capture config.
         :param parameters: The parameters to save.
         :param force: If True, overwrite existing configuration if it exists.
-        :param pvalidate: If True, apply the capture template and pvalidator.
+        :param validate: If True, apply the capture template and pvalidator.
         :raises ValueError: If no mode is currently set.
         """
         if validate:
@@ -278,10 +281,10 @@ class Receiver:
         )
 
     def load_parameters(self, tag: str, validate: bool = True) -> Parameters:
-        """Load parameters from a capture configuration.
+        """Load parameters from a capture config.
 
-        :param tag: The tag identifying the capture configuration.
-        :param pvalidate: If True, apply the capture template and pvalidator.
+        :param tag: The tag identifying the capture config.
+        :param validate: If True, apply the capture template and pvalidator.
         :raises ValueError: If no mode is currently set.
         :return: The validated parameters stored in the configuration.
         """
