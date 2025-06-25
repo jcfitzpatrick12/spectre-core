@@ -80,10 +80,10 @@ class Receiver:
         self,
         name: ReceiverName,
         mode: Optional[str] = None,
-        specs: Specs = Specs(),
-        capture_methods: CaptureMethods = CaptureMethods(),
-        capture_templates: CaptureTemplates = CaptureTemplates(),
-        pvalidators: PValidators = PValidators(),
+        specs: Optional[Specs] = Specs(),
+        capture_methods: Optional[CaptureMethods] = None,
+        capture_templates: Optional[CaptureTemplates] = None,
+        pvalidators: Optional[PValidators] = None,
     ) -> None:
         """Initialise a receiver instance.
 
@@ -96,10 +96,10 @@ class Receiver:
         """
         self._name = name
         self._mode = mode
-        self._specs = specs
-        self._capture_methods = capture_methods
-        self._capture_templates = capture_templates
-        self._pvalidators = pvalidators
+        self._specs = specs or Specs()
+        self._capture_methods = capture_methods or CaptureMethods()
+        self._capture_templates = capture_templates or CaptureTemplates()
+        self._pvalidators = pvalidators or PValidators()
 
     @property
     def name(self) -> ReceiverName:
