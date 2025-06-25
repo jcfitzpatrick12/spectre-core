@@ -20,7 +20,11 @@ from spectre_core.capture_configs import (
 )
 
 from ._receiver_names import ReceiverName
-from ._rsp1a_gr import swept_center_frequency, fixed_center_frequency
+from ._rspduo_gr import (
+    tuner_1_fixed_center_frequency,
+    tuner_2_fixed_center_frequency,
+    tuner_1_swept_center_frequency,
+)
 from ._receiver_names import ReceiverName
 from ._gr import capture
 from .._receiver import Specs, SpecName
@@ -166,17 +170,18 @@ def _make_capture_template_swept_center_frequency(specs: Specs) -> CaptureTempla
     return capture_template
 
 
-@dataclass(frozen=True)
+@dataclass
 class _Mode:
-    """An operating mode for the `RSP1A` receiver."""
+    """An operating mode for the `RSPduo` receiver."""
 
-    FIXED_CENTER_FREQUENCY = "fixed_center_frequency"
-    SWEPT_CENTER_FREQUENCY = "swept_center_frequency"
+    TUNER_1_FIXED_CENTER_FREQUENCY = f"tuner_1_fixed_center_frequency"
+    TUNER_2_FIXED_CENTER_FREQUENCY = f"tuner_2_fixed_center_frequency"
+    TUNER_1_SWEPT_CENTER_FREQUENCY = f"tuner_1_swept_center_frequency"
 
 
-@register_receiver(ReceiverName.RSP1A)
-class RSP1A(Receiver):
-    """Receiver implementation for the SDRPlay RSP1A (https://www.sdrplay.com/rsp1a/)"""
+@register_receiver(ReceiverName.RSPDUO)
+class RSPduo(Receiver):
+    """Receiver implementation for the SDRPlay RSPduo (https://www.sdrplay.com/rspduo/)"""
 
     def __init__(self, name: ReceiverName, mode: Optional[str] = None) -> None:
         super().__init__(name, mode)
@@ -187,23 +192,29 @@ class RSP1A(Receiver):
         self.add_spec(SpecName.FREQUENCY_UPPER_BOUND, 2e9)
         self.add_spec(SpecName.IF_GAIN_UPPER_BOUND, -20)
         self.add_spec(SpecName.RF_GAIN_UPPER_BOUND, 0)
-        self.add_spec(SpecName.API_RETUNING_LATENCY, 25 * 1e-3)
+        self.add_spec(SpecName.API_RETUNING_LATENCY, 50 * 1e-3)
         self.add_spec(
             SpecName.BANDWIDTH_OPTIONS,
             [200000, 300000, 600000, 1536000, 5000000, 6000000, 7000000, 8000000],
         )
 
         self.add_mode(
-            _Mode.FIXED_CENTER_FREQUENCY,
-            partial(capture, top_block_cls=fixed_center_frequency),
+            _Mode.TUNER_1_FIXED_CENTER_FREQUENCY,
+            partial(capture, top_block_cls=tuner_1_fixed_center_frequency),
             _make_capture_template_fixed_center_frequency(self.specs),
             _make_pvalidator_fixed_center_frequency(self.specs),
         )
+
         self.add_mode(
-            _Mode.SWEPT_CENTER_FREQUENCY,
-            partial(
-                capture, top_block_cls=swept_center_frequency, max_noutput_items=1024
-            ),
+            _Mode.TUNER_2_FIXED_CENTER_FREQUENCY,
+            partial(capture, top_block_cls=tuner_2_fixed_center_frequency),
+            _make_capture_template_fixed_center_frequency(self.specs),
+            _make_pvalidator_fixed_center_frequency(self.specs),
+        )
+
+        self.add_mode(
+            _Mode.TUNER_1_SWEPT_CENTER_FREQUENCY,
+            partial(capture, top_block_cls=tuner_1_swept_center_frequency),
             _make_capture_template_swept_center_frequency(self.specs),
             _make_pvalidator_swept_center_frequency(self.specs),
         )

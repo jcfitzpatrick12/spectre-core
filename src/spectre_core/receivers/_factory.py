@@ -8,34 +8,34 @@ from spectre_core.exceptions import ReceiverNotFoundError
 from ._register import receivers
 from ._receiver import Receiver
 from .plugins._receiver_names import ReceiverName
+from .plugins._signal_generator import SignalGenerator
 from .plugins._rsp1a import RSP1A
-
-# from .plugins._rspduo import RSPduo
-# from .plugins._test import Test
-# from .plugins._b200mini import B200mini
-
-# @overload
-# def get_receiver(
-#     receiver_name: Literal[ReceiverName.RSPDUO], mode: Optional[str] = None
-# ) -> RSPduo: ...
+from .plugins._rspduo import RSPduo
+from .plugins._b200mini import B200mini
 
 
-# @overload
-# def get_receiver(
-#     receiver_name: Literal[ReceiverName.TEST], mode: Optional[str] = None
-# ) -> Test: ...
-
-
-# @overload
-# def get_receiver(
-#     receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
-# ) -> B200mini: ...
+@overload
+def get_receiver(
+    receiver_name: Literal[ReceiverName.SIGNAL_GENERATOR], mode: Optional[str] = None
+) -> SignalGenerator: ...
 
 
 @overload
 def get_receiver(
     receiver_name: Literal[ReceiverName.RSP1A], mode: Optional[str] = None
 ) -> RSP1A: ...
+
+
+@overload
+def get_receiver(
+    receiver_name: Literal[ReceiverName.RSPDUO], mode: Optional[str] = None
+) -> RSPduo: ...
+
+
+@overload
+def get_receiver(
+    receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
+) -> B200mini: ...
 
 
 @overload

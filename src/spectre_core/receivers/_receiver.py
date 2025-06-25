@@ -177,7 +177,15 @@ def default_pvalidator(parameters: Parameters) -> None:
 class Receiver:
     """Abstraction layer for software-defined radio receivers."""
 
-    def __init__(self, name: ReceiverName, mode: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        name: ReceiverName,
+        mode: Optional[str] = None,
+        specs: Specs = Specs(),
+        capture_methods: CaptureMethods = CaptureMethods(),
+        capture_templates: CaptureTemplates = CaptureTemplates(),
+        pvalidators: PValidators = PValidators(),
+    ) -> None:
         """Initialise a receiver instance.
 
         :param name: The name of the receiver.
@@ -189,10 +197,10 @@ class Receiver:
         """
         self._name = name
         self._mode = mode
-        self._specs = Specs()
-        self._capture_methods = CaptureMethods()
-        self._capture_templates = CaptureTemplates()
-        self._pvalidators = PValidators()
+        self._specs = specs
+        self._capture_methods = capture_methods
+        self._capture_templates = capture_templates
+        self._pvalidators = pvalidators
 
     @property
     def name(self) -> ReceiverName:
