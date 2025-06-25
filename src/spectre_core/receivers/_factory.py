@@ -38,6 +38,7 @@ def get_receiver(
     receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
 ) -> B200mini: ...
 
+
 @overload
 def get_receiver(
     receiver_name: Literal[ReceiverName.CUSTOM], mode: Optional[str] = None
