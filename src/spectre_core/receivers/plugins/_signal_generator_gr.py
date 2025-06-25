@@ -58,7 +58,7 @@ class constant_staircase(spectre_top_block):
         batch_size = parameters.get_parameter_value(PName.BATCH_SIZE)
 
         # Blocks
-        self.spectre_constant_staircase = spectre.constant_staircase(
+        self.spectre_constant_staircase = spectre.tagged_staircase(
             min_samples_per_step,
             max_samples_per_step,
             frequency_step,
