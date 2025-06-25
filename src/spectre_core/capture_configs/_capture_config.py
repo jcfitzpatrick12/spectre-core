@@ -49,6 +49,10 @@ class CaptureConfig(JsonHandler):
 
         Some substrings are reserved for third-party spectrogram data.
         """
+        if "_" in tag:
+            raise ValueError(
+                "An underscore is not allowed in a capture config tag."
+            )
         if "callisto" in tag:
             raise ValueError(
                 f"The substring `callisto` is reserved, and is not allowed in a capture config tag."
