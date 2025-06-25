@@ -9,21 +9,7 @@ from spectre_core.capture_configs import CaptureTemplate, Parameters, CaptureCon
 from .plugins._receiver_names import ReceiverName
 from ._specs import Specs, SpecName
 
-
-def _ensure_mode_exists(mode: str, d: dict) -> None:
-    """Ensure a mode exists in the input dictionary.
-
-    :param mode: The mode to check.
-    :param collection: The dictionary containing modes.
-    :raises ModeNotFoundError: If the mode is not found.
-    """
-    if mode not in d:
-        raise ModeNotFoundError(
-            f"Mode `{mode}` not found. Expected one of {list(d.keys())}"
-        )
-
-
-T = TypeVar("T")  # Generic type for the value stored in ReceiverComponents
+T = TypeVar("T")
 
 
 class ReceiverComponents(Generic[T]):
@@ -53,7 +39,10 @@ class ReceiverComponents(Generic[T]):
         :return: The component associated with this mode.
         :raises ModeNotFoundError: If the mode is not found.
         """
-        _ensure_mode_exists(mode, self._components)
+        if mode not in self._components:
+            raise ModeNotFoundError(
+                f"Mode `{mode}` not found. Expected one of {self._components}"
+            )
         return self._components[mode]
 
 
@@ -66,7 +55,7 @@ class CaptureTemplates(ReceiverComponents[CaptureTemplate]):
 
 
 class PValidators(ReceiverComponents[Callable[[Parameters], None]]):
-    """Validate capture config parameters, per operating mode."""
+    """Validate capture config parameters en groupe, per operating mode."""
 
 
 def default_pvalidator(parameters: Parameters) -> None:
@@ -74,13 +63,13 @@ def default_pvalidator(parameters: Parameters) -> None:
 
 
 class Receiver:
-    """Abstraction layer for software-defined radio receivers."""
+    """An abstraction layer for software-defined radio receivers."""
 
     def __init__(
         self,
         name: ReceiverName,
         mode: Optional[str] = None,
-        specs: Optional[Specs] = Specs(),
+        specs: Optional[Specs] = None,
         capture_methods: Optional[CaptureMethods] = None,
         capture_templates: Optional[CaptureTemplates] = None,
         pvalidators: Optional[PValidators] = None,
@@ -108,14 +97,14 @@ class Receiver:
 
     @property
     def mode(self) -> Optional[str]:
-        """Retrieve the active operating mode."""
+        """Retrieve the operating mode."""
         return self._mode
 
     @mode.setter
     def mode(self, value: str) -> None:
-        """Set the active operating mode.
+        """Set the operating mode.
 
-        :param value: The new operating mode to activate.
+        :param value: The new operating mode of the receiver. Use `None` to unset the mode.
         """
         self._mode = value
 
@@ -228,9 +217,9 @@ class Receiver:
         """Add a new mode to the receiver.
 
         :param mode: The name of the new mode.
-        :param capture_method: The function defining how data is captured in this mode.
-        :param capture_template: The template defining required parameters for this mode.
-        :param pvalidator: The function to validate parameters for this mode.
+        :param capture_method: Define how data is captured in this mode.
+        :param capture_template: Define what parameters are required in a capture config, and the values each parameter can take.
+        :param pvalidator: The function to validate parameters for this mode, as a group.
         """
         self._capture_methods.add(mode, capture_method)
         self._capture_templates.add(mode, capture_template)
