@@ -83,7 +83,7 @@ class _AnalyticalFactory:
         a corresponding builder method.
         :return: The expected spectrogram for running a session with the `SignalGenerator` receiver in the specified mode.
         """
-        if capture_config.receiver_name != "test":
+        if capture_config.receiver_name != "signal_generator":
             raise ValueError(
                 f"Input capture config must correspond to the test receiver"
             )
