@@ -2,80 +2,12 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Callable, Optional, Any
-from enum import Enum
+from typing import Callable, Optional, TypeVar, Generic, Any
 
 from spectre_core.exceptions import ModeNotFoundError
 from spectre_core.capture_configs import CaptureTemplate, Parameters, CaptureConfig
 from .plugins._receiver_names import ReceiverName
-
-
-class SpecName(Enum):
-    """Enumeration of hardware specification names for SDR receivers.
-
-    :ivar FREQUENCY_LOWER_BOUND: The lower bound for the center frequency, in Hz.
-    :ivar FREQUENCY_UPPER_BOUND: The upper bound for the center frequency, in Hz.
-    :ivar SAMPLE_RATE_LOWER_BOUND: The lower bound for the sampling rate, in Hz.
-    :ivar SAMPLE_RATE_UPPER_BOUND: The upper bound for the sampling rate, in Hz.
-    :ivar BANDWIDTH_LOWER_BOUND: The lower bound for the bandwidth, in Hz.
-    :ivar BANDWIDTH_UPPER_BOUND: The upper bound for the bandwidth, in Hz.
-    :ivar BANDWIDTH_OPTIONS: The permitted bandwidths for the receiver, in Hz.
-    :ivar IF_GAIN_UPPER_BOUND: The upper bound for the intermediate frequency gain, in dB.
-    :ivar RF_GAIN_UPPER_BOUND: The upper bound for the radio frequency gain, in dB.
-    :ivar GAIN_UPPER_BOUND: The upper bound for the gain, in dB.
-    :ivar WIRE_FORMATS: Supported data types transferred over the bus/network.
-    :ivar MASTER_CLOCK_RATE_LOWER_BOUND: The lower bound for the SDR reference clock rate, in Hz.
-    :ivar MASTER_CLOCK_RATE_UPPER_BOUND: The upper bound for the SDR reference clock rate, in Hz.
-    :ivar API_RETUNING_LATENCY: Estimated delay between issuing a retune command and the actual frequency update.
-    """
-
-    FREQUENCY_LOWER_BOUND = "frequency_lower_bound"
-    FREQUENCY_UPPER_BOUND = "frequency_upper_bound"
-    SAMPLE_RATE_LOWER_BOUND = "sample_rate_lower_bound"
-    SAMPLE_RATE_UPPER_BOUND = "sample_rate_upper_bound"
-    BANDWIDTH_LOWER_BOUND = "bandwidth_lower_bound"
-    BANDWIDTH_UPPER_BOUND = "bandwidth_upper_bound"
-    BANDWIDTH_OPTIONS = "bandwidth_options"
-    IF_GAIN_UPPER_BOUND = "if_gain_upper_bound"
-    RF_GAIN_UPPER_BOUND = "rf_gain_upper_bound"
-    GAIN_UPPER_BOUND = "gain_upper_bound"
-    WIRE_FORMATS = "wire_formats"
-    MASTER_CLOCK_RATE_LOWER_BOUND = "master_clock_rate_lower_bound"
-    MASTER_CLOCK_RATE_UPPER_BOUND = "master_clock_rate_upper_bound"
-    API_RETUNING_LATENCY = "api_retuning_latency"
-
-
-class Specs:
-    """Define hardware specifications."""
-
-    def __init__(self) -> None:
-        """Initialise an instance of `Specs`."""
-        self._specs: dict[SpecName, Any] = {}
-
-    def add(self, name: SpecName, value: Any) -> None:
-        """Add a hardware specification.
-
-        :param name: The specification's name.
-        :param value: The specification's value.
-        """
-        self._specs[name] = value
-
-    def get(self, name: SpecName) -> Any:
-        """Get a hardware specification.
-
-        :param name: The specification's name.
-        :return: The specification's value.
-        :raises KeyError: If the specification is not found.
-        """
-        if name not in self._specs:
-            raise KeyError(
-                f"Specification `{name}` not found. Expected one of {list(self._specs.keys())}"
-            )
-        return self._specs[name]
-
-    def all(self) -> dict[SpecName, Any]:
-        """Retrieve all hardware specifications."""
-        return self._specs
+from ._specs import Specs, SpecName
 
 
 def _ensure_mode_exists(mode: str, d: dict) -> None:
@@ -91,83 +23,50 @@ def _ensure_mode_exists(mode: str, d: dict) -> None:
         )
 
 
-class CaptureMethods:
+T = TypeVar("T")  # Generic type for the value stored in ReceiverComponents
+
+
+class ReceiverComponents(Generic[T]):
+    """Base class for managing receiver components per operating mode."""
+
+    def __init__(self) -> None:
+        """Initialise an instance of `ReceiverComponents`."""
+        self._components: dict[str, T] = {}
+
+    @property
+    def modes(self) -> list[str]:
+        """Get all the added operating modes."""
+        return list(self._components.keys())
+
+    def add(self, mode: str, component: T) -> None:
+        """Add a component for a particular operating mode.
+
+        :param mode: The operating mode for the receiver.
+        :param component: The component associated with this mode.
+        """
+        self._components[mode] = component
+
+    def get(self, mode: str) -> T:
+        """Retrieve the component for a particular operating mode.
+
+        :param mode: The operating mode for the receiver.
+        :return: The component associated with this mode.
+        :raises ModeNotFoundError: If the mode is not found.
+        """
+        _ensure_mode_exists(mode, self._components)
+        return self._components[mode]
+
+
+class CaptureMethods(ReceiverComponents[Callable[[str, Parameters], None]]):
     """Per operating mode, define how the receiver captures data."""
 
-    def __init__(self) -> None:
-        """Initialise an instance of `CaptureMethods`."""
-        self._capture_methods: dict[str, Callable[[str, Parameters], None]] = {}
 
-    def add(self, mode: str, capture_method: Callable[[str, Parameters], None]) -> None:
-        """Add a capture method a particular operating mode.
-
-        :param mode: The operating mode for the receiver.
-        :param capture_method: The function defining how data is captured in this mode. Typically,
-        the capture method will call a GNU Radio flowgraph.
-        """
-        self._capture_methods[mode] = capture_method
-
-    def get(self, mode: str) -> Callable[[str, Parameters], None]:
-        """Retrieve the capture method for a particular operating mode.
-
-        :param mode: The operating mode for the receiver.
-        :return: The function to call, to capture data in this mode.
-        """
-        _ensure_mode_exists(mode, self._capture_methods)
-        return self._capture_methods[mode]
-
-
-class CaptureTemplates:
+class CaptureTemplates(ReceiverComponents[CaptureTemplate]):
     """Per operating mode, define what parameters are required in a capture config, and the values each parameter can take."""
 
-    def __init__(self) -> None:
-        """Initialise an instance of `CaptureTemplates`."""
-        self._capture_templates: dict[str, CaptureTemplate] = {}
 
-    def add(self, mode: str, capture_template: CaptureTemplate) -> None:
-        """Add a capture template a particular operating mode.
-
-        :param mode: The operating mode for the receiver.
-        :param capture_template: The capture template for this mode.
-        """
-        self._capture_templates[mode] = capture_template
-
-    def get(self, mode: str) -> CaptureTemplate:
-        """Retrieve the capture template a particular operating mode.
-
-        :param mode: The operating mode for the receiver.
-        :return: The capture template for this mode.
-        """
-        _ensure_mode_exists(mode, self._capture_templates)
-        return self._capture_templates[mode]
-
-
-class PValidators:
-    """Validate capture config parameters, per operating mode.
-
-    Typically, each `pvalidator` function validates parameters en groupe, while the capture template validates each parameter individually.
-    """
-
-    def __init__(self) -> None:
-        """Initialise an instance of `PValidators`."""
-        self._pvalidators: dict[str, Callable[[Parameters], None]] = {}
-
-    def add(self, mode: str, pvalidator: Callable[[Parameters], None]) -> None:
-        """Add a parameter validator a particular operating mode.
-
-        :param mode: The operating mode for the receiver.
-        :param pvalidator: The function to validate parameters in this mode.
-        """
-        self._pvalidators[mode] = pvalidator
-
-    def get(self, mode: str) -> Callable[[Parameters], None]:
-        """Retrieve the parameter validator a particular operating mode.
-
-        :param mode: The operating mode for the receiver.
-        :return: The function to validate parameters in this mode.
-        """
-        _ensure_mode_exists(mode, self._pvalidators)
-        return self._pvalidators[mode]
+class PValidators(ReceiverComponents[Callable[[Parameters], None]]):
+    """Validate capture config parameters, per operating mode."""
 
 
 def default_pvalidator(parameters: Parameters) -> None:
@@ -219,6 +118,20 @@ class Receiver:
         :param value: The new operating mode to activate.
         """
         self._mode = value
+
+    @property
+    def modes(self) -> list[str]:
+        """The operating modes for the receiver.
+
+        :raises ValueError: If the modes are inconsistent.
+        """
+        if (
+            not self._capture_methods.modes
+            == self._pvalidators.modes
+            == self._capture_templates.modes
+        ):
+            raise ValueError(f"Modes are inconsistent for the receiver {self.name}.")
+        return self._capture_methods.modes
 
     @property
     def active_mode(self) -> str:

@@ -27,7 +27,8 @@ from ._rspduo_gr import (
 )
 from ._receiver_names import ReceiverName
 from ._gr import capture
-from .._receiver import Specs, SpecName
+from .._receiver import Receiver
+from .._specs import Specs
 
 
 from .._receiver import SpecName, Receiver

@@ -23,7 +23,8 @@ from ._receiver_names import ReceiverName
 from ._rsp1a_gr import swept_center_frequency, fixed_center_frequency
 from ._receiver_names import ReceiverName
 from ._gr import capture
-from .._receiver import Specs, SpecName
+from .._receiver import Receiver
+from .._specs import Specs
 
 
 from .._receiver import SpecName, Receiver

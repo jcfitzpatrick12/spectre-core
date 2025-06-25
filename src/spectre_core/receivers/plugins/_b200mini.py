@@ -23,7 +23,8 @@ from spectre_core.capture_configs import (
 from ._receiver_names import ReceiverName
 from ._gr import capture
 from ._b200mini_gr import fixed_center_frequency, swept_center_frequency
-from .._receiver import Receiver, SpecName, Specs
+from .._receiver import Receiver
+from .._specs import Specs, SpecName
 from .._register import register_receiver
 
 
@@ -220,6 +221,8 @@ class B200mini(Receiver):
     """Receiver implementation for the USRP B200mini (https://www.ettus.com/all-products/usrp-b200mini/)"""
 
     def __init__(self, name: ReceiverName, mode: Optional[str] = None) -> None:
+        super().__init__(name, mode)
+
         self.add_spec(SpecName.SAMPLE_RATE_LOWER_BOUND, 200e3)
         self.add_spec(SpecName.SAMPLE_RATE_UPPER_BOUND, 56e6)
         self.add_spec(SpecName.FREQUENCY_LOWER_BOUND, 70e6)
