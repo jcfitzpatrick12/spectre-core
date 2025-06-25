@@ -182,7 +182,7 @@ class Receiver:
         tag: str,
         parameters: Parameters,
         force: bool = False,
-        validate: bool = False,
+        validate: bool = True,
     ) -> None:
         """Save parameters to a capture config.
 
