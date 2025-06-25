@@ -25,7 +25,7 @@ from .._specs import Specs, SpecName
 from .._register import register_receiver
 
 
-def _make_capture_template_cos_wave(specs: Specs) -> CaptureTemplate:
+def _make_capture_template_cos_wave(receiver: Receiver) -> CaptureTemplate:
     capture_template = get_base_capture_template(CaptureMode.FIXED_CENTER_FREQUENCY)
     capture_template.add_ptemplate(get_base_ptemplate(PName.AMPLITUDE))
     capture_template.add_ptemplate(get_base_ptemplate(PName.FREQUENCY))
@@ -52,8 +52,8 @@ def _make_capture_template_cos_wave(specs: Specs) -> CaptureTemplate:
         PName.SAMPLE_RATE,
         [
             Bound(
-                lower_bound=specs.get(SpecName.SAMPLE_RATE_LOWER_BOUND),
-                upper_bound=specs.get(SpecName.SAMPLE_RATE_UPPER_BOUND),
+                lower_bound=receiver.get_spec(SpecName.SAMPLE_RATE_LOWER_BOUND),
+                upper_bound=receiver.get_spec(SpecName.SAMPLE_RATE_UPPER_BOUND),
             )
         ],
     )
@@ -61,15 +61,15 @@ def _make_capture_template_cos_wave(specs: Specs) -> CaptureTemplate:
         PName.FREQUENCY,
         [
             Bound(
-                lower_bound=specs.get(SpecName.FREQUENCY_LOWER_BOUND),
-                upper_bound=specs.get(SpecName.FREQUENCY_UPPER_BOUND),
+                lower_bound=receiver.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
+                upper_bound=receiver.get_spec(SpecName.FREQUENCY_UPPER_BOUND),
             )
         ],
     )
     return capture_template
 
 
-def _make_capture_template_constant_staircase(specs: Specs) -> CaptureTemplate:
+def _make_capture_template_constant_staircase(receiver: Receiver) -> CaptureTemplate:
     capture_template = make_base_capture_template(
         PName.TIME_RESOLUTION,
         PName.FREQUENCY_RESOLUTION,
@@ -123,7 +123,7 @@ def _make_capture_template_constant_staircase(specs: Specs) -> CaptureTemplate:
     return capture_template
 
 
-def _make_pvalidator_cosine_wave(specs: Specs) -> Callable[[Parameters], None]:
+def _make_pvalidator_cosine_wave(receiver: Receiver) -> Callable[[Parameters], None]:
     def pvalidator(parameters: Parameters) -> None:
         validate_window(parameters)
 
@@ -161,7 +161,9 @@ def _make_pvalidator_cosine_wave(specs: Specs) -> Callable[[Parameters], None]:
     return pvalidator
 
 
-def _make_pvalidator_constant_staircase(specs: Specs) -> Callable[[Parameters], None]:
+def _make_pvalidator_constant_staircase(
+    receiver: Receiver,
+) -> Callable[[Parameters], None]:
     def pvalidator(parameters: Parameters) -> None:
         validate_window(parameters)
 
@@ -211,13 +213,13 @@ class SignalGenerator(Receiver):
         self.add_mode(
             _Mode.COSINE_WAVE,
             partial(capture, top_block_cls=cosine_wave),
-            _make_capture_template_cos_wave(self.specs),
-            _make_pvalidator_cosine_wave(self.specs),
+            _make_capture_template_cos_wave(self),
+            _make_pvalidator_cosine_wave(self),
         )
 
         self.add_mode(
             _Mode.constant_staircase,
             partial(capture, top_block_cls=constant_staircase),
-            _make_capture_template_constant_staircase(self.specs),
-            _make_pvalidator_constant_staircase(self.specs),
+            _make_capture_template_constant_staircase(self),
+            _make_pvalidator_constant_staircase(self),
         )

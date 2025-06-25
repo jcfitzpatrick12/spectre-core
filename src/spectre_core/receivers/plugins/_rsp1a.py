@@ -32,7 +32,7 @@ from .._register import register_receiver
 
 
 def _make_pvalidator_fixed_center_frequency(
-    specs: Specs,
+    receiver: Receiver,
 ) -> Callable[[Parameters], None]:
     def pvalidator(parameters: Parameters) -> None:
         validate_fixed_center_frequency(parameters)
@@ -41,18 +41,18 @@ def _make_pvalidator_fixed_center_frequency(
 
 
 def _make_pvalidator_swept_center_frequency(
-    specs: Specs,
+    receiver: Receiver,
 ) -> Callable[[Parameters], None]:
     def pvalidator(parameters: Parameters) -> None:
         validate_swept_center_frequency(
-            parameters, specs.get(SpecName.API_RETUNING_LATENCY)
+            parameters, receiver.get_spec(SpecName.API_RETUNING_LATENCY)
         )
 
     return pvalidator
 
 
 def _make_capture_template_fixed_center_frequency(
-    specs: Specs,
+    receiver: Receiver,
 ) -> CaptureTemplate:
 
     capture_template = get_base_capture_template(CaptureMode.FIXED_CENTER_FREQUENCY)
@@ -76,8 +76,8 @@ def _make_capture_template_fixed_center_frequency(
         PName.CENTER_FREQUENCY,
         [
             Bound(
-                lower_bound=specs.get(SpecName.FREQUENCY_LOWER_BOUND),
-                upper_bound=specs.get(SpecName.FREQUENCY_UPPER_BOUND),
+                lower_bound=receiver.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
+                upper_bound=receiver.get_spec(SpecName.FREQUENCY_UPPER_BOUND),
             )
         ],
     )
@@ -85,26 +85,28 @@ def _make_capture_template_fixed_center_frequency(
         PName.SAMPLE_RATE,
         [
             Bound(
-                lower_bound=specs.get(SpecName.SAMPLE_RATE_LOWER_BOUND),
-                upper_bound=specs.get(SpecName.SAMPLE_RATE_UPPER_BOUND),
+                lower_bound=receiver.get_spec(SpecName.SAMPLE_RATE_LOWER_BOUND),
+                upper_bound=receiver.get_spec(SpecName.SAMPLE_RATE_UPPER_BOUND),
             )
         ],
     )
     capture_template.add_pconstraint(
-        PName.BANDWIDTH, [OneOf(specs.get(SpecName.BANDWIDTH_OPTIONS))]
+        PName.BANDWIDTH, [OneOf(receiver.get_spec(SpecName.BANDWIDTH_OPTIONS))]
     )
     capture_template.add_pconstraint(
         PName.IF_GAIN,
-        [Bound(upper_bound=specs.get(SpecName.IF_GAIN_UPPER_BOUND))],
+        [Bound(upper_bound=receiver.get_spec(SpecName.IF_GAIN_UPPER_BOUND))],
     )
     capture_template.add_pconstraint(
         PName.RF_GAIN,
-        [Bound(upper_bound=specs.get(SpecName.RF_GAIN_UPPER_BOUND))],
+        [Bound(upper_bound=receiver.get_spec(SpecName.RF_GAIN_UPPER_BOUND))],
     )
     return capture_template
 
 
-def _make_capture_template_swept_center_frequency(specs: Specs) -> CaptureTemplate:
+def _make_capture_template_swept_center_frequency(
+    receiver: Receiver,
+) -> CaptureTemplate:
 
     capture_template = get_base_capture_template(CaptureMode.SWEPT_CENTER_FREQUENCY)
     capture_template.add_ptemplate(get_base_ptemplate(PName.BANDWIDTH))
@@ -130,8 +132,8 @@ def _make_capture_template_swept_center_frequency(specs: Specs) -> CaptureTempla
         PName.MIN_FREQUENCY,
         [
             Bound(
-                lower_bound=specs.get(SpecName.FREQUENCY_LOWER_BOUND),
-                upper_bound=specs.get(SpecName.FREQUENCY_UPPER_BOUND),
+                lower_bound=receiver.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
+                upper_bound=receiver.get_spec(SpecName.FREQUENCY_UPPER_BOUND),
             )
         ],
     )
@@ -139,8 +141,8 @@ def _make_capture_template_swept_center_frequency(specs: Specs) -> CaptureTempla
         PName.MAX_FREQUENCY,
         [
             Bound(
-                lower_bound=specs.get(SpecName.FREQUENCY_LOWER_BOUND),
-                upper_bound=specs.get(SpecName.FREQUENCY_UPPER_BOUND),
+                lower_bound=receiver.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
+                upper_bound=receiver.get_spec(SpecName.FREQUENCY_UPPER_BOUND),
             )
         ],
     )
@@ -148,21 +150,21 @@ def _make_capture_template_swept_center_frequency(specs: Specs) -> CaptureTempla
         PName.SAMPLE_RATE,
         [
             Bound(
-                lower_bound=specs.get(SpecName.SAMPLE_RATE_LOWER_BOUND),
-                upper_bound=specs.get(SpecName.SAMPLE_RATE_UPPER_BOUND),
+                lower_bound=receiver.get_spec(SpecName.SAMPLE_RATE_LOWER_BOUND),
+                upper_bound=receiver.get_spec(SpecName.SAMPLE_RATE_UPPER_BOUND),
             )
         ],
     )
     capture_template.add_pconstraint(
-        PName.BANDWIDTH, [OneOf(specs.get(SpecName.BANDWIDTH_OPTIONS))]
+        PName.BANDWIDTH, [OneOf(receiver.get_spec(SpecName.BANDWIDTH_OPTIONS))]
     )
     capture_template.add_pconstraint(
         PName.IF_GAIN,
-        [Bound(upper_bound=specs.get(SpecName.IF_GAIN_UPPER_BOUND))],
+        [Bound(upper_bound=receiver.get_spec(SpecName.IF_GAIN_UPPER_BOUND))],
     )
     capture_template.add_pconstraint(
         PName.RF_GAIN,
-        [Bound(upper_bound=specs.get(SpecName.RF_GAIN_UPPER_BOUND))],
+        [Bound(upper_bound=receiver.get_spec(SpecName.RF_GAIN_UPPER_BOUND))],
     )
     return capture_template
 
@@ -197,14 +199,14 @@ class RSP1A(Receiver):
         self.add_mode(
             _Mode.FIXED_CENTER_FREQUENCY,
             partial(capture, top_block_cls=fixed_center_frequency),
-            _make_capture_template_fixed_center_frequency(self.specs),
-            _make_pvalidator_fixed_center_frequency(self.specs),
+            _make_capture_template_fixed_center_frequency(self),
+            _make_pvalidator_fixed_center_frequency(self),
         )
         self.add_mode(
             _Mode.SWEPT_CENTER_FREQUENCY,
             partial(
                 capture, top_block_cls=swept_center_frequency, max_noutput_items=1024
             ),
-            _make_capture_template_swept_center_frequency(self.specs),
-            _make_pvalidator_swept_center_frequency(self.specs),
+            _make_capture_template_swept_center_frequency(self),
+            _make_pvalidator_swept_center_frequency(self),
         )
