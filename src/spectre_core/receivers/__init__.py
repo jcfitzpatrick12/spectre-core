@@ -25,6 +25,7 @@ __all__ = [
     "RSP1A",
     "RSPduo",
     "B200mini",
+    "Custom",
     "get_receiver",
     "get_registered_receivers",
 ]

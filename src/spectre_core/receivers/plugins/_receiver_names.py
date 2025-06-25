@@ -12,9 +12,11 @@ class ReceiverName(Enum):
     :ivar RSPDUO: SDRPlay RSPduo
     :ivar SIGNAL_GENERATOR: A synthetic signal generator.
     :ivar B200MINI: USRP B200mini.
+    :ivar CUSTOM: A custom receiver, which starts with no operating modes.
     """
 
     SIGNAL_GENERATOR = "signal_generator"
     RSP1A = "rsp1a"
     RSPDUO = "rspduo"
     B200MINI = "b200mini"
+    CUSTOM = "custom"

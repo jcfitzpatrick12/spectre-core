@@ -12,6 +12,7 @@ from .plugins._signal_generator import SignalGenerator
 from .plugins._rsp1a import RSP1A
 from .plugins._rspduo import RSPduo
 from .plugins._b200mini import B200mini
+from .plugins._custom import CustomReceiver
 
 
 @overload
@@ -36,6 +37,11 @@ def get_receiver(
 def get_receiver(
     receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
 ) -> B200mini: ...
+
+@overload
+def get_receiver(
+    receiver_name: Literal[ReceiverName.CUSTOM], mode: Optional[str] = None
+) -> CustomReceiver: ...
 
 
 @overload
