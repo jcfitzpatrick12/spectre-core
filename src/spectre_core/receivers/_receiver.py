@@ -106,6 +106,10 @@ class Receiver:
 
         :param value: The new operating mode of the receiver. Use `None` to unset the mode.
         """
+        if value not in self.modes:
+            raise ModeNotFoundError(
+                f"Mode `{value}` not found. Expected one of {self.modes}"
+            )
         self._mode = value
 
     @property
@@ -151,12 +155,12 @@ class Receiver:
         return self._pvalidators.get(self.active_mode)
 
     @property
-    def specs(self) -> Specs:
+    def specs(self) -> dict[SpecName, Any]:
         """Retrieve all hardware specifications.
 
         :return: A dictionary of all specifications.
         """
-        return self._specs
+        return self._specs.all()
 
     def start_capture(self, tag: str) -> None:
         """Start capturing data using the active operating mode.
@@ -239,4 +243,4 @@ class Receiver:
         :param name: The specification's name.
         :return: The specification's value.
         """
-        return self.specs.get(name)
+        return self._specs.get(name)
