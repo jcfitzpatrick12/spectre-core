@@ -43,7 +43,7 @@ class cosine_wave(spectre_top_block):
         )
 
 
-class tagged_staircase(spectre_top_block):
+class constant_staircase(spectre_top_block):
     def flowgraph(self, tag: str, parameters: Parameters) -> None:
         # Unpack the capture config parameters
         step_increment = parameters.get_parameter_value(PName.STEP_INCREMENT)
@@ -58,7 +58,7 @@ class tagged_staircase(spectre_top_block):
         batch_size = parameters.get_parameter_value(PName.BATCH_SIZE)
 
         # Blocks
-        self.spectre_tagged_staircase = spectre.tagged_staircase(
+        self.spectre_constant_staircase = spectre.constant_staircase(
             min_samples_per_step,
             max_samples_per_step,
             frequency_step,
@@ -73,5 +73,5 @@ class tagged_staircase(spectre_top_block):
         )
 
         # Connections
-        self.connect((self.spectre_tagged_staircase, 0), (self.blocks_throttle, 0))
+        self.connect((self.spectre_constant_staircase, 0), (self.blocks_throttle, 0))
         self.connect((self.blocks_throttle, 0), (self.spectre_batched_file_sink, 0))

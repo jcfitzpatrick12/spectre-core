@@ -52,14 +52,14 @@ class _AnalyticalFactory:
     def __init__(self) -> None:
         """Initialises an instance of the `_AnalyticalFactory` class."""
         self._builders: dict[str, Callable[[int, CaptureConfig], Spectrogram]] = {
-            "cosine_signal_1": self._cosine_signal_1,
-            "tagged_staircase": self._tagged_staircase,
+            "cosine_wave": self._cosine_wave,
+            "constant_staircase": self._constant_staircase,
         }
 
     @property
     def builders(self) -> dict[str, Callable[[int, CaptureConfig], Spectrogram]]:
         """
-        Provides a mapping from each `Test` receiver mode to its corresponding builder method.
+        Provides a mapping from each `SignalGenerator` receiver mode to its corresponding builder method.
 
         Each builder method generates the expected spectrograms for a session run in the associated mode.
         """
@@ -67,21 +67,21 @@ class _AnalyticalFactory:
 
     @property
     def test_modes(self) -> list[str]:
-        """Returns the available modes for the `Test` receiver."""
+        """Returns the available modes for the `SignalGenerator` receiver."""
         return list(self.builders.keys())
 
     def get_spectrogram(
         self, num_spectrums: int, capture_config: CaptureConfig
     ) -> Spectrogram:
         """
-        Generates an analytical spectrogram based on the capture config for a `Test` receiver.
+        Generates an analytical spectrogram based on the capture config for a `SignalGenerator` receiver.
 
         :param num_spectrums: The number of spectrums to include in the output spectrogram.
-        :param capture_config: The capture config used for `Test` receiver data capture.
-        :raises ValueError: Raised if the capture config is not associated with a `Test` receiver.
-        :raises ModeNotFoundError: Raised if the specified `Test` mode in the capture config lacks
+        :param capture_config: The capture config used for `SignalGenerator` receiver data capture.
+        :raises ValueError: Raised if the capture config is not associated with a `SignalGenerator` receiver.
+        :raises ModeNotFoundError: Raised if the specified `SignalGenerator` mode in the capture config lacks
         a corresponding builder method.
-        :return: The expected spectrogram for running a session with the `Test` receiver in the specified mode.
+        :return: The expected spectrogram for running a session with the `SignalGenerator` receiver in the specified mode.
         """
         if capture_config.receiver_name != "test":
             raise ValueError(
@@ -95,10 +95,10 @@ class _AnalyticalFactory:
             )
         return builder_method(num_spectrums, capture_config)
 
-    def _cosine_signal_1(
+    def _cosine_wave(
         self, num_spectrums: int, capture_config: CaptureConfig
     ) -> Spectrogram:
-        """Creates the expected spectrogram for the `Test` receiver operating in the mode `cosine-signal-1`."""
+        """Creates the expected spectrogram for the `SignalGenerator` receiver operating in the mode `cosine_wave`."""
         # Extract necessary parameters from the capture config.
         window_size = cast(int, capture_config.get_parameter_value(PName.WINDOW_SIZE))
         sample_rate = cast(int, capture_config.get_parameter_value(PName.SAMPLE_RATE))
@@ -146,10 +146,10 @@ class _AnalyticalFactory:
             SpectrumUnit.AMPLITUDE,
         )
 
-    def _tagged_staircase(
+    def _constant_staircase(
         self, num_spectrums: int, capture_config: CaptureConfig
     ) -> Spectrogram:
-        """Creates the expected spectrogram for the `Test` receiver operating in the mode `tagged-staircase`."""
+        """Creates the expected spectrogram for the `SignalGenerator` receiver operating in the mode `constant_staircase`."""
         # Extract necessary parameters from the capture config.
         window_size = cast(int, capture_config.get_parameter_value(PName.WINDOW_SIZE))
         min_samples_per_step = cast(
@@ -217,15 +217,15 @@ class _AnalyticalFactory:
 def get_analytical_spectrogram(
     num_spectrums: int, capture_config: CaptureConfig
 ) -> Spectrogram:
-    """Each mode of the `Test` receiver generates a known synthetic signal. Based on this, we can
+    """Each mode of the `SignalGenerator` receiver generates a known synthetic signal. Based on this, we can
     derive an analytical solution that predicts the expected spectrogram for a session in that mode.
 
-    This function constructs the analytical spectrogram using the capture config for a `Test`
+    This function constructs the analytical spectrogram using the capture config for a `SignalGenerator`
     receiver operating in a specific mode.
 
     :param num_spectrums: The number of spectrums in the output spectrogram.
     :param capture_config: The capture config used for data capture.
-    :return: The expected, analytically derived spectrogram for the specified mode of the `Test` receiver.
+    :return: The expected, analytically derived spectrogram for the specified mode of the `SignalGenerator` receiver.
     """
     factory = _AnalyticalFactory()
     return factory.get_spectrogram(num_spectrums, capture_config)
@@ -234,7 +234,7 @@ def get_analytical_spectrogram(
 def validate_analytically(
     spectrogram: Spectrogram, capture_config: CaptureConfig, absolute_tolerance: float
 ) -> TestResults:
-    """Validate a spectrogram generated during sessions with a `Test` receiver operating
+    """Validate a spectrogram generated during sessions with a `SignalGenerator` receiver operating
     in a particular mode.
 
     :param spectrogram: The spectrogram to be validated.

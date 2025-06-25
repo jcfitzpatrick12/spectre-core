@@ -17,7 +17,7 @@ from spectre_core.capture_configs import (
     get_base_ptemplate,
     validate_window,
 )
-from ._signal_generator_gr import cosine_wave, tagged_staircase
+from ._signal_generator_gr import cosine_wave, constant_staircase
 from ._gr import capture
 from ._receiver_names import ReceiverName
 from .._receiver import Receiver
@@ -69,7 +69,7 @@ def _make_capture_template_cos_wave(specs: Specs) -> CaptureTemplate:
     return capture_template
 
 
-def _make_capture_template_tagged_staircase(specs: Specs) -> CaptureTemplate:
+def _make_capture_template_constant_staircase(specs: Specs) -> CaptureTemplate:
     capture_template = make_base_capture_template(
         PName.TIME_RESOLUTION,
         PName.FREQUENCY_RESOLUTION,
@@ -161,7 +161,7 @@ def _make_pvalidator_cosine_wave(specs: Specs) -> Callable[[Parameters], None]:
     return pvalidator
 
 
-def _make_pvalidator_tagged_staircase(specs: Specs) -> Callable[[Parameters], None]:
+def _make_pvalidator_constant_staircase(specs: Specs) -> Callable[[Parameters], None]:
     def pvalidator(parameters: Parameters) -> None:
         validate_window(parameters)
 
@@ -193,7 +193,7 @@ class _Mode:
     """An operating mode for the `SignalGenerator` receiver."""
 
     COSINE_WAVE = "cosine_wave"
-    TAGGED_STAIRCASE = "tagged_staircase"
+    constant_staircase = "constant_staircase"
 
 
 @register_receiver(ReceiverName.SIGNAL_GENERATOR)
@@ -216,8 +216,8 @@ class SignalGenerator(Receiver):
         )
 
         self.add_mode(
-            _Mode.TAGGED_STAIRCASE,
-            partial(capture, top_block_cls=tagged_staircase),
-            _make_capture_template_tagged_staircase(self.specs),
-            _make_pvalidator_tagged_staircase(self.specs),
+            _Mode.constant_staircase,
+            partial(capture, top_block_cls=constant_staircase),
+            _make_capture_template_constant_staircase(self.specs),
+            _make_pvalidator_constant_staircase(self.specs),
         )
