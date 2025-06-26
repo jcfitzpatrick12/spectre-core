@@ -25,7 +25,8 @@ from .._receiver import Receiver, ReceiverName
 from .._specs import SpecName
 
 LOW_IF_SAMPLE_RATE_CUTOFF = 2e6
-LOW_IF_PERMITTED_SAMPLE_RATES = [LOW_IF_SAMPLE_RATE_CUTOFF / (2 ** i) for i in range(6)]
+LOW_IF_PERMITTED_SAMPLE_RATES = [LOW_IF_SAMPLE_RATE_CUTOFF / (2**i) for i in range(6)]
+
 
 class SDRplayReceiver(ABC, Receiver):
     """An abstract base class for SDRplay devices."""
@@ -72,9 +73,9 @@ def _validate_rf_gain(rf_gain: int, expected_rf_gains: list[int]):
 
 def _validate_low_if_sample_rate(sample_rate: int) -> None:
     """The sampling rate of the hardware is 2MHz, but we can get (effectively) lower than that by decimating.
-    The backend will update 
-    
-    
+    The backend will update
+
+
     We try to ensure that the sample rate requested by the user is not silently adjusted by the backend.
     Please refer to https://github.com/fventuri/gr-sdrplay3/blob/v3.11.0.9/lib/rsp_impl.cc#L140-L179
     """
