@@ -24,7 +24,7 @@ from ._receiver_names import ReceiverName
 from ._gr import capture
 from ._b200mini_gr import fixed_center_frequency, swept_center_frequency
 from .._receiver import Receiver
-from .._specs import Specs, SpecName
+from .._specs import SpecName
 from .._register import register_receiver
 
 

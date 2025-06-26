@@ -4,9 +4,9 @@
 
 from typing import Optional
 
+from ._receiver_names import ReceiverName
 from .._register import register_receiver
 from .._receiver import Receiver
-from ._receiver_names import ReceiverName
 
 
 @register_receiver(ReceiverName.CUSTOM)

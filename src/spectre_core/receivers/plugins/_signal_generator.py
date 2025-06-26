@@ -21,7 +21,7 @@ from ._signal_generator_gr import cosine_wave, constant_staircase
 from ._gr import capture
 from ._receiver_names import ReceiverName
 from .._receiver import Receiver
-from .._specs import Specs, SpecName
+from .._specs import SpecName
 from .._register import register_receiver
 
 

@@ -17,9 +17,6 @@ from ._sdrplay_receiver import (
 from ._rsp1a_gr import swept_center_frequency, fixed_center_frequency
 from ._receiver_names import ReceiverName
 from ._gr import capture
-
-
-from .._receiver import SpecName
 from .._register import register_receiver
 
 

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from dataclasses import dataclass
-from typing import Optional, Callable
+from typing import Optional
 from functools import partial
 
 from ._receiver_names import ReceiverName
@@ -14,7 +14,6 @@ from ._rspduo_gr import (
 )
 from ._receiver_names import ReceiverName
 from ._gr import capture
-from .._receiver import Receiver
 from ._sdrplay_receiver import (
     SDRplayReceiver,
     make_capture_template_fixed_center_frequency,
@@ -23,8 +22,6 @@ from ._sdrplay_receiver import (
     make_pvalidator_swept_center_frequency,
 )
 
-
-from .._receiver import SpecName, Receiver
 from .._register import register_receiver
 
 
