@@ -51,18 +51,21 @@ class SDRplayReceiver(ABC, Receiver):
 
     @abstractmethod
     def get_rf_gains(self, center_frequency: float) -> list[int]:
-        """Get an ordered list of RF gain values per LNA state, at the specifed center frequency. This
-        differs for each SDRplay receiver.
+        """Get an ordered list of RF gain values corresponding to each LNA state at the specified center frequency.
 
-        Negative gain is the same as positive gain reduction. So we take the negative of each of the
-        values documented in the gain reduction tables in the SDRplay API specification.
+        The values are taken from the gain reduction tables documented in the SDRplay API specification, and are 
+        unique to each model. Note that negative gain values represent positive gain reduction.
         """
 
 
 def _validate_rf_gain(rf_gain: int, expected_rf_gains: list[int]):
-    """The applied RF gain is determined by the LNA state, and so can take on only specific values,
-    These values are documented in the gain reduction tables in the SDRplay API specification.
-    Please refer to https://github.com/fventuri/gr-sdrplay3/blob/v3.11.0.9/lib/rsp_impl.cc#L378-L387
+    """Validate the RF gain value against the expected values for the current LNA state.
+
+    The RF gain is determined by the LNA state and can only take specific values as documented in the 
+    gain reduction tables of the SDRplay API specification.
+
+    For implementation details, refer to the `gr-sdrplay3` OOT module:
+    https://github.com/fventuri/gr-sdrplay3/blob/v3.11.0.9/lib/rsp_impl.cc#L378-L387
     """
     if rf_gain not in expected_rf_gains:
         raise ValueError(
@@ -72,12 +75,14 @@ def _validate_rf_gain(rf_gain: int, expected_rf_gains: list[int]):
 
 
 def _validate_low_if_sample_rate(sample_rate: int) -> None:
-    """The sampling rate of the hardware is 2MHz, but we can get (effectively) lower than that by decimating.
-    The backend will update
+    """Validate the sample rate if the receiver is operating in low IF mode.
 
+    The minimum physical sampling rate of the SDRplay hardware is 2 MHz. Lower effective rates can be achieved 
+    through decimation, as handled by the `gr-sdrplay3` OOT module. This function ensures that the sample rate 
+    is not silently adjusted by the backend.
 
-    We try to ensure that the sample rate requested by the user is not silently adjusted by the backend.
-    Please refer to https://github.com/fventuri/gr-sdrplay3/blob/v3.11.0.9/lib/rsp_impl.cc#L140-L179
+    For implementation details, refer to:
+    https://github.com/fventuri/gr-sdrplay3/blob/v3.11.0.9/lib/rsp_impl.cc#L140-L179
     """
     if sample_rate <= LOW_IF_SAMPLE_RATE_CUTOFF:
         if sample_rate not in LOW_IF_PERMITTED_SAMPLE_RATES:
