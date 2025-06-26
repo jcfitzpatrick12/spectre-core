@@ -7,7 +7,7 @@ from enum import Enum
 
 
 class SpecName(Enum):
-    """Enumeration of hardware specification names for SDR receivers.
+    """Hardware specification names for SDR receivers.
 
     :ivar FREQUENCY_LOWER_BOUND: The lower bound for the center frequency, in Hz.
     :ivar FREQUENCY_UPPER_BOUND: The upper bound for the center frequency, in Hz.
@@ -24,7 +24,7 @@ class SpecName(Enum):
     :ivar WIRE_FORMATS: Supported data types transferred over the bus/network.
     :ivar MASTER_CLOCK_RATE_LOWER_BOUND: The lower bound for the SDR reference clock rate, in Hz.
     :ivar MASTER_CLOCK_RATE_UPPER_BOUND: The upper bound for the SDR reference clock rate, in Hz.
-    :ivar API_RETUNING_LATENCY: Estimated delay between issuing a retune command and the actual frequency update.
+    :ivar API_RETUNING_LATENCY: Estimated delay between issuing a retune command and the actual center frequency update.
     """
 
     FREQUENCY_LOWER_BOUND = "frequency_lower_bound"
