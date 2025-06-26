@@ -5,12 +5,12 @@
 from typing import TypeVar, Callable, Type
 
 from .plugins._receiver_names import ReceiverName
-from ._base import BaseReceiver
+from ._receiver import Receiver
 
 # map populated at runtime via the `register_receiver` decorator.
-receivers: dict[ReceiverName, Type[BaseReceiver]] = {}
+receivers: dict[ReceiverName, Type[Receiver]] = {}
 
-T = TypeVar("T", bound=BaseReceiver)
+T = TypeVar("T", bound=Receiver)
 
 
 def register_receiver(

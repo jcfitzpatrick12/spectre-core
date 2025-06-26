@@ -10,6 +10,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib import use
 from datetime import datetime
+import gc
 
 from spectre_core.spectrograms import TimeType
 from spectre_core.config import TimeFormat, get_batches_dir_path
@@ -281,12 +282,19 @@ class PanelStack:
 
         self._overlay_superimposed_panels()
 
+    def _close(self) -> None:
+        """Prevent memory leaks once a figure has been created, and successfully visualised."""
+        self._get_fig().clear()
+        plt.close(self._fig)
+        # Garbage collection seems to be required to prevent the memory leak.
+        # See https://github.com/jcfitzpatrick12/spectre/issues/128
+        gc.collect()
+
     def show(self) -> None:
         """Display the panel stack figure."""
         self._make_figure()
         self._get_fig().show()
-        self._get_fig().clear()
-        plt.close(self._fig)
+        self._close()
 
     def save(
         self,
@@ -312,6 +320,5 @@ class PanelStack:
         # If the parent directory does not exist, create it.
         os.makedirs(os.path.dirname(batch_file_path), exist_ok=True)
         self._get_fig().savefig(batch_file_path)
-        self._get_fig().clear()
-        plt.close(self._fig)
+        self._close()
         return batch_file_path

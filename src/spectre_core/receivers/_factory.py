@@ -2,16 +2,23 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Optional, overload, Literal, TypeVar
+from typing import Optional, overload, Literal
 
 from spectre_core.exceptions import ReceiverNotFoundError
 from ._register import receivers
-from ._base import BaseReceiver
+from ._receiver import Receiver
 from .plugins._receiver_names import ReceiverName
+from .plugins._signal_generator import SignalGenerator
 from .plugins._rsp1a import RSP1A
 from .plugins._rspduo import RSPduo
-from .plugins._test import Test
 from .plugins._b200mini import B200mini
+from .plugins._custom import CustomReceiver
+
+
+@overload
+def get_receiver(
+    receiver_name: Literal[ReceiverName.SIGNAL_GENERATOR], mode: Optional[str] = None
+) -> SignalGenerator: ...
 
 
 @overload
@@ -28,25 +35,23 @@ def get_receiver(
 
 @overload
 def get_receiver(
-    receiver_name: Literal[ReceiverName.TEST], mode: Optional[str] = None
-) -> Test: ...
-
-
-@overload
-def get_receiver(
     receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
 ) -> B200mini: ...
 
 
 @overload
 def get_receiver(
-    receiver_name: ReceiverName, mode: Optional[str] = None
-) -> BaseReceiver: ...
+    receiver_name: Literal[ReceiverName.CUSTOM], mode: Optional[str] = None
+) -> CustomReceiver: ...
 
 
+@overload
 def get_receiver(
     receiver_name: ReceiverName, mode: Optional[str] = None
-) -> BaseReceiver:
+) -> Receiver: ...
+
+
+def get_receiver(receiver_name: ReceiverName, mode: Optional[str] = None) -> Receiver:
     """Get a registered receiver.
 
     :param receiver_name: The name of the receiver.

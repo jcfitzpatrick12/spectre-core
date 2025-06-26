@@ -4,7 +4,7 @@
 
 import sys
 import signal
-from typing import Type, TypeVar
+from typing import Type
 
 from gnuradio import gr
 
