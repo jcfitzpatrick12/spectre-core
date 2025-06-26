@@ -195,7 +195,7 @@ class _Mode:
     """An operating mode for the `SignalGenerator` receiver."""
 
     COSINE_WAVE = "cosine_wave"
-    constant_staircase = "constant_staircase"
+    CONSTANT_STAIRCASE = "constant_staircase"
 
 
 @register_receiver(ReceiverName.SIGNAL_GENERATOR)
@@ -218,7 +218,7 @@ class SignalGenerator(Receiver):
         )
 
         self.add_mode(
-            _Mode.constant_staircase,
+            _Mode.CONSTANT_STAIRCASE,
             partial(capture, top_block_cls=constant_staircase),
             _make_capture_template_constant_staircase(self),
             _make_pvalidator_constant_staircase(self),
