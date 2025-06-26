@@ -53,7 +53,7 @@ class SDRplayReceiver(ABC, Receiver):
     def get_rf_gains(self, center_frequency: float) -> list[int]:
         """Get an ordered list of RF gain values corresponding to each LNA state at the specified center frequency.
 
-        The values are taken from the gain reduction tables documented in the SDRplay API specification, and are 
+        The values are taken from the gain reduction tables documented in the SDRplay API specification, and are
         unique to each model. Note that negative gain values represent positive gain reduction.
         """
 
@@ -61,7 +61,7 @@ class SDRplayReceiver(ABC, Receiver):
 def _validate_rf_gain(rf_gain: int, expected_rf_gains: list[int]):
     """Validate the RF gain value against the expected values for the current LNA state.
 
-    The RF gain is determined by the LNA state and can only take specific values as documented in the 
+    The RF gain is determined by the LNA state and can only take specific values as documented in the
     gain reduction tables of the SDRplay API specification.
 
     For implementation details, refer to the `gr-sdrplay3` OOT module:
@@ -77,8 +77,8 @@ def _validate_rf_gain(rf_gain: int, expected_rf_gains: list[int]):
 def _validate_low_if_sample_rate(sample_rate: int) -> None:
     """Validate the sample rate if the receiver is operating in low IF mode.
 
-    The minimum physical sampling rate of the SDRplay hardware is 2 MHz. Lower effective rates can be achieved 
-    through decimation, as handled by the `gr-sdrplay3` OOT module. This function ensures that the sample rate 
+    The minimum physical sampling rate of the SDRplay hardware is 2 MHz. Lower effective rates can be achieved
+    through decimation, as handled by the `gr-sdrplay3` OOT module. This function ensures that the sample rate
     is not silently adjusted by the backend.
 
     For implementation details, refer to:
