@@ -3,170 +3,24 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from dataclasses import dataclass
-from typing import Optional, Callable
+from typing import Optional
 from functools import partial
 
-from spectre_core.capture_configs import (
-    CaptureTemplate,
-    CaptureMode,
-    Parameters,
-    Bound,
-    PName,
-    OneOf,
-    get_base_capture_template,
-    get_base_ptemplate,
-    validate_fixed_center_frequency,
-    validate_swept_center_frequency,
-)
-
 from ._receiver_names import ReceiverName
+from ._sdrplay_receiver import (
+    SDRplayReceiver,
+    make_capture_template_fixed_center_frequency,
+    make_capture_template_swept_center_frequency,
+    make_pvalidator_fixed_center_frequency,
+    make_pvalidator_swept_center_frequency,
+)
 from ._rsp1a_gr import swept_center_frequency, fixed_center_frequency
 from ._receiver_names import ReceiverName
 from ._gr import capture
-from .._receiver import Receiver
-from .._specs import Specs
 
 
-from .._receiver import SpecName, Receiver
+from .._receiver import SpecName
 from .._register import register_receiver
-
-
-def _make_pvalidator_fixed_center_frequency(
-    receiver: Receiver,
-) -> Callable[[Parameters], None]:
-    def pvalidator(parameters: Parameters) -> None:
-        validate_fixed_center_frequency(parameters)
-
-    return pvalidator
-
-
-def _make_pvalidator_swept_center_frequency(
-    receiver: Receiver,
-) -> Callable[[Parameters], None]:
-    def pvalidator(parameters: Parameters) -> None:
-        validate_swept_center_frequency(
-            parameters, receiver.get_spec(SpecName.API_RETUNING_LATENCY)
-        )
-
-    return pvalidator
-
-
-def _make_capture_template_fixed_center_frequency(
-    receiver: Receiver,
-) -> CaptureTemplate:
-
-    capture_template = get_base_capture_template(CaptureMode.FIXED_CENTER_FREQUENCY)
-    capture_template.add_ptemplate(get_base_ptemplate(PName.BANDWIDTH))
-    capture_template.add_ptemplate(get_base_ptemplate(PName.IF_GAIN))
-    capture_template.add_ptemplate(get_base_ptemplate(PName.RF_GAIN))
-
-    capture_template.set_defaults(
-        (PName.BATCH_SIZE, 3.0),
-        (PName.CENTER_FREQUENCY, 95800000),
-        (PName.SAMPLE_RATE, 600000),
-        (PName.BANDWIDTH, 600000),
-        (PName.WINDOW_HOP, 512),
-        (PName.WINDOW_SIZE, 1024),
-        (PName.WINDOW_TYPE, "blackman"),
-        (PName.RF_GAIN, -30),
-        (PName.IF_GAIN, -30),
-    )
-
-    capture_template.add_pconstraint(
-        PName.CENTER_FREQUENCY,
-        [
-            Bound(
-                lower_bound=receiver.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
-                upper_bound=receiver.get_spec(SpecName.FREQUENCY_UPPER_BOUND),
-            )
-        ],
-    )
-    capture_template.add_pconstraint(
-        PName.SAMPLE_RATE,
-        [
-            Bound(
-                lower_bound=receiver.get_spec(SpecName.SAMPLE_RATE_LOWER_BOUND),
-                upper_bound=receiver.get_spec(SpecName.SAMPLE_RATE_UPPER_BOUND),
-            )
-        ],
-    )
-    capture_template.add_pconstraint(
-        PName.BANDWIDTH, [OneOf(receiver.get_spec(SpecName.BANDWIDTH_OPTIONS))]
-    )
-    capture_template.add_pconstraint(
-        PName.IF_GAIN,
-        [Bound(upper_bound=receiver.get_spec(SpecName.IF_GAIN_UPPER_BOUND))],
-    )
-    capture_template.add_pconstraint(
-        PName.RF_GAIN,
-        [Bound(upper_bound=receiver.get_spec(SpecName.RF_GAIN_UPPER_BOUND))],
-    )
-    return capture_template
-
-
-def _make_capture_template_swept_center_frequency(
-    receiver: Receiver,
-) -> CaptureTemplate:
-
-    capture_template = get_base_capture_template(CaptureMode.SWEPT_CENTER_FREQUENCY)
-    capture_template.add_ptemplate(get_base_ptemplate(PName.BANDWIDTH))
-    capture_template.add_ptemplate(get_base_ptemplate(PName.IF_GAIN))
-    capture_template.add_ptemplate(get_base_ptemplate(PName.RF_GAIN))
-
-    capture_template.set_defaults(
-        (PName.BATCH_SIZE, 4.0),
-        (PName.MIN_FREQUENCY, 95000000),
-        (PName.MAX_FREQUENCY, 100000000),
-        (PName.SAMPLES_PER_STEP, 80000),
-        (PName.FREQUENCY_STEP, 1536000),
-        (PName.SAMPLE_RATE, 1536000),
-        (PName.BANDWIDTH, 1536000),
-        (PName.WINDOW_HOP, 512),
-        (PName.WINDOW_SIZE, 1024),
-        (PName.WINDOW_TYPE, "blackman"),
-        (PName.RF_GAIN, -30),
-        (PName.IF_GAIN, -30),
-    )
-
-    capture_template.add_pconstraint(
-        PName.MIN_FREQUENCY,
-        [
-            Bound(
-                lower_bound=receiver.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
-                upper_bound=receiver.get_spec(SpecName.FREQUENCY_UPPER_BOUND),
-            )
-        ],
-    )
-    capture_template.add_pconstraint(
-        PName.MAX_FREQUENCY,
-        [
-            Bound(
-                lower_bound=receiver.get_spec(SpecName.FREQUENCY_LOWER_BOUND),
-                upper_bound=receiver.get_spec(SpecName.FREQUENCY_UPPER_BOUND),
-            )
-        ],
-    )
-    capture_template.add_pconstraint(
-        PName.SAMPLE_RATE,
-        [
-            Bound(
-                lower_bound=receiver.get_spec(SpecName.SAMPLE_RATE_LOWER_BOUND),
-                upper_bound=receiver.get_spec(SpecName.SAMPLE_RATE_UPPER_BOUND),
-            )
-        ],
-    )
-    capture_template.add_pconstraint(
-        PName.BANDWIDTH, [OneOf(receiver.get_spec(SpecName.BANDWIDTH_OPTIONS))]
-    )
-    capture_template.add_pconstraint(
-        PName.IF_GAIN,
-        [Bound(upper_bound=receiver.get_spec(SpecName.IF_GAIN_UPPER_BOUND))],
-    )
-    capture_template.add_pconstraint(
-        PName.RF_GAIN,
-        [Bound(upper_bound=receiver.get_spec(SpecName.RF_GAIN_UPPER_BOUND))],
-    )
-    return capture_template
 
 
 @dataclass(frozen=True)
@@ -178,35 +32,36 @@ class _Mode:
 
 
 @register_receiver(ReceiverName.RSP1A)
-class RSP1A(Receiver):
+class RSP1A(SDRplayReceiver):
     """Receiver implementation for the SDRPlay RSP1A (https://www.sdrplay.com/rsp1a/)"""
 
     def __init__(self, name: ReceiverName, mode: Optional[str] = None) -> None:
+        """Initialise an instance of an `RSP1A`."""
         super().__init__(name, mode)
-
-        self.add_spec(SpecName.SAMPLE_RATE_LOWER_BOUND, 200e3)
-        self.add_spec(SpecName.SAMPLE_RATE_UPPER_BOUND, 10e6)
-        self.add_spec(SpecName.FREQUENCY_LOWER_BOUND, 1e3)
-        self.add_spec(SpecName.FREQUENCY_UPPER_BOUND, 2e9)
-        self.add_spec(SpecName.IF_GAIN_UPPER_BOUND, -20)
-        self.add_spec(SpecName.RF_GAIN_UPPER_BOUND, 0)
-        self.add_spec(SpecName.API_RETUNING_LATENCY, 25 * 1e-3)
-        self.add_spec(
-            SpecName.BANDWIDTH_OPTIONS,
-            [200000, 300000, 600000, 1536000, 5000000, 6000000, 7000000, 8000000],
-        )
 
         self.add_mode(
             _Mode.FIXED_CENTER_FREQUENCY,
             partial(capture, top_block_cls=fixed_center_frequency),
-            _make_capture_template_fixed_center_frequency(self),
-            _make_pvalidator_fixed_center_frequency(self),
+            make_capture_template_fixed_center_frequency(self),
+            make_pvalidator_fixed_center_frequency(self),
         )
         self.add_mode(
             _Mode.SWEPT_CENTER_FREQUENCY,
             partial(
                 capture, top_block_cls=swept_center_frequency, max_noutput_items=1024
             ),
-            _make_capture_template_swept_center_frequency(self),
-            _make_pvalidator_swept_center_frequency(self),
+            make_capture_template_swept_center_frequency(self),
+            make_pvalidator_swept_center_frequency(self),
         )
+
+    def get_rf_gains(self, center_frequency: float) -> list[int]:
+        if center_frequency <= 60e6:
+            return [0, -6, -12, -18, -37, -42, -61]
+        elif center_frequency <= 420e6:
+            return [0, -6, -12, -18, -20, -26, -32, -38, -57, -62]
+        elif center_frequency <= 1e9:
+            return [0, -7, -13, -19, -20, -27, -33, -39, -45, -64]
+        elif center_frequency <= 2e9:
+            return [0, -6, -12, -20, -26, -32, -38, -43, -62]
+        else:
+            return []

@@ -17,7 +17,9 @@ class SpecName(Enum):
     :ivar BANDWIDTH_UPPER_BOUND: The upper bound for the bandwidth, in Hz.
     :ivar BANDWIDTH_OPTIONS: The permitted bandwidths for the receiver, in Hz.
     :ivar IF_GAIN_UPPER_BOUND: The upper bound for the intermediate frequency gain, in dB.
+    :ivar IF_GAIN_LOWER_BOUND: The lower bound for the intermediate frequency gain, in dB.
     :ivar RF_GAIN_UPPER_BOUND: The upper bound for the radio frequency gain, in dB.
+    :ivar RF_GAIN_LOWER_BOUND: The lower bound for the radio frequency gain, in dB.
     :ivar GAIN_UPPER_BOUND: The upper bound for the gain, in dB.
     :ivar WIRE_FORMATS: Supported data types transferred over the bus/network.
     :ivar MASTER_CLOCK_RATE_LOWER_BOUND: The lower bound for the SDR reference clock rate, in Hz.
@@ -33,7 +35,9 @@ class SpecName(Enum):
     BANDWIDTH_UPPER_BOUND = "bandwidth_upper_bound"
     BANDWIDTH_OPTIONS = "bandwidth_options"
     IF_GAIN_UPPER_BOUND = "if_gain_upper_bound"
+    IF_GAIN_LOWER_BOUND = "if_gain_lower_bound"
     RF_GAIN_UPPER_BOUND = "rf_gain_upper_bound"
+    RF_GAIN_LOWER_BOUND = "rf_gain_lower_bound"
     GAIN_UPPER_BOUND = "gain_upper_bound"
     WIRE_FORMATS = "wire_formats"
     MASTER_CLOCK_RATE_LOWER_BOUND = "master_clock_rate_lower_bound"
