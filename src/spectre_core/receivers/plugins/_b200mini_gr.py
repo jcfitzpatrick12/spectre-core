@@ -26,7 +26,7 @@ class fixed_center_frequency(spectre_top_block):
 
         # Blocks
         master_clock_rate = f"master_clock_rate={master_clock_rate}"
-        self.uhd_usrp_sourcespecs.get = uhd.usrp_source(
+        self.uhd_usrp_source = uhd.usrp_source(
             ",".join(("", "", master_clock_rate)),
             uhd.stream_args(
                 cpu_format="fc32",

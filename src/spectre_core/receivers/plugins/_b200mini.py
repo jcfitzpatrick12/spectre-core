@@ -60,7 +60,6 @@ def _make_capture_template_fixed_center_frequency(
     capture_template.add_ptemplate(get_base_ptemplate(PName.WIRE_FORMAT))
     capture_template.add_ptemplate(get_base_ptemplate(PName.MASTER_CLOCK_RATE))
 
-    # TODO: Delegate defaults to receiver subclasses. Currently, these are sensible defaults for the b200mini
     capture_template.set_defaults(
         (PName.BATCH_SIZE, 4.0),
         (PName.CENTER_FREQUENCY, 95800000),
