@@ -162,13 +162,14 @@ class Receiver:
         """
         return self._specs.all()
 
-    def start_capture(self, tag: str) -> None:
+    def start_capture(self, tag: str, validate: bool = True) -> None:
         """Start capturing data using the active operating mode.
 
         :param tag: The tag identifying the capture config.
+        :param validate: If True, validate the capture config. Defaults to False.
         :raises ValueError: If no mode is currently set.
         """
-        self.capture_method(tag, self.load_parameters(tag))
+        self.capture_method(tag, self.load_parameters(tag, validate))
 
     def save_parameters(
         self,
