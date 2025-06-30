@@ -145,10 +145,13 @@ class PTemplate(Generic[VT]):
                 )
         return value
 
-    def apply_template(self, value: Optional[Any]) -> Optional[VT]:
+    def apply_template(
+        self, value: Optional[Any], apply_pconstraints: bool = True
+    ) -> Optional[VT]:
         """Cast a value and validate it according to this parameter template.
 
         :param value: The input value.
+        :param apply_pconstraints: If True, apply `PConstraints` to each of the input parameters.
         :raises ValueError: If the value is `None`, no `default` is specified, and the parameter is not nullable.
         :return: The input value type cast and validated according to the parameter template.
         """
@@ -164,7 +167,10 @@ class PTemplate(Generic[VT]):
             else:
                 return None
 
-        return self._constrain(self._cast(value))
+        if apply_pconstraints:
+            return self._constrain(self._cast(value))
+        else:
+            return self._cast(value)
 
     def make_parameter(self, value: Optional[Any] = None) -> Parameter:
         """Create a `Parameter` compliant with this template.

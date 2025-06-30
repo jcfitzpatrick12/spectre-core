@@ -47,19 +47,23 @@ class CaptureTemplate:
             )
         return self._ptemplates[parameter_name]
 
-    def __apply_parameter_template(self, parameter: Parameter) -> None:
+    def __apply_parameter_template(
+        self, parameter: Parameter, apply_pconstraints: bool = True
+    ) -> None:
         """Apply the corresponding parameter template to the input parameter.
 
         As a side effect, the value of the input parameter will be type cast
         according to the template.
         """
         ptemplate = self.get_ptemplate(parameter.name)
-        parameter.value = ptemplate.apply_template(parameter.value)
+        parameter.value = ptemplate.apply_template(parameter.value, apply_pconstraints)
 
-    def __apply_parameter_templates(self, parameters: Parameters) -> None:
+    def __apply_parameter_templates(
+        self, parameters: Parameters, apply_pconstraints: bool = True
+    ) -> None:
         """Apply the corresponding parameter template to each of the input parameters."""
         for parameter in parameters:
-            self.__apply_parameter_template(parameter)
+            self.__apply_parameter_template(parameter, apply_pconstraints)
 
     def __fill_missing_with_defaults(self, parameters: Parameters) -> None:
         """Add default parameters to `parameters` for any missing entries.
@@ -74,7 +78,9 @@ class CaptureTemplate:
                 parameter = ptemplate.make_parameter()
                 parameters.add_parameter(parameter.name, parameter.value)
 
-    def apply_template(self, parameters: Parameters) -> Parameters:
+    def apply_template(
+        self, parameters: Parameters, apply_pconstraints: bool = True
+    ) -> Parameters:
         """Apply the capture template to the input parameters. This involves:
 
         - Adding default parameters if they are missing with respect to this template.
@@ -82,10 +88,11 @@ class CaptureTemplate:
         - Validating the value of each input parameter against any corresponding pconstraints.
 
         :param parameters: The parameters to apply this capture template to.
+        :param apply_pconstraints: If True, apply `PConstraints` to each of the input parameters.
         :return: A `Parameters` instance compliant with this template.
         """
         self.__fill_missing_with_defaults(parameters)
-        self.__apply_parameter_templates(parameters)
+        self.__apply_parameter_templates(parameters, apply_pconstraints)
         return parameters
 
     def __iter__(self) -> Iterator[PTemplate]:

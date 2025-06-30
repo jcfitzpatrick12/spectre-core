@@ -185,8 +185,11 @@ class Receiver:
         :param validate: If True, apply the capture template and pvalidator.
         :raises ValueError: If no mode is currently set.
         """
+        parameters = self.capture_template.apply_template(
+            parameters, apply_pconstraints=validate
+        )
+
         if validate:
-            parameters = self.capture_template.apply_template(parameters)
             self.pvalidator(parameters)
 
         capture_config = CaptureConfig(tag)
