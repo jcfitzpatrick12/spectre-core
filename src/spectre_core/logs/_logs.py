@@ -144,7 +144,7 @@ class Logs:
 
         for log_file in log_files:
 
-            log_start_time, pid, process_type = parse_log_base_file_name(log_file)
+            log_start_time, pid, process_type = parse_log_file_name(log_file)
 
             if self.process_type and process_type != self.process_type:
                 continue
