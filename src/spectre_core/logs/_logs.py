@@ -16,10 +16,10 @@ from spectre_core.config import get_logs_dir_path, TimeFormat
 from ._process_types import ProcessType
 
 
-def parse_log_base_file_name(base_file_name: str) -> Tuple[str, str, str]:
+def parse_log_file_name(file_name: str) -> Tuple[str, str, str]:
     """Parse the base file name of a log into a start time, process ID and process type."""
-    file_name, _ = os.path.splitext(base_file_name)
-    log_start_time, pid, process_type = file_name.split("_")
+    base_file_name, _ = os.path.splitext(file_name)
+    log_start_time, pid, process_type = base_file_name.split("_")
     return log_start_time, pid, process_type
 
 
