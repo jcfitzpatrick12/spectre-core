@@ -17,7 +17,7 @@ from ._process_types import ProcessType
 
 
 def parse_log_file_name(file_name: str) -> Tuple[str, str, str]:
-    """Parse the base file name of a log into a start time, process ID and process type."""
+    """Parse the file name of a log into a start time, process ID and process type."""
     base_file_name, _ = os.path.splitext(file_name)
     log_start_time, pid, process_type = base_file_name.split("_")
     return log_start_time, pid, process_type
