@@ -183,7 +183,7 @@ class Receiver:
         :param tag: The tag identifying the capture config.
         :param parameters: The parameters to save.
         :param force: If True, overwrite existing configuration if it exists.
-        :param validate: If True, apply the capture template and pvalidator.
+        :param validate: If True, validate capture config parameters.
         :raises ValueError: If no mode is currently set.
         """
         parameters = self.capture_template.apply_template(
@@ -202,18 +202,20 @@ class Receiver:
         """Load parameters from a capture config.
 
         :param tag: The tag identifying the capture config.
-        :param validate: If True, apply the capture template and pvalidator.
+        :param validate: If True, validate capture config parameters.
         :raises ValueError: If no mode is currently set.
         :return: The validated parameters stored in the configuration.
         """
         capture_config = CaptureConfig(tag)
 
+        parameters = self.capture_template.apply_template(
+            capture_config.parameters, apply_pconstraints=validate
+        )
+
         if validate:
-            parameters = self.capture_template.apply_template(capture_config.parameters)
             self.pvalidator(parameters)
-            return parameters
-        else:
-            return capture_config.parameters
+
+        return parameters
 
     def add_mode(
         self,
