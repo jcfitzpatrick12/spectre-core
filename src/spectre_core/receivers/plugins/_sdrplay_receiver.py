@@ -160,11 +160,11 @@ def make_capture_template_fixed_center_frequency(
         (PName.CENTER_FREQUENCY, 95800000),
         (PName.SAMPLE_RATE, 500000),
         (PName.BANDWIDTH, 300000),
-        (PName.WINDOW_HOP, 512),
-        (PName.WINDOW_SIZE, 1024),
+        (PName.WINDOW_HOP, 2048),
+        (PName.WINDOW_SIZE, 512),
         (PName.WINDOW_TYPE, "blackman"),
         (PName.RF_GAIN, 0),
-        (PName.IF_GAIN, -30),
+        (PName.IF_GAIN, -30)
     )
 
     capture_template.add_pconstraint(
