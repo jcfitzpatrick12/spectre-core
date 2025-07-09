@@ -89,6 +89,7 @@ class RSPduo(SDRplayReceiver):
         )
 
     def get_rf_gains(self, center_frequency: float) -> list[int]:
+        # Assuming high z is not enabled.
         if center_frequency <= 60e6:
             return [0, -6, -12, -18, -37, -42, -61]
         elif center_frequency <= 420e6:
