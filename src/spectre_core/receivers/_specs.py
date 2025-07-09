@@ -25,6 +25,8 @@ class SpecName(Enum):
     :ivar MASTER_CLOCK_RATE_LOWER_BOUND: The lower bound for the SDR reference clock rate, in Hz.
     :ivar MASTER_CLOCK_RATE_UPPER_BOUND: The upper bound for the SDR reference clock rate, in Hz.
     :ivar API_RETUNING_LATENCY: Estimated delay between issuing a retune command and the actual center frequency update.
+    :ivar LOW_IF_SAMPLE_RATE_CUTOFF: The cutoff sample rate at which the low IF mode is enabled for SDRplay receivers.
+    :ivar LOW_IF_PERMITTED_SAMPLE_RATES: The permitted sample rates when an SDRplay receiver is operating in low if mode.
     """
 
     FREQUENCY_LOWER_BOUND = "frequency_lower_bound"
@@ -43,6 +45,8 @@ class SpecName(Enum):
     MASTER_CLOCK_RATE_LOWER_BOUND = "master_clock_rate_lower_bound"
     MASTER_CLOCK_RATE_UPPER_BOUND = "master_clock_rate_upper_bound"
     API_RETUNING_LATENCY = "api_retuning_latency"
+    LOW_IF_SAMPLE_RATE_CUTOFF = "low_if_sample_rate_cutoff"
+    LOW_IF_PERMITTED_SAMPLE_RATES = "low_if_permitted_sample_rates"
 
 
 class Specs:

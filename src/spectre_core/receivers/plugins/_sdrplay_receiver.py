@@ -24,8 +24,18 @@ from spectre_core.capture_configs import (
 from .._receiver import Receiver, ReceiverName
 from .._specs import SpecName
 
+
+SAMPLE_RATE_LOWER_BOUND = 62.5e3
+SAMPLE_RATE_UPPER_BOUND = 10.66e6
+FREQUENCY_LOWER_BOUND = 1e3
+FREQUENCY_UPPER_BOUND = 2e9
+IF_GAIN_UPPER_BOUND = -20
+IF_GAIN_LOWER_BOUND = -59
+API_RETUNING_LATENCY = 25 * 1e-3
 LOW_IF_SAMPLE_RATE_CUTOFF = 2e6
 LOW_IF_PERMITTED_SAMPLE_RATES = [LOW_IF_SAMPLE_RATE_CUTOFF / (2**i) for i in range(6)]
+# bandwidth == 0 means 'AUTO', i.e. the largest bandwidth compatible with the sample rate
+BANDWIDTH_OPTIONS = [0, 200e3, 300e3, 600e3, 1.536e6, 5e6, 6e6, 7e6, 8e6]
 
 
 class SDRplayReceiver(ABC, Receiver):
@@ -35,19 +45,18 @@ class SDRplayReceiver(ABC, Receiver):
         """Initialise an instance of an `SDRplayReceiver`."""
         super().__init__(name, mode)
 
-        self.add_spec(SpecName.SAMPLE_RATE_LOWER_BOUND, 62.5e3)
-        self.add_spec(SpecName.SAMPLE_RATE_UPPER_BOUND, 10.66e6)
-        self.add_spec(SpecName.FREQUENCY_LOWER_BOUND, 1e3)
-        self.add_spec(SpecName.FREQUENCY_UPPER_BOUND, 2e9)
-        self.add_spec(SpecName.IF_GAIN_UPPER_BOUND, -20)
-        self.add_spec(SpecName.IF_GAIN_LOWER_BOUND, -59)
-        self.add_spec(SpecName.API_RETUNING_LATENCY, 25 * 1e-3)
-
-        # bandwidth == 0 means 'AUTO', i.e. the largest bandwidth compatible with the sample rate
+        self.add_spec(SpecName.SAMPLE_RATE_LOWER_BOUND, SAMPLE_RATE_LOWER_BOUND)
+        self.add_spec(SpecName.SAMPLE_RATE_UPPER_BOUND, SAMPLE_RATE_UPPER_BOUND)
+        self.add_spec(SpecName.FREQUENCY_LOWER_BOUND, FREQUENCY_LOWER_BOUND)
+        self.add_spec(SpecName.FREQUENCY_UPPER_BOUND, FREQUENCY_UPPER_BOUND)
+        self.add_spec(SpecName.IF_GAIN_UPPER_BOUND, IF_GAIN_UPPER_BOUND)
+        self.add_spec(SpecName.IF_GAIN_LOWER_BOUND, IF_GAIN_LOWER_BOUND)
+        self.add_spec(SpecName.API_RETUNING_LATENCY, API_RETUNING_LATENCY)
+        self.add_spec(SpecName.LOW_IF_SAMPLE_RATE_CUTOFF, LOW_IF_SAMPLE_RATE_CUTOFF)
         self.add_spec(
-            SpecName.BANDWIDTH_OPTIONS,
-            [0, 200e3, 300e3, 600e3, 1.536e6, 5e6, 6e6, 7e6, 8e6],
+            SpecName.LOW_IF_PERMITTED_SAMPLE_RATES, LOW_IF_PERMITTED_SAMPLE_RATES
         )
+        self.add_spec(SpecName.BANDWIDTH_OPTIONS, BANDWIDTH_OPTIONS)
 
     @abstractmethod
     def get_rf_gains(self, center_frequency: float) -> list[int]:
@@ -74,7 +83,11 @@ def _validate_rf_gain(rf_gain: int, expected_rf_gains: list[int]):
         )
 
 
-def _validate_low_if_sample_rate(sample_rate: int) -> None:
+def _validate_low_if_sample_rate(
+    sample_rate: int,
+    low_if_sample_rate_cutoff: int,
+    low_if_permitted_sample_rates: list[int],
+) -> None:
     """Validate the sample rate if the receiver is operating in low IF mode.
 
     The minimum physical sampling rate of the SDRplay hardware is 2 MHz. Lower effective rates can be achieved
@@ -84,12 +97,12 @@ def _validate_low_if_sample_rate(sample_rate: int) -> None:
     For implementation details, refer to:
     https://github.com/fventuri/gr-sdrplay3/blob/v3.11.0.9/lib/rsp_impl.cc#L140-L179
     """
-    if sample_rate <= LOW_IF_SAMPLE_RATE_CUTOFF:
-        if sample_rate not in LOW_IF_PERMITTED_SAMPLE_RATES:
+    if sample_rate <= low_if_sample_rate_cutoff:
+        if sample_rate not in low_if_permitted_sample_rates:
             raise ValueError(
-                f"If the requested sample rate is less than or equal to {LOW_IF_SAMPLE_RATE_CUTOFF}, "
+                f"If the requested sample rate is less than or equal to {low_if_sample_rate_cutoff}, "
                 f"the receiver will be operating in low IF mode. "
-                f"So, the sample rate must be exactly one of {LOW_IF_PERMITTED_SAMPLE_RATES}. "
+                f"So, the sample rate must be exactly one of {low_if_permitted_sample_rates}. "
                 f"Got sample rate {sample_rate} Hz"
             )
 
@@ -104,7 +117,11 @@ def make_pvalidator_fixed_center_frequency(
 
         # Validate the sample rate, in the case the receiver will be operating in low if mode.
         sample_rate = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
-        _validate_low_if_sample_rate(sample_rate)
+        _validate_low_if_sample_rate(
+            sample_rate,
+            receiver.get_spec(SpecName.LOW_IF_SAMPLE_RATE_CUTOFF),
+            receiver.get_spec(SpecName.LOW_IF_PERMITTED_SAMPLE_RATES),
+        )
 
         # Validate the rf gain value, which is a function of center frequency.
         rf_gain = cast(int, parameters.get_parameter_value(PName.RF_GAIN))
@@ -128,7 +145,11 @@ def make_pvalidator_swept_center_frequency(
 
         # Validate the sample rate, in the case the receiver will be operating in low if mode.
         sample_rate = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
-        _validate_low_if_sample_rate(sample_rate)
+        _validate_low_if_sample_rate(
+            sample_rate,
+            receiver.get_spec(SpecName.LOW_IF_SAMPLE_RATE_CUTOFF),
+            receiver.get_spec(SpecName.LOW_IF_PERMITTED_SAMPLE_RATES),
+        )
 
         # Validate the rf gain value, which is a function of center frequency.
         rf_gain = cast(int, parameters.get_parameter_value(PName.RF_GAIN))
@@ -164,7 +185,7 @@ def make_capture_template_fixed_center_frequency(
         (PName.WINDOW_SIZE, 512),
         (PName.WINDOW_TYPE, "blackman"),
         (PName.RF_GAIN, 0),
-        (PName.IF_GAIN, -30)
+        (PName.IF_GAIN, -30),
     )
 
     capture_template.add_pconstraint(
