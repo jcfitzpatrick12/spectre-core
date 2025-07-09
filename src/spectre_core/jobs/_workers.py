@@ -115,7 +115,6 @@ def make_worker(
     def _worker_target() -> None:
         if configure_logging:
             configure_root_logger(ProcessType.WORKER)
-        _LOGGER.info(args)
         target(*args)
 
     return Worker(name, _worker_target)
