@@ -52,11 +52,8 @@ class fixed_center_frequency(spectre_top_block):
         )
 
         self.sdrplay3_rspdx = sdrplay3.rspdx(
-            '',
-            stream_args=sdrplay3.stream_args(
-                output_type='fc32',
-                channels_size=1
-            ),
+            "",
+            stream_args=sdrplay3.stream_args(output_type="fc32", channels_size=1),
         )
         self.sdrplay3_rspdx.set_sample_rate(sample_rate)
         self.sdrplay3_rspdx.set_center_freq(center_freq)
@@ -116,11 +113,8 @@ class swept_center_frequency(spectre_top_block):
             min_frequency,
         )
         self.sdrplay3_rspdx = sdrplay3.rspdx(
-            '',
-            stream_args=sdrplay3.stream_args(
-                output_type='fc32',
-                channels_size=1
-            ),
+            "",
+            stream_args=sdrplay3.stream_args(output_type="fc32", channels_size=1),
         )
         self.sdrplay3_rspdx.set_sample_rate(sample_rate)
         self.sdrplay3_rspdx.set_center_freq(min_frequency)
