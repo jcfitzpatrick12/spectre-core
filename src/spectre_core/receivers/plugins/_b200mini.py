@@ -61,16 +61,16 @@ def _make_capture_template_fixed_center_frequency(
     capture_template.add_ptemplate(get_base_ptemplate(PName.MASTER_CLOCK_RATE))
 
     capture_template.set_defaults(
-        (PName.BATCH_SIZE, 4.0),
+        (PName.BATCH_SIZE, 3.0),
         (PName.CENTER_FREQUENCY, 95800000),
-        (PName.SAMPLE_RATE, 2000000),
-        (PName.BANDWIDTH, 2000000),
-        (PName.WINDOW_HOP, 512),
-        (PName.WINDOW_SIZE, 1024),
+        (PName.SAMPLE_RATE, 600e3),
+        (PName.BANDWIDTH, 600e3),
+        (PName.WINDOW_HOP, 2048),
+        (PName.WINDOW_SIZE, 512),
         (PName.WINDOW_TYPE, "blackman"),
         (PName.GAIN, 35),
         (PName.WIRE_FORMAT, "sc16"),
-        (PName.MASTER_CLOCK_RATE, 40e6),
+        (PName.MASTER_CLOCK_RATE, 60e6),
     )
 
     capture_template.add_pconstraint(
@@ -134,21 +134,20 @@ def _make_capture_template_swept_center_frequency(
     capture_template.add_ptemplate(get_base_ptemplate(PName.WIRE_FORMAT))
     capture_template.add_ptemplate(get_base_ptemplate(PName.MASTER_CLOCK_RATE))
 
-    # TODO: Delegate defaults to receiver subclasses. Currently, these are sensible defaults for the b200mini
     capture_template.set_defaults(
-        (PName.BATCH_SIZE, 4.0),
+        (PName.BATCH_SIZE, 3.0),
         (PName.MIN_FREQUENCY, 95000000),
-        (PName.MAX_FREQUENCY, 105000000),
-        (PName.SAMPLES_PER_STEP, 30000),
-        (PName.FREQUENCY_STEP, 2000000),
-        (PName.SAMPLE_RATE, 2000000),
-        (PName.BANDWIDTH, 2000000),
-        (PName.WINDOW_HOP, 512),
+        (PName.MAX_FREQUENCY, 101000000),
+        (PName.SAMPLES_PER_STEP, 60000),
+        (PName.FREQUENCY_STEP, 2e6),
+        (PName.SAMPLE_RATE, 2e6),
+        (PName.BANDWIDTH, 2e6),
+        (PName.WINDOW_HOP, 1024),
         (PName.WINDOW_SIZE, 1024),
         (PName.WINDOW_TYPE, "blackman"),
         (PName.GAIN, 35),
-        (PName.WIRE_FORMAT, "sc16"),
-        (PName.MASTER_CLOCK_RATE, 40e6),
+        (PName.WIRE_FORMAT, "sc12"),
+        (PName.MASTER_CLOCK_RATE, 60e6),
     )
 
     capture_template.add_pconstraint(
