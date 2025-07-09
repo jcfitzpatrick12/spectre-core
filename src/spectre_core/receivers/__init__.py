@@ -9,7 +9,8 @@ from .plugins._signal_generator import SignalGenerator
 from .plugins._rsp1a import RSP1A
 from .plugins._rspduo import RSPduo
 from .plugins._b200mini import B200mini
-
+from .plugins._rspdx import RSPdx
+ 
 from ._receiver import Receiver, ReceiverComponents
 from ._specs import SpecName, Specs
 from ._factory import get_receiver
@@ -24,6 +25,7 @@ __all__ = [
     "SignalGenerator",
     "RSP1A",
     "RSPduo",
+    "RSPdx",
     "B200mini",
     "Custom",
     "get_receiver",
