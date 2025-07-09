@@ -15,13 +15,23 @@ from gnuradio import sdrplay3
 @dataclass(frozen=True)
 class Port:
     """Specifies one of the antenna ports on the RSPduo.
-    
+
     These are easier to type in the CLI tool, than the values we must pass to `gr-sdrplay3`.
     Namely 'Tuner 1 50' ohm and 'Tuner 2 50 ohm'.
     """
 
     TUNER_1 = "tuner_1"
     TUNER_2 = "tuner_2"
+
+
+def _map_port(antenna_port: str | None) -> str:
+    """Maps the CLI-typeable port, to the one used in the constructor for the RSPduo block in the gr-sdrplay3 OOT module."""
+    if antenna_port == Port.TUNER_1:
+        return "Tuner 1 50 ohm"
+    elif antenna_port == Port.TUNER_2:
+        return "Tuner 2 50 ohm"
+    else:
+        raise ValueError(f"{antenna_port} is not a valid antenna port.")
 
 
 class fixed_center_frequency(spectre_top_block):
@@ -35,8 +45,6 @@ class fixed_center_frequency(spectre_top_block):
         rf_gain = parameters.get_parameter_value(PName.RF_GAIN)
         antenna_port = parameters.get_parameter_value(PName.ANTENNA_PORT)
 
-        antenna = "Tuner 1 50 ohm" if antenna_port == Port.TUNER_1 else "Tuner 2 50 ohm"
-
         # Blocks
         self.spectre_batched_file_sink = spectre.batched_file_sink(
             get_batches_dir_path(), tag, batch_size, sample_rate
@@ -44,13 +52,12 @@ class fixed_center_frequency(spectre_top_block):
         self.sdrplay3_rspduo = sdrplay3.rspduo(
             "",
             rspduo_mode="Single Tuner",
-            antenna=antenna,
             stream_args=sdrplay3.stream_args(output_type="fc32", channels_size=1),
         )
         self.sdrplay3_rspduo.set_sample_rate(sample_rate)
         self.sdrplay3_rspduo.set_center_freq(center_freq)
         self.sdrplay3_rspduo.set_bandwidth(bandwidth)
-        self.sdrplay3_rspduo.set_antenna(antenna)
+        self.sdrplay3_rspduo.set_antenna(_map_port(antenna_port))
         self.sdrplay3_rspduo.set_gain_mode(False)
         self.sdrplay3_rspduo.set_gain(if_gain, "IF")
         self.sdrplay3_rspduo.set_gain(rf_gain, "RF")
@@ -85,8 +92,6 @@ class swept_center_frequency(spectre_top_block):
         batch_size = parameters.get_parameter_value(PName.BATCH_SIZE)
         antenna_port = parameters.get_parameter_value(PName.ANTENNA_PORT)
 
-        antenna = "Tuner 1 50 ohm" if antenna_port == Port.TUNER_1 else "Tuner 2 50 ohm"
-
         # Blocks
         self.spectre_sweep_driver = spectre.sweep_driver(
             min_frequency,
@@ -108,13 +113,12 @@ class swept_center_frequency(spectre_top_block):
         self.sdrplay3_rspduo = sdrplay3.rspduo(
             "",
             rspduo_mode="Single Tuner",
-            antenna=antenna,
             stream_args=sdrplay3.stream_args(output_type="fc32", channels_size=1),
         )
         self.sdrplay3_rspduo.set_sample_rate(sample_rate, True)
         self.sdrplay3_rspduo.set_center_freq(min_frequency, True)
         self.sdrplay3_rspduo.set_bandwidth(bandwidth)
-        self.sdrplay3_rspduo.set_antenna(antenna)
+        self.sdrplay3_rspduo.set_antenna(_map_port(antenna_port))
         self.sdrplay3_rspduo.set_gain_mode(False)
         self.sdrplay3_rspduo.set_gain(if_gain, "IF", True)
         self.sdrplay3_rspduo.set_gain(rf_gain, "RF", True)
