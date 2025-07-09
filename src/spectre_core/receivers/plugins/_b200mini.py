@@ -249,7 +249,9 @@ class B200mini(Receiver):
 
         self.add_mode(
             _Mode.SWEPT_CENTER_FREQUENCY,
-            partial(capture, top_block_cls=swept_center_frequency),
+            partial(
+                capture, top_block_cls=swept_center_frequency, max_noutput_items=1024
+            ),
             _make_capture_template_swept_center_frequency(self),
             _make_pvalidator_swept_center_frequency(self),
         )
