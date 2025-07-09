@@ -127,7 +127,7 @@ class swept_center_frequency(spectre_top_block):
         self.sdrplay3_rspduo.set_iq_balance_mode(False)
         self.sdrplay3_rspduo.set_agc_setpoint(-30)
         self.sdrplay3_rspduo.set_rf_notch_filter(False)
-        self.sdrplay3_rspduo.set_dab_notch_filter(True)
+        self.sdrplay3_rspduo.set_dab_notch_filter(False)
         self.sdrplay3_rspduo.set_am_notch_filter(False)
         self.sdrplay3_rspduo.set_biasT(False)
         self.sdrplay3_rspduo.set_stream_tags(True)
