@@ -97,6 +97,8 @@ def _validate_low_if_sample_rate(sample_rate: int) -> None:
 def make_pvalidator_fixed_center_frequency(
     receiver: SDRplayReceiver,
 ) -> Callable[[Parameters], None]:
+    """A general pvalidator for any SDRplay receiver operating at a fixed center frequency."""
+
     def pvalidator(parameters: Parameters) -> None:
         validate_fixed_center_frequency(parameters)
 
@@ -117,6 +119,8 @@ def make_pvalidator_fixed_center_frequency(
 def make_pvalidator_swept_center_frequency(
     receiver: SDRplayReceiver,
 ) -> Callable[[Parameters], None]:
+    """A general pvalidator for any SDRplay receiver operating at a swept center frequency."""
+
     def pvalidator(parameters: Parameters) -> None:
         validate_swept_center_frequency(
             parameters, receiver.get_spec(SpecName.API_RETUNING_LATENCY)
@@ -145,7 +149,7 @@ def make_pvalidator_swept_center_frequency(
 def make_capture_template_fixed_center_frequency(
     receiver: SDRplayReceiver,
 ) -> CaptureTemplate:
-
+    """A general capture template for any SDRplay receiver operating at a fixed center frequency."""
     capture_template = get_base_capture_template(CaptureMode.FIXED_CENTER_FREQUENCY)
     capture_template.add_ptemplate(get_base_ptemplate(PName.BANDWIDTH))
     capture_template.add_ptemplate(get_base_ptemplate(PName.IF_GAIN))
@@ -199,7 +203,7 @@ def make_capture_template_fixed_center_frequency(
 def make_capture_template_swept_center_frequency(
     receiver: Receiver,
 ) -> CaptureTemplate:
-
+    """A general capture template for any SDRplay receiver operating at a swept center frequency."""
     capture_template = get_base_capture_template(CaptureMode.SWEPT_CENTER_FREQUENCY)
     capture_template.add_ptemplate(get_base_ptemplate(PName.BANDWIDTH))
     capture_template.add_ptemplate(get_base_ptemplate(PName.IF_GAIN))
