@@ -41,7 +41,7 @@ class ReceiverComponents(Generic[T]):
         """
         if mode not in self._components:
             raise ModeNotFoundError(
-                f"Mode `{mode}` not found. Expected one of {self._components}"
+                f"Mode `{mode}` not found. Expected one of {self.modes}"
             )
         return self._components[mode]
 
