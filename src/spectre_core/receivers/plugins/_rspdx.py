@@ -68,7 +68,7 @@ class _Mode:
 
 @register_receiver(ReceiverName.RSPDX)
 class RSPdx(SDRplayReceiver):
-    """Receiver implementation for the SDRPlay RSPdux (https://www.sdrplay.com/rspdx/)"""
+    """Receiver implementation for the SDRPlay RSPdx (https://www.sdrplay.com/rspdx/)"""
 
     def __init__(self, name: ReceiverName, mode: Optional[str] = None) -> None:
         """Initialise an instance of an `RSPdx`."""
