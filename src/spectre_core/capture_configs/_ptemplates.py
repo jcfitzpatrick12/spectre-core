@@ -407,6 +407,11 @@ _base_ptemplates: dict[PName, PTemplate] = {
             EnforceSign.positive,
         ],
     ),
+    PName.ANTENNA_PORT: PTemplate(
+        PName.ANTENNA_PORT,
+        str,
+        help="Specifies a particular antenna port on a receiver.",
+    ),
 }
 
 

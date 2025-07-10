@@ -52,3 +52,4 @@ class PName(Enum):
     GAIN = "gain"
     MASTER_CLOCK_RATE = "master_clock_rate"
     WIRE_FORMAT = "wire_format"
+    ANTENNA_PORT = "antenna_port"
