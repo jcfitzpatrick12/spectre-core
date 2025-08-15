@@ -5,8 +5,6 @@
 from math import floor
 from typing import Optional, cast
 
-from scipy.signal import get_window
-
 from ._parameters import Parameters
 from ._pnames import PName
 
@@ -34,11 +32,11 @@ def validate_window(parameters: Parameters) -> None:
             )
         )
 
-    try:
-        _ = get_window(window_type, window_size)
-    except Exception as e:
+    expected_windows = ["hann", "blackman", "boxcar"]
+    if window_type not in expected_windows:
         raise ValueError(
-            (f"An error has occurred while validating the window. " f"Got {str(e)}")
+            f"Unexpected window type: {window_type}. "
+            f"Expected one of {expected_windows}"
         )
 
 

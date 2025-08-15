@@ -9,6 +9,7 @@ import os
 
 from ._paths import (
     get_spectre_data_dir_path,
+    set_spectre_data_dir_path,
     get_batches_dir_path,
     get_configs_dir_path,
     get_logs_dir_path,
@@ -22,6 +23,7 @@ os.makedirs(get_configs_dir_path(), exist_ok=True)
 
 __all__ = [
     "get_spectre_data_dir_path",
+    "set_spectre_data_dir_path",
     "get_batches_dir_path",
     "get_configs_dir_path",
     "get_logs_dir_path",

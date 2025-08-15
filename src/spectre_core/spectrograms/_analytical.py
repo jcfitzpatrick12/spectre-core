@@ -128,7 +128,7 @@ class _AnalyticalFactory:
         )
 
         # Compute time array.
-        sampling_interval = 1 / sample_rate
+        sampling_interval = np.float32(1 / sample_rate)
         times = np.arange(num_spectrums) * window_hop * sampling_interval
 
         # compute the frequency array.
@@ -184,7 +184,7 @@ class _AnalyticalFactory:
 
         # Compute time array
         num_samples_per_sweep = sum(num_samples_per_step)
-        sampling_interval = 1 / samp_rate
+        sampling_interval = np.float32(1 / samp_rate)
         # compute the sample index we are "assigning" to each spectrum
         # and multiply by the sampling interval to get the equivalent physical time
         times = (

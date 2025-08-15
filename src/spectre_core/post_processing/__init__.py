@@ -9,6 +9,17 @@ from .plugins._swept_center_frequency import SweptEventHandler
 
 from ._factory import get_event_handler, get_event_handler_cls_from_tag
 from ._post_processor import start_post_processor
+from ._stfft import (
+    stfft,
+    get_buffer,
+    get_window,
+    get_fftw_obj,
+    get_frequencies,
+    get_times,
+    get_cosine_signal,
+    get_num_spectrums,
+    WindowType,
+)
 
 __all__ = [
     "FixedEventHandler",
@@ -16,4 +27,13 @@ __all__ = [
     "start_post_processor",
     "get_event_handler",
     "get_event_handler_cls_from_tag",
+    "stfft",
+    "get_buffer",
+    "get_window",
+    "get_fftw_obj",
+    "get_times",
+    "get_frequencies",
+    "get_num_spectrums",
+    "get_cosine_signal",
+    "WindowType",
 ]
