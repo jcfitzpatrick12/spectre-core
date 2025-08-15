@@ -16,22 +16,6 @@ from spectre_core.capture_configs import CaptureConfig, PName
 from spectre_core.spectrograms import Spectrogram, join_spectrograms
 
 
-def make_sft_instance(capture_config: CaptureConfig) -> ShortTimeFFT:
-    """Extract window parameters from the input capture config and create an instance
-    of `ShortTimeFFT` from `scipy.signal`.
-
-    :param capture_config: The capture config storing the parameters.
-    :return: An instance of `ShortTimeFFT` consistent with the window parameters
-    in the capture config.
-    """
-    window_type = cast(str, capture_config.get_parameter_value(PName.WINDOW_TYPE))
-    sample_rate = cast(int, capture_config.get_parameter_value(PName.SAMPLE_RATE))
-    window_hop = cast(int, capture_config.get_parameter_value(PName.WINDOW_HOP))
-    window_size = cast(int, capture_config.get_parameter_value(PName.WINDOW_SIZE))
-    window = get_window(window_type, window_size)
-    return ShortTimeFFT(window, window_hop, sample_rate, fft_mode="centered")
-
-
 class BaseEventHandler(ABC, FileSystemEventHandler):
     """An abstract base class for event-driven file post-processing."""
 
@@ -51,6 +35,13 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         # optionally store batched spectrograms as they are created into a cache
         # this can be flushed periodically to file as required.
         self._cached_spectrogram: Optional[Spectrogram] = None
+
+        self._time_range = cast(
+            float, self._capture_config.get_parameter_value(PName.TIME_RANGE) or 0.0
+        )
+        self._watch_extension = cast(
+            str, self._capture_config.get_parameter_value(PName.WATCH_EXTENSION)
+        )
 
     @abstractmethod
     def process(self, absolute_file_path: str) -> None:
@@ -86,10 +77,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
         # Additionally in the case of multiple sessions, the capture workers will create batch files in the same directory concurrently.
         # This method is triggered for all file creation events, so we ensure the batch file tag matches the session tag and early return
         # otherwise. This way, each post processor worker picks up the right files to process.
-        watch_extension = cast(
-            str, self._capture_config.get_parameter_value(PName.WATCH_EXTENSION)
-        )
-        if not absolute_file_path.endswith(f"{self._tag}.{watch_extension}"):
+        if not absolute_file_path.endswith(f"{self._tag}.{self._watch_extension}"):
             return
 
         _LOGGER.info(f"Noticed {absolute_file_path}")
@@ -129,8 +117,7 @@ class BaseEventHandler(ABC, FileSystemEventHandler):
                 [self._cached_spectrogram, spectrogram]
             )
 
-        time_range = self._capture_config.get_parameter_value(PName.TIME_RANGE) or 0.0
-        if self._cached_spectrogram.time_range >= cast(float, time_range):
+        if self._cached_spectrogram.time_range >= self._time_range:
             self._flush_cache()
 
     def _flush_cache(self) -> None:

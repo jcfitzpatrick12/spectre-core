@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import pytest
-from pytest import MonkeyPatch
 import os
 import json
 from tempfile import TemporaryDirectory
@@ -21,6 +20,7 @@ from spectre_core.receivers import (
 )
 from spectre_core.capture_configs import make_base_capture_template, Parameters, PName
 from spectre_core.exceptions import ModeNotFoundError
+from spectre_core.config import set_spectre_data_dir_path
 
 _PLACEHOLDER_TAG = "foobar"
 _SIGNAL_CAPTURE = "signal_capture"
@@ -30,10 +30,10 @@ _SAMPLE_RATE_UPPER_BOUND = 10  # Hz
 
 
 @pytest.fixture
-def spectre_data_dir(monkeypatch: MonkeyPatch):
+def spectre_data_dir_path():
     """Fixture to set up a temporary directory for SPECTRE data."""
     with TemporaryDirectory() as temp_dir:
-        monkeypatch.setenv("SPECTRE_DATA_DIR_PATH", temp_dir)
+        set_spectre_data_dir_path(temp_dir)
         yield temp_dir
 
 
@@ -139,7 +139,9 @@ class TestReceiver:
             # Choose any `SpecName` arbitrarily (the empty receiver doesn't have any at all, so all should raise an error)
             empty_receiver.get_spec(SpecName.MASTER_CLOCK_RATE_UPPER_BOUND)
 
-    def test_save_parameters(self, spectre_data_dir: str, receiver: Receiver) -> None:
+    def test_save_parameters(
+        self, spectre_data_dir_path: str, receiver: Receiver
+    ) -> None:
         """Check that valid parameters may be written to a capture config, and the contents are as expected."""
 
         # Define a tag for the capture config, and some valid parameters to save within it.
@@ -151,7 +153,7 @@ class TestReceiver:
 
         # Check the newly created file exists in the file system.
         expected_abs_file_path = os.path.join(
-            spectre_data_dir, "configs", f"{tag}.json"
+            spectre_data_dir_path, "configs", f"{tag}.json"
         )
         assert os.path.exists(expected_abs_file_path)
 
@@ -165,7 +167,9 @@ class TestReceiver:
             }
             assert actual_contents == expected_contents
 
-    def test_load_parameters(self, spectre_data_dir: str, receiver: Receiver) -> None:
+    def test_load_parameters(
+        self, spectre_data_dir_path: str, receiver: Receiver
+    ) -> None:
         """Check that a capture config can be loaded from file, and the contents are as expected."""
         # Define a tag for the capture config, and some valid parameters to save within it.
         tag = "tmp-tag"
@@ -196,7 +200,7 @@ class TestSDRPlay:
         ]
 
     def test_rsp1a_default_parameters(
-        self, spectre_data_dir: str, inactive_rsp1a: RSP1A
+        self, spectre_data_dir_path: str, inactive_rsp1a: RSP1A
     ) -> None:
         """Check that the default parameters for an RSP1A in each mode pass validation."""
         rsp1a = inactive_rsp1a
@@ -215,7 +219,7 @@ class TestSDRPlay:
         ]
 
     def test_rspduo_default_parameters(
-        self, spectre_data_dir: str, inactive_rspduo: RSPduo
+        self, spectre_data_dir_path: str, inactive_rspduo: RSPduo
     ) -> None:
         """ "Check that the default parameters for an RSPduo in each mode pass validation."""
         rspduo = inactive_rspduo
@@ -234,7 +238,7 @@ class TestSDRPlay:
         ]
 
     def test_rspdx_default_parameters(
-        self, spectre_data_dir: str, inactive_rspdx: RSPdx
+        self, spectre_data_dir_path: str, inactive_rspdx: RSPdx
     ) -> None:
         """ "Check that the default parameters for an RSPdx in each mode pass validation."""
         rspdx = inactive_rspdx

@@ -30,6 +30,27 @@ def get_spectre_data_dir_path() -> str:
     return _SPECTRE_DATA_DIR_PATH
 
 
+def set_spectre_data_dir_path(spectre_data_dir_path: str) -> None:
+    """Set the `SPECTRE_DATA_DIR_PATH` environment variable.
+
+    This will override the present value, if it is already set.
+
+    As a side effect, this function will also create the following directories:
+        - `spectre_data_dir_path`
+        - `spectre_data_dir_path` / batches
+        - `spectre_data_dir_path` / configs
+        - `spectre_data_dir_path` / logs
+    """
+    # Update the environment variable
+    os.environ["SPECTRE_DATA_DIR_PATH"] = spectre_data_dir_path
+
+    # Create the directories, if they do not already exist.
+    os.makedirs(get_spectre_data_dir_path(), exist_ok=True)
+    os.makedirs(get_batches_dir_path(), exist_ok=True)
+    os.makedirs(get_logs_dir_path(), exist_ok=True)
+    os.makedirs(get_configs_dir_path(), exist_ok=True)
+
+
 def _get_date_based_dir_path(
     base_dir: str,
     year: Optional[int] = None,

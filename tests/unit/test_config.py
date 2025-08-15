@@ -4,7 +4,9 @@
 
 import pytest
 import os
+from tempfile import TemporaryDirectory
 from spectre_core.config import (
+    set_spectre_data_dir_path,
     get_batches_dir_path,
     get_logs_dir_path,
     get_configs_dir_path,
@@ -72,3 +74,14 @@ def test_get_logs_dir_path(
 def test_get_configs_dir_path():
     """Check that the configs directory path is created as expected."""
     assert get_configs_dir_path() == os.path.join("/tmp", ".spectre-data", "configs")
+
+
+def test_set_spectre_data_dir_path():
+    """Check that setting a new value of `SPECTRE_DATA_DIR_PATH` overrides the current value,
+    and creates the appropriate directories."""
+    with TemporaryDirectory() as temp_dir:
+        set_spectre_data_dir_path(temp_dir)
+        assert os.path.exists(temp_dir)
+        assert os.path.exists(os.path.join(temp_dir, "batches"))
+        assert os.path.exists(os.path.join(temp_dir, "logs"))
+        assert os.path.exists(os.path.join(temp_dir, "configs"))

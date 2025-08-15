@@ -7,10 +7,11 @@ from logging import getLogger
 _LOGGER = getLogger(__name__)
 
 import time
-from typing import Callable
+from typing import Callable, Optional
 import multiprocessing
 
 from spectre_core.logs import configure_root_logger, ProcessType
+from spectre_core.config import set_spectre_data_dir_path
 from ._duration import Duration
 
 
@@ -98,6 +99,7 @@ def make_worker(
     target: Callable[..., None],
     args: tuple = (),
     configure_logging: bool = True,
+    spectre_data_dir_path: Optional[str] = None,
 ) -> Worker:
     """Create a `Worker` instance to manage a target function in a multiprocessing background daemon process.
 
@@ -109,12 +111,18 @@ def make_worker(
     :param target: The function to be executed by the worker process.
     :param args: Arguments to pass to the target function.
     :param configure_root_logger: If True, configure the root logger to write log events to file. Defaults to True.
+    :param spectre_data_dir_path: If specified, override the `SPECTRE_DATA_DIR_PATH` environment variable to this value in the process
+    managed by the worker.
     :return: A `Worker` instance managing the background process (not started).
     """
 
     def _worker_target() -> None:
         if configure_logging:
             configure_root_logger(ProcessType.WORKER)
+
+        if spectre_data_dir_path is not None:
+            set_spectre_data_dir_path(spectre_data_dir_path)
+
         target(*args)
 
     return Worker(name, _worker_target)
