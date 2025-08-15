@@ -31,7 +31,7 @@ _SAMPLE_RATE_UPPER_BOUND = 10  # Hz
 
 @pytest.fixture
 def spectre_data_dir_path():
-    """Fixture to set up a temporary directory for SPECTRE data."""
+    """Fixture to set up a temporary directory for Spectre filesystem data."""
     with TemporaryDirectory() as temp_dir:
         set_spectre_data_dir_path(temp_dir)
         yield temp_dir

@@ -17,13 +17,13 @@ from spectre_core.config import set_spectre_data_dir_path
 
 @pytest.fixture
 def signal_generator() -> Receiver:
-    """Get a signal generator, with mode not yet set"""
+    """Get a signal generator, with mode not yet set."""
     return get_receiver(ReceiverName.SIGNAL_GENERATOR)
 
 
 @pytest.fixture
 def spectre_data_dir_path():
-    """Fixture to set up a temporary directory for SPECTRE data."""
+    """Fixture to set up a temporary directory for Spectre filesystem data."""
     with TemporaryDirectory() as temp_dir:
         set_spectre_data_dir_path(temp_dir)
         yield temp_dir
@@ -68,7 +68,7 @@ CONSTANT_STAIRCASE_PARAMETERS = {
 
 
 class TestE2E:
-    """Test end-to-end execution of the program, using the signal generator and comparing
+    """Test end-to-end execution of the program using the signal generator, comparing
     the results to analytically derived solutions."""
 
     @pytest.mark.parametrize(
@@ -94,7 +94,7 @@ class TestE2E:
         tag = mode.replace("_", "-")
         signal_generator.save_parameters(tag, make_parameters(parameters), force=True)
 
-        # Use the signal generator receiver to produce some spectrograms.
+        # Use the signal generator to produce some spectrograms.
         post_processing_worker = make_worker(
             "post_processing_worker",
             start_post_processor,
@@ -109,7 +109,7 @@ class TestE2E:
         )
         start_job([post_processing_worker, capture_worker], TOTAL_RUNTIME)
 
-        # Compare each spectrogram produced by the program to the corresponding analytically derived solutions.
+        # Compare each spectrogram to the corresponding analytically derived solutions.
         for batch in Batches(tag, IQStreamBatch):
             if batch.spectrogram_file.exists:
                 spectrogram = batch.read_spectrogram()

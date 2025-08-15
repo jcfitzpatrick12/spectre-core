@@ -102,7 +102,7 @@ class TestSTFFT:
         )
 
     def test_stfft(self) -> None:
-        """Verify STFFT output matches expected results for a simple cosine input signal."""
+        """Check that the stfft of a simple cosine wave matches the analytically derived solution."""
         # Define the cosine wave.
         num_samples = 32
         sample_rate = 8
@@ -125,8 +125,6 @@ class TestSTFFT:
         # Plan, then compute the STFFT.
         fftw_obj = get_fftw_obj(buffer)
         dynamic_spectra = stfft(fftw_obj, buffer, signal, window, window_hop)
-
-        print(dynamic_spectra)
 
         # TODO: Replace this "point-in-time" check, with something more robust and human readable.
         # I'll go through the derivation again, and check against a runtime-computed analytical
