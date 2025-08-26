@@ -36,19 +36,27 @@ class WindowType(Enum):
     BOXCAR = "boxcar"
 
 
-# TODO: Remove dependency on Scipy, by manually computing the windows.
+def _window_general_cosine_asym(
+    window_size: int,
+    coefficients: npt.NDArray[np.float64],
+) -> npt.NDArray[np.float32]:
+    angles = np.linspace(-np.pi, np.pi, window_size + 1)[:-1]
+    window = sum(coef * np.cos(k * angles) for k, coef in enumerate(coefficients))
+    return window.astype(np.float32)
 
 
 def _window_boxcar(window_size: int) -> npt.NDArray[np.float32]:
-    return scipy.signal.get_window("boxcar", window_size)
+    return np.ones(window_size, np.float32)
 
 
 def _window_hann(window_size: int) -> npt.NDArray[np.float32]:
-    return scipy.signal.get_window("hann", window_size)
+    coefficients = np.asarray([0.5, 0.5])
+    return _window_general_cosine_asym(window_size, coefficients)
 
 
 def _window_blackman(window_size: int) -> npt.NDArray[np.float32]:
-    return scipy.signal.get_window("blackman", window_size)
+    coefficients = np.asarray([0.42, 0.50, 0.08])
+    return _window_general_cosine_asym(window_size, coefficients)
 
 
 def get_window(window_type: WindowType, window_size: int) -> npt.NDArray[np.float32]:
@@ -57,8 +65,13 @@ def get_window(window_type: WindowType, window_size: int) -> npt.NDArray[np.floa
     :param window_type: The type of window to generate.
     :param window_size: The number of samples in the window.
     :return: A numpy array containing the window samples.
-    :raises ValueError: If an unknown window type is provided.
+    :raises ValueError: If window_size is negative or an unknown window type is provided.
     """
+    if window_size < 0:
+        raise ValueError(
+            f"window_size must be a non-negative integer, got {window_size}"
+        )
+
     if window_type == WindowType.BOXCAR:
         return _window_boxcar(window_size)
     elif window_type == WindowType.HANN:
