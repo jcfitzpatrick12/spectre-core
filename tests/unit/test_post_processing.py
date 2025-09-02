@@ -26,47 +26,56 @@ from spectre_core.post_processing import (
 
 
 class TestSTFFT:
-    def test_boxcar(self) -> None:
-        """Check that the boxcar window produces expected results, consistent with SciPy."""
-        window_size = 8
-        expected_window = np.array([1, 1, 1, 1, 1, 1, 1, 1], dtype=np.float32)
-        assert is_close(expected_window, get_window(WindowType.BOXCAR, window_size))
+    @pytest.mark.parametrize(
+        ("window_type", "window_size", "expected_result"),
+        [
+            ("boxcar", 2, [1.0, 1.0]),
+            ("boxcar", 4, [1.0, 1.0, 1.0, 1.0]),
+            ("boxcar", 8, [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]),
+            ("hann", 2, [0.0, 1.0]),
+            ("hann", 4, [0.0, 0.5, 1.0, 0.5]),
+            (
+                "hann",
+                8,
+                [
+                    0.0,
+                    0.14644661,
+                    0.5,
+                    0.85355339,
+                    1.0,
+                    0.85355339,
+                    0.5,
+                    0.14644661,
+                ],
+            ),
+            ("blackman", 2, [0.0, 1.0]),
+            ("blackman", 4, [0.0, 0.34, 1.0, 0.34]),
+            (
+                "blackman",
+                8,
+                [
+                    0.0,
+                    0.0664466094,
+                    0.34,
+                    0.773553391,
+                    1.0,
+                    0.773553391,
+                    0.34,
+                    0.0664466094,
+                ],
+            ),
+        ],
+    )
+    def test_windows(
+        self, window_type: str, window_size: int, expected_result: list[float]
+    ) -> None:
 
-    def test_hann(self) -> None:
-        """Check that the hann window produces expected results, consistent with SciPy."""
-        window_size = 8
-        expected_window = np.array(
-            [
-                0.0,
-                0.14644660940672627,
-                0.5,
-                0.8535533905932737,
-                1.0,
-                0.8535533905932737,
-                0.5,
-                0.14644660940672627,
-            ],
-            dtype=np.float32,
-        )
-        assert is_close(expected_window, get_window(WindowType.HANN, window_size))
+        # Cast the window samples (hard-coded from Scipy v1.12.0) to 32-bit floats.
+        expected = np.array(expected_result, dtype=np.float32)
 
-    def test_blackman(self) -> None:
-        """Check that the blackman window produces expected results, consistent with SciPy."""
-        window_size = 8
-        expected_window = np.array(
-            [
-                0.0,
-                0.06644660940672624,
-                0.34,
-                0.7735533905932738,
-                1.0,
-                0.7735533905932738,
-                0.34,
-                0.06644660940672624,
-            ],
-            dtype=np.float32,
-        )
-        assert is_close(expected_window, get_window(WindowType.BLACKMAN, window_size))
+        # Check that our own implementation is consistent with Scipy.
+        actual = get_window(WindowType(window_type), window_size)
+        assert is_close(actual, expected)
 
     def test_compute_times(self) -> None:
         """Check that we assign the correct times to each spectrum."""
