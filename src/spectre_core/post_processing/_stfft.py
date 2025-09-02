@@ -7,7 +7,6 @@ from enum import Enum
 import numpy as np
 import numpy.typing as npt
 from pyfftw import FFTW, empty_aligned
-import scipy
 
 
 def get_cosine_signal(
