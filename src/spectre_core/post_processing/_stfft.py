@@ -65,12 +65,10 @@ def get_window(window_type: WindowType, window_size: int) -> npt.NDArray[np.floa
     :param window_type: The type of window to generate.
     :param window_size: The number of samples in the window.
     :return: A numpy array containing the window samples.
-    :raises ValueError: If window_size is negative or an unknown window type is provided.
+    :raises ValueError: If window_size is less than two or an unknown window type is provided.
     """
-    if window_size < 0:
-        raise ValueError(
-            f"window_size must be a non-negative integer, got {window_size}"
-        )
+    if window_size < 2:
+        raise ValueError(f"The window size cannot be less than 2, got {window_size}")
 
     if window_type == WindowType.BOXCAR:
         return _window_boxcar(window_size)
