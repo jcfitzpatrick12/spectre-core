@@ -13,9 +13,8 @@ def validate_window(parameters: Parameters) -> None:
     """Ensure that the capture config describes a valid window.
 
     :param parameters: The parameters to be validated.
-    :raises ValueError: If the window interval is greater than the batch size.
-    :raises ValueError: If the specified window type cannot be fetched using
-    the SciPy `get_window` function.
+    :raises ValueError: If the window interval is greater than the batch size, or an unexpected window type
+    is specified.
     """
     window_size = cast(int, parameters.get_parameter_value(PName.WINDOW_SIZE))
     sample_rate = cast(int, parameters.get_parameter_value(PName.SAMPLE_RATE))
