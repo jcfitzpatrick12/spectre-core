@@ -8,7 +8,6 @@ _LOGGER = getLogger(__name__)
 
 from typing import Optional, cast
 from abc import ABC, abstractmethod
-from scipy.signal import ShortTimeFFT, get_window
 
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
 
