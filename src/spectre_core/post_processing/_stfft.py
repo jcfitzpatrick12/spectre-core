@@ -138,6 +138,7 @@ def get_num_spectrums(signal_size: int, window_size: int, window_hop: int) -> in
     :param window_hop: The number of samples the window is shifted in each frame.
     :return: The total number of spectrums in the resulting spectrogram, when performing an
     stfft with these values.
+    :raises ValueError: If the window size or hop is less than one sample, or the window size is greater than the signal size.
     """
     if window_size < 1:
         raise ValueError(
