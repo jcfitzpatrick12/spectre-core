@@ -96,7 +96,67 @@ class TestSTFFT:
 
     @pytest.mark.parametrize(
         ("signal_size", "window_size", "window_hop", "expected_num_spectrums"),
-        [(16, 8, 8, 2), (16, 8, 4, 4), (16, 7, 2, 7)],
+        [
+            # Even signal size, even window size, even hop. Window size less than the hop.
+            (8, 4, 2, 4),
+            # Even signal size, even window size, even hop. Window size equal to the hop.
+            (8, 4, 4, 2),
+            # Even signal size, even window size, even hop. Window size greater than the hop.
+            (8, 4, 6, 2),
+            # Even signal size, even window size, odd hop. Window size less than the hop.
+            (8, 4, 3, 3),
+            # Even signal size, even window size, odd hop. Window size more than the hop.
+            (8, 4, 5, 2),
+            # Even signal size, odd window size, even hop. Window size less than the hop.
+            (8, 3, 2, 4),
+            # Even signal size, odd window size, even hop. Window size greater than the hop.
+            (8, 3, 4, 2),
+            # Even signal size, odd window size, odd hop. Window size less than the hop.
+            (8, 5, 3, 2),
+            # Even signal size, odd window size, odd hop. Window size equal to the hop.
+            (8, 5, 5, 2),
+            # Even signal size, odd window size, odd hop. Window size greater than the hop.
+            (8, 3, 5, 2),
+            # Odd signal size, even window size, even hop. Window size less than the hop.
+            (9, 4, 2, 4),
+            # Odd signal size, even window size, even hop. Window size equal to the hop.
+            (9, 4, 4, 2),
+            # Odd signal size, even window size, even hop. Window size greater than the hop.
+            (9, 4, 6, 2),
+            # Odd signal size, even window size, odd hop. Window size less than the hop.
+            (9, 4, 3, 3),
+            # Odd signal size, even window size, odd hop. Window size more than the hop.
+            (9, 4, 5, 2),
+            # Odd signal size, odd window size, even hop. Window size less than the hop.
+            (9, 3, 2, 4),
+            # Odd signal size, odd window size, even hop. Window size greater than the hop.
+            (9, 3, 4, 2),
+            # Odd signal size, odd window size, odd hop. Window size less than the hop.
+            (9, 5, 3, 3),
+            # Odd signal size, odd window size, odd hop. Window size equal to the hop.
+            (9, 5, 5, 2),
+            # Odd signal size, odd window size, odd hop. Window size greater than the hop.
+            (9, 3, 5, 2),
+            # Minimum window size.
+            (8, 1, 4, 2),
+            # Minimum hop size.
+            (8, 3, 1, 7),
+            # Minimum window size and minimum hop size.
+            (8, 1, 1, 8),
+            # Even signal size, maximum window size and hop.
+            (8, 8, 4, 2),
+            # Odd signal size, maximum window size and hop.
+            (9, 9, 4, 2),
+            # Window hop is greater than the signal size.
+            (9, 9, 10, 1),
+            # Window hop is much greater than the signal size.
+            (9, 9, 999, 1),
+            # Old test cases to make sure the new implementation is compatible with v1.1.1
+            # At least, according to those test cases.
+            (16, 8, 8, 2),
+            (16, 8, 4, 4),
+            (16, 7, 2, 7),
+        ],
     )
     def test_num_spectrums(
         self,
@@ -109,6 +169,27 @@ class TestSTFFT:
         assert expected_num_spectrums == get_num_spectrums(
             signal_size, window_size, window_hop
         )
+
+    @pytest.mark.parametrize(
+        ("signal_size", "window_size", "window_hop"),
+        [
+            # The window size cannot be less than one.
+            (8, 0, 4),
+            # The window hop cannot be less than one.
+            (8, 4, 0),
+            # The window must fit within the signal.
+            (8, 9, 4),
+        ],
+    )
+    def test_invalid_num_spectrums(
+        self,
+        signal_size: int,
+        window_size: int,
+        window_hop: int,
+    ) -> None:
+        """Check that passing bad arguments yields a ValueError in various cases."""
+        with pytest.raises(ValueError):
+            get_num_spectrums(signal_size, window_size, window_hop)
 
     def test_stfft(self) -> None:
         """Check that the stfft of a simple cosine wave matches the analytically derived solution."""

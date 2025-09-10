@@ -138,8 +138,24 @@ def get_num_spectrums(signal_size: int, window_size: int, window_hop: int) -> in
     :param window_hop: The number of samples the window is shifted in each frame.
     :return: The total number of spectrums in the resulting spectrogram, when performing an
     stfft with these values.
+    :raises ValueError: If the window size or hop is less than one sample, or the window size is greater than the signal size.
     """
-    return int(np.ceil((signal_size - (window_size // 2 - 1)) / window_hop))
+    if window_size < 1:
+        raise ValueError(
+            f"The window size must be at least one. " f"Got {window_size}."
+        )
+
+    if window_hop < 1:
+        raise ValueError(f"The window hop must be at least one. " f"Got {window_hop}.")
+
+    if window_size > signal_size:
+        raise ValueError(
+            f"The window must fit within the signal. "
+            f"Got window size {window_size}, which is greater "
+            f"than the signal size {signal_size}."
+        )
+
+    return int((signal_size - np.ceil(window_size / 2)) / window_hop) + 1
 
 
 def stfft(
