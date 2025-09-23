@@ -97,7 +97,7 @@ def inactive_rspdx() -> RSPdx:
 
 
 @pytest.fixture()
-def inactive_hackrfone() -> RSPdx:
+def inactive_hackrfone() -> HackRFOne:
     """Return an instance of an RSPdx, with no mode set."""
     return get_receiver(ReceiverName.HACKRFONE)
 
