@@ -40,6 +40,7 @@ def _make_capture_template_fixed_center_frequency(
 ) -> CaptureTemplate:
 
     capture_template = get_base_capture_template(CaptureMode.FIXED_CENTER_FREQUENCY)
+    capture_template.add_ptemplate(get_base_ptemplate(PName.BANDWIDTH))
     capture_template.add_ptemplate(get_base_ptemplate(PName.VGA_GAIN))
     capture_template.add_ptemplate(get_base_ptemplate(PName.LNA_GAIN))
     capture_template.add_ptemplate(get_base_ptemplate(PName.AMP_ON))
@@ -48,7 +49,7 @@ def _make_capture_template_fixed_center_frequency(
         (PName.BATCH_SIZE, 3.0),
         (PName.CENTER_FREQUENCY, 95800000),
         (PName.SAMPLE_RATE, 1e6),
-        (PName.BANDWIDTH, 1e6),
+        (PName.BANDWIDTH, 0),
         (PName.WINDOW_HOP, 2048),
         (PName.WINDOW_SIZE, 512),
         (PName.WINDOW_TYPE, "blackman"),
@@ -56,6 +57,8 @@ def _make_capture_template_fixed_center_frequency(
         (PName.LNA_GAIN, 20),
         (PName.AMP_ON, False),
     )
+    
+    capture_template.enforce_default(PName.BANDWIDTH)
 
     capture_template.add_pconstraint(
         PName.CENTER_FREQUENCY,
@@ -139,8 +142,8 @@ class HackRFOne(Receiver):
         self.add_spec(SpecName.FREQUENCY_UPPER_BOUND, 6e9)
         self.add_spec(SpecName.SAMPLE_RATE_LOWER_BOUND, 1e6)
         self.add_spec(SpecName.SAMPLE_RATE_UPPER_BOUND, 20e6)
-        self.add_spec(SpecName.IF_GAIN_LOWER_BOUND, 0)
-        self.add_spec(SpecName.IF_GAIN_UPPER_BOUND, 40)
+        self.add_spec(SpecName.LNA_GAIN_LOWER_BOUND, 0)
+        self.add_spec(SpecName.LNA_GAIN_UPPER_BOUND, 40)
         self.add_spec(SpecName.VGA_GAIN_LOWER_BOUND, 0)
         self.add_spec(SpecName.VGA_GAIN_UPPER_BOUND, 62)
         self.add_spec(SpecName.AMP_ON, 14)

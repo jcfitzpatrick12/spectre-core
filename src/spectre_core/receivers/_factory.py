@@ -13,6 +13,7 @@ from .plugins._rsp1a import RSP1A
 from .plugins._rspduo import RSPduo
 from .plugins._b200mini import B200mini
 from .plugins._rspdx import RSPdx
+from .plugins._hackrf import HackRFOne
 from .plugins._custom import CustomReceiver
 
 
@@ -44,6 +45,12 @@ def get_receiver(
 def get_receiver(
     receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
 ) -> B200mini: ...
+
+
+@overload
+def get_receiver(
+    receiver_name: Literal[ReceiverName.HACKRFONE], mode: Optional[str] = None
+) -> HackRFOne: ...
 
 
 @overload
