@@ -232,7 +232,7 @@ _base_ptemplates: dict[PName, PTemplate] = {
         PName.BANDWIDTH,
         float,
         help="The frequency range in Hz the signal will occupy without significant attenutation.",
-        pconstraints=[EnforceSign.positive],
+        pconstraints=[EnforceSign.non_negative],
     ),
     PName.SAMPLE_RATE: PTemplate(
         PName.SAMPLE_RATE,
@@ -418,14 +418,12 @@ _base_ptemplates: dict[PName, PTemplate] = {
         help="If true, amplify the signal.",
     ),
     PName.LNA_GAIN: PTemplate(
-        PName.AMP_ON,
-        bool,
-        help="The low-noise amplifier gain, in dB",
+        PName.LNA_GAIN,
+        float,
+        help="The low-noise amplifier gain, in dB.",
     ),
     PName.VGA_GAIN: PTemplate(
-        PName.AMP_ON,
-        bool,
-        help="The variable-gain amplifier gain, in dB",
+        PName.VGA_GAIN, float, help="The variable-gain amplifier gain, in dB."
     ),
 }
 
