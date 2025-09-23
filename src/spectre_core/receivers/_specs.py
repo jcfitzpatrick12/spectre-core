@@ -18,6 +18,10 @@ class SpecName(Enum):
     :ivar BANDWIDTH_OPTIONS: The permitted bandwidths for the receiver, in Hz.
     :ivar IF_GAIN_UPPER_BOUND: The upper bound for the intermediate frequency gain, in dB.
     :ivar IF_GAIN_LOWER_BOUND: The lower bound for the intermediate frequency gain, in dB.
+    :ivar LNA_GAIN_UPPER_BOUND: The upper bound for the low-noise amplifier gain, in dB.
+    :ivar LNA_GAIN_LOWER_BOUND: The lower bound for the low-noise amplifier gain, in dB.
+    :ivar VGA_GAIN_UPPER_BOUND: The upper bound for the variable-gain amplifier gain, in dB.
+    :ivar VGA_GAIN_LOWER_BOUND: The lower bound for the variable-gain amplifier gain, in dB.
     :ivar RF_GAIN_UPPER_BOUND: The upper bound for the radio frequency gain, in dB.
     :ivar RF_GAIN_LOWER_BOUND: The lower bound for the radio frequency gain, in dB.
     :ivar GAIN_UPPER_BOUND: The upper bound for the gain, in dB.
@@ -27,6 +31,7 @@ class SpecName(Enum):
     :ivar API_RETUNING_LATENCY: Estimated delay between issuing a retune command and the actual center frequency update.
     :ivar LOW_IF_SAMPLE_RATE_CUTOFF: The cutoff sample rate at which the low IF mode is enabled for SDRplay receivers.
     :ivar LOW_IF_PERMITTED_SAMPLE_RATES: The permitted sample rates when an SDRplay receiver is operating in low if mode.
+    :ivar AMP_ON: Amount of gain provided by an amplifier, in dB
     """
 
     FREQUENCY_LOWER_BOUND = "frequency_lower_bound"
@@ -47,6 +52,11 @@ class SpecName(Enum):
     API_RETUNING_LATENCY = "api_retuning_latency"
     LOW_IF_SAMPLE_RATE_CUTOFF = "low_if_sample_rate_cutoff"
     LOW_IF_PERMITTED_SAMPLE_RATES = "low_if_permitted_sample_rates"
+    AMP_ON = "amp_on"
+    LNA_GAIN_LOWER_BOUND = "lna_gain_lower_bound"
+    LNA_GAIN_UPPER_BOUND = "lna_gain_upper_bound"
+    VGA_GAIN_LOWER_BOUND = "vga_gain_lower_bound"
+    VGA_GAIN_UPPER_BOUND = "vga_gain_upper_bound"
 
 
 class Specs:

@@ -13,6 +13,7 @@ class ReceiverName(Enum):
     :ivar RSPDX: SDRPlay RSPdx
     :ivar SIGNAL_GENERATOR: A synthetic signal generator.
     :ivar B200MINI: USRP B200mini.
+    :ivar HACKRFONE: Hack RF One
     :ivar CUSTOM: A custom receiver, which starts with no operating modes.
     """
 
@@ -21,4 +22,5 @@ class ReceiverName(Enum):
     RSPDUO = "rspduo"
     RSPDX = "rspdx"
     B200MINI = "b200mini"
+    HACKRFONE = "hackrfone"
     CUSTOM = "custom"

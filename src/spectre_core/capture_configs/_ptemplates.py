@@ -412,6 +412,21 @@ _base_ptemplates: dict[PName, PTemplate] = {
         str,
         help="Specifies a particular antenna port on a receiver.",
     ),
+    PName.AMP_ON: PTemplate(
+        PName.AMP_ON,
+        bool,
+        help="If true, amplify the signal.",
+    ),
+    PName.LNA_GAIN: PTemplate(
+        PName.AMP_ON,
+        bool,
+        help="The low-noise amplifier gain, in dB",
+    ),
+    PName.VGA_GAIN: PTemplate(
+        PName.AMP_ON,
+        bool,
+        help="The variable-gain amplifier gain, in dB",
+    ),
 }
 
 
