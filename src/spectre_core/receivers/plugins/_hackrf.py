@@ -57,7 +57,7 @@ def _make_capture_template_fixed_center_frequency(
         (PName.LNA_GAIN, 20),
         (PName.AMP_ON, False),
     )
-    
+
     capture_template.enforce_default(PName.BANDWIDTH)
 
     capture_template.add_pconstraint(
