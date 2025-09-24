@@ -53,3 +53,6 @@ class PName(Enum):
     MASTER_CLOCK_RATE = "master_clock_rate"
     WIRE_FORMAT = "wire_format"
     ANTENNA_PORT = "antenna_port"
+    AMP_ON = "amp_on"
+    LNA_GAIN = "lna_gain"
+    VGA_GAIN = "vga_gain"

@@ -17,6 +17,7 @@ from spectre_core.receivers import (
     RSP1A,
     RSPduo,
     RSPdx,
+    HackRFOne,
 )
 from spectre_core.capture_configs import make_base_capture_template, Parameters, PName
 from spectre_core.exceptions import ModeNotFoundError
@@ -93,6 +94,12 @@ def inactive_rspduo() -> RSPduo:
 def inactive_rspdx() -> RSPdx:
     """Return an instance of an RSPdx, with no mode set."""
     return get_receiver(ReceiverName.RSPDX)
+
+
+@pytest.fixture()
+def inactive_hackrfone() -> HackRFOne:
+    """Return an instance of an RSPdx, with no mode set."""
+    return get_receiver(ReceiverName.HACKRFONE)
 
 
 class TestReceiver:
@@ -248,3 +255,18 @@ class TestSDRPlay:
 
         rspdx.mode = "swept_center_frequency"
         rspdx.save_parameters(_PLACEHOLDER_TAG, Parameters(), force=True)
+
+
+class TestHackRF:
+    def test_hackrfone_modes(self, inactive_hackrfone: HackRFOne) -> None:
+        """Check that the modes are as expected."""
+        assert inactive_hackrfone.modes == ["fixed_center_frequency"]
+
+    def test_hackrfone_default_parameters(
+        self, spectre_data_dir_path: str, inactive_hackrfone: HackRFOne
+    ) -> None:
+        """ "Check that the default parameters for an RSPduo in each mode pass validation."""
+        hackrfone = inactive_hackrfone
+
+        hackrfone.mode = "fixed_center_frequency"
+        hackrfone.save_parameters(_PLACEHOLDER_TAG, Parameters(), force=True)
