@@ -48,17 +48,15 @@ def _make_capture_template_fixed_center_frequency(
     capture_template.set_defaults(
         (PName.BATCH_SIZE, 3.0),
         (PName.CENTER_FREQUENCY, 95800000),
-        (PName.SAMPLE_RATE, 1e6),
-        (PName.BANDWIDTH, 0),
-        (PName.WINDOW_HOP, 2048),
-        (PName.WINDOW_SIZE, 512),
+        (PName.SAMPLE_RATE, 2e6),
+        (PName.BANDWIDTH, 2e6),
+        (PName.WINDOW_HOP, 1024),
+        (PName.WINDOW_SIZE, 2048),
         (PName.WINDOW_TYPE, "blackman"),
         (PName.VGA_GAIN, 20),
         (PName.LNA_GAIN, 20),
         (PName.AMP_ON, False),
     )
-
-    capture_template.enforce_default(PName.BANDWIDTH)
 
     capture_template.add_pconstraint(
         PName.CENTER_FREQUENCY,
