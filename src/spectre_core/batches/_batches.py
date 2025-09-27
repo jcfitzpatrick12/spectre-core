@@ -174,7 +174,17 @@ class Batches(Generic[T]):
         """
 
         spectrograms = []
-        for batch in self:
+
+        batch_start_datetimes = [datetime.strptime(t, TimeFormat.DATETIME) for t in self.start_times]
+
+        for idx, batch in enumerate(self):
+            this_start = batch_start_datetimes[idx]
+            next_start = batch_start_datetimes[idx + 1] if idx + 1 < len(batch_start_datetimes) else datetime.max
+
+            # skip batches that are completely outside the input time range
+            if end_datetime < this_start or start_datetime >= next_start:
+                continue
+
             # skip batches without spectrogram data
             if not batch.spectrogram_file.exists:
                 continue
