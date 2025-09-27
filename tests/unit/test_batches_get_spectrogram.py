@@ -18,7 +18,7 @@ def batches():
 
 def create_real_spectrogram(start_time):
     """Helper fucntion to create a real Spectorgram object."""
-    times = np.linspace(0, 600, 11) 
+    times = np.linspace(0, 600, 11)
     frequencies = np.array([100, 200])
     dynamic_spectra = np.random.rand(len(frequencies), len(times))
     return Spectrogram(
@@ -51,11 +51,16 @@ def test_get_spectrogram_returns_joined(batches):
         "2025-01-01T10:20:00": batch2,
     }
 
-    with patch('spectre_core.batches._batches.join_spectrograms', side_effect=lambda specs: specs[0]) as mock_join, \
-         patch('spectre_core.batches._batches.time_chop', side_effect=lambda spec, start, end: spec) as mock_time_chop:
+    with patch(
+        "spectre_core.batches._batches.join_spectrograms",
+        side_effect=lambda specs: specs[0],
+    ) as mock_join, patch(
+        "spectre_core.batches._batches.time_chop",
+        side_effect=lambda spec, start, end: spec,
+    ) as mock_time_chop:
         result = batches.get_spectrogram(
             start_datetime=datetime(2025, 1, 1, 10, 0),
-            end_datetime=datetime(2025, 1, 1, 10, 30)
+            end_datetime=datetime(2025, 1, 1, 10, 30),
         )
 
         assert mock_time_chop.call_count == 2
@@ -85,18 +90,35 @@ def test_get_spectrogram_raises_file_not_found(batches):
     "start1, start2, query_start, query_end, expected_calls",
     [
         # Partial overlap with both batches
-        (datetime(2025, 1, 1, 9, 50), datetime(2025, 1, 1, 10, 10),
-         datetime(2025, 1, 1, 10, 0), datetime(2025, 1, 1, 10, 20), 2),
+        (
+            datetime(2025, 1, 1, 9, 50),
+            datetime(2025, 1, 1, 10, 10),
+            datetime(2025, 1, 1, 10, 0),
+            datetime(2025, 1, 1, 10, 20),
+            2,
+        ),
         # No overlap with any batch
-        (datetime(2025, 1, 1, 8, 0), datetime(2025, 1, 1, 9, 0),
-         datetime(2025, 1, 1, 10, 0), datetime(2025, 1, 11, 0), 0),
+        (
+            datetime(2025, 1, 1, 8, 0),
+            datetime(2025, 1, 1, 9, 0),
+            datetime(2025, 1, 1, 10, 0),
+            datetime(2025, 1, 11, 0),
+            0,
+        ),
         # Single batch overlap
-        (datetime(2025, 1, 1, 10, 0), datetime(2025, 1, 1, 10, 10),
-         datetime(2025, 1, 1, 10, 5), datetime(2025, 1, 1, 10, 15), 1),
+        (
+            datetime(2025, 1, 1, 10, 0),
+            datetime(2025, 1, 1, 10, 10),
+            datetime(2025, 1, 1, 10, 5),
+            datetime(2025, 1, 1, 10, 15),
+            1,
+        ),
         # Complete overlap with one batch
-    ]
+    ],
 )
-def test_get_spectrogram_various_overlaps(batches, start1, start2, query_start, query_end, expected_calls):
+def test_get_spectrogram_various_overlaps(
+    batches, start1, start2, query_start, query_end, expected_calls
+):
     """Test various overlap scenarios for get_spectrogram."""
     batch1 = MagicMock(spec=BaseBatch)
     batch2 = MagicMock(spec=BaseBatch)
@@ -112,8 +134,13 @@ def test_get_spectrogram_various_overlaps(batches, start1, start2, query_start, 
         "2025-01-01T10:20:00": batch2,
     }
 
-    with patch('spectre_core.batches._batches.join_spectrograms', side_effect=lambda specs: specs[0]) as mock_join, \
-         patch('spectre_core.batches._batches.time_chop', side_effect=lambda spec, start, end: spec) as mock_time_chop:
+    with patch(
+        "spectre_core.batches._batches.join_spectrograms",
+        side_effect=lambda specs: specs[0],
+    ) as mock_join, patch(
+        "spectre_core.batches._batches.time_chop",
+        side_effect=lambda spec, start, end: spec,
+    ) as mock_time_chop:
         if expected_calls == 0:
             with pytest.raises(FileNotFoundError):
                 batches.get_spectrogram(query_start, query_end)
