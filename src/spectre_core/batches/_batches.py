@@ -172,43 +172,82 @@ class Batches(Generic[T]):
         :raises FileNotFoundError: If no spectrogram data is available within the specified time range.
         :return: A spectrogram created by stitching together data from all matching batches.
         """
+        filtered_batches = self.filter_batches_by_start_time(
+            start_datetime, end_datetime
+        )
+        existing_batches = self.filter_batches_by_existence(filtered_batches)
+        spectrograms = self.load_spectrograms_from_batches(existing_batches)
+        chopped_spectrograms = self.apply_time_chop_to_spectrograms(
+            spectrograms, start_datetime, end_datetime
+        )
+    
+        if not chopped_spectrograms:
+            raise FileNotFoundError(
+                f"No spectrogram data found for the time range {start_datetime} to {end_datetime}."
+            )
+        return join_spectrograms(chopped_spectrograms)
 
-        spectrograms = []
+    def filter_batches_by_start_time(
+        self, start_datetime: datetime, end_datetime: datetime
+    ) -> list[T]:
+        """Filter the available batches to only those that fall within the specified
+        time range.
 
-        batch_start_datetimes = [
+        :param start_datetime: The start time of the range (inclusive).
+        :param end_datetime: The end time of the range (inclusive).
+        :return: A list of `Batch` instances that fall within the specified time range.
+        """
+        filtered_batches = []
+        batch_datetimes = [
             datetime.strptime(t, TimeFormat.DATETIME) for t in self.start_times
         ]
-
         for idx, batch in enumerate(self):
-            this_start = batch_start_datetimes[idx]
+            this_start = batch_datetimes[idx]
             next_start = (
-                batch_start_datetimes[idx + 1]
-                if idx + 1 < len(batch_start_datetimes)
+                batch_datetimes[idx + 1]
+                if idx + 1 < len(batch_datetimes)
                 else datetime.max
             )
 
-            # skip batches that are completely outside the input time range
-            if end_datetime < this_start or start_datetime >= next_start:
-                continue
+            if start_datetime <= next_start and this_start <= end_datetime:
+                filtered_batches.append(batch)
 
-            # skip batches without spectrogram data
-            if not batch.spectrogram_file.exists:
-                continue
+        return filtered_batches
 
-            spectrogram = batch.read_spectrogram()
+    def filter_batches_by_existence(self, batches: list[T]) -> list[T]:
+        """Filter the available batches to only those that have existing spectrogram files.
+
+        :param batches: A list of `Batch` instances to filter.
+        :return: A list of `Batch` instances that have existing spectrogram files.
+        """
+        return [batch for batch in batches if batch.spectrogram_file.exists]
+
+    def load_spectrograms_from_batches(self, batches: list[T]) -> list[Spectrogram]:
+        """Load spectrograms from the provided list of batches assuming their spectrogram files exist.
+
+        :param batches: A list of `Batch` instances to load spectrograms from.
+        :return: A list of `Spectrogram` instances loaded from the provided batches.
+        """
+        return [batch.read_spectrogram() for batch in batches]
+
+    def apply_time_chop_to_spectrograms(
+        self,
+        spectrograms: list[Spectrogram],
+        start_datetime: datetime,
+        end_datetime: datetime,
+    ) -> list[Spectrogram]:
+        """Apply time chopping to a list of spectrograms based on the specified time range.
+
+        :param spectrograms: A list of `Spectrogram` instances to apply time chopping to.
+        :param start_datetime: The start time of the range (inclusive).
+        :param end_datetime: The end time of the range (inclusive).
+        :return: A list of `Spectrogram` instances after applying time chopping.
+        """
+        
+        chopped = []
+        for spectrogram in spectrograms:
             lower_bound = spectrogram.datetimes[0]
             upper_bound = spectrogram.datetimes[-1]
-
-            # Check if the batch overlaps with the input time range
             if start_datetime <= upper_bound and lower_bound <= end_datetime:
-                spectrograms.append(
-                    time_chop(spectrogram, start_datetime, end_datetime)
-                )
-
-        if spectrograms:
-            return join_spectrograms(spectrograms)
-        else:
-            raise FileNotFoundError(
-                f"No spectrogram data found for the time range "
-                f"{start_datetime} to {end_datetime}."
-            )
+                chopped.append(time_chop(spectrogram, start_datetime, end_datetime))
+        return chopped

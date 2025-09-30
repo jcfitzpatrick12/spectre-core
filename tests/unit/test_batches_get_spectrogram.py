@@ -149,3 +149,39 @@ def test_get_spectrogram_various_overlaps(
             assert mock_time_chop.call_count == expected_calls
             mock_join.assert_called_once()
             assert result is not None
+
+def test_filter_batches_by_start_time(batches):
+    batch1 = MagicMock(spec=BaseBatch)
+    batch2 = MagicMock(spec=BaseBatch)
+    batches._batch_map = {
+        "2025-01-01T10:00:00": batch1,
+        "2025-01-01T10:20:00": batch2,
+    }
+    filtered = batches.filter_batches_by_start_time(
+        datetime(2025,1,1,9,50), datetime(2025,1,1,10,15)
+    )
+    assert batch1 in filtered
+    assert batch2 not in filtered
+
+def test_filter_batches_by_existence(batches):
+    batch1 = MagicMock(spec=BaseBatch)
+    batch1.spectrogram_file.exists = True
+    batch2 = MagicMock(spec=BaseBatch)
+    batch2.spectrogram_file.exists = False
+    filtered = batches.filter_batches_by_existence([batch1, batch2])
+    assert batch1 in filtered
+    assert batch2 not in filtered
+
+def test_load_spectrograms_from_batches(batches):
+    batch = MagicMock(spec=BaseBatch)
+    spec = create_real_spectrogram(datetime.now())
+    batch.read_spectrogram.return_value = spec
+    loaded = batches.load_spectrograms_from_batches([batch])
+    assert loaded == [spec]
+
+def test_apply_time_chop_to_spectrograms(batches):
+    spec = create_real_spectrogram(datetime(2025,1,1,10,0))
+    with patch('spectre_core.batches._batches.time_chop', side_effect=lambda s, st, et: s) as mock_time_chop:
+        chopped = batches.apply_time_chop_to_spectrograms([spec], datetime(2025,1,1,10,0), datetime(2025,1,1,10,10))
+        assert chopped == [spec]
+        assert mock_time_chop.called
