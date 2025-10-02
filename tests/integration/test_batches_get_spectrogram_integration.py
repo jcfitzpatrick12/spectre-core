@@ -113,7 +113,6 @@ class TestBatchesGetSpectrogramIntegration:
         assert spectrogram.dynamic_spectra.ndim == 2
         assert spectrogram.times.min() >= 0
 
-
     @pytest.mark.parametrize(
         ("mode", "parameters"),
         [(COSINE_WAVE_MODE, COSINE_WAVE_PARAMETERS)],
@@ -139,6 +138,6 @@ class TestBatchesGetSpectrogramIntegration:
 
         batches = Batches(tag, IQStreamBatch)
         start_range = datetime(3000, 1, 1)
-        end_range   = datetime(3000, 1, 2)
+        end_range = datetime(3000, 1, 2)
         with pytest.raises(FileNotFoundError):
             _ = batches.get_spectrogram(start_range, end_range)

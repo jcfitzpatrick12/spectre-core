@@ -180,7 +180,7 @@ class Batches(Generic[T]):
         chopped_spectrograms = self.apply_time_chop_to_spectrograms(
             spectrograms, start_datetime, end_datetime
         )
-    
+
         if not chopped_spectrograms:
             raise FileNotFoundError(
                 f"No spectrogram data found for the time range {start_datetime} to {end_datetime}."
@@ -243,7 +243,7 @@ class Batches(Generic[T]):
         :param end_datetime: The end time of the range (inclusive).
         :return: A list of `Spectrogram` instances after applying time chopping.
         """
-        
+
         chopped = []
         for spectrogram in spectrograms:
             lower_bound = spectrogram.datetimes[0]

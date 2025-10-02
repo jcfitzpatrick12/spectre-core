@@ -18,7 +18,7 @@ def batches():
 
 def create_real_spectrogram(start_time):
     """Helper fucntion to create a real Spectorgram object."""
-    times = np.linspace(0, 600, 11) 
+    times = np.linspace(0, 600, 11)
     frequencies = np.array([100, 200])
     dynamic_spectra = np.random.rand(len(frequencies), len(times))
     return Spectrogram(
@@ -30,6 +30,7 @@ def create_real_spectrogram(start_time):
         start_datetime=start_time,
     )
 
+
 def test_filter_batches_by_start_time(batches):
     """Test filtering batches by start time."""
     batch1 = MagicMock(spec=BaseBatch)
@@ -39,10 +40,11 @@ def test_filter_batches_by_start_time(batches):
         "2025-01-01T10:20:00": batch2,
     }
     filtered = batches.filter_batches_by_start_time(
-        datetime(2025,1,1,9,50), datetime(2025,1,1,10,15)
+        datetime(2025, 1, 1, 9, 50), datetime(2025, 1, 1, 10, 15)
     )
     assert batch1 in filtered
     assert batch2 not in filtered
+
 
 def test_filter_batches_by_existence(batches):
     """Test filtering batches by existence of spectrogram files."""
@@ -54,6 +56,7 @@ def test_filter_batches_by_existence(batches):
     assert batch1 in filtered
     assert batch2 not in filtered
 
+
 def test_load_spectrograms_from_batches(batches):
     """Test loading spectrograms from batches."""
     batch = MagicMock(spec=BaseBatch)
@@ -62,10 +65,15 @@ def test_load_spectrograms_from_batches(batches):
     loaded = batches.load_spectrograms_from_batches([batch])
     assert loaded == [spec]
 
+
 def test_apply_time_chop_to_spectrograms(batches):
     """Test applying time chop to spectrograms."""
-    spec = create_real_spectrogram(datetime(2025,1,1,10,0))
-    with patch('spectre_core.batches._batches.time_chop', side_effect=lambda s, st, et: s) as mock_time_chop:
-        chopped = batches.apply_time_chop_to_spectrograms([spec], datetime(2025,1,1,10,0), datetime(2025,1,1,10,10))
+    spec = create_real_spectrogram(datetime(2025, 1, 1, 10, 0))
+    with patch(
+        "spectre_core.batches._batches.time_chop", side_effect=lambda s, st, et: s
+    ) as mock_time_chop:
+        chopped = batches.apply_time_chop_to_spectrograms(
+            [spec], datetime(2025, 1, 1, 10, 0), datetime(2025, 1, 1, 10, 10)
+        )
         assert chopped == [spec]
         assert mock_time_chop.called
