@@ -12,21 +12,12 @@ from spectre_core.receivers import ReceiverName, Receiver, get_receiver
 from spectre_core.post_processing import start_post_processor
 from spectre_core.spectrograms import validate_analytically
 from spectre_core.jobs import make_worker, start_job
-from spectre_core.config import set_spectre_data_dir_path
 
 
 @pytest.fixture
 def signal_generator() -> Receiver:
     """Get a signal generator, with mode not yet set."""
     return get_receiver(ReceiverName.SIGNAL_GENERATOR)
-
-
-@pytest.fixture
-def spectre_data_dir_path():
-    """Fixture to set up a temporary directory for Spectre filesystem data."""
-    with TemporaryDirectory() as temp_dir:
-        set_spectre_data_dir_path(temp_dir)
-        yield temp_dir
 
 
 TOTAL_RUNTIME = 10
