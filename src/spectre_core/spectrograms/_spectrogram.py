@@ -530,6 +530,11 @@ def _save_spectrogram(spectrogram: Spectrogram) -> None:
     dt = spectrogram.start_datetime.astype(datetime)
     # making the write path
     batch_parent_path = get_batches_dir_path(year=dt.year, month=dt.month, day=dt.day)
+
+    # Check if the directory exists, create it if it doesn't
+    if not os.path.exists(batch_parent_path):
+        os.makedirs(batch_parent_path)
+
     # file name formatted as a batch file
     file_name = f"{spectrogram.format_start_time()}_{spectrogram.tag}.fits"
     write_path = os.path.join(batch_parent_path, file_name)
