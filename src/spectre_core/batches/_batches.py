@@ -161,6 +161,23 @@ class Batches(Generic[T]):
         elif isinstance(subscript, int):
             return self._get_from_index(subscript)
 
+    def __validate_range(
+        self, start_datetime: datetime, end_datetime: datetime
+    ) -> None:
+        if start_datetime == end_datetime:
+            raise ValueError(
+                f"The start and end time must be different. "
+                f"Got start time {start_datetime}, "
+                f"and end time {end_datetime}"
+            )
+
+        if start_datetime > end_datetime:
+            raise ValueError(
+                f"The start time must be less than the end time. "
+                f"Got start time {start_datetime}, "
+                f"and end time {end_datetime}"
+            )
+
     def get_spectrogram(
         self, start_datetime: datetime, end_datetime: datetime
     ) -> Spectrogram:
@@ -170,29 +187,50 @@ class Batches(Generic[T]):
         :param start_datetime: The start time of the range (inclusive).
         :param end_datetime: The end time of the range (inclusive).
         :raises FileNotFoundError: If no spectrogram data is available within the specified time range.
+        :raise ValueError: If the start time is not less than the end time.
         :return: A spectrogram created by stitching together data from all matching batches.
         """
+        self.__validate_range(start_datetime, end_datetime)
+        batches_in_range = self.get_batches_in_range(start_datetime, end_datetime)
+        spectrograms = [
+            batch.read_spectrogram()
+            for batch in batches_in_range
+            if batch.spectrogram_file.exists
+        ]
 
-        spectrograms = []
-        for batch in self:
-            # skip batches without spectrogram data
-            if not batch.spectrogram_file.exists:
-                continue
-
-            spectrogram = batch.read_spectrogram()
-            lower_bound = spectrogram.datetimes[0]
-            upper_bound = spectrogram.datetimes[-1]
-
-            # Check if the batch overlaps with the input time range
-            if start_datetime <= upper_bound and lower_bound <= end_datetime:
-                spectrograms.append(
-                    time_chop(spectrogram, start_datetime, end_datetime)
-                )
-
-        if spectrograms:
-            return join_spectrograms(spectrograms)
-        else:
+        if not spectrograms:
             raise FileNotFoundError(
-                f"No spectrogram data found for the time range "
-                f"{start_datetime} to {end_datetime}."
+                f"No spectrogram data found for the time range {start_datetime} to {end_datetime}."
             )
+        return time_chop(join_spectrograms(spectrograms), start_datetime, end_datetime)
+
+    def get_batches_in_range(
+        self, start_datetime: datetime, end_datetime: datetime
+    ) -> list[T]:
+        """Get batches that overlap with the input time range.
+
+        The end time of each batch is upper bounded by the start time of the next,
+        since they cannot overlap. The final batch is treated as ending at `datetime.max`
+        since there is no batch after it to provide that upper bound.
+
+        :param start_datetime: The start time of the range (inclusive).
+        :param end_datetime: The end time of the range (inclusive).
+        :raise ValueError: If the start time is not less than the end time.
+        :return: A list of `Batch` instances that fall within the specified time range.
+        """
+        self.__validate_range(start_datetime, end_datetime)
+        filtered_batches = []
+        batch_datetimes = [
+            datetime.strptime(t, TimeFormat.DATETIME) for t in self.start_times
+        ]
+        for idx, batch in enumerate(self):
+            this_start = batch_datetimes[idx]
+            next_start = (
+                batch_datetimes[idx + 1]
+                if idx + 1 < len(batch_datetimes)
+                else datetime.max
+            )
+            if start_datetime < next_start and this_start <= end_datetime:
+                filtered_batches.append(batch)
+
+        return filtered_batches
