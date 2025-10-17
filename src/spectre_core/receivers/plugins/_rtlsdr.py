@@ -66,6 +66,7 @@ class RTLSDR(Receiver):
     def __init__(self, name: ReceiverName, mode: Optional[str] = None) -> None:
         super().__init__(name, mode)
 
+        # TODO: Implement more safeguards according to hardware constraints. See https://github.com/jcfitzpatrick12/spectre/issues/186
         self.add_mode(
             _Mode.FIXED_CENTER_FREQUENCY,
             partial(capture, top_block_cls=fixed_center_frequency),
