@@ -250,7 +250,6 @@ _base_ptemplates: dict[PName, PTemplate] = {
         PName.RF_GAIN,
         float,
         help="The radio frequency gain, in dB. Negative value indicates attenuation.",
-        pconstraints=[EnforceSign.non_positive],
     ),
     PName.GAIN: PTemplate(
         PName.GAIN,

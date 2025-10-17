@@ -5,7 +5,6 @@
 import pytest
 import os
 import json
-from tempfile import TemporaryDirectory
 from time import sleep
 from typing import cast
 
@@ -18,24 +17,16 @@ from spectre_core.receivers import (
     RSPduo,
     RSPdx,
     HackRFOne,
+    RTLSDR,
 )
 from spectre_core.capture_configs import make_base_capture_template, Parameters, PName
 from spectre_core.exceptions import ModeNotFoundError
-from spectre_core.config import set_spectre_data_dir_path
 
 _PLACEHOLDER_TAG = "foobar"
 _SIGNAL_CAPTURE = "signal_capture"
 _SAMPLE_RATE = 5  # Hz
 _SAMPLE_RATE_LOWER_BOUND = 1  # Hz
 _SAMPLE_RATE_UPPER_BOUND = 10  # Hz
-
-
-@pytest.fixture
-def spectre_data_dir_path():
-    """Fixture to set up a temporary directory for Spectre filesystem data."""
-    with TemporaryDirectory() as temp_dir:
-        set_spectre_data_dir_path(temp_dir)
-        yield temp_dir
 
 
 @pytest.fixture()
@@ -98,8 +89,14 @@ def inactive_rspdx() -> RSPdx:
 
 @pytest.fixture()
 def inactive_hackrfone() -> HackRFOne:
-    """Return an instance of an RSPdx, with no mode set."""
+    """Return an instance of an Hack RF One, with no mode set."""
     return get_receiver(ReceiverName.HACKRFONE)
+
+
+@pytest.fixture()
+def inactive_rtlsdr() -> RTLSDR:
+    """Return an instance of an RTLSDR, with no mode set."""
+    return get_receiver(ReceiverName.RTLSDR)
 
 
 class TestReceiver:
@@ -270,3 +267,18 @@ class TestHackRF:
 
         hackrfone.mode = "fixed_center_frequency"
         hackrfone.save_parameters(_PLACEHOLDER_TAG, Parameters(), force=True)
+
+
+class TestRTLSDR:
+    def test_rtlsdr_modes(self, inactive_rtlsdr: RTLSDR) -> None:
+        """Check that the modes are as expected."""
+        assert inactive_rtlsdr.modes == ["fixed_center_frequency"]
+
+    def test_rtlsdr_default_parameters(
+        self, spectre_data_dir_path: str, inactive_rtlsdr: RTLSDR
+    ) -> None:
+        """ "Check that the default parameters for an RSPduo in each mode pass validation."""
+        rtlsdr = inactive_rtlsdr
+
+        rtlsdr.mode = "fixed_center_frequency"
+        rtlsdr.save_parameters(_PLACEHOLDER_TAG, Parameters(), force=True)
