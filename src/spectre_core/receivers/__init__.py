@@ -11,6 +11,7 @@ from .plugins._rspduo import RSPduo
 from .plugins._b200mini import B200mini
 from .plugins._rspdx import RSPdx
 from .plugins._hackrf import HackRFOne
+from .plugins._rtlsdr import RTLSDR
 
 from ._receiver import Receiver, ReceiverComponents
 from ._specs import SpecName, Specs
@@ -29,6 +30,7 @@ __all__ = [
     "RSPdx",
     "B200mini",
     "HackRFOne",
+    "RTLSDR",
     "Custom",
     "get_receiver",
     "get_registered_receivers",

@@ -11,7 +11,7 @@ from spectre_core.capture_configs import (
     CaptureMode,
     Parameters,
     PName,
-    validate_fixed_center_frequency,
+    validate_window,
     get_base_capture_template,
     get_base_ptemplate,
 )
@@ -27,7 +27,7 @@ def _make_pvalidator_fixed_center_frequency(
     receiver: Receiver,
 ) -> Callable[[Parameters], None]:
     def pvalidator(parameters: Parameters) -> None:
-        validate_fixed_center_frequency(parameters)
+        validate_window(parameters)
 
     return pvalidator
 
