@@ -5,7 +5,6 @@
 import pytest
 import os
 import json
-from tempfile import TemporaryDirectory
 from time import sleep
 from typing import cast
 
@@ -21,21 +20,12 @@ from spectre_core.receivers import (
 )
 from spectre_core.capture_configs import make_base_capture_template, Parameters, PName
 from spectre_core.exceptions import ModeNotFoundError
-from spectre_core.config import set_spectre_data_dir_path
 
 _PLACEHOLDER_TAG = "foobar"
 _SIGNAL_CAPTURE = "signal_capture"
 _SAMPLE_RATE = 5  # Hz
 _SAMPLE_RATE_LOWER_BOUND = 1  # Hz
 _SAMPLE_RATE_UPPER_BOUND = 10  # Hz
-
-
-@pytest.fixture
-def spectre_data_dir_path():
-    """Fixture to set up a temporary directory for Spectre filesystem data."""
-    with TemporaryDirectory() as temp_dir:
-        set_spectre_data_dir_path(temp_dir)
-        yield temp_dir
 
 
 @pytest.fixture()

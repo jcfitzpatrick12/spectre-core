@@ -15,6 +15,7 @@ from .plugins._b200mini import B200mini
 from .plugins._rspdx import RSPdx
 from .plugins._hackrf import HackRFOne
 from .plugins._custom import CustomReceiver
+from .plugins._rtlsdr import RTLSDR
 
 
 @overload
@@ -51,6 +52,12 @@ def get_receiver(
 def get_receiver(
     receiver_name: Literal[ReceiverName.HACKRFONE], mode: Optional[str] = None
 ) -> HackRFOne: ...
+
+
+@overload
+def get_receiver(
+    receiver_name: Literal[ReceiverName.RTLSDR], mode: Optional[str] = None
+) -> RTLSDR: ...
 
 
 @overload
