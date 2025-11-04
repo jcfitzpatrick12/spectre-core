@@ -2,19 +2,18 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Optional, cast
-from warnings import warn
-from datetime import datetime
-from dataclasses import dataclass
-from enum import Enum
+import typing
+import warnings
+import datetime
+import dataclasses
+import enum
 import os
 
 import numpy as np
 import numpy.typing as npt
-from astropy.io import fits
+import astropy.io.fits
 
-from spectre_core.capture_configs import CaptureConfig, PName
-from spectre_core.config import get_batches_dir_path, TimeFormat
+import spectre_core.config
 from ._array_operations import (
     find_closest_index,
     normalise_peak_intensity,
@@ -24,7 +23,7 @@ from ._array_operations import (
 )
 
 
-class SpectrumUnit(Enum):
+class SpectrumUnit(enum.Enum):
     """A defined unit for dynamic spectra values.
 
     :ivar AMPLITUDE: Formal definition TBC.
@@ -37,7 +36,7 @@ class SpectrumUnit(Enum):
     DIGITS = "digits"
 
 
-@dataclass
+@dataclasses.dataclass
 class FrequencyCut:
     """A cut of a dynamic spectra, at a particular instant of time. Equivalently, some spectrum in
     the spectrogram.
@@ -49,13 +48,13 @@ class FrequencyCut:
     :ivar spectrum_unit: The unit of each spectrum value.
     """
 
-    time: float | datetime
+    time: float | datetime.datetime
     frequencies: npt.NDArray[np.float32]
     cut: npt.NDArray[np.float32]
     spectrum_unit: SpectrumUnit
 
 
-@dataclass
+@dataclasses.dataclass
 class TimeCut:
     """A cut of a dynamic spectra, at some fixed frequency. Equivalently, a time series of
     some spectral component in the spectrogram.
@@ -73,7 +72,7 @@ class TimeCut:
     spectrum_unit: SpectrumUnit
 
 
-class TimeType(Enum):
+class TimeType(enum.Enum):
     """The type of time we can assign to each spectrum in the dynamic spectra.
 
     :ivar RELATIVE: The elapsed time from the first spectrum, in seconds.
@@ -95,9 +94,8 @@ class Spectrogram:
         dynamic_spectra: npt.NDArray[np.float32],
         times: npt.NDArray[np.float32],
         frequencies: npt.NDArray[np.float32],
-        tag: str,
         spectrum_unit: SpectrumUnit,
-        start_datetime: Optional[datetime | np.datetime64] = None,
+        start_datetime: typing.Optional[datetime.datetime | np.datetime64] = None,
     ) -> None:
         """Initialise a Spectrogram instance.
 
@@ -118,7 +116,6 @@ class Spectrogram:
         self._times = times
 
         self._frequencies = frequencies
-        self._tag = tag
         self._spectrum_unit = spectrum_unit
         self._start_datetime = (
             np.datetime64(start_datetime) if start_datetime is not None else None
@@ -128,8 +125,8 @@ class Spectrogram:
         self._start_background_index = 0
         self._end_background_index = self.num_times
         # the background interval can be set after instantiation
-        self._start_background: Optional[str] = None
-        self._end_background: Optional[str] = None
+        self._start_background: typing.Optional[str] = None
+        self._end_background: typing.Optional[str] = None
 
         # finally check that the spectrogram arrays are matching in shape
         self._check_shapes()
@@ -204,11 +201,6 @@ class Spectrogram:
         return compute_range(self._frequencies)
 
     @property
-    def tag(self) -> str:
-        """The tag identifier for the spectrogram"""
-        return self._tag
-
-    @property
     def start_datetime_is_set(self) -> bool:
         """Indicates whether the start datetime for the spectrogram has been set."""
         return self._start_datetime is not None
@@ -238,7 +230,7 @@ class Spectrogram:
         return self._spectrum_unit
 
     @property
-    def start_background(self) -> Optional[str]:
+    def start_background(self) -> typing.Optional[str]:
         """The start of the background interval.
 
         Returns a string-formatted datetime up to seconds precision, or None
@@ -247,7 +239,7 @@ class Spectrogram:
         return self._start_background
 
     @property
-    def end_background(self) -> Optional[str]:
+    def end_background(self) -> typing.Optional[str]:
         """The end of the background interval.
 
         Returns a string-formatted datetime up to seconds precision, or None
@@ -307,8 +299,8 @@ class Spectrogram:
 
         :return: A string representation of the `start_datetime`, up to seconds precision.
         """
-        dt = self.start_datetime.astype(datetime)
-        return datetime.strftime(dt, TimeFormat.DATETIME)
+        dt = self.start_datetime.astype(datetime.datetime)
+        return datetime.datetime.strftime(dt, spectre_core.config.TimeFormat.DATETIME)
 
     def set_background(self, start_background: str, end_background: str) -> None:
         """Set the background interval for computing the background spectrum, and doing
@@ -329,10 +321,14 @@ class Spectrogram:
         self, start_background: str, end_background: str
     ) -> None:
         start_background_datetime = np.datetime64(
-            datetime.strptime(start_background, TimeFormat.DATETIME)
+            datetime.datetime.strptime(
+                start_background, spectre_core.config.TimeFormat.DATETIME
+            )
         )
         end_background_datetime = np.datetime64(
-            datetime.strptime(end_background, TimeFormat.DATETIME)
+            datetime.datetime.strptime(
+                end_background, spectre_core.config.TimeFormat.DATETIME
+            )
         )
         self._start_background_index = find_closest_index(
             start_background_datetime, self.datetimes, enforce_strict_bounds=True
@@ -360,10 +356,6 @@ class Spectrogram:
             raise ValueError(
                 f"Mismatch in number of time bins: Expected {self.num_times}, but got {dynamic_spectra_shape[1]}"
             )
-
-    def save(self) -> None:
-        """Write the spectrogram and its associated metadata to a batch file in the FITS format."""
-        _save_spectrogram(self)
 
     def integrate_over_frequency(
         self, correct_background: bool = False, peak_normalise: bool = False
@@ -408,7 +400,9 @@ class Spectrogram:
 
         if isinstance(at_time, str):
             _at_datetime = np.datetime64(
-                datetime.strptime(at_time, TimeFormat.DATETIME)
+                datetime.datetime.strptime(
+                    at_time, spectre_core.config.TimeFormat.DATETIME
+                )
             )
             index_of_cut = find_closest_index(
                 _at_datetime, self.datetimes, enforce_strict_bounds=True
@@ -436,7 +430,7 @@ class Spectrogram:
 
         if dBb:
             if peak_normalise:
-                warn(
+                warnings.warn(
                     "Ignoring frequency cut normalisation, since dBb units have been specified"
                 )
         else:
@@ -490,7 +484,7 @@ class Spectrogram:
         # Warn if dBb is used with background correction or peak normalisation
         if dBb:
             if correct_background or peak_normalise:
-                warn(
+                warnings.warn(
                     "Ignoring time cut normalisation, since dBb units have been specified"
                 )
         else:
@@ -514,156 +508,118 @@ class Spectrogram:
                 f"expected one of 'datetimes' or 'seconds'"
             )
 
+    def save(
+        self,
+        tag: str,
+        origin: str,
+        instrument: str,
+        telescope: str,
+        object: str,
+        obs_alt: float,
+        obs_lat: float,
+        obs_lon: float,
+    ) -> None:
+        """Write the spectrogram and its associated metadata to a batch file in the FITS format."""
+        # Create the primary HDU.
+        primary_hdu = astropy.io.fits.PrimaryHDU(self.dynamic_spectra)
 
-def _seconds_of_day(dt: datetime) -> float:
-    start_of_day = datetime(dt.year, dt.month, dt.day)
-    return (dt - start_of_day).total_seconds()
+        primary_hdu.header.set("SIMPLE", True)
+        primary_hdu.header.set("BITPIX", -32)
+        primary_hdu.header.set("NAXIS", 2)
+        primary_hdu.header.set("NAXIS1", self.num_times)
+        primary_hdu.header.set("NAXIS2", self.num_frequencies)
+        primary_hdu.header.set("EXTEND", True)
 
-
-# Function to create a FITS file with the specified structure
-def _save_spectrogram(spectrogram: Spectrogram) -> None:
-    """Save the input spectrogram and associated metadata to a fits file. Some metadata
-    will be fetched from the corresponding capture config.
-
-    :param spectrogram: The spectrogram containing the data to be saved.
-    """
-    dt = spectrogram.start_datetime.astype(datetime)
-    # making the write path
-    batch_parent_path = get_batches_dir_path(year=dt.year, month=dt.month, day=dt.day)
-
-    # Check if the directory exists, create it if it doesn't
-    if not os.path.exists(batch_parent_path):
-        os.makedirs(batch_parent_path)
-
-    # file name formatted as a batch file
-    file_name = f"{spectrogram.format_start_time()}_{spectrogram.tag}.fits"
-    write_path = os.path.join(batch_parent_path, file_name)
-
-    # get optional metadata from the capture config
-    capture_config = CaptureConfig(spectrogram.tag)
-    ORIGIN = cast(str, capture_config.get_parameter_value(PName.ORIGIN))
-    INSTRUME = cast(str, capture_config.get_parameter_value(PName.INSTRUMENT))
-    TELESCOP = cast(str, capture_config.get_parameter_value(PName.TELESCOPE))
-    OBJECT = cast(str, capture_config.get_parameter_value(PName.OBJECT))
-    OBS_ALT = cast(float, capture_config.get_parameter_value(PName.OBS_ALT))
-    OBS_LAT = cast(float, capture_config.get_parameter_value(PName.OBS_LAT))
-    OBS_LON = cast(float, capture_config.get_parameter_value(PName.OBS_LON))
-
-    # Primary HDU with data
-    primary_data = spectrogram.dynamic_spectra.astype(dtype=np.float32)
-    primary_hdu = fits.PrimaryHDU(primary_data)
-
-    primary_hdu.header.set("SIMPLE", True, "file does conform to FITS standard")
-    primary_hdu.header.set("BITPIX", -32, "number of bits per data pixel")
-    primary_hdu.header.set("NAXIS", 2, "number of data axes")
-    primary_hdu.header.set(
-        "NAXIS1", spectrogram.dynamic_spectra.shape[1], "length of data axis 1"
-    )
-    primary_hdu.header.set(
-        "NAXIS2", spectrogram.dynamic_spectra.shape[0], "length of data axis 2"
-    )
-    primary_hdu.header.set("EXTEND", True, "FITS dataset may contain extensions")
-
-    # Add comments
-    comments = [
-        "FITS (Flexible Image Transport System) format defined in Astronomy and",
-        "Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.",
-        "Contact the NASA Science Office of Standards and Technology for the",
-        "FITS Definition document #100 and other FITS information.",
-    ]
-
-    # The comments section remains unchanged since add_comment is the correct approach
-    for comment in comments:
+        comment = (
+            "FITS (Flexible Image Transport System) format defined in Astronomy and Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365. Contact the NASA Science Office of Standards and Technology for the FITS Definition document #100 and other FITS information."
+            ""
+        )
         primary_hdu.header.add_comment(comment)
 
-    start_datetime = cast(datetime, spectrogram.datetimes[0].astype(datetime))
-    start_date = start_datetime.strftime("%Y-%m-%d")
-    start_time = start_datetime.strftime("%H:%M:%S.%f")
+        start_datetime = typing.cast(
+            datetime.datetime, self.datetimes[0].astype(datetime.datetime)
+        )
+        start_date = start_datetime.strftime("%Y-%m-%d")
+        start_time = start_datetime.strftime("%H:%M:%S.%f")
 
-    end_datetime = cast(datetime, spectrogram.datetimes[-1].astype(datetime))
-    end_date = end_datetime.strftime("%Y-%m-%d")
-    end_time = end_datetime.strftime("%H:%M:%S.%f")
+        end_datetime = typing.cast(
+            datetime.datetime, self.datetimes[-1].astype(datetime.datetime)
+        )
+        end_date = end_datetime.strftime("%Y-%m-%d")
+        end_time = end_datetime.strftime("%H:%M:%S.%f")
 
-    primary_hdu.header.set("DATE", start_date, "time of observation")
-    primary_hdu.header.set(
-        "CONTENT", f"{start_date} dynamic spectrogram", "title of image"
-    )
-    primary_hdu.header.set("ORIGIN", f"{ORIGIN}")
-    primary_hdu.header.set("TELESCOP", f"{TELESCOP}", "type of instrument")
-    primary_hdu.header.set("INSTRUME", f"{INSTRUME}")
-    primary_hdu.header.set("OBJECT", f"{OBJECT}", "object description")
+        primary_hdu.header.set("DATE", start_date)
+        primary_hdu.header.set("CONTENT", f"{start_date} dynamic spectrogram")
+        primary_hdu.header.set("ORIGIN", f"{origin}")
+        primary_hdu.header.set("TELESCOP", f"{telescope}")
+        primary_hdu.header.set("INSTRUME", f"{instrument}")
+        primary_hdu.header.set("OBJECT", f"{object}")
 
-    primary_hdu.header.set("DATE-OBS", f"{start_date}", "date observation starts")
-    primary_hdu.header.set("TIME-OBS", f"{start_time}", "time observation starts")
-    primary_hdu.header.set("DATE-END", f"{end_date}", "date observation ends")
-    primary_hdu.header.set("TIME-END", f"{end_time}", "time observation ends")
+        primary_hdu.header.set("DATE-OBS", f"{start_date}")
+        primary_hdu.header.set("TIME-OBS", f"{start_time}")
+        primary_hdu.header.set("DATE-END", f"{end_date}")
+        primary_hdu.header.set("TIME-END", f"{end_time}")
 
-    primary_hdu.header.set("BZERO", 0, "scaling offset")
-    primary_hdu.header.set("BSCALE", 1, "scaling factor")
-    primary_hdu.header.set(
-        "BUNIT", f"{spectrogram.spectrum_unit.value}", "z-axis title"
-    )
+        primary_hdu.header.set("BZERO", 0)
+        primary_hdu.header.set("BSCALE", 1)
+        primary_hdu.header.set("BUNIT", f"{self.spectrum_unit.value}")
 
-    primary_hdu.header.set(
-        "DATAMIN", np.nanmin(spectrogram.dynamic_spectra), "minimum element in image"
-    )
-    primary_hdu.header.set(
-        "DATAMAX", np.nanmax(spectrogram.dynamic_spectra), "maximum element in image"
-    )
+        primary_hdu.header.set("DATAMIN", np.nanmin(self.dynamic_spectra))
+        primary_hdu.header.set("DATAMAX", np.nanmax(self.dynamic_spectra))
 
-    primary_hdu.header.set(
-        "CRVAL1",
-        f"{_seconds_of_day( start_datetime)}",
-        "value on axis 1 at reference pixel [sec of day]",
-    )
-    primary_hdu.header.set("CRPIX1", 0, "reference pixel of axis 1")
-    primary_hdu.header.set("CTYPE1", "TIME [UT]", "title of axis 1")
-    primary_hdu.header.set(
-        "CDELT1",
-        spectrogram.time_resolution,
-        "step between first and second element in x-axis",
-    )
+        primary_hdu.header.set("CRVAL1", f"{_seconds_of_day(start_datetime)}")
+        primary_hdu.header.set("CRPIX1", 0)
+        primary_hdu.header.set("CTYPE1", "TIME [UT]")
+        primary_hdu.header.set("CDELT1", self.time_resolution)
 
-    primary_hdu.header.set("CRVAL2", 0, "value on axis 2 at reference pixel")
-    primary_hdu.header.set("CRPIX2", 0, "reference pixel of axis 2")
-    primary_hdu.header.set("CTYPE2", "Frequency [Hz]", "title of axis 2")
-    primary_hdu.header.set(
-        "CDELT2",
-        spectrogram.frequency_resolution,
-        "step between first and second element in axis",
-    )
+        primary_hdu.header.set("CRVAL2", 0)
+        primary_hdu.header.set("CRPIX2", 0)
+        primary_hdu.header.set("CTYPE2", "Frequency [MHz]")
+        primary_hdu.header.set("CDELT2", self.frequency_resolution)
 
-    primary_hdu.header.set("OBS_LAT", f"{OBS_LAT}", "observatory latitude in degree")
-    primary_hdu.header.set("OBS_LAC", "N", "observatory latitude code {N,S}")
-    primary_hdu.header.set("OBS_LON", f"{OBS_LON}", "observatory longitude in degree")
-    primary_hdu.header.set("OBS_LOC", "W", "observatory longitude code {E,W}")
-    primary_hdu.header.set("OBS_ALT", f"{OBS_ALT}", "observatory altitude in meter asl")
+        primary_hdu.header.set("OBS_LAT", f"{obs_lat}")
+        primary_hdu.header.set("OBS_LAC", "N")
+        primary_hdu.header.set("OBS_LON", f"{obs_lon}")
+        primary_hdu.header.set("OBS_LOC", "W")
+        primary_hdu.header.set("OBS_ALT", f"{obs_alt}")
 
-    # Wrap arrays in an additional dimension to mimic the e-CALLISTO storage
-    times_wrapped = np.array([spectrogram.times.astype(np.float32)])
-    # To mimic e-Callisto storage, convert frequencies to MHz
-    frequencies_MHz = spectrogram.frequencies * 1e-6
-    frequencies_wrapped = np.array([frequencies_MHz.astype(np.float32)])
+        # Create the Binary table HDU, wrapping the arrays to mimic the e-CALLISTO FITS files.
+        times = np.array([self.times])
+        frequencies_MHz = self.frequencies * 1e-6  # Convert to MHz
+        frequencies = np.array([frequencies_MHz])
+        col1 = astropy.io.fits.Column(name="TIME", format="PD", array=times)
+        col2 = astropy.io.fits.Column(name="FREQUENCY", format="PD", array=frequencies)
+        cols = astropy.io.fits.ColDefs([col1, col2])
+        bin_table_hdu = astropy.io.fits.BinTableHDU.from_columns(cols)
+        bin_table_hdu.header.set("PCOUNT", 0)
+        bin_table_hdu.header.set("GCOUNT", 1)
+        bin_table_hdu.header.set("TFIELDS", 2)
+        bin_table_hdu.header.set("TTYPE1", "TIME")
+        bin_table_hdu.header.set("TFORM1", "D")
+        bin_table_hdu.header.set("TTYPE2", "FREQUENCY")
+        bin_table_hdu.header.set("TFORM2", "D")
+        bin_table_hdu.header.set("TSCAL1", 1, "")
+        bin_table_hdu.header.set("TZERO1", 0, "")
+        bin_table_hdu.header.set("TSCAL2", 1, "")
+        bin_table_hdu.header.set("TZERO2", 0, "")
 
-    # Binary Table HDU (extension)
-    col1 = fits.Column(name="TIME", format="PD", array=times_wrapped)
-    col2 = fits.Column(name="FREQUENCY", format="PD", array=frequencies_wrapped)
-    cols = fits.ColDefs([col1, col2])
+        # Combine the HDUs, and write them to the filesystem as a file in the FITS format.
+        hdul = astropy.io.fits.HDUList([primary_hdu, bin_table_hdu])
 
-    bin_table_hdu = fits.BinTableHDU.from_columns(cols)
+        dt = typing.cast(
+            datetime.datetime, self.start_datetime.astype(datetime.datetime)
+        )
+        batch_parent_path = spectre_core.config.paths.get_batches_dir_path(
+            year=dt.year, month=dt.month, day=dt.day
+        )
+        if not os.path.exists(batch_parent_path):
+            os.makedirs(batch_parent_path)
+        file_path = os.path.join(
+            batch_parent_path, f"{self.format_start_time()}_{tag}.fits"
+        )
+        hdul.writeto(file_path, overwrite=True)
 
-    bin_table_hdu.header.set("PCOUNT", 0, "size of special data area")
-    bin_table_hdu.header.set("GCOUNT", 1, "one data group (required keyword)")
-    bin_table_hdu.header.set("TFIELDS", 2, "number of fields in each row")
-    bin_table_hdu.header.set("TTYPE1", "TIME", "label for field 1")
-    bin_table_hdu.header.set("TFORM1", "D", "data format of field: 8-byte DOUBLE")
-    bin_table_hdu.header.set("TTYPE2", "FREQUENCY", "label for field 2")
-    bin_table_hdu.header.set("TFORM2", "D", "data format of field: 8-byte DOUBLE")
-    bin_table_hdu.header.set("TSCAL1", 1, "")
-    bin_table_hdu.header.set("TZERO1", 0, "")
-    bin_table_hdu.header.set("TSCAL2", 1, "")
-    bin_table_hdu.header.set("TZERO2", 0, "")
 
-    # Create HDU list and write to file
-    hdul = fits.HDUList([primary_hdu, bin_table_hdu])
-    hdul.writeto(write_path, overwrite=True)
+def _seconds_of_day(dt: datetime.datetime) -> float:
+    start_of_day = datetime.datetime(dt.year, dt.month, dt.day)
+    return (dt - start_of_day).total_seconds()

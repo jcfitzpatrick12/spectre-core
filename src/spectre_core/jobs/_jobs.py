@@ -2,14 +2,13 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from logging import getLogger
-
-_LOGGER = getLogger(__name__)
-
+import logging
 import time
 
 from ._workers import Worker
 from ._duration import Duration
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Job:

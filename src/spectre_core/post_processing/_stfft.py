@@ -2,11 +2,11 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from enum import Enum
+import enum
 
 import numpy as np
 import numpy.typing as npt
-from pyfftw import FFTW, empty_aligned
+import pyfftw
 
 
 def get_cosine_signal(
@@ -29,7 +29,7 @@ def get_cosine_signal(
     return amplitude * np.cos(2 * np.pi * (frequency / sample_rate) * n + phase)
 
 
-class WindowType(Enum):
+class WindowType(enum.Enum):
     HANN = "hann"
     BLACKMAN = "blackman"
     BOXCAR = "boxcar"
@@ -85,10 +85,10 @@ def get_buffer(num_samples: int) -> npt.NDArray[np.complex64]:
     :param num_samples: The number of samples in the buffer.
     :return: An empty numpy array.
     """
-    return empty_aligned(num_samples, dtype="complex64")
+    return pyfftw.empty_aligned(num_samples, dtype="complex64")
 
 
-def get_fftw_obj(buffer: npt.NDArray[np.complex64]) -> FFTW:
+def get_fftw_obj(buffer: npt.NDArray[np.complex64]) -> pyfftw.FFTW:
     """Plan an in-place 1D DFT using FFTW.
 
     The contents of the input buffer will be overwritten during the planning process, and so
@@ -97,7 +97,7 @@ def get_fftw_obj(buffer: npt.NDArray[np.complex64]) -> FFTW:
     :param buffer: An empty numpy array.
     :return: An FFTW object that, when called, computes the forward FFT of whatever is in the buffer.
     """
-    return FFTW(buffer, buffer, direction="FFTW_FORWARD", flags=["FFTW_PATIENT"])
+    return pyfftw.FFTW(buffer, buffer, direction="FFTW_FORWARD", flags=["FFTW_PATIENT"])
 
 
 def get_times(
@@ -159,7 +159,7 @@ def get_num_spectrums(signal_size: int, window_size: int, window_hop: int) -> in
 
 
 def stfft(
-    fftw_obj: FFTW,
+    fftw_obj: pyfftw.FFTW,
     buffer: npt.NDArray[np.complex64],
     signal: npt.NDArray[np.complex64],
     window: npt.NDArray[np.float32],

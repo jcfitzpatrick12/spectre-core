@@ -2,24 +2,24 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from abc import ABC, abstractmethod
-from typing import Optional, Literal
-from enum import Enum
-from datetime import datetime
+import abc
+import typing
+import enum
+import datetime
 
 import numpy.typing as npt
 import numpy as np
-import matplotlib.dates as mdates
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
+import matplotlib.axes
+import matplotlib.dates
+import matplotlib.figure
 
-from spectre_core.spectrograms import Spectrogram, TimeType
-from spectre_core.config import TimeFormat
+import spectre_core.spectrograms
+import spectre_core.config
 from ._format import PanelFormat
 from ._panel_names import PanelName
 
 
-class XAxisType(Enum):
+class XAxisType(enum.Enum):
     """The xaxis type for a panel.
 
     Axes are shared in a stack between panels with common `XAxisType`.
@@ -32,7 +32,7 @@ class XAxisType(Enum):
     FREQUENCY = "frequency"
 
 
-class BasePanel(ABC):
+class BasePanel(abc.ABC):
     """Abstract base class for a panel used to visualise spectrogram data.
 
     `BasePanel` instances are designed to be part of a `PanelStack`, where multiple
@@ -43,8 +43,8 @@ class BasePanel(ABC):
     def __init__(
         self,
         name: PanelName,
-        spectrogram: Spectrogram,
-        time_type: TimeType = TimeType.RELATIVE,
+        spectrogram: spectre_core.spectrograms.Spectrogram,
+        time_type: spectre_core.spectrograms.TimeType = spectre_core.spectrograms.TimeType.RELATIVE,
     ) -> None:
         """Initialize an instance of `BasePanel`.
 
@@ -58,51 +58,46 @@ class BasePanel(ABC):
         self._time_type = time_type
 
         # These attributes should be set by instances of `PanelStack`.
-        self._ax: Optional[Axes] = None
-        self._fig: Optional[Figure] = None
-        self._panel_format: Optional[PanelFormat] = None
-        self._identifier: Optional[str] = None
+        self._ax: typing.Optional[matplotlib.axes.Axes] = None
+        self._fig: typing.Optional[matplotlib.figure.Figure] = None
+        self._panel_format: typing.Optional[PanelFormat] = None
+        self._identifier: typing.Optional[str] = None
 
-    @abstractmethod
+    @abc.abstractmethod
     def draw(self) -> None:
         """Modify the `ax` attribute to draw the panel contents."""
 
-    @abstractmethod
+    @abc.abstractmethod
     def annotate_xaxis(self) -> None:
         """Modify the `ax` attribute to annotate the xaxis of the panel."""
 
-    @abstractmethod
+    @abc.abstractmethod
     def annotate_yaxis(self) -> None:
         """Modify the `ax` attribute to annotate the yaxis of the panel."""
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def xaxis_type(self) -> XAxisType:
         """Specify the xaxis type for the panel."""
 
     @property
-    def spectrogram(self) -> Spectrogram:
+    def spectrogram(self) -> spectre_core.spectrograms.Spectrogram:
         """The spectrogram being visualised on this panel."""
         return self._spectrogram
-
-    @property
-    def tag(self) -> str:
-        """The tag of the spectrogram being visualised."""
-        return self._spectrogram.tag
 
     @property
     def name(self) -> PanelName:
         """The name of the panel."""
         return self._name
 
-    def get_time_type(self) -> TimeType:
+    def get_time_type(self) -> spectre_core.spectrograms.TimeType:
         """The time type of the spectrogram.
 
         :raises ValueError: If the `time_type` has not been set.
         """
         return self._time_type
 
-    def set_time_type(self, value: TimeType) -> None:
+    def set_time_type(self, value: spectre_core.spectrograms.TimeType) -> None:
         """Set the `TimeType` for the spectrogram.
 
         This controls how time is represented and annotated on the panel.
@@ -127,7 +122,7 @@ class BasePanel(ABC):
         """
         self._panel_format = value
 
-    def _get_ax(self) -> Axes:
+    def _get_ax(self) -> matplotlib.axes.Axes:
         """Return the `Axes` object bound to this panel.
 
         This method is protected to restrict direct access to `matplotlib` functionality,
@@ -139,7 +134,7 @@ class BasePanel(ABC):
             raise ValueError(f"`ax` must be set for the panel `{self.name}`")
         return self._ax
 
-    def set_ax(self, value: Axes) -> None:
+    def set_ax(self, value: matplotlib.axes.Axes) -> None:
         """Assign a Matplotlib `Axes` object to this panel.
 
         This `Axes` will be used for drawing and annotations.
@@ -148,7 +143,7 @@ class BasePanel(ABC):
         """
         self._ax = value
 
-    def _get_fig(self) -> Figure:
+    def _get_fig(self) -> matplotlib.figure.Figure:
         """Return the `Figure` object bound to this panel.
 
         This method is protected to restrict direct access to `matplotlib` functionality,
@@ -160,7 +155,7 @@ class BasePanel(ABC):
             raise ValueError(f"`fig` must be set for the panel `{self.name}`")
         return self._fig
 
-    def set_fig(self, value: Figure) -> None:
+    def set_fig(self, value: matplotlib.figure.Figure) -> None:
         """
         Assign a Matplotlib `Figure` object to this panel.
 
@@ -170,7 +165,7 @@ class BasePanel(ABC):
         """
         self._fig = value
 
-    def get_identifier(self) -> Optional[str]:
+    def get_identifier(self) -> typing.Optional[str]:
         """Optional identifier for the panel.
 
         This identifier can be used to distinguish panels or aid in superimposing
@@ -193,7 +188,7 @@ class BasePanel(ABC):
         """Hide the labels for yaxis ticks in the panel."""
         self._get_ax().tick_params(axis="y", labelleft=False)
 
-    def sharex(self, axes: Axes):
+    def sharex(self, axes: matplotlib.axes.Axes):
         """Share the xaxis with another axes."""
         self._get_ax().sharex(axes)
 
@@ -230,7 +225,7 @@ class BaseTimeSeriesPanel(BasePanel):
     """
 
     @property
-    def xaxis_type(self) -> Literal[XAxisType.TIME]:
+    def xaxis_type(self) -> typing.Literal[XAxisType.TIME]:
         return XAxisType.TIME
 
     @property
@@ -238,19 +233,24 @@ class BaseTimeSeriesPanel(BasePanel):
         """The times assigned to each spectrum according to the `TimeType`."""
         return (
             self.spectrogram.times
-            if self.get_time_type() == TimeType.RELATIVE
+            if self.get_time_type() == spectre_core.spectrograms.TimeType.RELATIVE
             else self.spectrogram.datetimes
         )
 
     def annotate_xaxis(self) -> None:
         """Annotate the xaxis according to the specified `TimeType`."""
         ax = self._get_ax()
-        if self.get_time_type() == TimeType.RELATIVE:
+        if self.get_time_type() == spectre_core.spectrograms.TimeType.RELATIVE:
             ax.set_xlabel("Time [s]")
         else:
             # TODO: Adapt for time ranges greater than one day
-            start_date = datetime.strftime(
-                self.spectrogram.start_datetime.astype(datetime), TimeFormat.DATE
+            start_date = datetime.datetime.strftime(
+                self.spectrogram.start_datetime.astype(datetime.datetime),
+                spectre_core.config.TimeFormat.DATE,
             )
             ax.set_xlabel(f"Time [UTC] (Start Date: {start_date})")
-            ax.xaxis.set_major_formatter(mdates.DateFormatter(TimeFormat.TIME))
+            ax.xaxis.set_major_formatter(
+                matplotlib.dates.mdates.DateFormatter(
+                    spectre_core.config.TimeFormat.TIME
+                )
+            )

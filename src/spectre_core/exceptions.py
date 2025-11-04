@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 """
-`spectre` custom exceptions.
+Spectre custom exceptions.
 """
 
 import warnings
@@ -38,9 +38,6 @@ class BatchNotFoundError(KeyError): ...
 
 
 class ModeNotFoundError(KeyError): ...
-
-
-class EventHandlerNotFoundError(KeyError): ...
 
 
 class ReceiverNotFoundError(KeyError): ...

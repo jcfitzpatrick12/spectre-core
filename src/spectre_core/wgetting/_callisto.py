@@ -6,19 +6,13 @@ import os
 import subprocess
 import shutil
 import gzip
-from datetime import datetime, date
-from typing import Tuple
+import datetime
+import enum
 
-from spectre_core.config import (
-    get_spectre_data_dir_path,
-    get_batches_dir_path,
-    TimeFormat,
-)
-
-from enum import Enum
+import spectre_core.config
 
 
-class CallistoInstrumentCode(Enum):
+class CallistoInstrumentCode(enum.Enum):
     """e-Callisto network station codes."""
 
     ALASKA_ANCHORAGE = "ALASKA-ANCHORAGE"
@@ -78,7 +72,7 @@ class CallistoInstrumentCode(Enum):
 
 def _get_batch_name(station: str, date: str, time: str, code: str) -> str:
     """
-    Create a standardised batch file name for a `spectre` batch file.
+    Create a standardised batch file name for a Spectre batch file.
 
     :param station: Station name.
     :param date: Observation date in 'YYYYMMDD' format.
@@ -86,8 +80,8 @@ def _get_batch_name(station: str, date: str, time: str, code: str) -> str:
     :param code: Numeric instrument code.
     :return: Formatted batch file name.
     """
-    dt = datetime.strptime(f"{date}T{time}", "%Y%m%dT%H%M%S")
-    formatted_time = dt.strftime(TimeFormat.DATETIME)
+    dt = datetime.datetime.strptime(f"{date}T{time}", "%Y%m%dT%H%M%S")
+    formatted_time = dt.strftime(spectre_core.config.TimeFormat.DATETIME)
     return f"{formatted_time}_callisto-{station.lower()}-{code}.fits"
 
 
@@ -113,7 +107,7 @@ def _get_batch_components(gz_path: str) -> list[str]:
 
 def _get_batch_path(gz_path: str) -> str:
     """
-    Generate the full path for the `spectre` batch file.
+    Generate the full path for the Spectre batch file.
 
     :param gz_path: Path to the raw `.fit.gz` file.
     :return: Path to the corresponding batch file.
@@ -121,8 +115,12 @@ def _get_batch_path(gz_path: str) -> str:
     station, date, time, code = _get_batch_components(gz_path)
     batch_name = _get_batch_name(station, date, time, code)
     batch_start_time = batch_name.split("_")[0]
-    dt = datetime.strptime(batch_start_time, TimeFormat.DATETIME)
-    batch_dir = get_batches_dir_path(year=dt.year, month=dt.month, day=dt.day)
+    dt = datetime.datetime.strptime(
+        batch_start_time, spectre_core.config.TimeFormat.DATETIME
+    )
+    batch_dir = spectre_core.config.paths.get_batches_dir_path(
+        year=dt.year, month=dt.month, day=dt.day
+    )
     os.makedirs(batch_dir, exist_ok=True)
     return os.path.join(batch_dir, batch_name)
 
@@ -142,7 +140,7 @@ def _unzip_file_to_batches(gz_path: str) -> str:
 
 def _unzip_to_batches(tmp_dir: str) -> list[str]:
     """
-    Decompress all `.gz` files in a temporary directory and save them as `spectre`
+    Decompress all `.gz` files in a temporary directory and save them as Spectre
     batch files.
 
     :param tmp_dir: Path to the temporary directory containing `.gz` files.
@@ -190,9 +188,9 @@ def _wget_callisto_data(
 
 def download_callisto_data(
     instrument_code: CallistoInstrumentCode, year: int, month: int, day: int
-) -> Tuple[list[str], date]:
+) -> list[str]:
     """
-    Download and decompress e-Callisto FITS files, saving them as `spectre` batch files.
+    Download and decompress e-Callisto FITS files, saving them as Spectre batch files.
 
     :param instrument_code: e-Callisto station instrument code.
     :param year: Year of the observation.
@@ -200,11 +198,11 @@ def download_callisto_data(
     :param day: Day of the observation.
     :return: A list of file names of all newly created batch files, as absolute paths within the container's file system. Additionally, return the start date shared by all batch files.
     """
-    tmp_dir = os.path.join(get_spectre_data_dir_path(), "tmp")
+    tmp_dir = os.path.join(spectre_core.config.paths.get_spectre_data_dir_path(), "tmp")
     # if there are any residual files in the temporary directory, remove them.
     if os.path.exists(tmp_dir):
         shutil.rmtree(tmp_dir)
     os.makedirs(tmp_dir, exist_ok=True)
 
     _wget_callisto_data(instrument_code.value, year, month, day, tmp_dir)
-    return sorted(_unzip_to_batches(tmp_dir)), date(year, month, day)
+    return sorted(_unzip_to_batches(tmp_dir))

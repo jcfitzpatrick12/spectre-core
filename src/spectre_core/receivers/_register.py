@@ -2,20 +2,19 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import TypeVar, Callable, Type
+import typing
 
-from .plugins._receiver_names import ReceiverName
-from ._receiver import Receiver
+from ._base import BaseReceiver
 
 # map populated at runtime via the `register_receiver` decorator.
-receivers: dict[ReceiverName, Type[Receiver]] = {}
+receivers: dict[str, typing.Type[BaseReceiver]] = {}
 
-T = TypeVar("T", bound=Receiver)
+T = typing.TypeVar("T", bound=BaseReceiver)
 
 
 def register_receiver(
-    receiver_name: ReceiverName,
-) -> Callable[[Type[T]], Type[T]]:
+    receiver_name: str,
+) -> typing.Callable[[typing.Type[T]], typing.Type[T]]:
     """Decorator to register a fully implemented `BaseReceiver` subclass under a specified `receiver_name`.
 
     :param receiver_name: The name of the receiver.
@@ -23,7 +22,7 @@ def register_receiver(
     :return: A decorator that registers the `BaseReceiver` subclass under the given `receiver_name`.
     """
 
-    def decorator(cls: Type[T]) -> Type[T]:
+    def decorator(cls: typing.Type[T]) -> typing.Type[T]:
         if receiver_name in receivers:
             raise ValueError(f"The receiver '{receiver_name}' is already registered!")
         receivers[receiver_name] = cls
@@ -33,8 +32,5 @@ def register_receiver(
 
 
 def get_registered_receivers() -> list[str]:
-    """List all registered receivers.
-
-    :return: The string values of all registered `ReceiverName` enum keys.
-    """
-    return [k.value for k in receivers.keys()]
+    """List all registered receivers."""
+    return [k for k in receivers.keys()]

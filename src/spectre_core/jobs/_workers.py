@@ -2,21 +2,20 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from logging import getLogger
-
-_LOGGER = getLogger(__name__)
-
+import logging
 import time
-from typing import Callable, Optional
+import typing
 import multiprocessing
 
-from spectre_core.logs import configure_root_logger, ProcessType
-from spectre_core.config import set_spectre_data_dir_path
+import spectre_core.logs
+import spectre_core.config
 from ._duration import Duration
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def _make_daemon_process(
-    name: str, target: Callable[[], None]
+    name: str, target: typing.Callable[[], None]
 ) -> multiprocessing.Process:
     """
     Creates and returns a daemon `multiprocessing.Process` instance.
@@ -34,7 +33,7 @@ class Worker:
     Provides a very simple API to start, and restart a multiprocessing process.
     """
 
-    def __init__(self, name: str, target: Callable[[], None]) -> None:
+    def __init__(self, name: str, target: typing.Callable[[], None]) -> None:
         """Initialise a `Worker` instance.
 
         :param name: The name assigned to the process.
@@ -96,10 +95,10 @@ class Worker:
 # TODO: Somehow statically type check that `args` match the arguments to `target`
 def make_worker(
     name: str,
-    target: Callable[..., None],
+    target: typing.Callable[..., None],
     args: tuple = (),
     configure_logging: bool = True,
-    spectre_data_dir_path: Optional[str] = None,
+    spectre_data_dir_path: typing.Optional[str] = None,
 ) -> Worker:
     """Create a `Worker` instance to manage a target function in a multiprocessing background daemon process.
 
@@ -118,10 +117,12 @@ def make_worker(
 
     def _worker_target() -> None:
         if configure_logging:
-            configure_root_logger(ProcessType.WORKER)
+            spectre_core.logs.configure_root_logger(
+                spectre_core.logs.ProcessType.WORKER
+            )
 
         if spectre_data_dir_path is not None:
-            set_spectre_data_dir_path(spectre_data_dir_path)
+            spectre_core.config.paths.set_spectre_data_dir_path(spectre_data_dir_path)
 
         target(*args)
 

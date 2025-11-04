@@ -4,44 +4,42 @@
 
 import os
 import logging
-from typing import Tuple
-from datetime import datetime
+import datetime
+import typing
 
-from spectre_core.config import TimeFormat
-from ._logs import Log
+import spectre_core.config
 from ._process_types import ProcessType
 
 
-def configure_root_logger(process_type: ProcessType, level: int = logging.INFO) -> str:
-    """Configures the root logger to write logs to a file named based on
-    the process type, process ID, and the current system time.
-
-    :param process_type: Indicates the type of process, as defined by `ProcessType`.
-    :param level: The logging level, as defined in Python's `logging` module. Defaults to `logging.INFO`.
-    :return: The file path of the created log file.
-    """
-    # create a `spectre` log handler instance, to represent the log file.
-    # get the star time of the log
-    system_datetime = datetime.now()
-    start_time = system_datetime.strftime(TimeFormat.DATETIME)
-
-    # extract the process identifier, and cast as a string
-    pid = str(os.getpid())
-
-    # create a file handler representing the log file
-    log = Log(start_time, pid, process_type)
-    log.make_parent_dir_path()
-
-    # get the root logger and set its level.
+def configure_root_logger(
+    process_type: ProcessType,
+    level: int = logging.INFO,
+    logs_dir_path: typing.Optional[str] = None,
+) -> str:
+    # Get the root logger, set its level and remove any existing handlers.
     logger = logging.getLogger()
     logger.setLevel(level)
-
-    # remove existing handlers
     for handler in logger.handlers:
         logger.removeHandler(handler)
 
-    # Set up a file handler and add it to the root logger
-    file_handler = logging.FileHandler(log.file_path)
+    # Get the current system time and current process ID.
+    system_datetime = datetime.datetime.now()
+    start_time = system_datetime.strftime(spectre_core.config.TimeFormat.DATETIME)
+    pid = str(os.getpid())
+
+    # Make the file path.
+    if logs_dir_path is None:
+        logs_dir_path = spectre_core.config.paths.get_logs_dir_path(
+            system_datetime.year, system_datetime.month, system_datetime.day
+        )
+    if not os.path.exists(logs_dir_path):
+        os.makedirs(logs_dir_path)
+    file_path = os.path.join(
+        logs_dir_path, f"{start_time}_{pid}_{process_type.value}.log"
+    )
+
+    # Add the file handler to the root logger.
+    file_handler = logging.FileHandler(file_path)
     file_handler.setLevel(level)
     formatter = logging.Formatter(
         "[%(asctime)s] [%(levelname)8s] --- %(message)s (%(name)s:%(lineno)s)"
@@ -49,10 +47,10 @@ def configure_root_logger(process_type: ProcessType, level: int = logging.INFO) 
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
-    return log.file_path
+    return file_path
 
 
-def get_root_logger_state() -> Tuple[bool, int]:
+def get_root_logger_state() -> tuple[bool, int]:
     """Get the state of the root logger.
 
     :return: Whether the root logger has any handlers, and the level of the root logger.

@@ -2,77 +2,15 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Optional, overload, Literal
+import typing
 
-from spectre_core.exceptions import ReceiverNotFoundError
+import spectre_core.exceptions
+
 from ._register import receivers
-from ._receiver import Receiver
-from .plugins._receiver_names import ReceiverName
-from .plugins._signal_generator import SignalGenerator
-from .plugins._rsp1a import RSP1A
-from .plugins._rspduo import RSPduo
-from .plugins._b200mini import B200mini
-from .plugins._rspdx import RSPdx
-from .plugins._hackrf import HackRFOne
-from .plugins._custom import CustomReceiver
-from .plugins._rtlsdr import RTLSDR
+from ._base import BaseReceiver
 
 
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.SIGNAL_GENERATOR], mode: Optional[str] = None
-) -> SignalGenerator: ...
-
-
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.RSP1A], mode: Optional[str] = None
-) -> RSP1A: ...
-
-
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.RSPDUO], mode: Optional[str] = None
-) -> RSPduo: ...
-
-
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.RSPDX], mode: Optional[str] = None
-) -> RSPdx: ...
-
-
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
-) -> B200mini: ...
-
-
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.HACKRFONE], mode: Optional[str] = None
-) -> HackRFOne: ...
-
-
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.RTLSDR], mode: Optional[str] = None
-) -> RTLSDR: ...
-
-
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.CUSTOM], mode: Optional[str] = None
-) -> CustomReceiver: ...
-
-
-@overload
-def get_receiver(
-    receiver_name: ReceiverName, mode: Optional[str] = None
-) -> Receiver: ...
-
-
-def get_receiver(receiver_name: ReceiverName, mode: Optional[str] = None) -> Receiver:
+def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> BaseReceiver:
     """Get a registered receiver.
 
     :param receiver_name: The name of the receiver.
@@ -83,7 +21,7 @@ def get_receiver(receiver_name: ReceiverName, mode: Optional[str] = None) -> Rec
     receiver_cls = receivers.get(receiver_name)
     if receiver_cls is None:
         valid_receivers = list(receivers.keys())
-        raise ReceiverNotFoundError(
+        raise spectre_core.exceptions.ReceiverNotFoundError(
             f"No class found for the receiver: {receiver_name}. "
             f"Please specify one of the following receivers {valid_receivers}"
         )

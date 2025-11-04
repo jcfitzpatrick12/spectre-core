@@ -2,10 +2,10 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from dataclasses import dataclass
+import dataclasses
 
 
-@dataclass
+@dataclasses.dataclass
 class PanelFormat:
     """Specifies formatting options for a panel, including font sizes, line styles,
     colour maps, and general visual settings.
