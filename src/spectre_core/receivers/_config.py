@@ -71,7 +71,7 @@ class Config:
         return self._content[_CaptureConfigKey.RECEIVER_MODE]
 
     @property
-    def parameters(self) -> dict[str, str]:
+    def parameters(self) -> dict[str, typing.Any]:
         """User-configurable parameters."""
         return self._content[_CaptureConfigKey.PARAMETERS]
 
@@ -88,7 +88,7 @@ def write_config(
     tag: str,
     receiver_name: str,
     receiver_mode: str,
-    parameters: dict[str, str],
+    parameters: dict[str, typing.Any],
     configs_dir_path: typing.Optional[str] = None,
 ) -> None:
     configs_dir_path = (
