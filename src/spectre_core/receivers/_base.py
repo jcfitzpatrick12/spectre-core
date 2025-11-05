@@ -162,15 +162,16 @@ class BaseReceiver:
         return self._batches.get(self.active_mode)
 
     def validate(self, parameters: dict[str, str]) -> dict[str, typing.Any]:
-
         # Validate the flowgraph parameters
         _, flowgraph_model_cls = self.flowgraph
-        flowgraph_params = flowgraph_model_cls.model_validate(parameters).model_dump()
+        flowgraph_params = flowgraph_model_cls.model_validate(
+            parameters, strict=True
+        ).model_dump()
 
-        # Validate event handler parameters
+        # Validate event handler parameters separately
         _, event_handler_model_cls = self.event_handler
         event_handler_params = event_handler_model_cls.model_validate(
-            flowgraph_params
+            parameters, strict=True
         ).model_dump()
 
         # Merge the two (the event handler parameters take precedence)
@@ -204,7 +205,7 @@ class BaseReceiver:
         parameters = self.validate(config.parameters)
         flowgraph_cls, _ = self.flowgraph
         flowgraph_cls(
-            config.tag, batches_dir_path=batches_dir_path, **parameters
+            config.tag, parameters, batches_dir_path=batches_dir_path
         ).activate()
 
     def activate_post_processing(
@@ -219,7 +220,7 @@ class BaseReceiver:
         parameters = self.validate(config.parameters)
         event_handler_cls, _ = self.event_handler
         observer.schedule(
-            event_handler_cls(config.tag, **parameters),
+            event_handler_cls(config.tag, parameters),
             batches_dir_path,
             recursive=True,
             event_filter=[watchdog.events.FileCreatedEvent],

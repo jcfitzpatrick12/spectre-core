@@ -37,7 +37,9 @@ class FixedEventHandlerModel(BaseEventHandlerModel):
         gt=0,
         description="How much the window is shifted, in samples, when performing the Short Time FFT.",
     )
-    window_type: typing.Literal["blackman", "hann", "boxcar"] = pydantic.Field(
+    window_type: typing.Literal[
+        WindowType.BLACKMAN, WindowType.HANN, WindowType.BOXCAR
+    ] = pydantic.Field(
         "blackman",
         description="The type of window applied when performing the Short Time FFT.",
     )
@@ -60,22 +62,25 @@ class FixedEventHandlerModel(BaseEventHandlerModel):
         description="Spectrograms are averaged up to the time resolution, in seconds.",
     )
 
+    class ConfigDict:
+        validate_assignment = True
+
 
 class FixedEventHandler(BaseEventHandler):
     def __init__(
         self,
         tag: str,
-        **params,
+        parameters: dict[str, typing.Any],
     ) -> None:
-        super().__init__(tag, **params)
-        self.__window_size = typing.cast(int, params.pop("window_size"))
-        self.__window_hop = typing.cast(int, params.pop("window_hop"))
-        self.__window_type = typing.cast(str, params.pop("window_type"))
-        self.__center_frequency = typing.cast(float, params.pop("center_frequency"))
-        self.__sample_rate = typing.cast(int, params.pop("sample_rate"))
-        self.__time_resolution = typing.cast(float, params.pop("time_resolution"))
+        super().__init__(tag, parameters)
+        self.__window_size = typing.cast(int, parameters["window_size"])
+        self.__window_hop = typing.cast(int, parameters["window_hop"])
+        self.__window_type = typing.cast(str, parameters["window_type"])
+        self.__center_frequency = typing.cast(float, parameters["center_frequency"])
+        self.__sample_rate = typing.cast(int, parameters["sample_rate"])
+        self.__time_resolution = typing.cast(float, parameters["time_resolution"])
         self.__frequency_resolution = typing.cast(
-            float, params.pop("frequency_resolution")
+            float, parameters["frequency_resolution"]
         )
 
         # Read all the required capture config parameters.

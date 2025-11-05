@@ -116,13 +116,13 @@ def make_worker(
     """
 
     def _worker_target() -> None:
-        if configure_logging:
-            spectre_core.logs.configure_root_logger(
-                spectre_core.logs.ProcessType.WORKER
-            )
-
         if spectre_data_dir_path is not None:
             spectre_core.config.paths.set_spectre_data_dir_path(spectre_data_dir_path)
+
+        if configure_logging:
+            spectre_core.logs.configure_root_logger(
+                spectre_core.logs.ProcessType.WORKER,
+            )
 
         target(*args)
 

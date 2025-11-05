@@ -15,7 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class BaseEventHandlerModel(pydantic.BaseModel):
-    time_range: float = pydantic.Field(
+    time_range: int = pydantic.Field(
         0,
         ge=0,
         description="Spectrograms are stitched together until the time range has elapsed.",
@@ -42,9 +42,6 @@ class BaseEventHandlerModel(pydantic.BaseModel):
         0.0, description="Corresponds to the FITS keyword OBS_LON."
     )
 
-    class Config:
-        validate_assignment = True
-
 
 class BaseEventHandler(abc.ABC, watchdog.events.FileSystemEventHandler):
     """An abstract base class for event-driven file post-processing."""
@@ -52,21 +49,21 @@ class BaseEventHandler(abc.ABC, watchdog.events.FileSystemEventHandler):
     def __init__(
         self,
         tag: str,
+        parameters: dict[str, typing.Any],
         queued_file: typing.Optional[str] = None,
         cached_spectrogram: typing.Optional[
             spectre_core.spectrograms.Spectrogram
         ] = None,
-        **params,
     ) -> None:
         self._tag = tag
-        self.__time_range = typing.cast(float, params.pop("time_range"))
-        self.__origin = typing.cast(str, params.pop("origin"))
-        self.__instrument = typing.cast(str, params.pop("instrument"))
-        self.__telescope = typing.cast(str, params.pop("telescope"))
-        self.__object = typing.cast(str, params.pop("object"))
-        self.__obs_alt = typing.cast(float, params.pop("obs_alt"))
-        self.__obs_lat = typing.cast(float, params.pop("obs_lat"))
-        self.__obs_lon = typing.cast(float, params.pop("obs_lon"))
+        self.__time_range = typing.cast(float, parameters["time_range"])
+        self.__origin = typing.cast(str, parameters["origin"])
+        self.__instrument = typing.cast(str, parameters["instrument"])
+        self.__telescope = typing.cast(str, parameters["telescope"])
+        self.__object = typing.cast(str, parameters["object"])
+        self.__obs_alt = typing.cast(float, parameters["obs_alt"])
+        self.__obs_lat = typing.cast(float, parameters["obs_lat"])
+        self.__obs_lon = typing.cast(float, parameters["obs_lon"])
 
         self.__queued_file = queued_file
         self.__cached_spectrogram = cached_spectrogram

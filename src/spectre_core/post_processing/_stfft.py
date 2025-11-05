@@ -29,7 +29,7 @@ def get_cosine_signal(
     return amplitude * np.cos(2 * np.pi * (frequency / sample_rate) * n + phase)
 
 
-class WindowType(enum.Enum):
+class WindowType(str, enum.Enum):
     HANN = "hann"
     BLACKMAN = "blackman"
     BOXCAR = "boxcar"

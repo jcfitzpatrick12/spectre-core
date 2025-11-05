@@ -17,6 +17,7 @@ from ._signal_generator_flowgraphs import CosineWave, CosineWaveModel
 from .._register import register_receiver
 from .._base import BaseReceiver, ReceiverComponents
 from ._receiver_names import ReceiverName
+from .._config import Config
 
 
 def _is_close(
@@ -35,39 +36,6 @@ def _is_close(
     return bool(np.all(np.isclose(ar, ar_comparison, atol=absolute_tolerance)))
 
 
-@dataclasses.dataclass
-class TestResults:
-    """
-    Summarise the validation results when comparing two spectrograms.
-
-    :ivar times_validated: Whether the time arrays match.
-    :ivar frequencies_validated: Whether the frequency arrays match.
-    :ivar spectrum_validated: Maps the relative time of each spectrum to its match results.
-    """
-
-    times_validated: bool = False
-    frequencies_validated: bool = False
-    spectrum_validated: dict[float, bool] = dataclasses.field(default_factory=dict)
-
-    @property
-    def num_validated_spectrums(self) -> int:
-        """Returns the count of spectrums that successfully passed validation."""
-        return sum(is_validated for is_validated in self.spectrum_validated.values())
-
-    @property
-    def num_invalid_spectrums(self) -> int:
-        """Returns the count of spectrums that failed validation."""
-        return len(self.spectrum_validated) - self.num_validated_spectrums
-
-    def to_dict(self) -> dict[str, bool | dict[float, bool]]:
-        """Converts the instance into a serialisable dictionary."""
-        return {
-            "times_validated": self.times_validated,
-            "frequencies_validated": self.frequencies_validated,
-            "spectrum_validated": self.spectrum_validated,
-        }
-
-
 class Solvers(
     ReceiverComponents[
         typing.Callable[
@@ -83,13 +51,14 @@ def cosine_wave_solver(
 ) -> spectre_core.spectrograms.Spectrogram:
     """Creates the expected spectrogram for the `SignalGenerator` receiver operating in the mode `cosine_wave`."""
 
-    sample_rate = typing.cast(int, parameters.pop("sample_rate"))
-    window_size = typing.cast(int, parameters.pop("window_size"))
-    window_hop = typing.cast(int, parameters.pop("window_hop"))
-    frequency = typing.cast(float, parameters.pop("frequency"))
-    amplitude = typing.cast(float, parameters.pop("amplitude"))
-    center_frequency = typing.cast(float, parameters.pop("center_frequency"))
+    sample_rate = typing.cast(int, parameters["sample_rate"])
+    window_size = typing.cast(int, parameters["window_size"])
+    window_hop = typing.cast(int, parameters["window_hop"])
+    frequency = typing.cast(float, parameters["frequency"])
+    amplitude = typing.cast(float, parameters["amplitude"])
+    center_frequency = typing.cast(float, parameters["center_frequency"])
 
+    # Calculate derived parameters a (sampling rate ratio) and p (sampled periods).
     a = int(sample_rate / frequency)
     p = int(window_size / a)
 
@@ -105,16 +74,17 @@ def cosine_wave_solver(
     # Populate the spectrogram with identical spectra.
     dynamic_spectra = np.ones((window_size, num_spectrums)) * spectrum[:, np.newaxis]
 
-    # Compute times array.
+    # Compute time array.
     sampling_interval = np.float32(1 / sample_rate)
     times = np.arange(num_spectrums) * window_hop * sampling_interval
 
-    # Compute the physical frequencies we'll assign to each spectrel component.
+    # compute the frequency array.
     frequencies = (
         np.fft.fftshift(np.fft.fftfreq(window_size, sampling_interval))
         + center_frequency
     )
 
+    # Return the spectrogram.
     return spectre_core.spectrograms.Spectrogram(
         dynamic_spectra,
         times,
@@ -133,23 +103,6 @@ class _Mode:
 @register_receiver(ReceiverName.SIGNAL_GENERATOR)
 class SignalGenerator(BaseReceiver):
     """An entirely software-defined receiver, which generates synthetic signals."""
-
-    def add_solver(
-        self,
-        mode: str,
-        solver: typing.Callable[
-            [int, dict[str, typing.Any]], spectre_core.spectrograms.Spectrogram
-        ],
-    ) -> None:
-        self.__solvers.add(mode, solver)
-
-    @property
-    def solver(
-        self,
-    ) -> typing.Callable[
-        [int, dict[str, typing.Any]], spectre_core.spectrograms.Spectrogram
-    ]:
-        return self.__solvers.get(self.active_mode)
 
     def __init__(
         self, *args, solvers: typing.Optional[Solvers] = None, **kwargs
@@ -172,63 +125,70 @@ class SignalGenerator(BaseReceiver):
         )
         self.add_solver(_Mode.COSINE_WAVE, cosine_wave_solver)
 
+    @property
+    def solver(
+        self,
+    ) -> typing.Callable[
+        [int, dict[str, typing.Any]], spectre_core.spectrograms.Spectrogram
+    ]:
+        return self.__solvers.get(self.active_mode)
 
-def get_analytical_spectrogram(
-    mode: str, num_spectrums: int, **parameters: dict[str, typing.Any]
-) -> spectre_core.spectrograms.Spectrogram:
-    """Each mode of the `SignalGenerator` receiver generates a known synthetic signal. Based on this, we can
-    derive an analytical solution that predicts the expected spectrogram for a session in that mode.
+    def add_solver(
+        self,
+        mode: str,
+        solver: typing.Callable[
+            [int, dict[str, typing.Any]], spectre_core.spectrograms.Spectrogram
+        ],
+    ) -> None:
+        self.__solvers.add(mode, solver)
 
-    This function constructs the analytical spectrogram using the capture config for a `SignalGenerator`
-    receiver operating in a specific mode.
+    def validate_analytically(
+        self,
+        spectrogram: spectre_core.spectrograms.Spectrogram,
+        config: Config,
+        absolute_tolerance: float,
+    ) -> dict[str, typing.Any]:
+        """Validate a spectrogram generated during sessions with a `SignalGenerator` receiver operating
+        in a particular mode.
 
-    :param num_spectrums: The number of spectrums in the output spectrogram.
-    :param capture_config: The capture config used for data capture.
-    :return: The expected, analytically derived spectrogram for the specified mode of the `SignalGenerator` receiver.
-    """
-    signal_generator = SignalGenerator(mode=mode)
-    return signal_generator.solver(num_spectrums, parameters)
+        :param spectrogram: The spectrogram to be validated.
+        :param absolute_tolerance: Tolerance level for numerical comparisons.
+        :return: A dictionary summarising the validation outcome.
+        """
+        analytical_spectrogram = self.solver(spectrogram.num_times, config.parameters)
 
-
-def validate_analytically(
-    mode: str,
-    spectrogram: spectre_core.spectrograms.Spectrogram,
-    absolute_tolerance: float,
-    **parameters: dict[str, typing.Any],
-) -> TestResults:
-    """Validate a spectrogram generated during sessions with a `SignalGenerator` receiver operating
-    in a particular mode.
-
-    :param spectrogram: The spectrogram to be validated.
-    :param capture_config: The capture config used for data capture.
-    :param absolute_tolerance: Tolerance level for numerical comparisons.
-    :return: A `TestResults` object summarising the validation outcome.
-    """
-    analytical_spectrogram = get_analytical_spectrogram(
-        mode, spectrogram.num_times, **parameters
-    )
-
-    test_results = TestResults()
-
-    test_results.times_validated = bool(
-        _is_close(analytical_spectrogram.times, spectrogram.times, absolute_tolerance)
-    )
-
-    test_results.frequencies_validated = bool(
-        _is_close(
+        # Validate times and frequencies.
+        print(analytical_spectrogram.num_frequencies)
+        print(spectrogram.num_frequencies)
+        print(analytical_spectrogram.times)
+        print(spectrogram.times)
+        times_validated = _is_close(
+            analytical_spectrogram.times, spectrogram.times, absolute_tolerance
+        )
+        frequencies_validated = _is_close(
             analytical_spectrogram.frequencies,
             spectrogram.frequencies,
             absolute_tolerance,
         )
-    )
 
-    test_results.spectrum_validated = {}
-    for i in range(spectrogram.num_times):
-        time = spectrogram.times[i]
-        analytical_spectrum = analytical_spectrogram.dynamic_spectra[:, i]
-        spectrum = spectrogram.dynamic_spectra[:, i]
-        test_results.spectrum_validated[time] = bool(
-            _is_close(analytical_spectrum, spectrum, absolute_tolerance)
-        )
+        # Validate each spectrum.
+        spectrum_validated = {
+            spectrogram.times[i]: _is_close(
+                analytical_spectrogram.dynamic_spectra[:, i],
+                spectrogram.dynamic_spectra[:, i],
+                absolute_tolerance,
+            )
+            for i in range(spectrogram.num_times)
+        }
 
-    return test_results
+        # Summarise results
+        num_validated_spectrums = sum(spectrum_validated.values())
+        num_invalid_spectrums = len(spectrum_validated) - num_validated_spectrums
+
+        return {
+            "times_validated": times_validated,
+            "frequencies_validated": frequencies_validated,
+            "spectrum_validated": spectrum_validated,
+            "num_validated_spectrums": num_validated_spectrums,
+            "num_invalid_spectrums": num_invalid_spectrums,
+        }

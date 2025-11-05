@@ -30,11 +30,11 @@ class CosineWaveModel(BaseFlowgraphModel):
 
 
 class CosineWave(BaseFlowgraph):
-    def configure(self, tag: str, **parameters) -> None:
-        sample_rate = typing.cast(float, parameters.pop("sample_rate"))
-        batch_size = typing.cast(float, parameters.pop("batch_size"))
-        frequency = typing.cast(float, parameters.pop("frequency"))
-        amplitude = typing.cast(float, parameters.pop("amplitude"))
+    def configure(self, tag: str, parameters: dict[str, typing.Any]) -> None:
+        sample_rate = typing.cast(float, parameters["sample_rate"])
+        batch_size = typing.cast(float, parameters["batch_size"])
+        frequency = typing.cast(float, parameters["frequency"])
+        amplitude = typing.cast(float, parameters["amplitude"])
 
         # Blocks
         self.spectre_batched_file_sink = spectre.batched_file_sink(

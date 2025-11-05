@@ -19,25 +19,22 @@ class BaseFlowgraphModel(pydantic.BaseModel):
         description="The maximum number of items to be handled at each call of the work function.",
     )
 
-    class Config:
-        validate_assignment = True
-
 
 class BaseFlowgraph(gnuradio.gr.top_block):
     def __init__(
         self,
         tag,
+        parameters: dict[str, typing.Any],
         batches_dir_path: typing.Optional[str] = None,
-        **parameters,
     ):
         super().__init__()
-        self.__max_noutput_items = typing.cast(int, parameters.pop("max_noutput_items"))
+        self.__max_noutput_items = typing.cast(int, parameters["max_noutput_items"])
         self._batches_dir_path = (
             batches_dir_path or spectre_core.config.paths.get_batches_dir_path()
         )
-        self.configure(tag, **parameters)
+        self.configure(tag, parameters)
 
-    def configure(self, tag: str, **parameters):
+    def configure(self, tag: str, parameters: dict[str, typing.Any]):
         """Configure the flowgraph for the block."""
         # TODO: Using the `@abc.abstractmethod` decorator causes static type checking to complain that subclasses are abstract, even
         # when they implement this method. I think inheriting from `gnuradio.gr.top_block` is throwing things off.
