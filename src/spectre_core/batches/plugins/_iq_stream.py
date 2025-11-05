@@ -18,7 +18,7 @@ from .._base import BaseBatch, BatchFile
 
 
 @dataclasses.dataclass(frozen=True)
-class _Extension:
+class IQStreamBatchExtension:
     """Supported extensions for a `IQStreamBatch`.
 
     :ivar FITS: Corresponds to the `.fits` file extension.
@@ -174,24 +174,24 @@ class IQStreamBatch(BaseBatch):
         """
         super().__init__(batches_dir_path, start_time, tag)
 
-        self.add_file(_FitsFile, _Extension.FITS)
-        self.add_file(_BinFile, _Extension.BIN)
-        self.add_file(_HdrFile, _Extension.HDR)
+        self.add_file(_FitsFile, IQStreamBatchExtension.FITS)
+        self.add_file(_BinFile, IQStreamBatchExtension.BIN)
+        self.add_file(_HdrFile, IQStreamBatchExtension.HDR)
 
     @property
     def fits_file(self) -> _FitsFile:
         """The batch file corresponding to the `.bin` extension."""
-        return typing.cast(_FitsFile, self.get_file(_Extension.FITS))
+        return typing.cast(_FitsFile, self.get_file(IQStreamBatchExtension.FITS))
 
     @property
     def bin_file(self) -> _BinFile:
         """The batch file corresponding to the `.bin` extension."""
-        return typing.cast(_BinFile, self.get_file(_Extension.BIN))
+        return typing.cast(_BinFile, self.get_file(IQStreamBatchExtension.BIN))
 
     @property
     def hdr_file(self) -> _HdrFile:
         """The batch file corresponding to the `.hdr` extension."""
-        return typing.cast(_HdrFile, self.get_file(_Extension.HDR))
+        return typing.cast(_HdrFile, self.get_file(IQStreamBatchExtension.HDR))
 
     @property
     def spectrogram_file(self) -> _FitsFile:

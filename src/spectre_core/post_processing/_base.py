@@ -10,8 +10,11 @@ import pydantic
 import watchdog.events
 
 import spectre_core.spectrograms
+import spectre_core.batches
 
 _LOGGER = logging.getLogger(__name__)
+
+T = typing.TypeVar("T", bound=spectre_core.batches.BaseBatch)
 
 
 class BaseEventHandlerModel(pydantic.BaseModel):
@@ -43,19 +46,23 @@ class BaseEventHandlerModel(pydantic.BaseModel):
     )
 
 
-class BaseEventHandler(abc.ABC, watchdog.events.FileSystemEventHandler):
+class BaseEventHandler(
+    abc.ABC, typing.Generic[T], watchdog.events.FileSystemEventHandler
+):
     """An abstract base class for event-driven file post-processing."""
 
     def __init__(
         self,
         tag: str,
         parameters: dict[str, typing.Any],
+        batch_cls: typing.Type[T],
         queued_file: typing.Optional[str] = None,
         cached_spectrogram: typing.Optional[
             spectre_core.spectrograms.Spectrogram
         ] = None,
     ) -> None:
         self._tag = tag
+        self.__batch_cls = batch_cls
         self.__time_range = typing.cast(float, parameters["time_range"])
         self.__origin = typing.cast(str, parameters["origin"])
         self.__instrument = typing.cast(str, parameters["instrument"])
@@ -69,12 +76,7 @@ class BaseEventHandler(abc.ABC, watchdog.events.FileSystemEventHandler):
         self.__cached_spectrogram = cached_spectrogram
 
     @abc.abstractmethod
-    def process(self, absolute_file_path: str) -> None:
-        """
-        Process a batch file at the given file path.
-
-        :param absolute_file_path: The absolute path to the batch file to be processed.
-        """
+    def process(self, batch: T) -> spectre_core.spectrograms.Spectrogram: ...
 
     @property
     @abc.abstractmethod
@@ -113,7 +115,14 @@ class BaseEventHandler(abc.ABC, watchdog.events.FileSystemEventHandler):
         # If there exists a queued file, try and process it
         if self.__queued_file is not None:
             try:
-                self.process(self.__queued_file)
+                _LOGGER.info(f"Processing {self.__queued_file}")
+                batches_dir_path, start_time, tag, _ = (
+                    spectre_core.batches.parse_batch_file_path(self.__queued_file)
+                )
+                spectrogram = self.process(
+                    self.__batch_cls(batches_dir_path, start_time, tag)
+                )
+                self.__cache_spectrogram(spectrogram)
             except Exception:
                 _LOGGER.error(
                     f"An error has occured while processing {self.__queued_file}",
@@ -128,7 +137,7 @@ class BaseEventHandler(abc.ABC, watchdog.events.FileSystemEventHandler):
         _LOGGER.info(f"Queueing {absolute_file_path} for post processing")
         self.__queued_file = absolute_file_path
 
-    def _cache_spectrogram(
+    def __cache_spectrogram(
         self, spectrogram: spectre_core.spectrograms.Spectrogram
     ) -> None:
         _LOGGER.info("Joining spectrogram")

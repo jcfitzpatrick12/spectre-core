@@ -7,7 +7,7 @@
 from ._base import BaseBatch, BatchFile, parse_batch_file_name, parse_batch_file_path
 from ._batches import Batches
 from .plugins._callisto import CallistoBatch
-from .plugins._iq_stream import IQMetadata, IQStreamBatch
+from .plugins._iq_stream import IQMetadata, IQStreamBatch, IQStreamBatchExtension
 
 __all__ = [
     "BaseBatch",
@@ -18,4 +18,5 @@ __all__ = [
     "CallistoBatch",
     "IQMetadata",
     "IQStreamBatch",
+    "IQStreamBatchExtension",
 ]

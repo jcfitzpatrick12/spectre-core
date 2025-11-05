@@ -40,7 +40,7 @@ class FixedEventHandlerModel(BaseEventHandlerModel):
     window_type: typing.Literal[
         WindowType.BLACKMAN, WindowType.HANN, WindowType.BOXCAR
     ] = pydantic.Field(
-        "blackman",
+        WindowType.BLACKMAN,
         description="The type of window applied when performing the Short Time FFT.",
     )
     center_frequency: float = pydantic.Field(
@@ -66,13 +66,14 @@ class FixedEventHandlerModel(BaseEventHandlerModel):
         validate_assignment = True
 
 
-class FixedEventHandler(BaseEventHandler):
+class FixedEventHandler(BaseEventHandler[spectre_core.batches.IQStreamBatch]):
     def __init__(
         self,
         tag: str,
         parameters: dict[str, typing.Any],
+        batch_cls: typing.Type[spectre_core.batches.IQStreamBatch],
     ) -> None:
-        super().__init__(tag, parameters)
+        super().__init__(tag, parameters, batch_cls)
         self.__window_size = typing.cast(int, parameters["window_size"])
         self.__window_hop = typing.cast(int, parameters["window_hop"])
         self.__window_type = typing.cast(str, parameters["window_type"])
@@ -96,22 +97,14 @@ class FixedEventHandler(BaseEventHandler):
 
     @property
     def _watch_extension(self) -> str:
-        return "bin"
+        return spectre_core.batches.IQStreamBatchExtension.BIN
 
-    def process(self, absolute_file_path: str) -> None:
+    def process(
+        self, batch: spectre_core.batches.IQStreamBatch
+    ) -> spectre_core.spectrograms.Spectrogram:
         """Compute the spectrogram of IQ samples captured at a fixed center frequency, then save it to
         file in the FITS format.
-
-        :param absolute_file_path: The absolute file path of the `.bin` file in the batch.
         """
-        _LOGGER.info(f"Processing {absolute_file_path}")
-
-        batches_dir_path, start_time, tag, _ = (
-            spectre_core.batches.parse_batch_file_path(absolute_file_path)
-        )
-
-        batch = spectre_core.batches.IQStreamBatch(batches_dir_path, start_time, tag)
-
         _LOGGER.info(f"Reading {batch.bin_file.file_path}")
         iq_data = batch.bin_file.read()
 
@@ -164,10 +157,10 @@ class FixedEventHandler(BaseEventHandler):
             spectrogram, resolution=self.__frequency_resolution
         )
 
-        self._cache_spectrogram(spectrogram)
-
         _LOGGER.info(f"Deleting {batch.bin_file.file_path}")
         batch.bin_file.delete()
 
         _LOGGER.info(f"Deleting {batch.hdr_file.file_path}")
         batch.hdr_file.delete()
+
+        return spectrogram

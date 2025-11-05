@@ -220,7 +220,7 @@ class BaseReceiver:
         parameters = self.validate(config.parameters)
         event_handler_cls, _ = self.event_handler
         observer.schedule(
-            event_handler_cls(config.tag, parameters),
+            event_handler_cls(config.tag, parameters, self.batch),
             batches_dir_path,
             recursive=True,
             event_filter=[watchdog.events.FileCreatedEvent],
