@@ -79,13 +79,12 @@ def cosine_wave_solver(
     sampling_interval = np.float32(1 / sample_rate)
     times = np.arange(num_spectrums) * window_hop * sampling_interval
 
-    # compute the frequency array.
+    # Compute the frequency array.
     frequencies = (
         np.fft.fftshift(np.fft.fftfreq(window_size, sampling_interval))
         + center_frequency
     )
 
-    # Return the spectrogram.
     return spectre_core.spectrograms.Spectrogram(
         dynamic_spectra,
         times,
@@ -155,10 +154,6 @@ class SignalGenerator(Base):
         analytical_spectrogram = self.solver(spectrogram.num_times, config.parameters)
 
         # Validate times and frequencies.
-        print(analytical_spectrogram.num_frequencies)
-        print(spectrogram.num_frequencies)
-        print(analytical_spectrogram.times)
-        print(spectrogram.times)
         times_validated = _is_close(
             analytical_spectrogram.times, spectrogram.times, absolute_tolerance
         )
