@@ -17,7 +17,7 @@ from ._base import Base, BaseModel
 
 class CosineWaveModel(BaseModel):
     sample_rate: spectre_core.fields.Field.sample_rate = 128000
-    batch_size: spectre_core.fields.Field.batch_size = 3.0
+    batch_size: spectre_core.fields.Field.batch_size = 3
     frequency: spectre_core.fields.Field.frequency = 32000
     amplitude: spectre_core.fields.Field.amplitude = 1
 

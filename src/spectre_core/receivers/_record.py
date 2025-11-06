@@ -41,16 +41,16 @@ def _make_post_processing_worker(
 
 @spectre_core.logs.log_call
 def record_signal(
-    config: Config,
+    configs: list[Config],
     duration: int = 60,
     force_restart: bool = False,
     max_restarts: int = 5,
     skip_validation: bool = False,
     spectre_data_dir_path: typing.Optional[str] = None,
 ) -> int:
-    """Capture data from an SDR in real time.
+    """Capture data from SDRs in real time.
 
-    :param config: The config.
+    :param config: A list of configs.
     :param duration: How long to record for, in seconds.
     :param force_restart: If specified, restart the recording if it fails at runtime.
     :param max_restarts: Maximum number of times the recording can be restarted before giving up.
@@ -58,11 +58,12 @@ def record_signal(
     :param skip_validation: If True, skip validating the config parameters against the model.
     :return: 0 exit code on success.
     """
-    flowgraph_worker = _make_flowgraph_worker(
-        config, skip_validation, spectre_data_dir_path
-    )
+    flowgraph_workers = [
+        _make_flowgraph_worker(config, skip_validation, spectre_data_dir_path)
+        for config in configs
+    ]
     spectre_core.jobs.start_job(
-        [flowgraph_worker], duration, force_restart, max_restarts
+        flowgraph_workers, duration, force_restart, max_restarts
     )
 
     return 0
@@ -70,16 +71,16 @@ def record_signal(
 
 @spectre_core.logs.log_call
 def record_spectrograms(
-    config: Config,
+    configs: list[Config],
     duration: int = 60,
     force_restart: bool = False,
     max_restarts: int = 5,
     skip_validation: bool = False,
     spectre_data_dir_path: typing.Optional[str] = None,
 ) -> int:
-    """Capture data from an SDR and post-process it into spectrograms in real time.
+    """Capture data from SDRs and post-process it into spectrograms in real time.
 
-    :param config: The config.
+    :param configs: A list of configs.
     :param duration: How long to record for, in seconds.
     :param force_restart: If specified, restart the recording if it fails at runtime.
     :param max_restarts: Maximum number of times the recording can be restarted before giving up.
@@ -87,14 +88,16 @@ def record_spectrograms(
     :param skip_validation: If True, skip validating the config parameters against the model.
     :return: 0 exit code on success.
     """
-    flowgraph_worker = _make_flowgraph_worker(
-        config, skip_validation, spectre_data_dir_path
-    )
-    post_processing_worker = _make_post_processing_worker(
-        config, skip_validation, spectre_data_dir_path
-    )
+    flowgraph_workers = [
+        _make_flowgraph_worker(config, skip_validation, spectre_data_dir_path)
+        for config in configs
+    ]
+    post_processing_workers = [
+        _make_post_processing_worker(config, skip_validation, spectre_data_dir_path)
+        for config in configs
+    ]
     spectre_core.jobs.start_job(
-        [post_processing_worker, flowgraph_worker],
+        post_processing_workers + flowgraph_workers,
         duration=duration,
         force_restart=force_restart,
         max_restarts=max_restarts,

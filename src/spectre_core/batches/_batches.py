@@ -27,34 +27,34 @@ class Batches(typing.Generic[T]):
         :param batch_cls: The `Base` subclass used to read batch files under that tag.
         :param batches_dir_path: Optionally override the directory containing the batched files.
         """
-        self._tag = tag
-        self._batch_cls = batch_cls
-        self._batches_dir_path = (
+        self.__tag = tag
+        self.__batch_cls = batch_cls
+        self.__batches_dir_path = (
             batches_dir_path or spectre_core.config.paths.get_batches_dir_path()
         )
-        self._batch_map: dict[str, T] = collections.OrderedDict()
+        self.__batch_map: dict[str, T] = collections.OrderedDict()
         self.__update()
 
     def __update(self) -> None:
         """Perform a fresh search of all files with `tag` in the batch name."""
-        self._batch_map.clear()
+        self.__batch_map.clear()
 
         paths = []
-        for root, _, files in os.walk(self._batches_dir_path):
+        for root, _, files in os.walk(self.__batches_dir_path):
             for file in files:
                 paths.append(os.path.join(root, file))
 
         for path in paths:
             start_time, tag, _ = parse_batch_file_name(os.path.basename(path))
-            if tag == self._tag:
-                self._batch_map[start_time] = self._batch_cls(
+            if tag == self.__tag:
+                self.__batch_map[start_time] = self.__batch_cls(
                     os.path.dirname(path), start_time, tag
                 )
 
-        self._batch_map = collections.OrderedDict(sorted(self._batch_map.items()))
+        self.__batch_map = collections.OrderedDict(sorted(self.__batch_map.items()))
 
     def __iter__(self) -> typing.Iterator[T]:
-        yield from self._batch_map.values()
+        yield from self.__batch_map.values()
 
     def __validate_range(
         self, start_datetime: datetime.datetime, end_datetime: datetime.datetime
@@ -121,7 +121,7 @@ class Batches(typing.Generic[T]):
         filtered_batches = []
         batch_datetimes = [
             datetime.datetime.strptime(t, spectre_core.config.TimeFormat.DATETIME)
-            for t in self._batch_map.keys()
+            for t in self.__batch_map.keys()
         ]
         for idx, batch in enumerate(self):
             this_start = batch_datetimes[idx]

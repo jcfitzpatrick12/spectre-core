@@ -29,7 +29,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
-            gt=1,
+            ge=1,
             description="Samples are recorded in batches of this size, specified in seconds.",
         ),
     ]
