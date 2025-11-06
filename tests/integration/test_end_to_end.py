@@ -8,7 +8,6 @@ import pytest
 import spectre_core.receivers
 import spectre_core.config
 import spectre_core.batches
-import spectre_core.jobs
 
 
 @pytest.fixture
