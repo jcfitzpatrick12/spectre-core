@@ -136,8 +136,6 @@ class Base(abc.ABC, typing.Generic[T], watchdog.events.FileSystemEventHandler):
     def __cache_spectrogram(
         self, spectrogram: spectre_core.spectrograms.Spectrogram
     ) -> None:
-        _LOGGER.info("Joining spectrogram")
-
         if self.__cached_spectrogram is None:
             self.__cached_spectrogram = spectrogram
         else:

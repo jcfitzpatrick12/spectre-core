@@ -119,6 +119,7 @@ class SignalGenerator(Base):
             spectre_core.event_handlers.FixedCenterFrequency,
             spectre_core.batches.IQStreamBatch,
         )
+
         self.add_solver(_Mode.COSINE_WAVE, cosine_wave_solver)
 
     @property
