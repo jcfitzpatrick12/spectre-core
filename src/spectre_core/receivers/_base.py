@@ -201,9 +201,9 @@ class Base:
             )
         return self.__specs[name]
 
-    def __validate(
+    def model_validate(
         self, parameters: dict[str, typing.Any], skip: bool = False
-    ) -> dict[str, typing.Any]:
+    ) -> pydantic.BaseModel:
         """Validate the input parameters against the model for the active operating mode.
 
         :param parameters: The parameters to validate
@@ -211,11 +211,10 @@ class Base:
         :return: The validated parameters.
         """
         if skip:
-            print("Here")
-            return parameters
+            return self.model_cls.model_construct(**parameters)
 
         _LOGGER.info("Validating parameters...")
-        return self.model_cls.model_validate(parameters).model_dump()
+        return self.model_cls.model_validate(parameters)
 
     def read_config(
         self,
@@ -237,7 +236,7 @@ class Base:
         if skip_validation:
             return config
         else:
-            self.__validate(config.parameters)
+            _ = self.model_validate(config.parameters)
             return config
 
     def write_config(
@@ -258,7 +257,7 @@ class Base:
             tag,
             self.name,
             self.active_mode,
-            self.__validate(parameters, skip=skip_validation),
+            self.model_validate(parameters, skip_validation).model_dump(),
             configs_dir_path,
         )
 
@@ -279,7 +278,7 @@ class Base:
         _LOGGER.info("Starting the flowgraph...")
         self.flowgraph_cls(
             tag,
-            self.__validate(parameters, skip=skip_validation),
+            self.model_validate(parameters, skip=skip_validation),
             batches_dir_path=batches_dir_path,
         ).activate()
 
@@ -304,7 +303,9 @@ class Base:
         observer = watchdog.observers.Observer()
         observer.schedule(
             self.event_handler_cls(
-                tag, self.__validate(parameters, skip=skip_validation), self.batch_cls
+                tag,
+                self.model_validate(parameters, skip=skip_validation),
+                self.batch_cls,
             ),
             batches_dir_path,
             recursive=True,

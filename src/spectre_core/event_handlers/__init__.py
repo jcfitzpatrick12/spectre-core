@@ -6,8 +6,7 @@
 
 from ._base import Base
 from ._fixed_center_frequency import FixedCenterFrequency, FixedCenterFrequencyModel
-
-# from ._swept import SweptEventHandler, SweptEventHandlerModel
+from ._swept_center_frequency import SweptCenterFrequency, SweptCenterFrequencyModel
 
 from ._stfft import (
     stfft,

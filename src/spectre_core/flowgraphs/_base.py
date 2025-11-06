@@ -21,11 +21,14 @@ class BaseModel(pydantic.BaseModel):
     max_noutput_items: spectre_core.fields.Field.max_noutput_items = 100000
 
 
-class Base(gnuradio.gr.top_block):
+M = typing.TypeVar("M", bound="BaseModel")
+
+
+class Base(gnuradio.gr.top_block, typing.Generic[M]):
     def __init__(
         self,
-        tag,
-        parameters: dict[str, typing.Any],
+        tag: str,
+        model: M,
         batches_dir_path: typing.Optional[str] = None,
     ):
         """An abstract interface for a configurable GNU Radio flowgaph.
@@ -35,13 +38,13 @@ class Base(gnuradio.gr.top_block):
         :param batches_dir_path: Optionally specify the directory to store data produced at runtime.
         """
         super().__init__()
-        self.__max_noutput_items = typing.cast(int, parameters["max_noutput_items"])
+        self.__model = model
         self._batches_dir_path = (
             batches_dir_path or spectre_core.config.paths.get_batches_dir_path()
         )
-        self.configure(tag, parameters)
+        self.configure(tag, self.__model)
 
-    def configure(self, tag: str, parameters: dict[str, typing.Any]):
+    def configure(self, tag: str, model: M) -> None:
         """Configure the flowgraph for the block."""
         # TODO: Using the `@abc.abstractmethod` decorator causes static type checking to complain that subclasses are abstract, even
         # when they implement this method. I think inheriting from `gnuradio.gr.top_block` is throwing things off.
@@ -58,4 +61,4 @@ class Base(gnuradio.gr.top_block):
         signal.signal(signal.SIGINT, sig_handler)
         signal.signal(signal.SIGTERM, sig_handler)
 
-        self.run(self.__max_noutput_items)
+        self.run(self.__model.max_noutput_items)

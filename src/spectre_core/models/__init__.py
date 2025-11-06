@@ -5,6 +5,6 @@
 
 """Templatise configurable parameters."""
 
-from ._signal_generator import CosineWaveModel
+from ._signal_generator import CosineWaveModel, ConstantStaircaseModel
 
-__all__ = ["CosineWaveModel"]
+__all__ = ["CosineWaveModel", "ConstantStaircaseModel"]

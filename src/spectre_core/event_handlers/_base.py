@@ -15,8 +15,6 @@ import spectre_core.fields
 
 _LOGGER = logging.getLogger(__name__)
 
-T = typing.TypeVar("T", bound=spectre_core.batches.Base)
-
 
 class BaseModel(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(
@@ -32,12 +30,16 @@ class BaseModel(pydantic.BaseModel):
     obs_lon: spectre_core.fields.Field.obs_lon = 0.0
 
 
-class Base(abc.ABC, typing.Generic[T], watchdog.events.FileSystemEventHandler):
+B = typing.TypeVar("B", bound=spectre_core.batches.Base)
+M = typing.TypeVar("M", bound=BaseModel)
+
+
+class Base(abc.ABC, typing.Generic[M, B], watchdog.events.FileSystemEventHandler):
     def __init__(
         self,
         tag: str,
-        parameters: dict[str, typing.Any],
-        batch_cls: typing.Type[T],
+        model: M,
+        batch_cls: typing.Type[B],
         queued_file: typing.Optional[str] = None,
         cached_spectrogram: typing.Optional[
             spectre_core.spectrograms.Spectrogram
@@ -53,20 +55,12 @@ class Base(abc.ABC, typing.Generic[T], watchdog.events.FileSystemEventHandler):
         """
         self._tag = tag
         self.__batch_cls = batch_cls
-        self.__time_range = typing.cast(float, parameters["time_range"])
-        self.__origin = typing.cast(str, parameters["origin"])
-        self.__instrument = typing.cast(str, parameters["instrument"])
-        self.__telescope = typing.cast(str, parameters["telescope"])
-        self.__object = typing.cast(str, parameters["object"])
-        self.__obs_alt = typing.cast(float, parameters["obs_alt"])
-        self.__obs_lat = typing.cast(float, parameters["obs_lat"])
-        self.__obs_lon = typing.cast(float, parameters["obs_lon"])
-
+        self.__model = model
         self.__queued_file = queued_file
         self.__cached_spectrogram = cached_spectrogram
 
     @abc.abstractmethod
-    def process(self, batch: T) -> spectre_core.spectrograms.Spectrogram:
+    def process(self, batch: B) -> spectre_core.spectrograms.Spectrogram:
         """Transform data from the input batch into a spectrogram.
 
         :param batch: The batch providing an interface to read signal data from the filesystem.
@@ -143,7 +137,7 @@ class Base(abc.ABC, typing.Generic[T], watchdog.events.FileSystemEventHandler):
                 [self.__cached_spectrogram, spectrogram]
             )
 
-        if self.__cached_spectrogram.time_range >= self.__time_range:
+        if self.__cached_spectrogram.time_range >= self.__model.time_range:
             self.__flush_cache()
 
     def __flush_cache(self) -> None:
@@ -154,13 +148,13 @@ class Base(abc.ABC, typing.Generic[T], watchdog.events.FileSystemEventHandler):
             )
             self.__cached_spectrogram.save(
                 self._tag,
-                self.__origin,
-                self.__instrument,
-                self.__telescope,
-                self.__object,
-                self.__obs_alt,
-                self.__obs_lat,
-                self.__obs_lon,
+                self.__model.origin,
+                self.__model.instrument,
+                self.__model.telescope,
+                self.__model.object,
+                self.__model.obs_alt,
+                self.__model.obs_lat,
+                self.__model.obs_lon,
             )
             _LOGGER.info("Flush successful, resetting spectrogram cache")
             self.__cached_spectrogram = None  # reset the cache

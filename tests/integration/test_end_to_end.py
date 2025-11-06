@@ -20,16 +20,31 @@ def signal_generator() -> spectre_core.receivers.Base:
 
 
 ATOL = 1e-4
-DURATION = 10
+DURATION = 6
+BATCH_SIZE = 2
+USE_DEFAULT_PARAMETERS: dict[str, typing.Any] = {}
 COSINE_WAVE_MODE = "cosine_wave"
 COSINE_WAVE_PARAMETERS = {
+    "batch_size": BATCH_SIZE,
     "amplitude": 2.0,
     "frequency": 32000.0,
     "window_hop": 512,
     "window_size": 512,
     "window_type": "boxcar",
-    "batch_size": 2,
     "sample_rate": 128000,
+}
+
+CONSTANT_STAIRCASE_MODE = "constant_staircase"
+CONSTANT_STAIRCASE_PARAMETERS = {
+    "batch_size": BATCH_SIZE,
+    "frequency_step": 128000.0,
+    "max_samples_per_step": 5000,
+    "min_samples_per_step": 4000,
+    "sample_rate": 128000,
+    "step_increment": 200,
+    "window_hop": 512,
+    "window_size": 512,
+    "window_type": "boxcar",
 }
 
 
@@ -40,7 +55,10 @@ class TestEndToEnd:
     @pytest.mark.parametrize(
         ("mode", "parameters"),
         [
+            (COSINE_WAVE_MODE, USE_DEFAULT_PARAMETERS),
             (COSINE_WAVE_MODE, COSINE_WAVE_PARAMETERS),
+            (CONSTANT_STAIRCASE_MODE, USE_DEFAULT_PARAMETERS),
+            (CONSTANT_STAIRCASE_MODE, CONSTANT_STAIRCASE_PARAMETERS),
         ],
     )
     def test_end_to_end(
@@ -86,7 +104,9 @@ class TestEndToEnd:
                 found_spectrograms = True
 
                 result = signal_generator.validate_analytically(
-                    spectrogram, config, ATOL
+                    spectrogram,
+                    signal_generator.model_validate(config.parameters),
+                    ATOL,
                 )
 
                 assert result["frequencies_validated"]

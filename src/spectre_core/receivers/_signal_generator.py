@@ -5,7 +5,9 @@
 import dataclasses
 import dataclasses
 import typing
+import abc
 
+import pydantic
 import numpy as np
 import numpy.typing as npt
 
@@ -18,7 +20,6 @@ import spectre_core.spectrograms
 from ._register import register_receiver
 from ._base import Base, ReceiverComponents
 from ._names import ReceiverName
-from ._config import Config
 
 
 def _is_close(
@@ -37,60 +38,127 @@ def _is_close(
     return bool(np.all(np.isclose(ar, ar_comparison, atol=absolute_tolerance)))
 
 
-class Solvers(
-    ReceiverComponents[
-        typing.Callable[
-            [int, dict[str, typing.Any]], spectre_core.spectrograms.Spectrogram
-        ]
-    ]
-):
+M = typing.TypeVar("M", bound=pydantic.BaseModel)
+
+
+class Solver(typing.Generic[M]):
+    @abc.abstractmethod
+    def solve(
+        self, num_spectrums: int, model: M
+    ) -> spectre_core.spectrograms.Spectrogram:
+        """Subclasses should produce an analytically derived spectrogram for the `SignalGenerator` receiver
+        according to the mode and input model.
+
+        :param num_spectrums: The number of spectrums in the resulting spectrogram.
+        :param model: The model containing the configurable parameters.
+        """
+
+
+class Solvers(ReceiverComponents[Solver]):
     """For each mode, produce an analytically-derived spectrogram."""
 
 
-def cosine_wave_solver(
-    num_spectrums: int, parameters: dict[str, typing.Any]
-) -> spectre_core.spectrograms.Spectrogram:
-    """Produces the analytically-derived spectrogram for the `SignalGenerator` receiver operating in the mode `cosine_wave`."""
+class CosineWaveSolver(Solver[spectre_core.models.CosineWaveModel]):
+    def solve(
+        self, num_spectrums: int, model: spectre_core.models.CosineWaveModel
+    ) -> spectre_core.spectrograms.Spectrogram:
+        """Produces the analytically-derived spectrogram for the `SignalGenerator` receiver operating in the mode `cosine_wave`."""
 
-    sample_rate = typing.cast(int, parameters["sample_rate"])
-    window_size = typing.cast(int, parameters["window_size"])
-    window_hop = typing.cast(int, parameters["window_hop"])
-    frequency = typing.cast(float, parameters["frequency"])
-    amplitude = typing.cast(float, parameters["amplitude"])
-    center_frequency = typing.cast(float, parameters["center_frequency"])
+        # Calculate derived parameters a (sampling rate ratio) and p (sampled periods).
+        a = int(model.sample_rate / model.frequency)
+        p = int(model.window_size / a)
 
-    # Calculate derived parameters a (sampling rate ratio) and p (sampled periods).
-    a = int(sample_rate / frequency)
-    p = int(window_size / a)
+        # Create the analytical spectrum, which is constant in time.
+        spectrum = np.zeros(model.window_size)
+        spectral_amplitude = model.amplitude * model.window_size / 2
+        spectrum[p] = spectral_amplitude
+        spectrum[model.window_size - p] = spectral_amplitude
 
-    # Create the analytical spectrum, which is constant in time.
-    spectrum = np.zeros(window_size)
-    spectral_amplitude = amplitude * window_size / 2
-    spectrum[p] = spectral_amplitude
-    spectrum[window_size - p] = spectral_amplitude
+        # Align spectrum to naturally ordered frequency array.
+        spectrum = np.fft.fftshift(spectrum)
 
-    # Align spectrum to naturally ordered frequency array.
-    spectrum = np.fft.fftshift(spectrum)
+        # Populate the spectrogram with identical spectra.
+        dynamic_spectra = (
+            np.ones((model.window_size, num_spectrums)) * spectrum[:, np.newaxis]
+        )
 
-    # Populate the spectrogram with identical spectra.
-    dynamic_spectra = np.ones((window_size, num_spectrums)) * spectrum[:, np.newaxis]
+        # Compute time array.
+        sampling_interval = np.float32(1 / model.sample_rate)
+        times = np.arange(num_spectrums) * model.window_hop * sampling_interval
 
-    # Compute time array.
-    sampling_interval = np.float32(1 / sample_rate)
-    times = np.arange(num_spectrums) * window_hop * sampling_interval
+        # Compute the frequency array.
+        frequencies = (
+            np.fft.fftshift(np.fft.fftfreq(model.window_size, sampling_interval))
+            + model.center_frequency
+        )
 
-    # Compute the frequency array.
-    frequencies = (
-        np.fft.fftshift(np.fft.fftfreq(window_size, sampling_interval))
-        + center_frequency
-    )
+        return spectre_core.spectrograms.Spectrogram(
+            dynamic_spectra,
+            times,
+            frequencies,
+            spectre_core.spectrograms.SpectrumUnit.AMPLITUDE,
+        )
 
-    return spectre_core.spectrograms.Spectrogram(
-        dynamic_spectra,
-        times,
-        frequencies,
-        spectre_core.spectrograms.SpectrumUnit.AMPLITUDE,
-    )
+
+class ConstantStaircaseSolver(Solver[spectre_core.models.ConstantStaircaseModel]):
+    def solve(
+        self, num_spectrums: int, model: spectre_core.models.ConstantStaircaseModel
+    ) -> spectre_core.spectrograms.Spectrogram:
+        """Produces the analytically-derived spectrogram for the `SignalGenerator` receiver operating in the mode `constant_staircase`."""
+
+        # Calculate step sizes and derived parameters.
+        num_samples_per_step = np.arange(
+            model.min_samples_per_step,
+            model.max_samples_per_step + 1,
+            model.step_increment,
+        )
+        num_steps = len(num_samples_per_step)
+
+        # Create the analytical spectrum, constant in time.
+        spectrum = np.zeros(model.window_size * num_steps)
+        step_count = 0
+        for i in range(num_steps):
+            step_count += 1
+            spectral_amplitude = model.window_size * step_count
+            spectrum[int(model.window_size / 2) + i * model.window_size] = (
+                spectral_amplitude
+            )
+
+        # Populate the spectrogram with identical spectra.
+        dynamic_spectra = (
+            np.ones((model.window_size * num_steps, num_spectrums))
+            * spectrum[:, np.newaxis]
+        )
+
+        # Compute time array
+        num_samples_per_sweep = sum(num_samples_per_step)
+        sampling_interval = np.float32(1 / model.sample_rate)
+        # compute the sample index we are "assigning" to each spectrum
+        # and multiply by the sampling interval to get the equivalent physical time
+        times = (
+            np.array([(i * num_samples_per_sweep) for i in range(num_spectrums)])
+            * sampling_interval
+        )
+
+        # Compute the frequency array
+        baseband_frequencies = np.fft.fftshift(
+            np.fft.fftfreq(model.window_size, sampling_interval)
+        )
+        frequencies = np.empty((model.window_size * num_steps), dtype=np.float32)
+        for i in range(num_steps):
+            lower_bound = i * model.window_size
+            upper_bound = (i + 1) * model.window_size
+            frequencies[lower_bound:upper_bound] = (
+                baseband_frequencies + (model.sample_rate / 2) + (model.sample_rate * i)
+            )
+
+        # Return the spectrogram.
+        return spectre_core.spectrograms.Spectrogram(
+            dynamic_spectra,
+            times,
+            frequencies,
+            spectre_core.spectrograms.SpectrumUnit.AMPLITUDE,
+        )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -98,6 +166,7 @@ class _Mode:
     """An operating mode for the `SignalGenerator` receiver."""
 
     COSINE_WAVE = "cosine_wave"
+    CONSTANT_STAIRCASE = "constant_staircase"
 
 
 @register_receiver(ReceiverName.SIGNAL_GENERATOR)
@@ -118,30 +187,30 @@ class SignalGenerator(Base):
             spectre_core.event_handlers.FixedCenterFrequency,
             spectre_core.batches.IQStreamBatch,
         )
+        self.add_solver(_Mode.COSINE_WAVE, CosineWaveSolver())
 
-        self.add_solver(_Mode.COSINE_WAVE, cosine_wave_solver)
+        self.add_mode(
+            _Mode.CONSTANT_STAIRCASE,
+            spectre_core.models.ConstantStaircaseModel,
+            spectre_core.flowgraphs.ConstantStaircase,
+            spectre_core.event_handlers.SweptCenterFrequency,
+            spectre_core.batches.IQStreamBatch,
+        )
+        self.add_solver(_Mode.CONSTANT_STAIRCASE, ConstantStaircaseSolver())
 
     @property
     def solver(
         self,
-    ) -> typing.Callable[
-        [int, dict[str, typing.Any]], spectre_core.spectrograms.Spectrogram
-    ]:
+    ) -> Solver:
         return self.__solvers.get(self.active_mode)
 
-    def add_solver(
-        self,
-        mode: str,
-        solver: typing.Callable[
-            [int, dict[str, typing.Any]], spectre_core.spectrograms.Spectrogram
-        ],
-    ) -> None:
+    def add_solver(self, mode: str, solver: Solver) -> None:
         self.__solvers.add(mode, solver)
 
     def validate_analytically(
         self,
         spectrogram: spectre_core.spectrograms.Spectrogram,
-        config: Config,
+        model: pydantic.BaseModel,
         absolute_tolerance: float,
     ) -> dict[str, typing.Any]:
         """Validate a spectrogram generated during sessions with a `SignalGenerator` receiver operating
@@ -151,7 +220,7 @@ class SignalGenerator(Base):
         :param absolute_tolerance: Tolerance level for numerical comparisons.
         :return: A dictionary summarising the validation outcome.
         """
-        analytical_spectrogram = self.solver(spectrogram.num_times, config.parameters)
+        analytical_spectrogram = self.solver.solve(spectrogram.num_times, model)
 
         # Validate times and frequencies.
         times_validated = _is_close(

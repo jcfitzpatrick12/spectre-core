@@ -15,7 +15,7 @@ class Field:
         int,
         pydantic.Field(
             ...,
-            gt=0,
+            gt=1000,
             description="The maximum number of items handled at each call of the work function in GNU Radio.",
         ),
     ]
@@ -38,15 +38,13 @@ class Field:
     ]
     amplitude = typing.Annotated[
         int,
-        pydantic.Field(
-            ..., gt=0, description="Amplitude of the signal, arbitrary units."
-        ),
+        pydantic.Field(..., description="Amplitude of the signal, arbitrary units."),
     ]
     window_size = typing.Annotated[
         int,
         pydantic.Field(
             ...,
-            gt=16,
+            gt=2,
             description="The size of the window, in samples, when performing the Short Time FFT.",
         ),
     ]
@@ -129,5 +127,36 @@ class Field:
         pydantic.Field(
             ...,
             description="If True, keep the signal after creating the spectrogram. Otherwise, it is deleted from the file system.",
+        ),
+    ]
+    frequency_step = typing.Annotated[
+        float,
+        pydantic.Field(
+            ...,
+            description="The amount, in Hz, by which the center frequency is incremented for each step in the frequency sweep.",
+        ),
+    ]
+    step_increment = typing.Annotated[
+        int,
+        pydantic.Field(
+            ...,
+            gt=0,
+            description="The length by which each step in the staircase is incremented.",
+        ),
+    ]
+    min_samples_per_step = typing.Annotated[
+        int,
+        pydantic.Field(
+            ...,
+            gt=0,
+            description="The minimum number of samples in the shortest step of the staircase.",
+        ),
+    ]
+    max_samples_per_step = typing.Annotated[
+        int,
+        pydantic.Field(
+            ...,
+            gt=0,
+            description="The maximum number of samples in the shortest step of the staircase.",
         ),
     ]

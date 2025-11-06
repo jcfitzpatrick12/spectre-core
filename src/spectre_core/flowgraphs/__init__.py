@@ -6,6 +6,17 @@
 
 
 from ._base import Base
-from ._signal_generator import CosineWave, CosineWaveModel
+from ._signal_generator import (
+    CosineWave,
+    CosineWaveModel,
+    ConstantStaircase,
+    ConstantStaircaseModel,
+)
 
-__all__ = ["Base", "CosineWave", "CosineWaveFlowgraphModel"]
+__all__ = [
+    "Base",
+    "CosineWave",
+    "CosineWaveModel",
+    "ConstantStaircase",
+    "ConstantStaircaseModel",
+]

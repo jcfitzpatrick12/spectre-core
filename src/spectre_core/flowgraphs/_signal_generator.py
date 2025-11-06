@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import typing
+import pydantic
 
 from gnuradio import gr
 from gnuradio import blocks
@@ -21,24 +22,28 @@ class CosineWaveModel(BaseModel):
     amplitude: spectre_core.fields.Field.amplitude = 1
 
 
-class CosineWave(Base):
+class CosineWave(Base[CosineWaveModel]):
     """Record a complex-valued cosine signal to batched data files."""
 
-    def configure(self, tag: str, parameters: dict[str, typing.Any]) -> None:
-        sample_rate = typing.cast(float, parameters["sample_rate"])
-        batch_size = typing.cast(float, parameters["batch_size"])
-        frequency = typing.cast(float, parameters["frequency"])
-        amplitude = typing.cast(float, parameters["amplitude"])
-
+    def configure(self, tag: str, model: CosineWaveModel) -> None:
         self.spectre_batched_file_sink = spectre.batched_file_sink(
-            self._batches_dir_path, tag, batch_size, sample_rate
+            self._batches_dir_path, tag, model.batch_size, model.sample_rate
         )
-        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_float * 1, sample_rate, True)
-        self.blocks_throttle_1 = blocks.throttle(gr.sizeof_float * 1, sample_rate, True)
+        self.blocks_throttle_0 = blocks.throttle(
+            gr.sizeof_float * 1, model.sample_rate, True
+        )
+        self.blocks_throttle_1 = blocks.throttle(
+            gr.sizeof_float * 1, model.sample_rate, True
+        )
         self.blocks_null_source = blocks.null_source(gr.sizeof_float * 1)
         self.blocks_float_to_complex = blocks.float_to_complex(1)
         self.analog_sig_source = analog.sig_source_f(
-            sample_rate, analog.GR_COS_WAVE, frequency, amplitude, 0, 0
+            model.sample_rate,
+            analog.GR_COS_WAVE,
+            model.frequency,
+            model.amplitude,
+            0,
+            0,
         )
 
         self.connect((self.analog_sig_source, 0), (self.blocks_throttle_0, 0))
@@ -48,3 +53,38 @@ class CosineWave(Base):
         self.connect(
             (self.blocks_float_to_complex, 0), (self.spectre_batched_file_sink, 0)
         )
+
+
+class ConstantStaircaseModel(BaseModel):
+    step_increment: spectre_core.fields.Field.step_increment = 200
+    sample_rate: spectre_core.fields.Field.sample_rate = 128000
+    min_samples_per_step: spectre_core.fields.Field.min_samples_per_step = 4000
+    max_samples_per_step: spectre_core.fields.Field.max_samples_per_step = 5000
+    frequency_step: spectre_core.fields.Field.frequency_step = 128000
+    batch_size: spectre_core.fields.Field.batch_size = 3
+
+
+class ConstantStaircase(Base[ConstantStaircaseModel]):
+    def configure(self, tag: str, model: ConstantStaircaseModel) -> None:
+        self.spectre_constant_staircase = spectre.tagged_staircase(
+            model.min_samples_per_step,
+            model.max_samples_per_step,
+            model.frequency_step,
+            model.step_increment,
+            model.sample_rate,
+        )
+        self.spectre_batched_file_sink = spectre.batched_file_sink(
+            self._batches_dir_path,
+            tag,
+            model.batch_size,
+            model.sample_rate,
+            True,
+            "rx_freq",
+            0,
+        )  # zero means the center frequency is unset
+        self.blocks_throttle = blocks.throttle(
+            gr.sizeof_gr_complex * 1, model.sample_rate, True
+        )
+
+        self.connect((self.spectre_constant_staircase, 0), (self.blocks_throttle, 0))
+        self.connect((self.blocks_throttle, 0), (self.spectre_batched_file_sink, 0))
