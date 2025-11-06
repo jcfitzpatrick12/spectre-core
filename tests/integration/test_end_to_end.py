@@ -20,11 +20,10 @@ def signal_generator() -> spectre_core.receivers.Base:
 
 ATOL = 1e-4
 DURATION = 5
-BATCH_SIZE = 1
 USE_DEFAULT_PARAMETERS: dict[str, typing.Any] = {}
 COSINE_WAVE_MODE = "cosine_wave"
 COSINE_WAVE_PARAMETERS = {
-    "batch_size": BATCH_SIZE,
+    "batch_size": 1,
     "amplitude": 3.0,
     "frequency": 16000.0,
     "window_hop": 256,
@@ -35,15 +34,15 @@ COSINE_WAVE_PARAMETERS = {
 
 CONSTANT_STAIRCASE_MODE = "constant_staircase"
 CONSTANT_STAIRCASE_PARAMETERS = {
-    "batch_size": BATCH_SIZE,
+    "batch_size": 1,
+    "window_hop": 512,
+    "window_size": 512,
+    "window_type": "boxcar",
     "frequency_step": 128000.0,
     "max_samples_per_step": 5000,
     "min_samples_per_step": 4000,
     "sample_rate": 128000,
     "step_increment": 200,
-    "window_hop": 512,
-    "window_size": 512,
-    "window_type": "boxcar",
 }
 
 
@@ -52,83 +51,28 @@ class TestAnalytical:
     the results to analytically derived solutions."""
 
     @pytest.mark.parametrize(
-        ("mode", "parameters"),
+        ("modes", "parameters"),
         [
-            (COSINE_WAVE_MODE, USE_DEFAULT_PARAMETERS),
-            (COSINE_WAVE_MODE, COSINE_WAVE_PARAMETERS),
-            (CONSTANT_STAIRCASE_MODE, USE_DEFAULT_PARAMETERS),
-            (CONSTANT_STAIRCASE_MODE, CONSTANT_STAIRCASE_PARAMETERS),
+            ([COSINE_WAVE_MODE], [USE_DEFAULT_PARAMETERS]),
+            ([COSINE_WAVE_MODE], [COSINE_WAVE_PARAMETERS]),
+            ([CONSTANT_STAIRCASE_MODE], [USE_DEFAULT_PARAMETERS]),
+            ([CONSTANT_STAIRCASE_MODE], [CONSTANT_STAIRCASE_PARAMETERS]),
+            (
+                [COSINE_WAVE_MODE, CONSTANT_STAIRCASE_MODE],
+                [USE_DEFAULT_PARAMETERS, USE_DEFAULT_PARAMETERS],
+            ),
         ],
     )
-    def test_end_to_end(
+    def test(
         self,
-        spectre_config_paths: spectre_core.config.Paths,
-        signal_generator: spectre_core.receivers.SignalGenerator,
-        mode: str,
-        parameters: dict[str, typing.Any],
-    ) -> None:
-        # Set the mode of the receiver.
-        signal_generator.mode = mode
-
-        # Make a new config, with the tag dynamically created based on the receiver mode.
-        tag = mode.replace("_", "-")
-        signal_generator.write_config(
-            tag,
-            parameters,
-            configs_dir_path=spectre_config_paths.get_configs_dir_path(),
-        )
-
-        # Read the config back from the filesystem.
-        config = signal_generator.read_config(
-            tag, configs_dir_path=spectre_config_paths.get_configs_dir_path()
-        )
-
-        # Record some spectrograms.
-        spectre_core.receivers.record_spectrograms(
-            [config],
-            DURATION,
-            spectre_data_dir_path=spectre_config_paths.get_spectre_data_dir_path(),
-        )
-
-        # Check that we've found some spectrograms.
-        found_spectrograms = False
-
-        # Compare each spectrogram to the corresponding analytically derived solutions.
-        for batch in spectre_core.batches.Batches(
-            tag, signal_generator.batch_cls, spectre_config_paths.get_batches_dir_path()
-        ):
-            if batch.spectrogram_file.exists:
-
-                spectrogram = batch.read_spectrogram()
-                found_spectrograms = True
-
-                result = signal_generator.validate_analytically(
-                    spectrogram,
-                    signal_generator.model_validate(config.parameters),
-                    ATOL,
-                )
-
-                assert result["frequencies_validated"]
-                assert result["times_validated"]
-
-                # Permit at most one invalid spectrum (usually the first, due to window effects)
-                assert 0 <= result["num_invalid_spectrums"] <= 1
-
-        assert found_spectrograms
-
-
-class TestSimultaneousRecording:
-    """Test end-to-end execution of the program using the signal generator, operating in two
-    operating modes simultaneously."""
-
-    def test_simultaneous_recording(
-        self,
+        modes: list[str],
+        parameters: list[dict[str, typing.Any]],
         spectre_config_paths: spectre_core.config.Paths,
         signal_generator: spectre_core.receivers.SignalGenerator,
     ) -> None:
 
         configs: list[spectre_core.receivers.Config] = []
-        for mode in [COSINE_WAVE_MODE, CONSTANT_STAIRCASE_MODE]:
+        for mode, parameters in zip(modes, parameters):
             # Set the mode of the receiver.
             signal_generator.mode = mode
 
@@ -136,7 +80,7 @@ class TestSimultaneousRecording:
             tag = mode.replace("_", "-")
             signal_generator.write_config(
                 tag,
-                USE_DEFAULT_PARAMETERS,
+                parameters,
                 configs_dir_path=spectre_config_paths.get_configs_dir_path(),
             )
 
