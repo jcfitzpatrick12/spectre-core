@@ -14,7 +14,7 @@ import spectre_core.exceptions
 import spectre_core.config
 import spectre_core.spectrograms
 
-from .._base import BaseBatch, BatchFile
+from ._base import Base, BatchFile
 
 
 @dataclasses.dataclass(frozen=True)
@@ -39,14 +39,14 @@ class _BinFile(BatchFile[npt.NDArray[np.complex64]]):
     def read(self) -> npt.NDArray[np.complex64]:
         """Reads the binary file and returns the stored complex IQ samples.
 
-        :return: The raw 32-bit floats in the binary file, interpreted as 64-bit complex IQ samples.
+        :return: The raw 32-bit floats are interpreted as 64-bit complex IQ samples.
         """
         return np.fromfile(self.file_path, dtype=np.complex64)
 
 
 @dataclasses.dataclass
 class IQMetadata:
-    """Represents metadata for IQ samples produced by the `gr-spectre` OOT module block `batched_file_sink`.
+    """Stores metadata produced by the `gr-spectre` OOT module block `batched_file_sink`.
 
     :ivar millisecond_correction: The millisecond component of the batch start time.
     :ivar center_frequencies: Center frequencies for each IQ sample, if the stream was frequency tagged.
@@ -88,7 +88,7 @@ class _HdrFile(BatchFile[IQMetadata]):
         """Parses the binary contents of the `.hdr` file to extract IQ sample metadata.
 
         :return: An instance of `IQMetadata` containing the parsed metadata, including the millisecond correction
-        and, if applicable, frequency tagging details.
+        and, if applicable, frequency tag details.
         """
         hdr_contents = np.fromfile(self.file_path, dtype=np.float32)
 
@@ -128,7 +128,7 @@ class _FitsFile(BatchFile[spectre_core.spectrograms.Spectrogram]):
     def read(self) -> spectre_core.spectrograms.Spectrogram:
         """Read the FITS file and create a spectrogram.
 
-        :return: A `Spectrogram` instance containing the parsed FITS file data.
+        :return: A `Spectrogram` containing the parsed FITS file data.
         """
         with astropy.io.fits.open(self.file_path, mode="readonly") as hdulist:
             primary_hdu = hdulist["PRIMARY"]
@@ -157,17 +157,16 @@ class _FitsFile(BatchFile[spectre_core.spectrograms.Spectrogram]):
         )
 
 
-class IQStreamBatch(BaseBatch):
-    """A batch of data derived from a stream of IQ samples from some receiver.
-
-    Supports the following extensions:
-    - `.fits` (via the `spectrogram_file` attribute)
-    - `.bin` (via the `bin_file` attribute)
-    - `.hdr` (via the `hdr_file` attribute)
-    """
+class IQStreamBatch(Base):
 
     def __init__(self, batches_dir_path: str, start_time: str, tag: str) -> None:
-        """Initialise a `IQStreamBatch` instance.
+        """A batch of data derived from a stream of IQ samples from some receiver.
+
+        Supports the following extensions:
+        - `.fits`
+        - `.bin`
+        - `.hdr`
+
 
         :param start_time: The start time of the batch.
         :param tag: The batch name tag.
@@ -180,7 +179,7 @@ class IQStreamBatch(BaseBatch):
 
     @property
     def fits_file(self) -> _FitsFile:
-        """The batch file corresponding to the `.bin` extension."""
+        """The batch file corresponding to the `.fits` extension."""
         return typing.cast(_FitsFile, self.get_file(IQStreamBatchExtension.FITS))
 
     @property

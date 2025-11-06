@@ -2,6 +2,9 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+
+"""Templatise configurable parameters."""
+
 from ._signal_generator import CosineWaveModel
 
 __all__ = ["CosineWaveModel"]

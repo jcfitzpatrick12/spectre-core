@@ -7,10 +7,10 @@ import typing
 import spectre_core.exceptions
 
 from ._register import receivers
-from ._base import BaseReceiver
+from ._base import Base
 
 
-def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> BaseReceiver:
+def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base:
     """Get a registered receiver.
 
     :param receiver_name: The name of the receiver.

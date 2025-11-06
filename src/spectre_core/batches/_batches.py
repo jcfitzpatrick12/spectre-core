@@ -9,21 +9,24 @@ import datetime
 
 import spectre_core.config
 import spectre_core.spectrograms
-from ._base import BaseBatch, parse_batch_file_name
+from ._base import Base, parse_batch_file_name
 
-T = typing.TypeVar("T", bound=BaseBatch)
+T = typing.TypeVar("T", bound=Base)
 
 
 class Batches(typing.Generic[T]):
-    """Managed collection of `Batch` instances for a given tag. Provides a simple
-    interface for read operations on batched data files."""
-
     def __init__(
         self,
         tag: str,
         batch_cls: typing.Type[T],
         batches_dir_path: typing.Optional[str] = None,
     ) -> None:
+        """A simple interface to read batched filesystem data.
+
+        :param tag: The data tag.
+        :param batch_cls: The `Base` subclass used to read batch files under that tag.
+        :param batches_dir_path: Optionally override the directory containing the batched files.
+        """
         self._tag = tag
         self._batch_cls = batch_cls
         self._batches_dir_path = (
@@ -51,7 +54,6 @@ class Batches(typing.Generic[T]):
         self._batch_map = collections.OrderedDict(sorted(self._batch_map.items()))
 
     def __iter__(self) -> typing.Iterator[T]:
-        """Iterate over the stored batch instances."""
         yield from self._batch_map.values()
 
     def __validate_range(
@@ -106,14 +108,14 @@ class Batches(typing.Generic[T]):
     ) -> list[T]:
         """Get batches that overlap with the input time range.
 
-        The end time of each batch is upper bounded by the start time of the next,
+        The end time of each batch is assumed to be upper bounded by the start time of the next,
         since they cannot overlap. The final batch is treated as ending at `datetime.max`
         since there is no batch after it to provide that upper bound.
 
         :param start_datetime: The start time of the range (inclusive).
         :param end_datetime: The end time of the range (inclusive).
         :raise ValueError: If the start time is not less than the end time.
-        :return: A list of `Batch` instances that fall within the specified time range.
+        :return: A list of batches that fall within the specified time range.
         """
         self.__validate_range(start_datetime, end_datetime)
         filtered_batches = []

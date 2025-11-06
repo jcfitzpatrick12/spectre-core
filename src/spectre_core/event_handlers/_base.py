@@ -15,10 +15,13 @@ import spectre_core.fields
 
 _LOGGER = logging.getLogger(__name__)
 
-T = typing.TypeVar("T", bound=spectre_core.batches.BaseBatch)
+T = typing.TypeVar("T", bound=spectre_core.batches.Base)
 
 
 class BaseModel(pydantic.BaseModel):
+    model_config = pydantic.ConfigDict(
+        validate_assignment=True,
+    )
     time_range: spectre_core.fields.Field.time_range = 0
     origin: spectre_core.fields.Field.origin = "NOTSET"
     telescope: spectre_core.fields.Field.telescope = "NOTSET"
@@ -30,8 +33,6 @@ class BaseModel(pydantic.BaseModel):
 
 
 class Base(abc.ABC, typing.Generic[T], watchdog.events.FileSystemEventHandler):
-    """An abstract base class for event-driven file post-processing."""
-
     def __init__(
         self,
         tag: str,
@@ -42,6 +43,14 @@ class Base(abc.ABC, typing.Generic[T], watchdog.events.FileSystemEventHandler):
             spectre_core.spectrograms.Spectrogram
         ] = None,
     ) -> None:
+        """An abstract interface enabling event-driven file processing.
+
+        :param tag: The data tag.
+        :param parameters: Configurable parameters.
+        :param batch_cls: The batch used to read data files.
+        :param queued_file: Optionally override the queued file, defaults to None
+        :param cached_spectrogram: Optionally override the cached spectrogram, defaults to None
+        """
         self._tag = tag
         self.__batch_cls = batch_cls
         self.__time_range = typing.cast(float, parameters["time_range"])
@@ -57,11 +66,17 @@ class Base(abc.ABC, typing.Generic[T], watchdog.events.FileSystemEventHandler):
         self.__cached_spectrogram = cached_spectrogram
 
     @abc.abstractmethod
-    def process(self, batch: T) -> spectre_core.spectrograms.Spectrogram: ...
+    def process(self, batch: T) -> spectre_core.spectrograms.Spectrogram:
+        """Transform data from the input batch into a spectrogram.
+
+        :param batch: The batch providing an interface to read signal data from the filesystem.
+        :return: The signal data transformed into a spectrogram.
+        """
 
     @property
     @abc.abstractmethod
-    def _watch_extension(self) -> str: ...
+    def _watch_extension(self) -> str:
+        """Newly created files with this extension trigger the batch to be processed."""
 
     def on_created(self, event: watchdog.events.FileSystemEvent) -> None:
         """Process a newly created batch file, only once the next batch is created.

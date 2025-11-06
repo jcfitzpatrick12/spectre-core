@@ -16,6 +16,17 @@ def configure_root_logger(
     level: int = logging.INFO,
     logs_dir_path: typing.Optional[str] = None,
 ) -> str:
+    """Configure the root logger to write log events to a file.
+
+    The log file will be created at the following path
+
+        `<logs_dir_path>/<start_time>_<pid>_<process_type>.log`
+
+    :param process_type: The type of the process.
+    :param level: The logging level, defaults to logging.INFO
+    :param logs_dir_path: Optionally override the directory in which logs will be written to, defaults to None
+    :return: The file path of the log file on the filesystem.
+    """
     # Get the root logger, set its level and remove any existing handlers.
     logger = logging.getLogger()
     logger.setLevel(level)
@@ -47,7 +58,7 @@ def configure_root_logger(
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
-    return file_path
+    return os.path.abspath(file_path)
 
 
 def get_root_logger_state() -> tuple[bool, int]:

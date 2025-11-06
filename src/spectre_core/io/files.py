@@ -22,6 +22,10 @@ class FileFormat(enum.Enum):
 
 class BaseFile(abc.ABC, Generic[T]):
     def __init__(self, file_path: str) -> None:
+        """An abstract interface to read a file of arbitrary format from the file system.
+
+        :param file_path: The path to the file on the filesystem.
+        """
         self._cache: Optional[T] = None
         self._file_path = file_path
 
@@ -31,6 +35,7 @@ class BaseFile(abc.ABC, Generic[T]):
 
     @property
     def file_path(self) -> str:
+        """The path to the file on the filesystem."""
         return self._file_path
 
     @property
@@ -59,13 +64,9 @@ class BaseFile(abc.ABC, Generic[T]):
         """Check if the file exists in the filesystem."""
         return os.path.exists(self._file_path)
 
-    def cached_read(self, cache: bool = True) -> T:
-        """Read the file contents.
-
-        :param cache: If False, bypasses the cache and reads the file directly, defaults to True.
-        :return: The file contents.
-        """
-        if not cache or self._cache is None:
+    def cached_read(self) -> T:
+        """Read the file contents, caching the result for repeated calls."""
+        if self._cache is None:
             self._cache = self.read()
         return self._cache
 
@@ -87,24 +88,6 @@ class _JsonFile(BaseFile[dict[str, Any]]):
         with open(self._file_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    def save(self, data: dict[str, Any], force: bool = False) -> None:
-        """Save the input dictionary to the file in JSON format.
-
-        :param data: The dictionary to save.
-        :param force: If True, overwrites the file if it already exists, defaults to False.
-        :raises FileExistsError: If the file exists and `force` is False.
-        """
-        if not self.exists:
-            os.mkdir(self.parent_dir_path)
-
-        if self.exists and not force:
-            raise FileExistsError(
-                f"{self.file_name} already exists. Use `force=True` to overwrite."
-            )
-
-        with open(self._file_path, "w", encoding="utf-8") as file:
-            json.dump(data, file, indent=4)
-
 
 class _TextFile(BaseFile[str]):
     def read(self) -> str:
@@ -114,10 +97,6 @@ class _TextFile(BaseFile[str]):
 
 class _PngFile(BaseFile[str]):
     def read(self) -> str:
-        """Reads the PNG file and returns it base64-encoded.
-
-        :return: Base64-encoded string representation of the image.
-        """
         with open(self.file_path, "rb") as f:
             encoded = base64.b64encode(f.read())
             return encoded.decode("ascii")

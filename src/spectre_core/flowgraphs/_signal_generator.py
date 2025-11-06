@@ -22,6 +22,8 @@ class CosineWaveModel(BaseModel):
 
 
 class CosineWave(Base):
+    """Record a complex-valued cosine signal to batched data files."""
+
     def configure(self, tag: str, parameters: dict[str, typing.Any]) -> None:
         sample_rate = typing.cast(float, parameters["sample_rate"])
         batch_size = typing.cast(float, parameters["batch_size"])

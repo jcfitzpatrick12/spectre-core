@@ -37,6 +37,7 @@ class FixedCenterFrequencyModel(BaseModel):
     frequency_resolution: spectre_core.fields.Field.frequency_resolution = 0
     time_resolution: spectre_core.fields.Field.time_resolution = 0
     batch_size: spectre_core.fields.Field.batch_size = 3
+    keep_signal: spectre_core.fields.Field.keep_signal = True
 
     @pydantic.model_validator(mode="after")
     def validate(self):
@@ -60,6 +61,8 @@ class FixedCenterFrequency(Base[spectre_core.batches.IQStreamBatch]):
         batch_cls: typing.Type[spectre_core.batches.IQStreamBatch],
     ) -> None:
         super().__init__(tag, parameters, batch_cls)
+
+        # Unpack configurable parameters.
         self.__window_size = typing.cast(int, parameters["window_size"])
         self.__window_hop = typing.cast(int, parameters["window_hop"])
         self.__window_type = typing.cast(str, parameters["window_type"])
@@ -69,8 +72,9 @@ class FixedCenterFrequency(Base[spectre_core.batches.IQStreamBatch]):
         self.__frequency_resolution = typing.cast(
             float, parameters["frequency_resolution"]
         )
+        self.__keep_signal = typing.cast(bool, parameters["keep_signal"])
 
-        # Read all the required capture config parameters.
+        # Make the window.
         self.__window = get_window(WindowType(self.__window_type), self.__window_size)
 
         # Pre-allocate the buffer.
@@ -88,9 +92,7 @@ class FixedCenterFrequency(Base[spectre_core.batches.IQStreamBatch]):
     def process(
         self, batch: spectre_core.batches.IQStreamBatch
     ) -> spectre_core.spectrograms.Spectrogram:
-        """Compute the spectrogram of IQ samples captured at a fixed center frequency, then save it to
-        file in the FITS format.
-        """
+        """Compute the spectrogram of IQ samples captured at a fixed center frequency."""
         _LOGGER.info(f"Reading {batch.bin_file.file_path}")
         iq_data = batch.bin_file.read()
 
@@ -106,6 +108,7 @@ class FixedCenterFrequency(Base[spectre_core.batches.IQStreamBatch]):
             self.__fftw_obj, self.__buffer, iq_data, self.__window, self.__window_hop
         )
 
+        _LOGGER.info("Creating the spectrogram")
         # Shift the zero-frequency component to the middle of the spectrum.
         dynamic_spectra = np.fft.fftshift(dynamic_spectra, axes=0)
 
@@ -135,7 +138,6 @@ class FixedCenterFrequency(Base[spectre_core.batches.IQStreamBatch]):
             start_datetime,
         )
 
-        _LOGGER.info("Averaging the spectrogram")
         spectrogram = spectre_core.spectrograms.time_average(
             spectrogram, resolution=self.__time_resolution
         )
@@ -143,10 +145,13 @@ class FixedCenterFrequency(Base[spectre_core.batches.IQStreamBatch]):
             spectrogram, resolution=self.__frequency_resolution
         )
 
-        _LOGGER.info(f"Deleting {batch.bin_file.file_path}")
-        batch.bin_file.delete()
+        _LOGGER.info("Spectrogram created successfully")
 
-        _LOGGER.info(f"Deleting {batch.hdr_file.file_path}")
-        batch.hdr_file.delete()
+        if not self.__keep_signal:
+            _LOGGER.info(f"Deleting {batch.bin_file.file_path}")
+            batch.bin_file.delete()
+
+            _LOGGER.info(f"Deleting {batch.hdr_file.file_path}")
+            batch.hdr_file.delete()
 
         return spectrogram

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 
-"""Program config."""
+"""Program-wide config."""
 
 from ._paths import paths, Paths
 from ._time_formats import TimeFormat

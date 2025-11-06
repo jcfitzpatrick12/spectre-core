@@ -12,16 +12,15 @@ import spectre_core.jobs
 
 
 @pytest.fixture
-def signal_generator() -> spectre_core.receivers.BaseReceiver:
+def signal_generator() -> spectre_core.receivers.Base:
     """Get a signal generator, with mode not yet set."""
     return spectre_core.receivers.get_receiver(
         spectre_core.receivers.ReceiverName.SIGNAL_GENERATOR
     )
 
 
-TOTAL_RUNTIME = 10
 ATOL = 1e-4
-
+DURATION = 10
 COSINE_WAVE_MODE = "cosine_wave"
 COSINE_WAVE_PARAMETERS = {
     "amplitude": 2.0,
@@ -57,41 +56,24 @@ class TestEndToEnd:
         # Make a new config, with the tag dynamically created based on the receiver mode.
         tag = mode.replace("_", "-")
         signal_generator.write_config(
-            tag, parameters, spectre_config_paths.get_configs_dir_path()
+            tag,
+            parameters,
+            configs_dir_path=spectre_config_paths.get_configs_dir_path(),
         )
 
         # Read the config back from the filesystem.
         config = signal_generator.read_config(
-            tag, spectre_config_paths.get_configs_dir_path()
+            tag, configs_dir_path=spectre_config_paths.get_configs_dir_path()
         )
 
-        # Create the workers.
-        post_processing_worker = spectre_core.jobs.make_worker(
-            "post_processing",
-            signal_generator.activate_post_processing,
-            (
-                config,
-                spectre_config_paths.get_batches_dir_path(),
-            ),
+        # Record some spectrograms.
+        spectre_core.receivers.record_spectrograms(
+            config,
+            DURATION,
             spectre_data_dir_path=spectre_config_paths.get_spectre_data_dir_path(),
         )
 
-        flowgraph_worker = spectre_core.jobs.make_worker(
-            "flowgraph",
-            signal_generator.activate_flowgraph,
-            (
-                config,
-                spectre_config_paths.get_batches_dir_path(),
-            ),
-            spectre_data_dir_path=spectre_config_paths.get_spectre_data_dir_path(),
-        )
-
-        # Start the job.
-        spectre_core.jobs.start_job(
-            [post_processing_worker, flowgraph_worker], TOTAL_RUNTIME
-        )
-
-        # Check that we've found some spectrums.
+        # Check that we've found some spectrograms.
         found_spectrograms = False
 
         # Compare each spectrogram to the corresponding analytically derived solutions.

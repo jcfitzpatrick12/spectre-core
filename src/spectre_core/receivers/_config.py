@@ -50,6 +50,11 @@ class _CaptureConfigKey:
 
 class Config:
     def __init__(self, tag: str, content: dict[str, typing.Any]) -> None:
+        """A container for config data.
+
+        :param tag: The tag of the config.
+        :param content: The config data.
+        """
         _validate_keys(content)
         _validate_tag(tag)
         self._tag = tag
@@ -57,7 +62,7 @@ class Config:
 
     @property
     def tag(self) -> str:
-        """A unique identifier."""
+        """A config tag."""
         return self._tag
 
     @property
@@ -72,11 +77,17 @@ class Config:
 
     @property
     def parameters(self) -> dict[str, typing.Any]:
-        """User-configurable parameters."""
+        """Configurable parameters."""
         return self._content[_CaptureConfigKey.PARAMETERS]
 
 
 def read_config(tag: str, configs_dir_path: typing.Optional[str] = None) -> Config:
+    """Read config data from the filesystem.
+
+    :param tag: The config tag.
+    :param configs_dir_path: Optionally override the directory containing the configs, defaults to None
+    :return: A container storing the config data.
+    """
     configs_dir_path = configs_dir_path or spectre_core.config.paths.get_logs_dir_path()
     file_path = os.path.join(configs_dir_path, f"{tag}.json")
     return Config(
@@ -91,6 +102,14 @@ def write_config(
     parameters: dict[str, typing.Any],
     configs_dir_path: typing.Optional[str] = None,
 ) -> None:
+    """Write parameters to a config on the filesystem.
+
+    :param tag: The config tag.
+    :param receiver_name: The name of the receiver.
+    :param receiver_mode: The name of the operating mode.
+    :param parameters: The parameters to save.
+    :param configs_dir_path: Optionally override the directory containing the configs, defaults to None
+    """
     configs_dir_path = (
         configs_dir_path or spectre_core.config.paths.get_configs_dir_path()
     )

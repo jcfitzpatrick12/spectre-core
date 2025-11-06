@@ -28,13 +28,10 @@ def _make_daemon_process(
 
 
 class Worker:
-    """A lightweight wrapper for a `multiprocessing.Process` daemon.
-
-    Provides a very simple API to start, and restart a multiprocessing process.
-    """
-
     def __init__(self, name: str, target: typing.Callable[[], None]) -> None:
-        """Initialise a `Worker` instance.
+        """A lightweight wrapper for a `multiprocessing.Process` daemon.
+
+        Provides a very simple API to start, and restart a multiprocessing process.
 
         :param name: The name assigned to the process.
         :param target: The callable to be executed by the worker process.

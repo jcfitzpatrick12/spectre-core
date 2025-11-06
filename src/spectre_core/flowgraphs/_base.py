@@ -15,6 +15,9 @@ import spectre_core.fields
 
 
 class BaseModel(pydantic.BaseModel):
+    """Base model to be inherited by all flowgraph models."""
+
+    model_config = pydantic.ConfigDict(validate_assignment=True)
     max_noutput_items: spectre_core.fields.Field.max_noutput_items = 100000
 
 
@@ -25,6 +28,12 @@ class Base(gnuradio.gr.top_block):
         parameters: dict[str, typing.Any],
         batches_dir_path: typing.Optional[str] = None,
     ):
+        """An abstract interface for a configurable GNU Radio flowgaph.
+
+        :param tag: The data tag.
+        :param parameters: Configurable parameters.
+        :param batches_dir_path: Optionally specify the directory to store data produced at runtime.
+        """
         super().__init__()
         self.__max_noutput_items = typing.cast(int, parameters["max_noutput_items"])
         self._batches_dir_path = (
@@ -39,6 +48,7 @@ class Base(gnuradio.gr.top_block):
         raise NotImplementedError("Flowgraphs must implement the `configure` method.")
 
     def activate(self) -> None:
+        """Activate the GNU Radio flowgraph."""
 
         def sig_handler(sig=None, frame=None):
             self.stop()

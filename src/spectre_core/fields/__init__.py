@@ -2,6 +2,8 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+"""Shared pydantic fields for all models."""
+
 from ._fields import Field
 
 __all__ = ["Field"]

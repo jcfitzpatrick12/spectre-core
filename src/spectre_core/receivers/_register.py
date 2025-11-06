@@ -4,22 +4,22 @@
 
 import typing
 
-from ._base import BaseReceiver
+from ._base import Base
 
 # map populated at runtime via the `register_receiver` decorator.
-receivers: dict[str, typing.Type[BaseReceiver]] = {}
+receivers: dict[str, typing.Type[Base]] = {}
 
-T = typing.TypeVar("T", bound=BaseReceiver)
+T = typing.TypeVar("T", bound=Base)
 
 
 def register_receiver(
     receiver_name: str,
 ) -> typing.Callable[[typing.Type[T]], typing.Type[T]]:
-    """Decorator to register a fully implemented `BaseReceiver` subclass under a specified `receiver_name`.
+    """Decorator to register a fully implemented `Base` subclass under a specified `receiver_name`.
 
     :param receiver_name: The name of the receiver.
     :raises ValueError: If the provided `receiver_name` is already registered.
-    :return: A decorator that registers the `BaseReceiver` subclass under the given `receiver_name`.
+    :return: A decorator that registers the `Base` subclass under the given `receiver_name`.
     """
 
     def decorator(cls: typing.Type[T]) -> typing.Type[T]:

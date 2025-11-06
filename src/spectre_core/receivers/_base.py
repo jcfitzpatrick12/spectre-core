@@ -14,6 +14,7 @@ import spectre_core.batches
 import spectre_core.event_handlers
 import spectre_core.config
 import spectre_core.flowgraphs
+import spectre_core.logs
 
 from ._config import Config, read_config, write_config
 
@@ -23,10 +24,8 @@ T = typing.TypeVar("T")
 
 
 class ReceiverComponents(typing.Generic[T]):
-    """Base class for managing receiver components per operating mode."""
-
     def __init__(self) -> None:
-        """Initialise an instance of `ReceiverComponents`."""
+        """Manage receiver components per operating mode."""
         self._components: dict[str, T] = {}
 
     @property
@@ -56,23 +55,23 @@ class ReceiverComponents(typing.Generic[T]):
         return self._components[mode]
 
 
-class Models(ReceiverComponents[typing.Type[pydantic.BaseModel]]): ...
+class Models(ReceiverComponents[typing.Type[pydantic.BaseModel]]):
+    """Store the model class per operating mode."""
 
 
-class Flowgraphs(ReceiverComponents[typing.Type[spectre_core.flowgraphs.Base]]): ...
+class Flowgraphs(ReceiverComponents[typing.Type[spectre_core.flowgraphs.Base]]):
+    """Store the flowgraph class per operating mode."""
 
 
-class EventHandlers(
-    ReceiverComponents[typing.Type[spectre_core.event_handlers.Base]]
-): ...
+class EventHandlers(ReceiverComponents[typing.Type[spectre_core.event_handlers.Base]]):
+    """Store the event handler class per operating mode."""
 
 
-class Batches(ReceiverComponents[typing.Type[spectre_core.batches.BaseBatch]]): ...
+class Batches(ReceiverComponents[typing.Type[spectre_core.batches.Base]]):
+    """Store the batch class per operating mode."""
 
 
-class BaseReceiver:
-    """An abstraction layer for software-defined radio receivers."""
-
+class Base:
     def __init__(
         self,
         name: str,
@@ -83,23 +82,33 @@ class BaseReceiver:
         batches: typing.Optional[Batches] = None,
         specs: typing.Optional[dict[str, typing.Any]] = None,
     ) -> None:
-        self._name = name
-        self._mode = mode
-        self._models = models or Models()
-        self._flowgraphs = flowgraphs or Flowgraphs()
-        self._event_handlers = event_handlers or EventHandlers()
-        self._batches = batches or Batches()
-        self._specs = specs or {}
+        """An abstraction layer for software-defined radio receivers.
+
+        :param name: The name of the receiver.
+        :param mode: Optionally set the operating mode for the receiver, defaults to None
+        :param models: Optionally provide model classes per operating mode, defaults to None
+        :param flowgraphs: Optionally provide flowgraph classes per operating mode, defaults to None
+        :param event_handlers: Optionally provide event handler classes per operating mode, defaults to None
+        :param batches: Optionally provide batch classes per operating mode, defaults to None
+        :param specs: Optionally provide hardware specifications, defaults to None
+        """
+        self.__name = name
+        self.__mode = mode
+        self.__models = models or Models()
+        self.__flowgraphs = flowgraphs or Flowgraphs()
+        self.__event_handlers = event_handlers or EventHandlers()
+        self.__batches = batches or Batches()
+        self.__specs = specs or {}
 
     @property
     def name(self) -> str:
-        """Retrieve the name of the receiver."""
-        return self._name
+        """The name of the receiver."""
+        return self.__name
 
     @property
     def mode(self) -> typing.Optional[str]:
-        """Retrieve the operating mode."""
-        return self._mode
+        """The operating mode, or `None` if it's not set."""
+        return self.__mode
 
     @mode.setter
     def mode(self, value: str) -> None:
@@ -107,63 +116,69 @@ class BaseReceiver:
 
         :param value: The new operating mode of the receiver. Use `None` to unset the mode.
         """
+        _LOGGER.info(f"Setting the mode to '{value}'")
         if value not in self.modes:
             raise spectre_core.exceptions.ModeNotFoundError(
                 f"Mode `{value}` not found. Expected one of {self.modes}"
             )
-        self._mode = value
+        self.__mode = value
 
     @property
     def modes(self) -> list[str]:
-        """The operating modes for the receiver.
+        """The available operating modes for the receiver.
 
         :raises ValueError: If the modes are inconsistent.
         """
         if (
-            not self._flowgraphs.modes
-            == self._event_handlers.modes
-            == self._batches.modes
+            not self.__flowgraphs.modes
+            == self.__event_handlers.modes
+            == self.__batches.modes
         ):
             raise ValueError(f"Inconsistent modes for the receiver '{self.name}'")
-        return self._flowgraphs.modes
+        return self.__flowgraphs.modes
 
     @property
     def active_mode(self) -> str:
-        """Retrieve the active operating mode, raising an error if not set.
+        """The active operating mode, raising an error if not set.
 
         :raises ValueError: If no mode is currently set.
         :return: The active operating mode.
         """
-        if self._mode is None:
+        if self.__mode is None:
             raise ValueError(
                 f"An active mode is not set for the receiver '{self.name}'. "
-                f"Currently, the mode is {self._mode}"
+                f"Currently, the mode is {self.__mode}"
             )
-        return self._mode
+        return self.__mode
 
     @property
     def model_cls(self) -> typing.Type[pydantic.BaseModel]:
-        return self._models.get(self.active_mode)
+        """The model for the active operating mode."""
+        return self.__models.get(self.active_mode)
 
     @property
     def flowgraph_cls(
         self,
     ) -> typing.Type[spectre_core.flowgraphs.Base]:
-        return self._flowgraphs.get(self.active_mode)
+        """The flowgraph for the active operating mode."""
+        return self.__flowgraphs.get(self.active_mode)
 
     @property
     def event_handler_cls(
         self,
     ) -> typing.Type[spectre_core.event_handlers.Base]:
-        return self._event_handlers.get(self.active_mode)
+        """The event handler for the active operating mode."""
+        return self.__event_handlers.get(self.active_mode)
 
     @property
-    def batch_cls(self) -> typing.Type[spectre_core.batches.BaseBatch]:
-        return self._batches.get(self.active_mode)
+    def batch_cls(self) -> typing.Type[spectre_core.batches.Base]:
+        """The batch for the active operating mode."""
+        return self.__batches.get(self.active_mode)
 
     @property
     def specs(self) -> dict[str, typing.Any]:
-        return self._specs
+        """A copy of the hardware specifications."""
+        return self.__specs.copy()
 
     def add_spec(self, name: str, value: typing.Any) -> None:
         """Add a hardware specification.
@@ -171,7 +186,7 @@ class BaseReceiver:
         :param name: The specification's name.
         :param value: The specification's value.
         """
-        self._specs[name] = value
+        self.__specs[name] = value
 
     def get_spec(self, name: str) -> typing.Any:
         """Get a hardware specification.
@@ -180,76 +195,135 @@ class BaseReceiver:
         :return: The specification's value.
         :raises KeyError: If the specification is not found.
         """
-        if name not in self._specs:
+        if name not in self.__specs:
             raise KeyError(
-                f"Specification `{name}` not found. Expected one of {list(self._specs.keys())}"
+                f"Specification `{name}` not found. Expected one of {list(self.__specs.keys())}"
             )
-        return self._specs[name]
+        return self.__specs[name]
 
-    def validate(self, parameters: dict[str, str]) -> dict[str, typing.Any]:
+    def __validate(
+        self, parameters: dict[str, typing.Any], skip: bool = False
+    ) -> dict[str, typing.Any]:
+        """Validate the input parameters against the model for the active operating mode.
+
+        :param parameters: The parameters to validate
+        :param skip: If True, skip validating the parameters against the model.
+        :return: The validated parameters.
+        """
+        if skip:
+            print("Here")
+            return parameters
+
+        _LOGGER.info("Validating parameters...")
         return self.model_cls.model_validate(parameters).model_dump()
 
     def read_config(
-        self, tag: str, configs_dir_path: typing.Optional[str] = None
+        self,
+        tag: str,
+        skip_validation: bool = False,
+        configs_dir_path: typing.Optional[str] = None,
     ) -> Config:
+        """Read a config.
+
+        :param tag: The tag of the config.
+        :param skip_validation: If True, skip validating the parameters against the model.
+        :param configs_dir_path: Optionally override the directory which stores the configs, defaults to None
+        :return: A container storing the file contents.
+        """
         configs_dir_path = (
             configs_dir_path or spectre_core.config.paths.get_configs_dir_path()
         )
-        return read_config(tag, configs_dir_path)
+        config = read_config(tag, configs_dir_path)
+        if skip_validation:
+            return config
+        else:
+            self.__validate(config.parameters)
+            return config
 
     def write_config(
         self,
         tag: str,
-        parameters: dict[str, str],
+        parameters: dict[str, typing.Any],
+        skip_validation: bool = False,
         configs_dir_path: typing.Optional[str] = None,
     ) -> None:
+        """Write parameters to a config.
+
+        :param tag: The tag of the config.
+        :param parameters: The parameters to save.
+        :param skip_validation: If True, skip validating the parameters against the model.
+        :param configs_dir_path: Optionally override the directory which stores the configs, defaults to None
+        """
         write_config(
             tag,
             self.name,
             self.active_mode,
-            self.validate(parameters),
+            self.__validate(parameters, skip=skip_validation),
             configs_dir_path,
         )
 
+    @spectre_core.logs.log_call
     def activate_flowgraph(
-        self, config: Config, batches_dir_path: typing.Optional[str] = None
+        self,
+        tag: str,
+        parameters: dict[str, typing.Any],
+        skip_validation: bool = False,
+        batches_dir_path: typing.Optional[str] = None,
     ) -> None:
-        parameters = self.validate(config.parameters)
+        """Activate a flowgraph.
+
+        :param config: The config used to configure the flowgraph.
+        :param skip_validation: If True, skip validating the parameters against the model.
+        :param batches_dir_path: Optionally override the directory which stores the runtime data, defaults to None
+        """
+        _LOGGER.info("Starting the flowgraph...")
         self.flowgraph_cls(
-            config.tag, parameters, batches_dir_path=batches_dir_path
+            tag,
+            self.__validate(parameters, skip=skip_validation),
+            batches_dir_path=batches_dir_path,
         ).activate()
 
+    @spectre_core.logs.log_call
     def activate_post_processing(
-        self, config: Config, batches_dir_path: typing.Optional[str] = None
+        self,
+        tag: str,
+        parameters: dict[str, typing.Any],
+        skip_validation: bool = False,
+        batches_dir_path: typing.Optional[str] = None,
     ) -> None:
+        """Activate post processing.
+
+        :param config: The config used to configure post processing.
+        :param skip_validation: If True, skip validating the parameters against the model.
+        :param batches_dir_path: Optionally override the directory which stores the runtime data, defaults to None
+        """
 
         batches_dir_path = (
             batches_dir_path or spectre_core.config.paths.get_batches_dir_path()
         )
         observer = watchdog.observers.Observer()
-
-        parameters = self.validate(config.parameters)
-        self.event_handler_cls
         observer.schedule(
-            self.event_handler_cls(config.tag, parameters, self.batch_cls),
+            self.event_handler_cls(
+                tag, self.__validate(parameters, skip=skip_validation), self.batch_cls
+            ),
             batches_dir_path,
             recursive=True,
             event_filter=[watchdog.events.FileCreatedEvent],
         )
 
         try:
-            _LOGGER.info("Starting the post processing thread...")
+            _LOGGER.info("Starting the post processing...")
             observer.start()
             observer.join()
         except KeyboardInterrupt:
             _LOGGER.warning(
                 (
                     "Keyboard interrupt detected. Signalling "
-                    "the post processing thread to stop"
+                    "the post processing to stop"
                 )
             )
             observer.stop()
-            _LOGGER.warning(("Post processing thread has been successfully stopped"))
+            _LOGGER.warning(("Post processing has been successfully stopped"))
 
     def add_mode(
         self,
@@ -257,9 +331,19 @@ class BaseReceiver:
         model: typing.Type[pydantic.BaseModel],
         flowgraph: typing.Type[spectre_core.flowgraphs.Base],
         event_handler: typing.Type[spectre_core.event_handlers.Base],
-        batch: typing.Type[spectre_core.batches.BaseBatch],
+        batch: typing.Type[spectre_core.batches.Base],
     ) -> None:
-        self._models.add(mode, model)
-        self._flowgraphs.add(mode, flowgraph)
-        self._event_handlers.add(mode, event_handler)
-        self._batches.add(mode, batch)
+        """Add an operating mode.
+
+        :param mode: The name of the operating mode.
+        :param model: The model defining configurable parameters for the operating mode.
+        :param flowgraph: The flowgraph class for this operating mode, which will record
+        the signal.
+        :param event_handler: The event handler class for this operating mode, which will
+        post process data recorded by the flowgraph.
+        :param batch: The batch class used to read data produced at runtime by this operating mode.
+        """
+        self.__models.add(mode, model)
+        self.__flowgraphs.add(mode, flowgraph)
+        self.__event_handlers.add(mode, event_handler)
+        self.__batches.add(mode, batch)

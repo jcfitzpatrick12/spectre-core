@@ -13,12 +13,13 @@ DEFAULT_SPECTRE_DATA_DIR_PATH = pathlib.Path(os.curdir) / ".spectre_data"
 
 
 class Paths:
-    """Manages file system paths for Spectre."""
-
     def __init__(self, env: Optional[Dict[str, str]] = None):
-        """:param env: A dictionary representing environment variables. Defaults to `os.environ`."""
+        """Manages file system paths for Spectre.
+
+        :param env: A dictionary representing environment variables. Defaults to `os.environ`.
+        """
         self._env = env or os.environ
-        self.make_dirs()
+        self.__make_dirs()
 
     def get_spectre_data_dir_path(self) -> str:
         """Get the base directory for Spectre data.
@@ -37,9 +38,9 @@ class Paths:
         :param spectre_data_dir_path: The new base directory for Spectre data.
         """
         self._env["SPECTRE_DATA_DIR_PATH"] = spectre_data_dir_path
-        self.make_dirs()
+        self.__make_dirs()
 
-    def make_dirs(self) -> None:
+    def __make_dirs(self) -> None:
         self.__mkdir(pathlib.Path(self.get_spectre_data_dir_path()))
         self.__mkdir(pathlib.Path(self.get_batches_dir_path()))
         self.__mkdir(pathlib.Path(self.get_logs_dir_path()))
@@ -53,7 +54,7 @@ class Paths:
     ) -> str:
         """Get the directory for batched data files, optionally with a date-based subdirectory."""
         return str(
-            self._get_date_based_dir_path(
+            self.__get_date_based_dir_path(
                 pathlib.Path(self.get_spectre_data_dir_path()) / "batches",
                 year,
                 month,
@@ -69,7 +70,7 @@ class Paths:
     ) -> str:
         """Get the directory for log files, optionally with a date-based subdirectory."""
         return str(
-            self._get_date_based_dir_path(
+            self.__get_date_based_dir_path(
                 pathlib.Path(self.get_spectre_data_dir_path()) / "logs",
                 year,
                 month,
@@ -81,7 +82,7 @@ class Paths:
         """Get the directory for configuration files."""
         return str(pathlib.Path(self.get_spectre_data_dir_path()) / "configs")
 
-    def _get_date_based_dir_path(
+    def __get_date_based_dir_path(
         self,
         base_dir: pathlib.Path,
         year: Optional[int],

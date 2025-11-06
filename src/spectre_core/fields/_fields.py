@@ -9,12 +9,14 @@ import pydantic
 
 
 class Field:
+    """Shared `pydantic` fields for all models."""
+
     max_noutput_items = typing.Annotated[
         int,
         pydantic.Field(
             ...,
             gt=0,
-            description="The maximum number of items to be handled at each call of the work function in GNU Radio.",
+            description="The maximum number of items handled at each call of the work function in GNU Radio.",
         ),
     ]
     sample_rate = typing.Annotated[
@@ -28,7 +30,7 @@ class Field:
         pydantic.Field(
             ...,
             gt=1,
-            description="SDR data is collected in batches of this size, specified in seconds.",
+            description="Samples are recorded in batches of this size, specified in seconds.",
         ),
     ]
     frequency = typing.Annotated[
@@ -68,7 +70,7 @@ class Field:
         pydantic.Field(
             ...,
             gt=0.0,
-            description="The center frequency of the SDR in Hz. This value determines the midpoint of the frequency range being processed.",
+            description="The center frequency, in Hz. This value determines the midpoint of the frequency range being processed.",
         ),
     ]
     frequency_resolution = typing.Annotated[
@@ -121,4 +123,11 @@ class Field:
     obs_lon = typing.Annotated[
         float,
         pydantic.Field(..., description="Corresponds to the FITS keyword OBS_LON."),
+    ]
+    keep_signal = typing.Annotated[
+        bool,
+        pydantic.Field(
+            ...,
+            description="If True, keep the signal after creating the spectrogram. Otherwise, it is deleted from the file system.",
+        ),
     ]

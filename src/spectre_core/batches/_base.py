@@ -15,6 +15,7 @@ import spectre_core.spectrograms
 
 
 def parse_batch_file_path(absolute_file_path: str) -> tuple[str, str, str, str]:
+    """Parse a file path into the directory name, the start time, tag and extension."""
     return (
         os.path.dirname(absolute_file_path),
         *parse_batch_file_name(os.path.basename(absolute_file_path)),
@@ -22,7 +23,7 @@ def parse_batch_file_path(absolute_file_path: str) -> tuple[str, str, str, str]:
 
 
 def parse_batch_file_name(file_name: str) -> tuple[str, str, str]:
-    """Parse the base file name of a batch file into a start time, tag, and extension."""
+    """Parse a file name into a start time, tag, and extension."""
     batch_name, extension = os.path.splitext(file_name)
     if batch_name.count("_") != 1:
         raise ValueError(f"Expected exactly one underscore in '{batch_name}'.")
@@ -35,33 +36,34 @@ T = typing.TypeVar("T")
 
 
 class BatchFile(spectre_core.io.BaseFile[T]):
-    """Abstract base class for files belonging to a batch, identified by their file extension.
-
-    Batch file names must conform to the following structure:
-
-        `<start time>_<tag>.<extension>`
-
-    The substring `<start time>_<tag>` is referred to as the batch name. Files with the same batch name
-    belong to the same batch.
-    """
-
     def __init__(self, file_path: str) -> None:
+        """An abstract base class for files belonging to a batch, identified by their file extension.
+
+        Batch file names must conform to the following structure:
+
+            `<start time>_<tag>.<extension>`
+
+        The substring `<start time>_<tag>` is referred to as the batch name. Files with the same batch name
+        belong to the same batch.
+
+        :param file_path: The absolute path to the batch file.
+        """
         super().__init__(file_path)
         self._start_time, self._tag, _ = parse_batch_file_name(self.file_name)
 
     @property
     def start_time(self) -> str:
-        """The start time of the batch, formatted as a string up to seconds precision."""
+        """The start time of the batch, up to seconds precision."""
         return self._start_time
 
     @property
     def tag(self) -> str:
-        """The batch name tag."""
+        """The data tag."""
         return self._tag
 
     @functools.cached_property
     def start_datetime(self) -> datetime.datetime:
-        """The start time of the batch, parsed as a datetime up to seconds precision."""
+        """The start time of the batch, up to seconds precision."""
         return datetime.datetime.strptime(
             self.start_time, spectre_core.config.TimeFormat.DATETIME
         )
@@ -73,24 +75,28 @@ class _Extension:
 
 
 class _PngFile(BatchFile[str]):
+    """Stores an image in the PNG file format."""
+
     def read(self) -> str:
         return spectre_core.io.read_file(self.file_path, spectre_core.io.FileFormat.PNG)
 
 
-class BaseBatch(abc.ABC):
-    """
-    An abstract base class representing a group of data files over a common time interval.
-
-    All files in a batch share a base file name and differ only by their extension.
-    Subclasses of `BaseBatch` define the expected data for each file extension and
-    provide an API for accessing their contents using `BatchFile` subclasses.
-
-    Subclasses should expose `BatchFile` instances directly as attributes, which
-    simplifies static typing. Additionally, they should call `add_file` in the constructor
-    to formally register each `BatchFile`.
-    """
-
+class Base(abc.ABC):
     def __init__(self, batches_dir_path: str, start_time: str, tag: str) -> None:
+        """An abstract base class representing a group of data files over a common time interval.
+
+        All files in a batch share a base file name and differ only by their extension.
+        Subclasses define the expected data for each file extension and
+        provide an API for accessing their contents using `BatchFile` subclasses.
+
+        Subclasses should expose `BatchFile` instances directly as attributes, which
+        simplifies static typing. Additionally, they should call `add_file` in the constructor
+        to formally register each `BatchFile`.
+
+        :param batches_dir_path: The shared parent directory for each batch file.
+        :param start_time: The start time of the batch.
+        :param tag: The data tag.
+        """
         self._batches_dir_path = batches_dir_path
         self._start_time = start_time
         self._tag: str = tag
@@ -101,23 +107,24 @@ class BaseBatch(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def spectrogram_file(self) -> BatchFile[spectre_core.spectrograms.Spectrogram]: ...
+    def spectrogram_file(self) -> BatchFile[spectre_core.spectrograms.Spectrogram]:
+        """Indicate the file in the batch storing spectrogram data."""
 
     @property
     def start_time(self) -> str:
-        """The start time of the batch, formatted as a string up to seconds precision."""
+        """The start time of the batch, up to seconds precision."""
         return self._start_time
 
     @functools.cached_property
     def start_datetime(self) -> datetime.datetime:
-        """The start time of the batch, parsed as a datetime up to seconds precision."""
+        """The start time of the batch, up to seconds precision."""
         return datetime.datetime.strptime(
             self.start_time, spectre_core.config.TimeFormat.DATETIME
         )
 
     @property
     def tag(self) -> str:
-        """The batch name tag."""
+        """The data tag."""
         return self._tag
 
     @property
@@ -137,7 +144,7 @@ class BaseBatch(abc.ABC):
         return typing.cast(_PngFile, self.get_file(_Extension.PNG))
 
     def add_file(self, batch_file_cls: typing.Type[BatchFile], extension: str) -> None:
-        """Add an instance of a batch file to the batch."""
+        """Add a batch file to the batch."""
         if extension in self._batch_files:
             raise ValueError(
                 f"A file with extension '{extension}' is already registered."
@@ -147,11 +154,11 @@ class BaseBatch(abc.ABC):
         )
 
     def get_file(self, extension: str) -> BatchFile:
-        """Get a batch file instance from the batch, according to the file extension.
+        """Get a batch file from the batch, according to the file extension.
 
         :param extension: The file extension of the batch file.
         :raises NotImplementedError: If the extension is undefined for the batch.
-        :return: The batch file instance registered under the input file extension.
+        :return: The batch file registered under the input file extension.
         """
         if extension in self._batch_files:
             return self._batch_files[extension]

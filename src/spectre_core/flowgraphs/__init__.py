@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""GNURadio flowgraphs."""
+"""Configurable, extensible GNURadio flowgraphs."""
 
 
 from ._base import Base

@@ -16,7 +16,7 @@ import spectre_core.batches
 import spectre_core.spectrograms
 
 from ._register import register_receiver
-from ._base import BaseReceiver, ReceiverComponents
+from ._base import Base, ReceiverComponents
 from ._names import ReceiverName
 from ._config import Config
 
@@ -102,7 +102,7 @@ class _Mode:
 
 
 @register_receiver(ReceiverName.SIGNAL_GENERATOR)
-class SignalGenerator(BaseReceiver):
+class SignalGenerator(Base):
     """An entirely software-defined receiver, which generates synthetic signals."""
 
     def __init__(
