@@ -11,8 +11,10 @@ import numpy as np
 
 import spectre_core.batches
 import spectre_core.spectrograms
-from .._base import BaseEventHandler, BaseEventHandlerModel
-from .._stfft import (
+import spectre_core.fields
+
+from ._base import Base, BaseModel
+from ._stfft import (
     get_buffer,
     get_window,
     get_times,
@@ -26,47 +28,31 @@ from .._stfft import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class FixedEventHandlerModel(BaseEventHandlerModel):
-    window_size: int = pydantic.Field(
-        512,
-        gt=0,
-        description="The size of the window, in samples, when performing the Short Time FFT.",
-    )
-    window_hop: int = pydantic.Field(
-        1024,
-        gt=0,
-        description="How much the window is shifted, in samples, when performing the Short Time FFT.",
-    )
-    window_type: typing.Literal[
-        WindowType.BLACKMAN, WindowType.HANN, WindowType.BOXCAR
-    ] = pydantic.Field(
-        WindowType.BLACKMAN,
-        description="The type of window applied when performing the Short Time FFT.",
-    )
-    center_frequency: float = pydantic.Field(
-        95800000.0,
-        gt=0.0,
-        description="The center frequency of the SDR in Hz. This value determines the midpoint of the frequency range being processed.",
-    )
-    sample_rate: int = pydantic.Field(
-        1000000, gt=0, description="The number of samples per second in Hz."
-    )
-    frequency_resolution: float = pydantic.Field(
-        0,
-        ge=0,
-        description="Spectrograms are averaged up to the frequency resolution, in Hz.",
-    )
-    time_resolution: typing.Optional[float] = pydantic.Field(
-        0,
-        ge=0,
-        description="Spectrograms are averaged up to the time resolution, in seconds.",
-    )
+class FixedCenterFrequencyModel(BaseModel):
+    window_size: spectre_core.fields.Field.window_size = 1024
+    window_hop: spectre_core.fields.Field.window_hop = 1024
+    window_type: spectre_core.fields.Field.window_type = "blackman"
+    center_frequency: spectre_core.fields.Field.center_frequency = 95.8e6
+    sample_rate: spectre_core.fields.Field.sample_rate = 1000000
+    frequency_resolution: spectre_core.fields.Field.frequency_resolution = 0
+    time_resolution: spectre_core.fields.Field.time_resolution = 0
+    batch_size: spectre_core.fields.Field.batch_size = 3
 
-    class ConfigDict:
-        validate_assignment = True
+    @pydantic.model_validator(mode="after")
+    def validate(self):
+        window_interval = self.window_size * (1 / self.sample_rate)
+        if window_interval > self.batch_size:
+            raise ValueError(
+                (
+                    f"The windowing interval must be strictly less than the batch size. "
+                    f"Computed the windowing interval to be {window_interval} [s], "
+                    f"but the batch size is {self.batch_size} [s]"
+                )
+            )
+        return self
 
 
-class FixedEventHandler(BaseEventHandler[spectre_core.batches.IQStreamBatch]):
+class FixedCenterFrequency(Base[spectre_core.batches.IQStreamBatch]):
     def __init__(
         self,
         tag: str,

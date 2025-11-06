@@ -11,44 +11,25 @@ import watchdog.events
 
 import spectre_core.spectrograms
 import spectre_core.batches
+import spectre_core.fields
 
 _LOGGER = logging.getLogger(__name__)
 
 T = typing.TypeVar("T", bound=spectre_core.batches.BaseBatch)
 
 
-class BaseEventHandlerModel(pydantic.BaseModel):
-    time_range: int = pydantic.Field(
-        0,
-        ge=0,
-        description="Spectrograms are stitched together until the time range has elapsed.",
-    )
-    origin: str = pydantic.Field(
-        "Spectre", description="Corresponds to the FITS keyword ORIGIN."
-    )
-    telescope: str = pydantic.Field(
-        "NOTSET", description="Corresponds to the FITS keyword TELESCOP."
-    )
-    instrument: str = pydantic.Field(
-        "NOTSET", description="Corresponds to the FITS keyword INSTRUMEN."
-    )
-    object: str = pydantic.Field(
-        "NOTSET", description="Corresponds to the FITS keyword OBJECT."
-    )
-    obs_lat: float = pydantic.Field(
-        0.0, description="Corresponds to the FITS keyword OBS_LAT."
-    )
-    obs_alt: float = pydantic.Field(
-        0.0, description="Corresponds to the FITS keyword OBS_ALT."
-    )
-    obs_lon: float = pydantic.Field(
-        0.0, description="Corresponds to the FITS keyword OBS_LON."
-    )
+class BaseModel(pydantic.BaseModel):
+    time_range: spectre_core.fields.Field.time_range = 0
+    origin: spectre_core.fields.Field.origin = "NOTSET"
+    telescope: spectre_core.fields.Field.telescope = "NOTSET"
+    instrument: spectre_core.fields.Field.instrument = "NOTSET"
+    object: spectre_core.fields.Field.object_ = "NOTSET"
+    obs_alt: spectre_core.fields.Field.obs_alt = 0.0
+    obs_lat: spectre_core.fields.Field.obs_lat = 0.0
+    obs_lon: spectre_core.fields.Field.obs_lon = 0.0
 
 
-class BaseEventHandler(
-    abc.ABC, typing.Generic[T], watchdog.events.FileSystemEventHandler
-):
+class Base(abc.ABC, typing.Generic[T], watchdog.events.FileSystemEventHandler):
     """An abstract base class for event-driven file post-processing."""
 
     def __init__(

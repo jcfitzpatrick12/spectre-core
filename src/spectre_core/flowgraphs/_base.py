@@ -7,20 +7,18 @@ import signal
 import typing
 import pydantic
 
-import spectre_core.config
-
 import gnuradio.gr
 
 
-class BaseFlowgraphModel(pydantic.BaseModel):
-    max_noutput_items: int = pydantic.Field(
-        100000,
-        gt=0,
-        description="The maximum number of items to be handled at each call of the work function.",
-    )
+import spectre_core.config
+import spectre_core.fields
 
 
-class BaseFlowgraph(gnuradio.gr.top_block):
+class BaseModel(pydantic.BaseModel):
+    max_noutput_items: spectre_core.fields.Field.max_noutput_items = 100000
+
+
+class Base(gnuradio.gr.top_block):
     def __init__(
         self,
         tag,

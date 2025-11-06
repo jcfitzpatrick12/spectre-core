@@ -3,40 +3,31 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import typing
-import pydantic
 
 from gnuradio import gr
 from gnuradio import blocks
 from gnuradio import analog
 from gnuradio import spectre
 
+import spectre_core.fields
 
-from .._flowgraph import BaseFlowgraph, BaseFlowgraphModel
-
-
-class CosineWaveModel(BaseFlowgraphModel):
-    sample_rate: int = pydantic.Field(
-        128000, gt=0, description="The number of samples per second in Hz."
-    )
-    batch_size: float = pydantic.Field(
-        3,
-        gt=1,
-        description="SDR data is collected in batches of this size, specified in seconds.",
-    )
-    frequency: float = pydantic.Field(
-        32000.0, gt=0, description="Frequency of the wave in Hz."
-    )
-    amplitude: float = pydantic.Field(1, gt=0, description="Amplitude of the wave.")
+from ._base import Base, BaseModel
 
 
-class CosineWave(BaseFlowgraph):
+class CosineWaveModel(BaseModel):
+    sample_rate: spectre_core.fields.Field.sample_rate = 128000
+    batch_size: spectre_core.fields.Field.batch_size = 3.0
+    frequency: spectre_core.fields.Field.frequency = 32000
+    amplitude: spectre_core.fields.Field.amplitude = 1
+
+
+class CosineWave(Base):
     def configure(self, tag: str, parameters: dict[str, typing.Any]) -> None:
         sample_rate = typing.cast(float, parameters["sample_rate"])
         batch_size = typing.cast(float, parameters["batch_size"])
         frequency = typing.cast(float, parameters["frequency"])
         amplitude = typing.cast(float, parameters["amplitude"])
 
-        # Blocks
         self.spectre_batched_file_sink = spectre.batched_file_sink(
             self._batches_dir_path, tag, batch_size, sample_rate
         )
@@ -48,7 +39,6 @@ class CosineWave(BaseFlowgraph):
             sample_rate, analog.GR_COS_WAVE, frequency, amplitude, 0, 0
         )
 
-        # Connections
         self.connect((self.analog_sig_source, 0), (self.blocks_throttle_0, 0))
         self.connect((self.blocks_null_source, 0), (self.blocks_throttle_1, 0))
         self.connect((self.blocks_throttle_0, 0), (self.blocks_float_to_complex, 0))

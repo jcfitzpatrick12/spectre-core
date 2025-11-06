@@ -16,7 +16,7 @@
 # import spectre_core.exceptions
 # import spectre_core.spectrograms
 
-# from .._base import BaseEventHandler
+# from .._base import Base
 # from .._stfft import (
 #     get_buffer,
 #     get_window,
@@ -365,43 +365,46 @@
 #     return (iq_data, center_frequencies, num_samples, num_samples_prepended)
 
 
-# class SweptEventHandler(BaseEventHandler):
+# class SweptEventHandler(Base[spectre_core.batches.IQStreamBatch]):
 #     def __init__(
 #         self,
 #         tag: str,
-#         window_size: int,
-#         window_type: int,
-#         window_hop: int,
-#         sample_rate: int,
-#         frequency_step: float,
-#         time_resolution: float = 0,
-#         frequency_resolution: float = 0,
-#         **kwargs,
+#         parameters: dict[str, typing.Any],
+#         batch_cls: typing.Type[spectre_core.batches.IQStreamBatch],
 #     ) -> None:
-#         super().__init__(tag, **kwargs)
+#         super().__init__(tag, parameters, batch_cls)
 
 #         # Read all the required capture config parameters.
-#         self._window_size = window_size
-#         self._window_type = window_type
-#         self._window_hop = window_hop
-#         self._sample_rate = sample_rate
-#         self._time_resolution = time_resolution
-#         self._frequency_resolution = frequency_resolution
-#         self._frequency_step = frequency_step
-#         self._window = get_window(WindowType(self._window_type), self._window_size)
+#         self.__window_size = typing.cast(int, parameters["window_size"])
+#         self.__window_hop = typing.cast(int, parameters["window_hop"])
+#         self.__window_type = typing.cast(str, parameters["window_type"])
+#         self.__sample_rate = typing.cast(int, parameters["sample_rate"])
+#         self.__time_resolution = typing.cast(float, parameters["time_resolution"])
+#         self.__frequency_resolution = typing.cast(
+#             float, parameters["frequency_resolution"]
+#         )
+#         self.__frequency_step = typing.cast(float, parameters["frequency_step"])
+
+#         self.__window = get_window(WindowType(self.__window_type), self.__window_size)
 
 #         # Pre-allocate the buffer.
-#         self._buffer = get_buffer(self._window_size)
+#         self.__buffer = get_buffer(self.__window_size)
 
 #         # Defer the expensive FFTW plan creation until the first batch is being processed.
 #         # With this approach, we avoid a bug where filesystem events are missed because
 #         # the watchdog observer isn't set up in time before the receiver starts capturing data.
-#         self._fftw_obj = None
+#         self.__fftw_obj = None
 
 #         # Initialise a cache to hold the previous batches data.
-#         self._previous_batch: typing.Optional[spectre_core.batches.IQStreamBatch] = None
+#         self.__previous_batch: typing.Optional[spectre_core.batches.IQStreamBatch] = (
+#             None
+#         )
 
-#     def process(self, absolute_file_path: str) -> None:
+#     @property
+#     def _watch_extension(self) -> str:
+#         return spectre_core.batches.IQStreamBatchExtension.BIN
+
+#     def process(self, batch: spectre_core.batches.IQStreamBatch) -> None:
 #         """Compute a spectrogram of IQ samples captured at a center frequency periodically swept in
 #         fixed increments. Neighbouring IQ samples captured at the same frequency constitute a "step". Neighbouring
 #         steps captured at incrementally increasing center frequencies form a "sweep." A new sweep begins when the
@@ -411,18 +414,10 @@
 #         in time to produce a single spectrum per step. The spectra for each step are stitched in frequency to form a single
 #         spectrum for each sweep. These swept spectra are stiched in time to produce the final spectrogram, which is saved to file
 #         in the FITS format.
-
-#         :param absolute_file_path: The absolute path to the `.bin` file containing the IQ sample batch.
 #         """
-#         _LOGGER.info(f"Processing {absolute_file_path}")
-#         batches_dir_path, start_time, tag, _ = (
-#             spectre_core.batches.parse_batch_file_path(absolute_file_path)
-#         )
-#         batch = spectre_core.batches.IQStreamBatch(batches_dir_path, start_time, tag)
-
 #         _LOGGER.info(f"Reading {batch.bin_file.file_path}")
 #         iq_data = batch.bin_file.cached_read()
-# #
+#         #
 #         _LOGGER.info(f"Reading {batch.hdr_file.file_path}")
 #         iq_metadata = batch.hdr_file.cached_read()
 
@@ -442,35 +437,35 @@
 #         )
 
 #         # If a previous batch is stored, the initial sweep may span two adjacent batched files.
-#         if self._previous_batch is not None:
+#         if self.__previous_batch is not None:
 #             # If this is the case, first reconstruct the initial sweep of the current batch
 #             # by prepending the final sweep of the previous batch.
 #             iq_data, center_frequencies, num_samples, num_samples_prepended = (
 #                 _reconstruct_initial_sweep(
-#                     self._previous_batch.bin_file.cached_read(),
-#                     self._previous_batch.hdr_file.cached_read(),
+#                     self.__previous_batch.bin_file.cached_read(),
+#                     self.__previous_batch.hdr_file.cached_read(),
 #                     iq_data,
 #                     iq_metadata,
 #                 )
 #             )
 
 #             # Since we have prepended extra samples, we need to correct the spectrogram start time appropriately.
-#             elapsed_time = num_samples_prepended * (1 / self._sample_rate)
+#             elapsed_time = num_samples_prepended * (1 / self.__sample_rate)
 #             start_datetime -= datetime.timedelta(seconds=float(elapsed_time))
 
-#         if self._fftw_obj is None:
+#         if self.__fftw_obj is None:
 #             _LOGGER.info(f"Creating the FFTW plan")
-#             self._fftw_obj = get_fftw_obj(self._buffer)
+#             self.__fftw_obj = get_fftw_obj(self.__buffer)
 
 #         # Compute the short-time discrete fourier transform.
 #         times, frequencies, dynamic_spectra = _swept_stfft(
-#             self._fftw_obj,
-#             self._buffer,
+#             self.__fftw_obj,
+#             self.__buffer,
 #             iq_data,
-#             self._window,
-#             self._window_hop,
-#             self._sample_rate,
-#             self._frequency_step,
+#             self.__window,
+#             self.__window_hop,
+#             self.__sample_rate,
+#             self.__frequency_step,
 #             center_frequencies,
 #             num_samples,
 #         )
@@ -485,21 +480,21 @@
 
 #         _LOGGER.info("Averaging the spectrogram")
 #         spectrogram = spectre_core.spectrograms.time_average(
-#             spectrogram, resolution=self._time_resolution
+#             spectrogram, resolution=self.__time_resolution
 #         )
 #         spectrogram = spectre_core.spectrograms.frequency_average(
-#             spectrogram, resolution=self._frequency_resolution
+#             spectrogram, resolution=self.__frequency_resolution
 #         )
 
-#         self._cache_spectrogram(spectrogram)
-
 #         # If the previous batch exists, then by this point it has already been processed.
-#         if self._previous_batch is not None:
-#             _LOGGER.info(f"Deleting {self._previous_batch.bin_file.file_path}")
-#             self._previous_batch.bin_file.delete()
+#         if self.__previous_batch is not None:
+#             _LOGGER.info(f"Deleting {self.__previous_batch.bin_file.file_path}")
+#             self.__previous_batch.bin_file.delete()
 
-#             _LOGGER.info(f"Deleting {self._previous_batch.hdr_file.file_path}")
-#             self._previous_batch.hdr_file.delete()
+#             _LOGGER.info(f"Deleting {self.__previous_batch.hdr_file.file_path}")
+#             self.__previous_batch.hdr_file.delete()
 
 #         # Assign the current batch to be used as the previous batch at the next call of this method.
-#         self._previous_batch = batch
+#         self.__previous_batch = batch
+
+#         return spectrogram

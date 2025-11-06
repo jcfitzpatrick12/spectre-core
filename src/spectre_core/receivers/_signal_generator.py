@@ -9,15 +9,16 @@ import typing
 import numpy as np
 import numpy.typing as npt
 
-import spectre_core.post_processing
+import spectre_core.event_handlers
+import spectre_core.flowgraphs
+import spectre_core.models
 import spectre_core.batches
 import spectre_core.spectrograms
 
-from ._signal_generator_flowgraphs import CosineWave, CosineWaveModel
-from .._register import register_receiver
-from .._base import BaseReceiver, ReceiverComponents
-from ._receiver_names import ReceiverName
-from .._config import Config
+from ._register import register_receiver
+from ._base import BaseReceiver, ReceiverComponents
+from ._names import ReceiverName
+from ._config import Config
 
 
 def _is_close(
@@ -43,13 +44,13 @@ class Solvers(
         ]
     ]
 ):
-    """Produce an analytically-derived spectrogram."""
+    """For each mode, produce an analytically-derived spectrogram."""
 
 
 def cosine_wave_solver(
     num_spectrums: int, parameters: dict[str, typing.Any]
 ) -> spectre_core.spectrograms.Spectrogram:
-    """Creates the expected spectrogram for the `SignalGenerator` receiver operating in the mode `cosine_wave`."""
+    """Produces the analytically-derived spectrogram for the `SignalGenerator` receiver operating in the mode `cosine_wave`."""
 
     sample_rate = typing.cast(int, parameters["sample_rate"])
     window_size = typing.cast(int, parameters["window_size"])
@@ -113,14 +114,9 @@ class SignalGenerator(BaseReceiver):
 
         self.add_mode(
             _Mode.COSINE_WAVE,
-            (
-                CosineWave,
-                CosineWaveModel,
-            ),
-            (
-                spectre_core.post_processing.FixedEventHandler,
-                spectre_core.post_processing.FixedEventHandlerModel,
-            ),
+            spectre_core.models.CosineWaveModel,
+            spectre_core.flowgraphs.CosineWave,
+            spectre_core.event_handlers.FixedCenterFrequency,
             spectre_core.batches.IQStreamBatch,
         )
         self.add_solver(_Mode.COSINE_WAVE, cosine_wave_solver)

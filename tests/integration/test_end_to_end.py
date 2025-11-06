@@ -4,13 +4,10 @@
 
 import typing
 import pytest
-import tempfile
 
 import spectre_core.receivers
 import spectre_core.config
 import spectre_core.batches
-import spectre_core.post_processing
-import spectre_core.spectrograms
 import spectre_core.jobs
 
 
@@ -37,7 +34,7 @@ COSINE_WAVE_PARAMETERS = {
 }
 
 
-class TestE2E:
+class TestEndToEnd:
     """Test end-to-end execution of the program using the signal generator, comparing
     the results to analytically derived solutions."""
 
@@ -68,6 +65,7 @@ class TestE2E:
             tag, spectre_config_paths.get_configs_dir_path()
         )
 
+        # Create the workers.
         post_processing_worker = spectre_core.jobs.make_worker(
             "post_processing",
             signal_generator.activate_post_processing,
@@ -87,6 +85,8 @@ class TestE2E:
             ),
             spectre_data_dir_path=spectre_config_paths.get_spectre_data_dir_path(),
         )
+
+        # Start the job.
         spectre_core.jobs.start_job(
             [post_processing_worker, flowgraph_worker], TOTAL_RUNTIME
         )
@@ -96,7 +96,7 @@ class TestE2E:
 
         # Compare each spectrogram to the corresponding analytically derived solutions.
         for batch in spectre_core.batches.Batches(
-            tag, signal_generator.batch, spectre_config_paths.get_batches_dir_path()
+            tag, signal_generator.batch_cls, spectre_config_paths.get_batches_dir_path()
         ):
             if batch.spectrogram_file.exists:
 

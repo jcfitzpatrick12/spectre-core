@@ -4,16 +4,17 @@
 
 import typing
 import logging
+import pydantic
 
 import watchdog.observers
 import watchdog.events
 
 import spectre_core.exceptions
 import spectre_core.batches
-import spectre_core.post_processing
+import spectre_core.event_handlers
 import spectre_core.config
+import spectre_core.flowgraphs
 
-from ._flowgraph import BaseFlowgraph, BaseFlowgraphModel
 from ._config import Config, read_config, write_config
 
 _LOGGER = logging.getLogger(__name__)
@@ -55,20 +56,14 @@ class ReceiverComponents(typing.Generic[T]):
         return self._components[mode]
 
 
-class Flowgraphs(
-    ReceiverComponents[
-        tuple[typing.Type[BaseFlowgraph], typing.Type[BaseFlowgraphModel]]
-    ]
-): ...
+class Models(ReceiverComponents[typing.Type[pydantic.BaseModel]]): ...
+
+
+class Flowgraphs(ReceiverComponents[typing.Type[spectre_core.flowgraphs.Base]]): ...
 
 
 class EventHandlers(
-    ReceiverComponents[
-        tuple[
-            typing.Type[spectre_core.post_processing.BaseEventHandler],
-            typing.Type[spectre_core.post_processing.BaseEventHandlerModel],
-        ]
-    ]
+    ReceiverComponents[typing.Type[spectre_core.event_handlers.Base]]
 ): ...
 
 
@@ -82,15 +77,19 @@ class BaseReceiver:
         self,
         name: str,
         mode: typing.Optional[str] = None,
+        models: typing.Optional[Models] = None,
         flowgraphs: typing.Optional[Flowgraphs] = None,
         event_handlers: typing.Optional[EventHandlers] = None,
         batches: typing.Optional[Batches] = None,
+        specs: typing.Optional[dict[str, typing.Any]] = None,
     ) -> None:
         self._name = name
         self._mode = mode
+        self._models = models or Models()
         self._flowgraphs = flowgraphs or Flowgraphs()
         self._event_handlers = event_handlers or EventHandlers()
         self._batches = batches or Batches()
+        self._specs = specs or {}
 
     @property
     def name(self) -> str:
@@ -143,39 +142,52 @@ class BaseReceiver:
         return self._mode
 
     @property
-    def flowgraph(
+    def model_cls(self) -> typing.Type[pydantic.BaseModel]:
+        return self._models.get(self.active_mode)
+
+    @property
+    def flowgraph_cls(
         self,
-    ) -> tuple[typing.Type[BaseFlowgraph], typing.Type[BaseFlowgraphModel]]:
+    ) -> typing.Type[spectre_core.flowgraphs.Base]:
         return self._flowgraphs.get(self.active_mode)
 
     @property
-    def event_handler(
+    def event_handler_cls(
         self,
-    ) -> tuple[
-        typing.Type[spectre_core.post_processing.BaseEventHandler],
-        typing.Type[spectre_core.post_processing.BaseEventHandlerModel],
-    ]:
+    ) -> typing.Type[spectre_core.event_handlers.Base]:
         return self._event_handlers.get(self.active_mode)
 
     @property
-    def batch(self) -> typing.Type[spectre_core.batches.BaseBatch]:
+    def batch_cls(self) -> typing.Type[spectre_core.batches.BaseBatch]:
         return self._batches.get(self.active_mode)
 
+    @property
+    def specs(self) -> dict[str, typing.Any]:
+        return self._specs
+
+    def add_spec(self, name: str, value: typing.Any) -> None:
+        """Add a hardware specification.
+
+        :param name: The specification's name.
+        :param value: The specification's value.
+        """
+        self._specs[name] = value
+
+    def get_spec(self, name: str) -> typing.Any:
+        """Get a hardware specification.
+
+        :param name: The specification's name.
+        :return: The specification's value.
+        :raises KeyError: If the specification is not found.
+        """
+        if name not in self._specs:
+            raise KeyError(
+                f"Specification `{name}` not found. Expected one of {list(self._specs.keys())}"
+            )
+        return self._specs[name]
+
     def validate(self, parameters: dict[str, str]) -> dict[str, typing.Any]:
-        # Validate the flowgraph parameters
-        _, flowgraph_model_cls = self.flowgraph
-        flowgraph_params = flowgraph_model_cls.model_validate(
-            parameters, strict=True
-        ).model_dump()
-
-        # Validate event handler parameters separately
-        _, event_handler_model_cls = self.event_handler
-        event_handler_params = event_handler_model_cls.model_validate(
-            parameters, strict=True
-        ).model_dump()
-
-        # Merge the two (the event handler parameters take precedence)
-        return {**flowgraph_params, **event_handler_params}
+        return self.model_cls.model_validate(parameters).model_dump()
 
     def read_config(
         self, tag: str, configs_dir_path: typing.Optional[str] = None
@@ -203,8 +215,7 @@ class BaseReceiver:
         self, config: Config, batches_dir_path: typing.Optional[str] = None
     ) -> None:
         parameters = self.validate(config.parameters)
-        flowgraph_cls, _ = self.flowgraph
-        flowgraph_cls(
+        self.flowgraph_cls(
             config.tag, parameters, batches_dir_path=batches_dir_path
         ).activate()
 
@@ -218,9 +229,9 @@ class BaseReceiver:
         observer = watchdog.observers.Observer()
 
         parameters = self.validate(config.parameters)
-        event_handler_cls, _ = self.event_handler
+        self.event_handler_cls
         observer.schedule(
-            event_handler_cls(config.tag, parameters, self.batch),
+            self.event_handler_cls(config.tag, parameters, self.batch_cls),
             batches_dir_path,
             recursive=True,
             event_filter=[watchdog.events.FileCreatedEvent],
@@ -243,13 +254,12 @@ class BaseReceiver:
     def add_mode(
         self,
         mode: str,
-        flowgraph: tuple[typing.Type[BaseFlowgraph], typing.Type[BaseFlowgraphModel]],
-        event_handler: tuple[
-            typing.Type[spectre_core.post_processing.BaseEventHandler],
-            typing.Type[spectre_core.post_processing.BaseEventHandlerModel],
-        ],
+        model: typing.Type[pydantic.BaseModel],
+        flowgraph: typing.Type[spectre_core.flowgraphs.Base],
+        event_handler: typing.Type[spectre_core.event_handlers.Base],
         batch: typing.Type[spectre_core.batches.BaseBatch],
     ) -> None:
+        self._models.add(mode, model)
         self._flowgraphs.add(mode, flowgraph)
         self._event_handlers.add(mode, event_handler)
         self._batches.add(mode, batch)
