@@ -47,7 +47,7 @@ class FixedCenterFrequencyModel(BaseModel):
 
 
 class FixedCenterFrequency(
-    Base[FixedCenterFrequencyModel, spectre_core.batches.IQStreamBatch]
+    Base[FixedCenterFrequencyModel, typing.Type[spectre_core.batches.IQStreamBatch]]
 ):
     def __init__(
         self,
