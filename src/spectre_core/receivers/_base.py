@@ -11,7 +11,7 @@ import watchdog.events
 
 import spectre_core.exceptions
 import spectre_core.batches
-import spectre_core.event_handlers
+import spectre_core.events
 import spectre_core.config
 import spectre_core.flowgraphs
 import spectre_core.logs
@@ -63,7 +63,7 @@ class Flowgraphs(ReceiverComponents[typing.Type[spectre_core.flowgraphs.Base]]):
     """Store the flowgraph class per operating mode."""
 
 
-class EventHandlers(ReceiverComponents[typing.Type[spectre_core.event_handlers.Base]]):
+class EventHandlers(ReceiverComponents[typing.Type[spectre_core.events.Base]]):
     """Store the event handler class per operating mode."""
 
 
@@ -171,7 +171,7 @@ class Base:
     @property
     def event_handler_cls(
         self,
-    ) -> typing.Type[spectre_core.event_handlers.Base]:
+    ) -> typing.Type[spectre_core.events.Base]:
         """The event handler for the active operating mode."""
         return self.__event_handlers.get(self.active_mode)
 
@@ -336,7 +336,7 @@ class Base:
         mode: str,
         model: typing.Type[pydantic.BaseModel],
         flowgraph: typing.Type[spectre_core.flowgraphs.Base],
-        event_handler: typing.Type[spectre_core.event_handlers.Base],
+        event_handler: typing.Type[spectre_core.events.Base],
         batch: typing.Type[spectre_core.batches.Base],
     ) -> None:
         """Add an operating mode.

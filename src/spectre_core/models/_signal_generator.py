@@ -5,13 +5,13 @@
 import pydantic
 
 import spectre_core.fields
-import spectre_core.event_handlers
+import spectre_core.events
 import spectre_core.flowgraphs
 
 
 class CosineWaveModel(
     spectre_core.flowgraphs.CosineWaveModel,
-    spectre_core.event_handlers.FixedCenterFrequencyModel,
+    spectre_core.events.FixedCenterFrequencyModel,
 ):
     window_type: spectre_core.fields.Field.window_type = "boxcar"
 
@@ -45,7 +45,7 @@ class CosineWaveModel(
 
 class ConstantStaircaseModel(
     spectre_core.flowgraphs.ConstantStaircaseModel,
-    spectre_core.event_handlers.FixedCenterFrequencyModel,
+    spectre_core.events.FixedCenterFrequencyModel,
 ):
     window_type: spectre_core.fields.Field.window_type = "boxcar"
 

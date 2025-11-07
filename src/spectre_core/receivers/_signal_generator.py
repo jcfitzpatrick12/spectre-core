@@ -11,7 +11,7 @@ import pydantic
 import numpy as np
 import numpy.typing as npt
 
-import spectre_core.event_handlers
+import spectre_core.events
 import spectre_core.flowgraphs
 import spectre_core.models
 import spectre_core.batches
@@ -184,7 +184,7 @@ class SignalGenerator(Base):
             _Mode.COSINE_WAVE,
             spectre_core.models.CosineWaveModel,
             spectre_core.flowgraphs.CosineWave,
-            spectre_core.event_handlers.FixedCenterFrequency,
+            spectre_core.events.FixedCenterFrequency,
             spectre_core.batches.IQStreamBatch,
         )
         self.add_solver(_Mode.COSINE_WAVE, CosineWaveSolver())
@@ -193,7 +193,7 @@ class SignalGenerator(Base):
             _Mode.CONSTANT_STAIRCASE,
             spectre_core.models.ConstantStaircaseModel,
             spectre_core.flowgraphs.ConstantStaircase,
-            spectre_core.event_handlers.SweptCenterFrequency,
+            spectre_core.events.SweptCenterFrequency,
             spectre_core.batches.IQStreamBatch,
         )
         self.add_solver(_Mode.CONSTANT_STAIRCASE, ConstantStaircaseSolver())
