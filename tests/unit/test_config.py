@@ -132,9 +132,7 @@ def test_set_spectre_data_dir_path():
         ),
     ],
 )
-def test_time_format_parsing(
-    format: str, dt: str, expected_parsed: datetime.datetime
-):
+def test_time_format_parsing(format: str, dt: str, expected_parsed: datetime.datetime):
     """Ensure that example datetimes parse correctly using the defined formats."""
     parsed = datetime.datetime.strptime(dt, format)
     assert parsed == expected_parsed
