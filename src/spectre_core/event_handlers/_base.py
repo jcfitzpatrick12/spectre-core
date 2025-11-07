@@ -30,7 +30,7 @@ class BaseModel(pydantic.BaseModel):
     obs_lon: spectre_core.fields.Field.obs_lon = 0.0
 
 
-B = typing.TypeVar("B", bound=typing.Type[spectre_core.batches.Base])
+B = typing.TypeVar("B", bound=spectre_core.batches.Base)
 M = typing.TypeVar("M", bound=BaseModel)
 
 

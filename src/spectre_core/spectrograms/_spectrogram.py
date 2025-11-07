@@ -518,6 +518,7 @@ class Spectrogram:
         obs_alt: float,
         obs_lat: float,
         obs_lon: float,
+        batches_dir_path: typing.Optional[str],
     ) -> None:
         """Write the spectrogram and its associated metadata to a batch file in the FITS format."""
         # Create the primary HDU.
@@ -609,8 +610,11 @@ class Spectrogram:
         dt = typing.cast(
             datetime.datetime, self.start_datetime.astype(datetime.datetime)
         )
-        batch_parent_path = spectre_core.config.paths.get_batches_dir_path(
-            year=dt.year, month=dt.month, day=dt.day
+        batch_parent_path = (
+            batches_dir_path
+            or spectre_core.config.paths.get_batches_dir_path(
+                year=dt.year, month=dt.month, day=dt.day
+            )
         )
         if not os.path.exists(batch_parent_path):
             os.makedirs(batch_parent_path)

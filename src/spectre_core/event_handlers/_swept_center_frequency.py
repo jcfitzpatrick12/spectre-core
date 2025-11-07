@@ -384,7 +384,7 @@ class SweptCenterFrequencyModel(BaseModel):
 
 
 class SweptCenterFrequency(
-    Base[SweptCenterFrequencyModel, typing.Type[spectre_core.batches.IQStreamBatch]]
+    Base[SweptCenterFrequencyModel, spectre_core.batches.IQStreamBatch]
 ):
     def __init__(
         self,

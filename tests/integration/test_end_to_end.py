@@ -72,7 +72,7 @@ class TestAnalytical:
     ) -> None:
 
         configs: list[spectre_core.receivers.Config] = []
-        for mode, parameters in zip(modes, parameters):
+        for mode, p in zip(modes, parameters):
             # Set the mode of the receiver.
             signal_generator.mode = mode
 
@@ -80,7 +80,7 @@ class TestAnalytical:
             tag = mode.replace("_", "-")
             signal_generator.write_config(
                 tag,
-                parameters,
+                p,
                 configs_dir_path=spectre_config_paths.get_configs_dir_path(),
             )
 
