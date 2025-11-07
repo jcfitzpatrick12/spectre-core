@@ -250,7 +250,5 @@ class BaseTimeSeriesPanel(BasePanel):
             )
             ax.set_xlabel(f"Time [UTC] (Start Date: {start_date})")
             ax.xaxis.set_major_formatter(
-                matplotlib.dates.mdates.DateFormatter(
-                    spectre_core.config.TimeFormat.TIME
-                )
+                matplotlib.dates.DateFormatter(spectre_core.config.TimeFormat.TIME)
             )

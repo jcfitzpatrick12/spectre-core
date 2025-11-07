@@ -518,7 +518,7 @@ class Spectrogram:
         obs_alt: float,
         obs_lat: float,
         obs_lon: float,
-        batches_dir_path: typing.Optional[str],
+        batches_dir_path: typing.Optional[str] = None,
     ) -> None:
         """Write the spectrogram and its associated metadata to a batch file in the FITS format."""
         # Create the primary HDU.

@@ -12,6 +12,7 @@ from ._panels import (
     TimeCutsPanel,
     IntegralOverFrequencyPanel,
 )
+from ._panel_names import PanelName
 from ._panel_stack import PanelStack
 
 __all__ = [
@@ -20,6 +21,7 @@ __all__ = [
     "BasePanel",
     "PanelFormat",
     "PanelStack",
+    "PanelName",
     "SpectrogramPanel",
     "FrequencyCutsPanel",
     "TimeCutsPanel",
