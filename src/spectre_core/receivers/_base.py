@@ -157,6 +157,11 @@ class Base:
         return self.__models.get(self.active_mode)
 
     @property
+    def model_schema(self) -> dict[str, typing.Any]:
+        """The JSON schema representation of the model for the active operating mode."""
+        return self.model_cls.model_json_schema()
+
+    @property
     def flowgraph_cls(
         self,
     ) -> typing.Type[spectre_core.flowgraphs.Base]:
