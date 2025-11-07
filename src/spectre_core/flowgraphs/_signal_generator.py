@@ -23,9 +23,8 @@ class CosineWaveModel(BaseModel):
 
 
 class CosineWave(Base[CosineWaveModel]):
-    """Record a complex-valued cosine signal to batched data files."""
-
     def configure(self, tag: str, model: CosineWaveModel) -> None:
+        """Record a complex-valued cosine signal to batched data files."""
         self.spectre_batched_file_sink = spectre.batched_file_sink(
             self._batches_dir_path, tag, model.batch_size, model.sample_rate
         )
@@ -66,6 +65,8 @@ class ConstantStaircaseModel(BaseModel):
 
 class ConstantStaircase(Base[ConstantStaircaseModel]):
     def configure(self, tag: str, model: ConstantStaircaseModel) -> None:
+        """Record a constant signal that periodically increments in value.
+        Each step increases in duration, up to a maximum, before resetting."""
         self.spectre_constant_staircase = spectre.tagged_staircase(
             model.min_samples_per_step,
             model.max_samples_per_step,

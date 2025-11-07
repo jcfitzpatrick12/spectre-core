@@ -51,6 +51,10 @@ class ConstantStaircaseModel(
 
     @pydantic.model_validator(mode="after")
     def validate(self):
+        if not self.window_type == "boxcar":
+            raise ValueError(
+                f"The window type must be boxcar. Got '{self.window_type}'"
+            )
         if self.frequency_step != self.sample_rate:
             raise ValueError(f"The frequency step must be equal to the sampling rate")
 
