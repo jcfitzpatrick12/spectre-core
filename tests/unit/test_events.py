@@ -75,9 +75,7 @@ class TestSTFFT:
         window_hop = 4
         expected_times = np.array([0.0, 2.0, 4.0, 6.0], dtype=np.float32)
         assert is_close(
-            spectre_core.events.get_times(
-                num_spectrums, sample_rate, window_hop
-            ),
+            spectre_core.events.get_times(num_spectrums, sample_rate, window_hop),
             expected_times,
         )
 
@@ -186,9 +184,7 @@ class TestSTFFT:
     ) -> None:
         """Check that passing bad arguments yields a ValueError in various cases."""
         with pytest.raises(ValueError):
-            spectre_core.events.get_num_spectrums(
-                signal_size, window_size, window_hop
-            )
+            spectre_core.events.get_num_spectrums(signal_size, window_size, window_hop)
 
     def test_stfft(self) -> None:
         """Check that the stfft of a simple cosine wave matches the analytically derived solution."""
