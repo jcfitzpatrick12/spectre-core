@@ -4,6 +4,6 @@
 
 """Basic file io for common file formats."""
 
-from ._files import BaseFile, FileFormat, read_file
+from ._files import Base, FileFormat, read_file
 
-__all__ = ["BaseFile", "FileFormat", "read_file"]
+__all__ = ["Base", "FileFormat", "read_file"]

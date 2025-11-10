@@ -17,7 +17,7 @@ def tmpdir():
         yield tmpdir
 
 
-class File(spectre_core.io.BaseFile[str]):
+class File(spectre_core.io.Base[str]):
     """A pseudo-concrete implementation of the abstract parent for testing purposes."""
 
     def read(self) -> str:
@@ -29,39 +29,39 @@ BASE_FILE_NAME = "foo"
 
 
 @pytest.fixture
-def base_file(tmpdir: str) -> spectre_core.io.BaseFile:
+def base_file(tmpdir: str) -> spectre_core.io.Base:
     """Fixture to provide an instance of File with a dummy path."""
     file_path = f"{tmpdir}/{BASE_FILE_NAME}.{EXTENSION}"
     return File(file_path)
 
 
-class TestBaseFile:
+class TestBase:
     def test_parent_dir_path(
-        self, tmpdir: str, base_file: spectre_core.io.BaseFile
+        self, tmpdir: str, base_file: spectre_core.io.Base
     ) -> None:
         """Check that the parent directory path is correctly returned."""
         assert base_file.parent_dir_path == tmpdir
 
-    def test_base_file_name(self, base_file: spectre_core.io.BaseFile) -> None:
+    def test_base_file_name(self, base_file: spectre_core.io.Base) -> None:
         """Check that the base file name is correctly returned."""
         assert base_file.base_file_name == BASE_FILE_NAME
 
-    def test_extension(self, base_file: spectre_core.io.BaseFile) -> None:
+    def test_extension(self, base_file: spectre_core.io.Base) -> None:
         """Check that the file extension is correctly returned."""
         assert base_file.extension == EXTENSION
 
-    def test_file_name(self, base_file: spectre_core.io.BaseFile) -> None:
+    def test_file_name(self, base_file: spectre_core.io.Base) -> None:
         """Check that the full file name is correctly returned."""
         assert base_file.file_name == f"{BASE_FILE_NAME}.{EXTENSION}"
 
-    def test_exists(self, base_file: spectre_core.io.BaseFile) -> None:
+    def test_exists(self, base_file: spectre_core.io.Base) -> None:
         """Check that the file existence is correctly determined."""
         assert not base_file.exists
         with open(base_file.file_path, "w", encoding="utf-8") as f:
             f.write("foo")
         assert base_file.exists
 
-    def test_delete(self, base_file: spectre_core.io.BaseFile) -> None:
+    def test_delete(self, base_file: spectre_core.io.Base) -> None:
         """Check that the file is deleted correctly."""
         with open(base_file.file_path, "w", encoding="utf-8") as f:
             f.write("content")

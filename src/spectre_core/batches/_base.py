@@ -35,7 +35,7 @@ def parse_batch_file_name(file_name: str) -> tuple[str, str, str]:
 T = typing.TypeVar("T")
 
 
-class BatchFile(spectre_core.io.BaseFile[T]):
+class BatchFile(spectre_core.io.Base[T]):
     def __init__(self, file_path: str) -> None:
         """An abstract base class for files belonging to a batch, identified by their file extension.
 

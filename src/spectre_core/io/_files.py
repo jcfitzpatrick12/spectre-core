@@ -20,7 +20,7 @@ class FileFormat(enum.Enum):
     PNG = "png"
 
 
-class BaseFile(abc.ABC, Generic[T]):
+class Base(abc.ABC, Generic[T]):
     def __init__(self, file_path: str) -> None:
         """An abstract interface to read a file of arbitrary format from the file system.
 
@@ -83,19 +83,19 @@ class BaseFile(abc.ABC, Generic[T]):
             os.remove(self._file_path)
 
 
-class _JsonFile(BaseFile[dict[str, Any]]):
+class _JsonFile(Base[dict[str, Any]]):
     def read(self) -> dict[str, Any]:
         with open(self._file_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
 
-class _TextFile(BaseFile[str]):
+class _TextFile(Base[str]):
     def read(self) -> str:
         with open(self._file_path, "r", encoding="utf-8") as f:
             return f.read()
 
 
-class _PngFile(BaseFile[str]):
+class _PngFile(Base[str]):
     def read(self) -> str:
         with open(self.file_path, "rb") as f:
             encoded = base64.b64encode(f.read())
@@ -120,7 +120,7 @@ def read_file(file_path: str, file_format: FileFormat) -> typing.Any:
     :return: The contents of the file.
     :raises ValueError: If the file format is unsupported.
     """
-    file: BaseFile
+    file: Base
     if file_format == FileFormat.JSON:
         file = _JsonFile(file_path)
     elif file_format == FileFormat.TEXT:
