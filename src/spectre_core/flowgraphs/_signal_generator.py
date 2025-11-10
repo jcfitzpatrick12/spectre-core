@@ -2,9 +2,6 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import typing
-import pydantic
-
 from gnuradio import gr
 from gnuradio import blocks
 from gnuradio import analog

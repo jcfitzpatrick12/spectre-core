@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import dataclasses
-import dataclasses
 import typing
 import abc
 
@@ -171,11 +170,10 @@ class _Mode:
 
 @register_receiver(ReceiverName.SIGNAL_GENERATOR)
 class SignalGenerator(Base):
-    """An entirely software-defined receiver, which generates synthetic signals."""
-
     def __init__(
         self, *args, solvers: typing.Optional[Solvers] = None, **kwargs
     ) -> None:
+        """An entirely software-defined receiver, which generates synthetic signals."""
         super().__init__(*args, **kwargs)
 
         self.__solvers = solvers or Solvers()
