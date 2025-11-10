@@ -106,8 +106,8 @@ class TestAnalytical:
 
             # Compare each spectrogram to the corresponding analytically derived solutions.
             for batch in spectre_core.batches.Batches(
-                signal_generator.batch_cls,
                 config.tag,
+                signal_generator.batch_cls,
                 spectre_config_paths.get_batches_dir_path(),
             ):
                 if batch.spectrogram_file.exists:

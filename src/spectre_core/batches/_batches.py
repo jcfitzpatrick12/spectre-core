@@ -17,8 +17,8 @@ T = typing.TypeVar("T", bound=Base)
 class Batches(typing.Generic[T]):
     def __init__(
         self,
+        tag: str,
         batch_cls: typing.Type[T],
-        tag: typing.Optional[str] = None,
         batches_dir_path: typing.Optional[str] = None,
     ) -> None:
         """A simple interface to read batched filesystem data.

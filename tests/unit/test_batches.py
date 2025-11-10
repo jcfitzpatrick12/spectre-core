@@ -77,8 +77,8 @@ def batches(
         )
 
     yield spectre_core.batches.Batches(
-        spectre_core.batches.IQStreamBatch,
         TAG,
+        spectre_core.batches.IQStreamBatch,
         batches_dir_path=spectre_config_paths.get_batches_dir_path(),
     )
 
