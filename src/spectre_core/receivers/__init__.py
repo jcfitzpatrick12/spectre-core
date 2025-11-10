@@ -5,8 +5,14 @@
 """A vendor-neutral interface for recording signals and spectrograms from SDRs."""
 
 from ._register import register_receiver, get_registered_receivers
-from ._factory import get_receiver
-from ._config import Config, read_config, write_config
+from ._factory import get_receiver, get_batch_cls
+from ._config import (
+    Config,
+    read_config,
+    write_config,
+    get_config_file_path,
+    parse_config_file_name,
+)
 from ._base import Base
 from ._names import ReceiverName
 from ._signal_generator import SignalGenerator
@@ -17,6 +23,9 @@ __all__ = [
     "register_receiver",
     "get_registered_receivers",
     "get_receiver",
+    "get_batch_cls",
+    "get_config_file_path",
+    "parse_config_file_name",
     "ReceiverName",
     "Config",
     "read_config",

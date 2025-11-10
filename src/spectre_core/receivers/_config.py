@@ -20,7 +20,7 @@ class _ReservedTagStr(enum.Enum):
 
 def _validate_tag(tag: str) -> None:
     if "_" in tag:
-        raise ValueError("An underscore is not allowed in a capture config tag.")
+        raise ValueError("An underscore is not allowed in a config tag.")
     for s in _ReservedTagStr:
         if s.value in tag:
             raise ValueError(
@@ -85,19 +85,41 @@ class Config:
         """Configurable parameters."""
         return self._content[_CaptureConfigKey.PARAMETERS]
 
+    @property
+    def content(self) -> dict[str, typing.Any]:
+        return self._content
+
+
+def get_config_file_path(
+    tag: str, configs_dir_path: typing.Optional[str] = None
+) -> str:
+    """Build a config file path.
+
+    :param tag: The config tag.
+    :param configs_dir_path: Optionally override the directory containing the configs, defaults to None
+    """
+    configs_dir_path = configs_dir_path or spectre_core.config.paths.get_logs_dir_path()
+    return os.path.join(configs_dir_path, f"{tag}.json")
+
 
 def read_config(tag: str, configs_dir_path: typing.Optional[str] = None) -> Config:
-    """Read config data from the filesystem.
+    """Read any config data from the filesystem for any receiver, without validation.
 
     :param tag: The config tag.
     :param configs_dir_path: Optionally override the directory containing the configs, defaults to None
     :return: A container storing the config data.
     """
-    configs_dir_path = configs_dir_path or spectre_core.config.paths.get_logs_dir_path()
-    file_path = os.path.join(configs_dir_path, f"{tag}.json")
     return Config(
-        tag, spectre_core.io.read_file(file_path, spectre_core.io.FileFormat.JSON)
+        tag,
+        spectre_core.io.read_file(
+            get_config_file_path(tag, configs_dir_path), spectre_core.io.FileFormat.JSON
+        ),
     )
+
+
+def parse_config_file_name(file_name: str) -> tuple[str, str]:
+    """Parse a config file name into its tag and extension."""
+    return os.path.splitext(file_name)
 
 
 def write_config(

@@ -86,7 +86,7 @@ class Base(abc.ABC, typing.Generic[M, B], watchdog.events.FileSystemEventHandler
 
         # Only process a file if:
         #
-        # - It's extension matches the `watch_extension` as defined in the capture config.
+        # - It's extension matches the `watch_extension` as defined in the config.
         # - It's tag matches the current sessions tag.
         #
         # This is important for two reasons.

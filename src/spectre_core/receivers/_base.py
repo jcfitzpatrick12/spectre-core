@@ -198,12 +198,13 @@ class Base:
         skip_validation: bool = False,
         configs_dir_path: typing.Optional[str] = None,
     ) -> Config:
-        """Read a config.
+        """Read a config for this receiver, applying validations by default.
 
         :param tag: The tag of the config.
         :param skip_validation: If True, skip validating the parameters against the model.
         :param configs_dir_path: Optionally override the directory which stores the configs, defaults to None
         :return: A container storing the file contents.
+        :raises ValueError: If the config does not belong to this receiver, and `skip_validation` is False.
         """
         configs_dir_path = (
             configs_dir_path or spectre_core.config.paths.get_configs_dir_path()
@@ -212,6 +213,10 @@ class Base:
         if skip_validation:
             return config
         else:
+            if not config.receiver_name == self.name:
+                raise ValueError(
+                    f"Config with tag {tag}, does not belong to this receiver. Expected '{self.name}', got {config.receiver_name}."
+                )
             _ = self.model_validate(config.parameters)
             return config
 

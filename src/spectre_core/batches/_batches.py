@@ -17,18 +17,18 @@ T = typing.TypeVar("T", bound=Base)
 class Batches(typing.Generic[T]):
     def __init__(
         self,
-        tag: str,
         batch_cls: typing.Type[T],
+        tag: typing.Optional[str] = None,
         batches_dir_path: typing.Optional[str] = None,
     ) -> None:
         """A simple interface to read batched filesystem data.
 
-        :param tag: The data tag.
         :param batch_cls: The `Base` subclass used to read batch files under that tag.
+        :param tag: The data tag.
         :param batches_dir_path: Optionally override the directory containing the batched files.
         """
-        self.__tag = tag
         self.__batch_cls = batch_cls
+        self.__tag = tag
         self.__batches_dir_path = (
             batches_dir_path or spectre_core.config.paths.get_batches_dir_path()
         )
@@ -46,7 +46,7 @@ class Batches(typing.Generic[T]):
 
         for path in paths:
             start_time, tag, _ = parse_batch_file_name(os.path.basename(path))
-            if tag == self.__tag:
+            if not self.__tag is None and tag == self.__tag:
                 self.__batch_map[start_time] = self.__batch_cls(
                     os.path.dirname(path), start_time, tag
                 )
@@ -55,6 +55,20 @@ class Batches(typing.Generic[T]):
 
     def __iter__(self) -> typing.Iterator[T]:
         yield from self.__batch_map.values()
+
+    def __len__(self) -> int:
+        return len(self.__batch_map)
+
+    def __getitem__(self, start_time: str) -> T:
+        """Get a batch by its start time string.
+
+        :param start_time: The start time string in the format specified by TimeFormat.DATETIME.
+        :return: The batch corresponding to the start time.
+        :raises KeyError: If no batch exists for the given start time.
+        """
+        if start_time not in self.__batch_map:
+            raise KeyError(f"No batch found for start time '{start_time}'")
+        return self.__batch_map[start_time]
 
     def __validate_range(
         self, start_datetime: datetime.datetime, end_datetime: datetime.datetime

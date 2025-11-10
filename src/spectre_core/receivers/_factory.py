@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import typing
-import enum
 
 import spectre_core.exceptions
 import spectre_core.batches
@@ -35,8 +34,7 @@ def get_batch_cls(
     tag: str, configs_dir_path: typing.Optional[str] = None
 ) -> typing.Type[spectre_core.batches.Base]:
     """Get the right API used to read batch files under the input tag, accounting for
-    batch files containing third-party spectrogram data (and so with clearly no associated
-    receiver).
+    batch files containing third-party spectrogram data.
 
     :param tag: The batch file tag.
     """
