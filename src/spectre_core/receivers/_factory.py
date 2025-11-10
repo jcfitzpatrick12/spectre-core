@@ -3,11 +3,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import typing
+import enum
 
 import spectre_core.exceptions
+import spectre_core.batches
 
 from ._register import receivers
 from ._base import Base
+from ._config import _ReservedTagStr, read_config
 
 
 def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base:
@@ -26,3 +29,21 @@ def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base:
             f"Please specify one of the following receivers {valid_receivers}"
         )
     return receiver_cls(receiver_name, mode=mode)
+
+
+def get_batch_cls(
+    tag: str, configs_dir_path: typing.Optional[str] = None
+) -> typing.Type[spectre_core.batches.Base]:
+    """Get the right API used to read batch files under the input tag, accounting for
+    batch files containing third-party spectrogram data (and so with clearly no associated
+    receiver).
+
+    :param tag: The batch file tag.
+    """
+    for s in _ReservedTagStr:
+        if s.value in tag and s == _ReservedTagStr.CALLISTO:
+            return spectre_core.batches.CallistoBatch
+
+    config = read_config(tag, configs_dir_path)
+    receiver = get_receiver(config.receiver_name, config.receiver_mode)
+    return receiver.batch_cls

@@ -5,8 +5,6 @@
 import logging
 import typing
 import datetime
-import pydantic
-
 
 import numpy as np
 import numpy.typing as npt
@@ -18,7 +16,6 @@ import spectre_core.spectrograms
 import spectre_core.fields
 
 from ._base import Base, BaseModel
-from ._validators import validate_window_size
 from ._stfft import (
     get_buffer,
     get_window,
@@ -376,11 +373,6 @@ class SweptCenterFrequencyModel(BaseModel):
     time_resolution: spectre_core.fields.Field.time_resolution = 0
     keep_signal: spectre_core.fields.Field.keep_signal = True
     frequency_step: spectre_core.fields.Field.frequency_step = 1000000
-
-    @pydantic.model_validator(mode="after")
-    def validate(self):
-        validate_window_size(self.window_size)
-        return self
 
 
 class SweptCenterFrequency(

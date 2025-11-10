@@ -80,7 +80,6 @@ class Base:
         flowgraphs: typing.Optional[Flowgraphs] = None,
         event_handlers: typing.Optional[EventHandlers] = None,
         batches: typing.Optional[Batches] = None,
-        specs: typing.Optional[dict[str, typing.Any]] = None,
     ) -> None:
         """An abstraction layer for software-defined radio receivers.
 
@@ -90,7 +89,6 @@ class Base:
         :param flowgraphs: Optionally provide flowgraph classes per operating mode, defaults to None
         :param event_handlers: Optionally provide event handler classes per operating mode, defaults to None
         :param batches: Optionally provide batch classes per operating mode, defaults to None
-        :param specs: Optionally provide hardware specifications, defaults to None
         """
         self.__name = name
         self.__mode = mode
@@ -98,7 +96,6 @@ class Base:
         self.__flowgraphs = flowgraphs or Flowgraphs()
         self.__event_handlers = event_handlers or EventHandlers()
         self.__batches = batches or Batches()
-        self.__specs = specs or {}
 
     @property
     def name(self) -> str:
@@ -180,32 +177,6 @@ class Base:
         """The batch for the active operating mode."""
         return self.__batches.get(self.active_mode)
 
-    @property
-    def specs(self) -> dict[str, typing.Any]:
-        """A copy of the hardware specifications."""
-        return self.__specs.copy()
-
-    def add_spec(self, name: str, value: typing.Any) -> None:
-        """Add a hardware specification.
-
-        :param name: The specification's name.
-        :param value: The specification's value.
-        """
-        self.__specs[name] = value
-
-    def get_spec(self, name: str) -> typing.Any:
-        """Get a hardware specification.
-
-        :param name: The specification's name.
-        :return: The specification's value.
-        :raises KeyError: If the specification is not found.
-        """
-        if name not in self.__specs:
-            raise KeyError(
-                f"Specification `{name}` not found. Expected one of {list(self.__specs.keys())}"
-            )
-        return self.__specs[name]
-
     def model_validate(
         self, parameters: dict[str, typing.Any], skip: bool = False
     ) -> pydantic.BaseModel:
@@ -213,7 +184,7 @@ class Base:
 
         :param parameters: The parameters to validate
         :param skip: If True, skip validating the parameters against the model.
-        :return: The validated parameters.
+        :return: The validated model.
         """
         if skip:
             return self.model_cls.model_construct(**parameters)
@@ -258,7 +229,6 @@ class Base:
         :param skip_validation: If True, skip validating the parameters against the model.
         :param configs_dir_path: Optionally override the directory which stores the configs, defaults to None
         """
-        print(configs_dir_path)
         write_config(
             tag,
             self.name,

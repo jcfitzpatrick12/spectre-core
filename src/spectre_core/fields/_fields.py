@@ -133,6 +133,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            gt=0,
             description="The amount, in Hz, by which the center frequency is incremented for each step in the frequency sweep.",
         ),
     ]

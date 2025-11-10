@@ -88,14 +88,6 @@ class TestReceiver:
         assert len(custom_receiver.modes) == 0
         assert not custom_receiver.modes
 
-    def test_get_invalid_spec(
-        self, custom_receiver: spectre_core.receivers.Base
-    ) -> None:
-        """Check that we can't fetch an invalid hardware specification."""
-        with pytest.raises(KeyError):
-            # Choose any `SpecName` arbitrarily (the empty receiver doesn't have any at all, so all should raise an error)
-            custom_receiver.get_spec("foobar")
-
     def test_config_io(
         self,
         signal_generator: spectre_core.receivers.Base,
@@ -127,10 +119,3 @@ class TestReceiver:
         assert config.receiver_name == "signal_generator"
         assert "sample_rate" in config.parameters
         assert config.parameters["sample_rate"] == 256000
-
-    def test_add_spec(self, custom_receiver: spectre_core.receivers.Base) -> None:
-        """Check that we can add a hardware specification, and it updates the instance accordingly."""
-        spec_name = "foo"
-        spec_value = 1
-        custom_receiver.add_spec(spec_name, spec_value)
-        assert custom_receiver.get_spec(spec_name) == spec_value

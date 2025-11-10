@@ -8,6 +8,8 @@ import spectre_core.fields
 import spectre_core.events
 import spectre_core.flowgraphs
 
+from ._validators import validate_window_size
+
 
 class CosineWaveModel(
     spectre_core.flowgraphs.CosineWaveModel,
@@ -17,6 +19,8 @@ class CosineWaveModel(
 
     @pydantic.model_validator(mode="after")
     def validate(self):
+        validate_window_size(self.window_size)
+
         if not self.window_type == "boxcar":
             raise ValueError(
                 f"The window type must be boxcar. Got '{self.window_type}'"
@@ -51,6 +55,7 @@ class ConstantStaircaseModel(
 
     @pydantic.model_validator(mode="after")
     def validate(self):
+        validate_window_size(self.window_size)
         if not self.window_type == "boxcar":
             raise ValueError(
                 f"The window type must be boxcar. Got '{self.window_type}'"

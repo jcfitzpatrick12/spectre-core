@@ -6,7 +6,6 @@ import logging
 import datetime
 import typing
 
-import pydantic
 import numpy as np
 
 import spectre_core.batches
@@ -14,7 +13,6 @@ import spectre_core.spectrograms
 import spectre_core.fields
 
 from ._base import Base, BaseModel
-from ._validators import validate_window_size
 from ._stfft import (
     get_buffer,
     get_window,
@@ -39,11 +37,6 @@ class FixedCenterFrequencyModel(BaseModel):
     time_resolution: spectre_core.fields.Field.time_resolution = 0
     batch_size: spectre_core.fields.Field.batch_size = 3
     keep_signal: spectre_core.fields.Field.keep_signal = True
-
-    @pydantic.model_validator(mode="after")
-    def validate(self):
-        validate_window_size(self.window_size)
-        return self
 
 
 class FixedCenterFrequency(

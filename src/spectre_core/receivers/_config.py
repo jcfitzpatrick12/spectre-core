@@ -6,20 +6,25 @@ import dataclasses
 import os
 import typing
 import json
+import enum
 
 import spectre_core.io
 import spectre_core.config
 
-_reserved = ["callisto"]
+
+class _ReservedTagStr(enum.Enum):
+    """Reserve substrings to indicate batch files derived from external spectrogram data."""
+
+    CALLISTO = "callisto"
 
 
 def _validate_tag(tag: str) -> None:
     if "_" in tag:
         raise ValueError("An underscore is not allowed in a capture config tag.")
-    for s in _reserved:
-        if s in tag:
+    for s in _ReservedTagStr:
+        if s.value in tag:
             raise ValueError(
-                f"'{tag}' is an invalid tag, the substring '{s}' is reserved, "
+                f"'{tag}' is an invalid tag, the substring '{s}' is reserved."
             )
 
 
