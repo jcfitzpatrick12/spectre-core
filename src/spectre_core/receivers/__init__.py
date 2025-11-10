@@ -10,6 +10,7 @@ from ._config import Config, read_config, write_config
 from ._base import Base
 from ._names import ReceiverName
 from ._signal_generator import SignalGenerator
+from ._custom import Custom
 from ._record import record_signal, record_spectrograms
 
 __all__ = [
@@ -22,6 +23,7 @@ __all__ = [
     "write_config",
     "Base",
     "SignalGenerator",
+    "Custom",
     "ReceiverName",
     "record_signal",
     "record_spectrograms",

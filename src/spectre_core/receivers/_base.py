@@ -111,13 +111,13 @@ class Base:
         return self.__mode
 
     @mode.setter
-    def mode(self, value: str) -> None:
+    def mode(self, value: typing.Optional[str]) -> None:
         """Set the operating mode.
 
         :param value: The new operating mode of the receiver. Use `None` to unset the mode.
         """
         _LOGGER.info(f"Setting the mode to '{value}'")
-        if value not in self.modes:
+        if not value is None and value not in self.modes:
             raise spectre_core.exceptions.ModeNotFoundError(
                 f"Mode `{value}` not found. Expected one of {self.modes}"
             )
@@ -258,6 +258,7 @@ class Base:
         :param skip_validation: If True, skip validating the parameters against the model.
         :param configs_dir_path: Optionally override the directory which stores the configs, defaults to None
         """
+        print(configs_dir_path)
         write_config(
             tag,
             self.name,
