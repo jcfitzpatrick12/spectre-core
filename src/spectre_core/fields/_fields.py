@@ -161,3 +161,98 @@ class Field:
             description="The maximum number of samples in the shortest step of the staircase.",
         ),
     ]
+    bandwidth = typing.Annotated[
+        float,
+        pydantic.Field(
+            ...,
+            gt=0,
+            description="The range in Hz the signal will occupy in the frequency domain without attenutation.",
+        ),
+    ]
+    if_gain = typing.Annotated[
+        float,
+        pydantic.Field(
+            ...,
+            description="The intermediate frequency gain, in dB. Negative value indicates attenuation.",
+        ),
+    ]
+    rf_gain = typing.Annotated[
+        float,
+        pydantic.Field(
+            ...,
+            description="The radio frequency gain, in dB. Negative value indicates attenuation.",
+        ),
+    ]
+    min_frequency = typing.Annotated[
+        float,
+        pydantic.Field(
+            ...,
+            gt=0,
+            description="The minimum center frequency, in Hz, for the frequency sweep.",
+        ),
+    ]
+    max_frequency = typing.Annotated[
+        float,
+        pydantic.Field(
+            ...,
+            gt=0,
+            description="The maximum center frequency, in Hz, for the frequency sweep.",
+        ),
+    ]
+    gain = typing.Annotated[
+        float,
+        pydantic.Field(
+            ...,
+            description="The gain value for the SDR, in dB",
+        ),
+    ]
+    master_clock_rate = typing.Annotated[
+        int,
+        pydantic.Field(
+            ...,
+            description="The primary reference clock for the SDR, specified in Hz.",
+        ),
+    ]
+    wire_format = typing.Annotated[
+        str,
+        pydantic.Field(
+            ...,
+            description="Controls the form of the data over the bus/network.",
+        ),
+    ]
+    samples_per_step = typing.Annotated[
+        int,
+        pydantic.Field(
+            ...,
+            gt=0,
+            description="The number of samples taken at each center frequency in the sweep. This may vary slightly from what is specified due to the nature of GNU Radio runtime.",
+        ),
+    ]
+    antenna_port = typing.Annotated[
+        str,
+        pydantic.Field(
+            ...,
+            description="Specifies a particular antenna port on a receiver.",
+        ),
+    ]
+    amp_on = typing.Annotated[
+        bool,
+        pydantic.Field(
+            ...,
+            description="If true, amplify the signal.",
+        ),
+    ]
+    lna_gain = typing.Annotated[
+        float,
+        pydantic.Field(
+            ...,
+            description="The low-noise amplifier gain, in dB.",
+        ),
+    ]
+    vga_gain = typing.Annotated[
+        float,
+        pydantic.Field(
+            ...,
+            description="The variable-gain amplifier gain, in dB.",
+        ),
+    ]

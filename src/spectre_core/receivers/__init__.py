@@ -15,8 +15,9 @@ from ._config import (
 )
 from ._base import Base
 from ._names import ReceiverName
-from ._signal_generator import SignalGenerator
 from ._custom import Custom
+from ._signal_generator import SignalGenerator
+from ._rsp1a import RSP1A
 from ._record import record_signal, record_spectrograms
 
 __all__ = [
@@ -31,8 +32,9 @@ __all__ = [
     "read_config",
     "write_config",
     "Base",
-    "SignalGenerator",
     "Custom",
+    "SignalGenerator",
+    "RSP1A",
     "ReceiverName",
     "record_signal",
     "record_spectrograms",

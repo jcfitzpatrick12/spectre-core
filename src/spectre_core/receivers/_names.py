@@ -9,9 +9,11 @@ import dataclasses
 class ReceiverName:
     """The name of a supported receiver.
 
-    :ivar SIGNAL_GENERATOR: A synthetic signal generator.
     :ivar CUSTOM: A customisable receiver.
+    :ivar SIGNAL_GENERATOR: A synthetic signal generator.
+    :ivar RSP1A: SDRPlay RSP1A
     """
 
-    SIGNAL_GENERATOR = "signal_generator"
     CUSTOM = "custom"
+    SIGNAL_GENERATOR = "signal_generator"
+    RSP1A = "rsp1a"

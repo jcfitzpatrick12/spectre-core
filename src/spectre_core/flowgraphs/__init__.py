@@ -7,16 +7,26 @@
 
 from ._base import Base
 from ._signal_generator import (
-    CosineWave,
-    CosineWaveModel,
-    ConstantStaircase,
-    ConstantStaircaseModel,
+    SignalGeneratorCosineWave,
+    SignalGeneratorCosineWaveModel,
+    SignalGeneratorConstantStaircase,
+    SignalGeneratorConstantStaircaseModel,
+)
+from ._rsp1a import (
+    RSP1AFixedCenterFrequency,
+    RSP1AFixedCenterFrequencyModel,
+    RSP1ASweptCenterFrequency,
+    RSP1ASweptCenterFrequencyModel,
 )
 
 __all__ = [
     "Base",
-    "CosineWave",
-    "CosineWaveModel",
-    "ConstantStaircase",
-    "ConstantStaircaseModel",
+    "SignalGeneratorCosineWave",
+    "SignalGeneratorCosineWaveModel",
+    "SignalGeneratorConstantStaircase",
+    "SignalGeneratorConstantStaircaseModel",
+    "RSP1AFixedCenterFrequency",
+    "RSP1AFixedCenterFrequencyModel",
+    "RSP1ASweptCenterFrequency",
+    "RSP1ASweptCenterFrequencyModel",
 ]

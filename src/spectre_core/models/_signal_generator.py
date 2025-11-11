@@ -11,8 +11,8 @@ import spectre_core.flowgraphs
 from ._validators import validate_window_size
 
 
-class CosineWaveModel(
-    spectre_core.flowgraphs.CosineWaveModel,
+class SignalGeneratorCosineWaveModel(
+    spectre_core.flowgraphs.SignalGeneratorCosineWaveModel,
     spectre_core.events.FixedCenterFrequencyModel,
 ):
     window_type: spectre_core.fields.Field.window_type = "boxcar"
@@ -47,8 +47,8 @@ class CosineWaveModel(
         return self
 
 
-class ConstantStaircaseModel(
-    spectre_core.flowgraphs.ConstantStaircaseModel,
+class SignalGeneratorConstantStaircaseModel(
+    spectre_core.flowgraphs.SignalGeneratorConstantStaircaseModel,
     spectre_core.events.FixedCenterFrequencyModel,
 ):
     window_type: spectre_core.fields.Field.window_type = "boxcar"

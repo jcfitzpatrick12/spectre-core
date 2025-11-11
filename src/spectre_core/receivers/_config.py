@@ -98,7 +98,9 @@ def get_config_file_path(
     :param tag: The config tag.
     :param configs_dir_path: Optionally override the directory containing the configs, defaults to None
     """
-    configs_dir_path = configs_dir_path or spectre_core.config.paths.get_configs_dir_path()
+    configs_dir_path = (
+        configs_dir_path or spectre_core.config.paths.get_configs_dir_path()
+    )
     return os.path.join(configs_dir_path, f"{tag}.json")
 
 

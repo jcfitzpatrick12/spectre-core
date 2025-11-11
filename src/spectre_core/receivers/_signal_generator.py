@@ -57,9 +57,11 @@ class Solvers(ReceiverComponents[Solver]):
     """For each mode, produce an analytically-derived spectrogram."""
 
 
-class CosineWaveSolver(Solver[spectre_core.models.CosineWaveModel]):
+class CosineWaveSolver(Solver[spectre_core.models.SignalGeneratorCosineWaveModel]):
     def solve(
-        self, num_spectrums: int, model: spectre_core.models.CosineWaveModel
+        self,
+        num_spectrums: int,
+        model: spectre_core.models.SignalGeneratorCosineWaveModel,
     ) -> spectre_core.spectrograms.Spectrogram:
         """Produces the analytically-derived spectrogram for the `SignalGenerator` receiver operating in the mode `cosine_wave`."""
 
@@ -99,9 +101,13 @@ class CosineWaveSolver(Solver[spectre_core.models.CosineWaveModel]):
         )
 
 
-class ConstantStaircaseSolver(Solver[spectre_core.models.ConstantStaircaseModel]):
+class ConstantStaircaseSolver(
+    Solver[spectre_core.models.SignalGeneratorConstantStaircaseModel]
+):
     def solve(
-        self, num_spectrums: int, model: spectre_core.models.ConstantStaircaseModel
+        self,
+        num_spectrums: int,
+        model: spectre_core.models.SignalGeneratorConstantStaircaseModel,
     ) -> spectre_core.spectrograms.Spectrogram:
         """Produces the analytically-derived spectrogram for the `SignalGenerator` receiver operating in the mode `constant_staircase`."""
 
@@ -180,8 +186,8 @@ class SignalGenerator(Base):
 
         self.add_mode(
             _Mode.COSINE_WAVE,
-            spectre_core.models.CosineWaveModel,
-            spectre_core.flowgraphs.CosineWave,
+            spectre_core.models.SignalGeneratorCosineWaveModel,
+            spectre_core.flowgraphs.SignalGeneratorCosineWave,
             spectre_core.events.FixedCenterFrequency,
             spectre_core.batches.IQStreamBatch,
         )
@@ -189,8 +195,8 @@ class SignalGenerator(Base):
 
         self.add_mode(
             _Mode.CONSTANT_STAIRCASE,
-            spectre_core.models.ConstantStaircaseModel,
-            spectre_core.flowgraphs.ConstantStaircase,
+            spectre_core.models.SignalGeneratorConstantStaircaseModel,
+            spectre_core.flowgraphs.SignalGeneratorConstantStaircase,
             spectre_core.events.SweptCenterFrequency,
             spectre_core.batches.IQStreamBatch,
         )

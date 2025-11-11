@@ -12,16 +12,21 @@ from ._base import Base
 from ._config import _ReservedTagStr, read_config
 from ._signal_generator import SignalGenerator
 from ._custom import Custom
+from ._rsp1a import RSP1A
 
 
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["custom"], mode: typing.Optional[str] = None
+) -> Custom: ...
 @typing.overload
 def get_receiver(
     receiver_name: typing.Literal["signal_generator"], mode: typing.Optional[str] = None
 ) -> SignalGenerator: ...
 @typing.overload
 def get_receiver(
-    receiver_name: typing.Literal["custom"], mode: typing.Optional[str] = None
-) -> Custom: ...
+    receiver_name: typing.Literal["RSP1A"], mode: typing.Optional[str] = None
+) -> RSP1A: ...
 @typing.overload
 def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base: ...
 
