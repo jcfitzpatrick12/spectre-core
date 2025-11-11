@@ -10,6 +10,20 @@ import spectre_core.batches
 from ._register import receivers
 from ._base import Base
 from ._config import _ReservedTagStr, read_config
+from ._signal_generator import SignalGenerator
+from ._custom import Custom
+
+
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["signal_generator"], mode: typing.Optional[str] = None
+) -> SignalGenerator: ...
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["custom"], mode: typing.Optional[str] = None
+) -> Custom: ...
+@typing.overload
+def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base: ...
 
 
 def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base:

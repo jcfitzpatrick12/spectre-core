@@ -11,11 +11,9 @@ import spectre_core.batches
 
 
 @pytest.fixture
-def signal_generator() -> spectre_core.receivers.Base:
+def signal_generator() -> spectre_core.receivers.SignalGenerator:
     """Get a signal generator, with mode not yet set."""
-    return spectre_core.receivers.get_receiver(
-        spectre_core.receivers.ReceiverName.SIGNAL_GENERATOR
-    )
+    return spectre_core.receivers.get_receiver("signal_generator")
 
 
 ATOL = 1e-4
