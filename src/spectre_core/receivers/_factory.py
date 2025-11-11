@@ -38,8 +38,8 @@ def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base:
     if receiver_cls is None:
         valid_receivers = list(receivers.keys())
         raise spectre_core.exceptions.ReceiverNotFoundError(
-            f"No class found for the receiver: {receiver_name}. "
-            f"Please specify one of the following receivers {valid_receivers}"
+            f"Could not find the receiver '{receiver_name}', "
+            f"expected one of {valid_receivers}"
         )
     return receiver_cls(receiver_name, mode=mode)
 

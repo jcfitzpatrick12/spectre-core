@@ -42,7 +42,7 @@ def _make_post_processing_worker(
 @spectre_core.logs.log_call
 def record_signal(
     configs: list[Config],
-    duration: int = 60,
+    duration: float = 60,
     force_restart: bool = False,
     max_restarts: int = 5,
     skip_validation: bool = False,
@@ -72,7 +72,7 @@ def record_signal(
 @spectre_core.logs.log_call
 def record_spectrograms(
     configs: list[Config],
-    duration: int = 60,
+    duration: float = 60,
     force_restart: bool = False,
     max_restarts: int = 5,
     skip_validation: bool = False,
