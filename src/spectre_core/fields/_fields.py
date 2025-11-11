@@ -76,7 +76,7 @@ class Field:
         pydantic.Field(
             ...,
             ge=0,
-            description="Spectrograms are averaged up to the frequency resolution, in Hz.",
+            description="Spectrograms are averaged up to the frequency resolution, in Hz. 0 for no averaging.",
         ),
     ]
     time_resolution = typing.Annotated[
@@ -84,7 +84,7 @@ class Field:
         pydantic.Field(
             ...,
             ge=0,
-            description="Spectrograms are averaged up to the time resolution, in seconds.",
+            description="Spectrograms are averaged up to the time resolution, in seconds. 0 for no averaging.",
         ),
     ]
     time_range = typing.Annotated[
@@ -92,7 +92,7 @@ class Field:
         pydantic.Field(
             ...,
             ge=0,
-            description="Spectrograms are stitched together until the time range has elapsed.",
+            description="Spectrograms are stitched together until the time range has elapsed. 0 for no stitching.",
         ),
     ]
     origin = typing.Annotated[
