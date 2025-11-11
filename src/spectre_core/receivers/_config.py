@@ -137,6 +137,7 @@ def write_config(
     :param parameters: The parameters to save.
     :param configs_dir_path: Optionally override the directory containing the configs, defaults to None
     """
+    _validate_tag(tag)
     configs_dir_path = (
         configs_dir_path or spectre_core.config.paths.get_configs_dir_path()
     )
