@@ -16,7 +16,7 @@ class Field:
         pydantic.Field(
             ...,
             gt=1000,
-            description="The maximum number of items handled at each call of the work function in GNU Radio.",
+            description="The maximum number of samples handled at each call of the work function in GNU Radio.",
         ),
     ]
     sample_rate = typing.Annotated[
