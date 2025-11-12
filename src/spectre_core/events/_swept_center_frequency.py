@@ -371,7 +371,7 @@ class SweptCenterFrequencyModel(BaseModel):
     sample_rate: spectre_core.fields.Field.sample_rate = 1000000
     frequency_resolution: spectre_core.fields.Field.frequency_resolution = 0
     time_resolution: spectre_core.fields.Field.time_resolution = 0
-    keep_signal: spectre_core.fields.Field.keep_signal = True
+    keep_signal: spectre_core.fields.Field.keep_signal = False
     frequency_step: spectre_core.fields.Field.frequency_step = 1000000
 
 

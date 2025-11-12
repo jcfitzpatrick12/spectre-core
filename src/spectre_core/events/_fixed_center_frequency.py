@@ -36,7 +36,7 @@ class FixedCenterFrequencyModel(BaseModel):
     frequency_resolution: spectre_core.fields.Field.frequency_resolution = 0
     time_resolution: spectre_core.fields.Field.time_resolution = 0
     batch_size: spectre_core.fields.Field.batch_size = 3
-    keep_signal: spectre_core.fields.Field.keep_signal = True
+    keep_signal: spectre_core.fields.Field.keep_signal = False
 
 
 class FixedCenterFrequency(
