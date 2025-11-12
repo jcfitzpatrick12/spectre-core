@@ -18,6 +18,8 @@ from ._names import ReceiverName
 from ._custom import Custom
 from ._signal_generator import SignalGenerator
 from ._rsp1a import RSP1A
+from ._rspduo import RSPduo
+from ._rspdx import RSPdx
 from ._record import record_signal, record_spectrograms
 
 __all__ = [
@@ -35,6 +37,8 @@ __all__ = [
     "Custom",
     "SignalGenerator",
     "RSP1A",
+    "RSPduo",
+    "RSPdx",
     "ReceiverName",
     "record_signal",
     "record_spectrograms",

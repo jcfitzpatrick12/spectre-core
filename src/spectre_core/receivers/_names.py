@@ -13,9 +13,11 @@ class ReceiverName:
     :ivar SIGNAL_GENERATOR: A synthetic signal generator.
     :ivar RSP1A: SDRPlay RSP1A.
     :ivar RSPDUO: SDRPlay RSPduo.
+    :ivar RSPDX: SDRPlay RSPdx.
     """
 
     CUSTOM = "custom"
     SIGNAL_GENERATOR = "signal_generator"
     RSP1A = "rsp1a"
     RSPDUO = "rspduo"
+    RSPDX = "rspdx"

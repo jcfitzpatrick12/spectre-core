@@ -14,6 +14,7 @@ from ._signal_generator import SignalGenerator
 from ._custom import Custom
 from ._rsp1a import RSP1A
 from ._rspduo import RSPduo
+from ._rspdx import RSPdx
 
 
 @typing.overload
@@ -32,6 +33,10 @@ def get_receiver(
 def get_receiver(
     receiver_name: typing.Literal["RSPduo"], mode: typing.Optional[str] = None
 ) -> RSPduo: ...
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["RSPdx"], mode: typing.Optional[str] = None
+) -> RSPdx: ...
 @typing.overload
 def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base: ...
 
