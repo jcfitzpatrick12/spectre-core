@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# This file is part of SPECTRE
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 import typing
 
 import pydantic
@@ -18,10 +22,10 @@ class Field:
     sample_rate = typing.Annotated[
         int,
         pydantic.Field(
-            ..., 
+            ...,
             validate_default=True,
-            gt=0, 
-            description="The number of samples taken per second, in Hz."
+            gt=0,
+            description="The number of samples taken per second, in Hz.",
         ),
     ]
     batch_size = typing.Annotated[
@@ -34,20 +38,20 @@ class Field:
         ),
     ]
     frequency = typing.Annotated[
-        float, 
+        float,
         pydantic.Field(
-            ..., 
+            ...,
             validate_default=True,
-            gt=0, 
-            description="Frequency of the signal, in Hz."
-        )
+            gt=0,
+            description="Frequency of the signal, in Hz.",
+        ),
     ]
     amplitude = typing.Annotated[
         int,
         pydantic.Field(
-            ..., 
+            ...,
             validate_default=True,
-            description="Amplitude of the signal, arbitrary units."
+            description="Amplitude of the signal, arbitrary units.",
         ),
     ]
     window_size = typing.Annotated[
@@ -113,60 +117,60 @@ class Field:
         ),
     ]
     origin = typing.Annotated[
-        str, 
+        str,
         pydantic.Field(
-            ..., 
+            ...,
             validate_default=True,
-            description="Corresponds to the FITS keyword ORIGIN."
-        )
+            description="Corresponds to the FITS keyword ORIGIN.",
+        ),
     ]
     telescope = typing.Annotated[
         str,
         pydantic.Field(
-            ..., 
+            ...,
             validate_default=True,
-            description="Corresponds to the FITS keyword TELESCOP."
+            description="Corresponds to the FITS keyword TELESCOP.",
         ),
     ]
     instrument = typing.Annotated[
         str,
         pydantic.Field(
-            ..., 
+            ...,
             validate_default=True,
-            description="Corresponds to the FITS keyword INSTRUMEN."
+            description="Corresponds to the FITS keyword INSTRUMEN.",
         ),
     ]
     # Add an underscore to not conflict with the globally-scoped `object`.
     object_ = typing.Annotated[
-        str, 
+        str,
         pydantic.Field(
-            ..., 
+            ...,
             validate_default=True,
-            description="Corresponds to the FITS keyword OBJECT."
-        )
+            description="Corresponds to the FITS keyword OBJECT.",
+        ),
     ]
     obs_lat = typing.Annotated[
         float,
         pydantic.Field(
-            ..., 
+            ...,
             validate_default=True,
-            description="Corresponds to the FITS keyword OBS_LAT."
+            description="Corresponds to the FITS keyword OBS_LAT.",
         ),
     ]
     obs_alt = typing.Annotated[
         float,
         pydantic.Field(
-            ..., 
+            ...,
             validate_default=True,
-            description="Corresponds to the FITS keyword OBS_ALT."
+            description="Corresponds to the FITS keyword OBS_ALT.",
         ),
     ]
     obs_lon = typing.Annotated[
         float,
         pydantic.Field(
-            ..., 
+            ...,
             validate_default=True,
-            description="Corresponds to the FITS keyword OBS_LON."
+            description="Corresponds to the FITS keyword OBS_LON.",
         ),
     ]
     keep_signal = typing.Annotated[
