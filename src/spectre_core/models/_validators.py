@@ -8,7 +8,7 @@ import math
 import pydantic
 
 
-def skip_validator(info: pydantic.ValidationInfo) -> typing.Callable:
+def skip_validator(info: pydantic.ValidationInfo) -> bool:
     return True if info.context and info.context.get("skip", False) else False
 
 

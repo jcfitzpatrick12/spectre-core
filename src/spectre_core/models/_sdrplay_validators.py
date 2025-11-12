@@ -72,7 +72,7 @@ def validate_low_if_sample_rate(sample_rate: int) -> None:
             )
 
 
-def validate_rf_gain(rf_gain: int, expected_rf_gains: list[int]):
+def validate_rf_gain(rf_gain: float, expected_rf_gains: list[int]):
     """Validate the RF gain value against the expected values for the current LNA state.
 
     The RF gain is determined by the LNA state and can only take specific values as documented in the

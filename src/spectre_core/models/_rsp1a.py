@@ -43,7 +43,7 @@ class RSP1AFixedCenterFrequency(
     spectre_core.events.FixedCenterFrequencyModel,
 ):
     @pydantic.model_validator(mode="after")
-    def validate(self, info: pydantic.ValidationInfo):
+    def validator(self, info: pydantic.ValidationInfo):
         if skip_validator(info):
             return self
         validate_nyquist_criterion(self.sample_rate, self.bandwidth)
@@ -62,7 +62,7 @@ class RSP1ASweptCenterFrequency(
     spectre_core.events.SweptCenterFrequencyModel,
 ):
     @pydantic.model_validator(mode="after")
-    def validate(self, info: pydantic.ValidationInfo):
+    def validator(self, info: pydantic.ValidationInfo):
         if skip_validator(info):
             return self
         validate_center_frequency(self.min_frequency)

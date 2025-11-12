@@ -18,7 +18,7 @@ class SignalGeneratorCosineWaveModel(
     window_type: spectre_core.fields.Field.window_type = "boxcar"
 
     @pydantic.model_validator(mode="after")
-    def validate(self, info: pydantic.ValidationInfo):
+    def validator(self, info: pydantic.ValidationInfo):
         if skip_validator(info):
             return self
         validate_window_size(self.window_size)
@@ -56,7 +56,7 @@ class SignalGeneratorConstantStaircaseModel(
     window_type: spectre_core.fields.Field.window_type = "boxcar"
 
     @pydantic.model_validator(mode="after")
-    def validate(self, info: pydantic.ValidationInfo):
+    def validator(self, info: pydantic.ValidationInfo):
         if skip_validator(info):
             return self
         validate_window_size(self.window_size)
