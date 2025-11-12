@@ -18,6 +18,13 @@ from ._rsp1a import (
     RSP1ASweptCenterFrequency,
     RSP1ASweptCenterFrequencyModel,
 )
+from ._rspduo import (
+    RSPduoFixedCenterFrequency,
+    RSPduoFixedCenterFrequencyModel,
+    RSPduoSweptCenterFrequency,
+    RSPduoSweptCenterFrequencyModel,
+    RSPduoPort,
+)
 
 __all__ = [
     "Base",
@@ -29,4 +36,9 @@ __all__ = [
     "RSP1AFixedCenterFrequencyModel",
     "RSP1ASweptCenterFrequency",
     "RSP1ASweptCenterFrequencyModel",
+    "RSPduoFixedCenterFrequency",
+    "RSPduoFixedCenterFrequencyModel",
+    "RSPduoSweptCenterFrequency",
+    "RSPduoSweptCenterFrequencyModel",
+    "RSPduoPort",
 ]

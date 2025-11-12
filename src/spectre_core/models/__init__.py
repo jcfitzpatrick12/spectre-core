@@ -10,10 +10,13 @@ from ._signal_generator import (
     SignalGeneratorConstantStaircaseModel,
 )
 from ._rsp1a import RSP1AFixedCenterFrequency, RSP1ASweptCenterFrequency
+from ._rspduo import RSPduoFixedCenterFrequency, RSPduoSweptCenterFrequency
 
 __all__ = [
     "SignalGeneratorCosineWaveModel",
     "SignalGeneratorConstantStaircaseModel",
     "RSP1AFixedCenterFrequency",
     "RSP1ASweptCenterFrequency",
+    "RSPduoFixedCenterFrequency",
+    "RSPduoSweptCenterFrequency",
 ]
