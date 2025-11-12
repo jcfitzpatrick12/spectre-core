@@ -67,7 +67,6 @@ class RSP1ASweptCenterFrequencyModel(BaseModel):
 
 class RSP1ASweptCenterFrequency(Base[RSP1ASweptCenterFrequencyModel]):
     def configure(self, tag: str, model: RSP1ASweptCenterFrequencyModel) -> None:
-        # Blocks
         self.spectre_sweep_driver = spectre.sweep_driver(
             model.min_frequency,
             model.max_frequency,
