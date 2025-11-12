@@ -9,7 +9,8 @@ import pydantic
 
 
 def skip_validator(info: pydantic.ValidationInfo) -> typing.Callable:
-    return True if info.context and info.context.get('skip', False) else False
+    return True if info.context and info.context.get("skip", False) else False
+
 
 T = typing.TypeVar("T")
 

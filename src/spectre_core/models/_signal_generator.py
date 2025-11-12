@@ -8,10 +8,7 @@ import spectre_core.fields
 import spectre_core.events
 import spectre_core.flowgraphs
 
-from ._validators import (
-    skip_validator,
-    validate_window_size
-)
+from ._validators import skip_validator, validate_window_size
 
 
 class SignalGeneratorCosineWaveModel(
