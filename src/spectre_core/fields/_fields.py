@@ -1,8 +1,3 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
-# This file is part of SPECTRE
-# SPDX-License-Identifier: GPL-3.0-or-later
-
-
 import typing
 
 import pydantic
@@ -15,6 +10,7 @@ class Field:
         int,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=1000,
             description="The maximum number of samples handled at each call of the work function in GNU Radio.",
         ),
@@ -22,28 +18,43 @@ class Field:
     sample_rate = typing.Annotated[
         int,
         pydantic.Field(
-            ..., gt=0, description="The number of samples taken per second, in Hz."
+            ..., 
+            validate_default=True,
+            gt=0, 
+            description="The number of samples taken per second, in Hz."
         ),
     ]
     batch_size = typing.Annotated[
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             ge=1,
             description="Samples are recorded in batches of this size, specified in seconds.",
         ),
     ]
     frequency = typing.Annotated[
-        float, pydantic.Field(..., gt=0, description="Frequency of the signal, in Hz.")
+        float, 
+        pydantic.Field(
+            ..., 
+            validate_default=True,
+            gt=0, 
+            description="Frequency of the signal, in Hz."
+        )
     ]
     amplitude = typing.Annotated[
         int,
-        pydantic.Field(..., description="Amplitude of the signal, arbitrary units."),
+        pydantic.Field(
+            ..., 
+            validate_default=True,
+            description="Amplitude of the signal, arbitrary units."
+        ),
     ]
     window_size = typing.Annotated[
         int,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=2,
             description="The size of the window, in samples, when performing the Short Time FFT.",
         ),
@@ -52,6 +63,7 @@ class Field:
         int,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=0,
             description="How much the window is shifted, in samples, when performing the Short Time FFT.",
         ),
@@ -60,6 +72,7 @@ class Field:
         typing.Literal["blackman", "hann", "boxcar"],
         pydantic.Field(
             ...,
+            validate_default=True,
             description="The type of window applied when performing the Short Time FFT.",
         ),
     ]
@@ -67,6 +80,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=0.0,
             description="The center frequency, in Hz. This value determines the midpoint of the frequency range being processed.",
         ),
@@ -75,6 +89,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             ge=0,
             description="Spectrograms are averaged up to the frequency resolution, in Hz. 0 for no averaging.",
         ),
@@ -83,6 +98,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             ge=0,
             description="Spectrograms are averaged up to the time resolution, in seconds. 0 for no averaging.",
         ),
@@ -91,41 +107,73 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             ge=0,
             description="Spectrograms are stitched together until the time range has elapsed. 0 for no stitching.",
         ),
     ]
     origin = typing.Annotated[
-        str, pydantic.Field(..., description="Corresponds to the FITS keyword ORIGIN.")
+        str, 
+        pydantic.Field(
+            ..., 
+            validate_default=True,
+            description="Corresponds to the FITS keyword ORIGIN."
+        )
     ]
     telescope = typing.Annotated[
         str,
-        pydantic.Field(..., description="Corresponds to the FITS keyword TELESCOP."),
+        pydantic.Field(
+            ..., 
+            validate_default=True,
+            description="Corresponds to the FITS keyword TELESCOP."
+        ),
     ]
     instrument = typing.Annotated[
         str,
-        pydantic.Field(..., description="Corresponds to the FITS keyword INSTRUMEN."),
+        pydantic.Field(
+            ..., 
+            validate_default=True,
+            description="Corresponds to the FITS keyword INSTRUMEN."
+        ),
     ]
     # Add an underscore to not conflict with the globally-scoped `object`.
     object_ = typing.Annotated[
-        str, pydantic.Field(..., description="Corresponds to the FITS keyword OBJECT.")
+        str, 
+        pydantic.Field(
+            ..., 
+            validate_default=True,
+            description="Corresponds to the FITS keyword OBJECT."
+        )
     ]
     obs_lat = typing.Annotated[
         float,
-        pydantic.Field(..., description="Corresponds to the FITS keyword OBS_LAT."),
+        pydantic.Field(
+            ..., 
+            validate_default=True,
+            description="Corresponds to the FITS keyword OBS_LAT."
+        ),
     ]
     obs_alt = typing.Annotated[
         float,
-        pydantic.Field(..., description="Corresponds to the FITS keyword OBS_ALT."),
+        pydantic.Field(
+            ..., 
+            validate_default=True,
+            description="Corresponds to the FITS keyword OBS_ALT."
+        ),
     ]
     obs_lon = typing.Annotated[
         float,
-        pydantic.Field(..., description="Corresponds to the FITS keyword OBS_LON."),
+        pydantic.Field(
+            ..., 
+            validate_default=True,
+            description="Corresponds to the FITS keyword OBS_LON."
+        ),
     ]
     keep_signal = typing.Annotated[
         bool,
         pydantic.Field(
             ...,
+            validate_default=True,
             description="If True, keep the signal after creating the spectrogram. Otherwise, it is deleted from the file system.",
         ),
     ]
@@ -133,6 +181,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=0,
             description="The amount, in Hz, by which the center frequency is incremented for each step in the frequency sweep.",
         ),
@@ -141,6 +190,7 @@ class Field:
         int,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=0,
             description="The length by which each step in the staircase is incremented.",
         ),
@@ -149,6 +199,7 @@ class Field:
         int,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=0,
             description="The minimum number of samples in the shortest step of the staircase.",
         ),
@@ -157,6 +208,7 @@ class Field:
         int,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=0,
             description="The maximum number of samples in the shortest step of the staircase.",
         ),
@@ -165,6 +217,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=0,
             description="The range in Hz the signal will occupy in the frequency domain without attenutation.",
         ),
@@ -173,6 +226,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             description="The intermediate frequency gain, in dB. Negative value indicates attenuation.",
         ),
     ]
@@ -180,6 +234,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             description="The radio frequency gain, in dB. Negative value indicates attenuation.",
         ),
     ]
@@ -187,6 +242,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=0,
             description="The minimum center frequency, in Hz, for the frequency sweep.",
         ),
@@ -195,6 +251,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=0,
             description="The maximum center frequency, in Hz, for the frequency sweep.",
         ),
@@ -203,6 +260,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             description="The gain value for the SDR, in dB",
         ),
     ]
@@ -210,6 +268,7 @@ class Field:
         int,
         pydantic.Field(
             ...,
+            validate_default=True,
             description="The primary reference clock for the SDR, specified in Hz.",
         ),
     ]
@@ -217,6 +276,7 @@ class Field:
         str,
         pydantic.Field(
             ...,
+            validate_default=True,
             description="Controls the form of the data over the bus/network.",
         ),
     ]
@@ -224,6 +284,7 @@ class Field:
         int,
         pydantic.Field(
             ...,
+            validate_default=True,
             gt=0,
             description="The number of samples taken at each center frequency in the sweep. This may vary slightly from what is specified due to the nature of GNU Radio runtime.",
         ),
@@ -232,6 +293,7 @@ class Field:
         str,
         pydantic.Field(
             ...,
+            validate_default=True,
             description="Specifies a particular antenna port on a receiver.",
         ),
     ]
@@ -239,6 +301,7 @@ class Field:
         bool,
         pydantic.Field(
             ...,
+            validate_default=True,
             description="If true, amplify the signal.",
         ),
     ]
@@ -246,6 +309,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             description="The low-noise amplifier gain, in dB.",
         ),
     ]
@@ -253,6 +317,7 @@ class Field:
         float,
         pydantic.Field(
             ...,
+            validate_default=True,
             description="The variable-gain amplifier gain, in dB.",
         ),
     ]
