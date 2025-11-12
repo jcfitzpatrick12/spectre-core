@@ -111,11 +111,12 @@ def read_config(tag: str, configs_dir_path: typing.Optional[str] = None) -> Conf
     :param configs_dir_path: Optionally override the directory containing the configs, defaults to None
     :return: A container storing the config data.
     """
+    config_file_path = get_config_file_path(tag, configs_dir_path)
+    if not os.path.exists(config_file_path):
+        raise FileNotFoundError(f"A config with tag '{tag}' does not exist.")
     return Config(
         tag,
-        spectre_core.io.read_file(
-            get_config_file_path(tag, configs_dir_path), spectre_core.io.FileFormat.JSON
-        ),
+        spectre_core.io.read_file(config_file_path, spectre_core.io.FileFormat.JSON),
     )
 
 
