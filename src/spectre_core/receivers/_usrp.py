@@ -29,8 +29,8 @@ class USRP(Base):
 
         self.add_mode(
             _Mode.FIXED_CENTER_FREQUENCY,
-            spectre_core.models.RSP1AFixedCenterFrequency,
-            spectre_core.flowgraphs.RSP1AFixedCenterFrequency,
+            spectre_core.models.USRPFixedCenterFrequency,
+            spectre_core.flowgraphs.USRPFixedCenterFrequency,
             spectre_core.events.FixedCenterFrequency,
             spectre_core.batches.IQStreamBatch,
         )
