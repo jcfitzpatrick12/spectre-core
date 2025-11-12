@@ -119,3 +119,36 @@ class TestReceiver:
         assert config.receiver_name == "signal_generator"
         assert "sample_rate" in config.parameters
         assert config.parameters["sample_rate"] == 256000
+
+
+class TestReceivers:
+    @pytest.mark.parametrize(
+        ("receiver_name"),
+        [
+            spectre_core.receivers.ReceiverName.RSP1A,
+            spectre_core.receivers.ReceiverName.RSPDUO,
+            spectre_core.receivers.ReceiverName.RSPDX,
+            spectre_core.receivers.ReceiverName.USRP,
+            spectre_core.receivers.ReceiverName.B200MINI,
+        ],
+    )
+    def test_write_default_config(
+        self, spectre_config_paths: spectre_core.config.Paths, receiver_name: str
+    ) -> None:
+        """Check that the default configs satisfy each model."""
+        receiver = spectre_core.receivers.get_receiver(receiver_name)
+        for mode in receiver.modes:
+            receiver.mode = mode
+
+            # Dynamically create the tag based on the receiver and mode.
+            mode = mode.replace("_", "-")
+            tag = f"{receiver_name}-{mode}"
+
+            receiver.write_config(
+                tag, {}, configs_dir_path=spectre_config_paths.get_configs_dir_path()
+            )
+            assert os.path.exists(
+                spectre_core.receivers.get_config_file_path(
+                    tag, spectre_config_paths.get_configs_dir_path()
+                )
+            )

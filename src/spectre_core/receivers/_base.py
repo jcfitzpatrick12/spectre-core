@@ -235,7 +235,7 @@ class Base:
             tag,
             self.name,
             self.active_mode,
-            self.model_validate(parameters, skip_validation).model_dump(),
+            self.model_validate(parameters, skip=skip_validation).model_dump(),
             configs_dir_path,
         )
 
