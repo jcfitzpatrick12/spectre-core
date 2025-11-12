@@ -8,6 +8,7 @@ import spectre_core.events
 import spectre_core.flowgraphs
 
 from ._validators import (
+    skip_validator,
     validate_window_size,
     validate_non_overlapping_steps,
     validate_num_samples_per_step,
@@ -42,7 +43,9 @@ class RSP1AFixedCenterFrequency(
     spectre_core.events.FixedCenterFrequencyModel,
 ):
     @pydantic.model_validator(mode="after")
-    def validate(self):
+    def validate(self, info: pydantic.ValidationInfo):
+        if skip_validator(info):
+            return self
         validate_nyquist_criterion(self.sample_rate, self.bandwidth)
         validate_center_frequency(self.center_frequency)
         validate_window_size(self.window_size)
@@ -59,7 +62,9 @@ class RSP1ASweptCenterFrequency(
     spectre_core.events.SweptCenterFrequencyModel,
 ):
     @pydantic.model_validator(mode="after")
-    def validate(self):
+    def validate(self, info: pydantic.ValidationInfo):
+        if skip_validator(info):
+            return self
         validate_center_frequency(self.min_frequency)
         validate_center_frequency(self.max_frequency)
         validate_window_size(self.window_size)

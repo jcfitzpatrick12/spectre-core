@@ -186,11 +186,8 @@ class Base:
         :param skip: If True, skip validating the parameters against the model.
         :return: The validated model.
         """
-        if skip:
-            return self.model_cls.model_construct(**parameters)
-
         _LOGGER.info("Validating parameters...")
-        return self.model_cls.model_validate(parameters)
+        return self.model_cls.model_validate(parameters, context={"skip": skip})
 
     def read_config(
         self,

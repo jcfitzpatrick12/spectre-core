@@ -8,7 +8,10 @@ import spectre_core.fields
 import spectre_core.events
 import spectre_core.flowgraphs
 
-from ._validators import validate_window_size
+from ._validators import (
+    skip_validator,
+    validate_window_size
+)
 
 
 class SignalGeneratorCosineWaveModel(
@@ -18,7 +21,9 @@ class SignalGeneratorCosineWaveModel(
     window_type: spectre_core.fields.Field.window_type = "boxcar"
 
     @pydantic.model_validator(mode="after")
-    def validate(self):
+    def validate(self, info: pydantic.ValidationInfo):
+        if skip_validator(info):
+            return self
         validate_window_size(self.window_size)
 
         if not self.window_type == "boxcar":
@@ -54,7 +59,9 @@ class SignalGeneratorConstantStaircaseModel(
     window_type: spectre_core.fields.Field.window_type = "boxcar"
 
     @pydantic.model_validator(mode="after")
-    def validate(self):
+    def validate(self, info: pydantic.ValidationInfo):
+        if skip_validator(info):
+            return self
         validate_window_size(self.window_size)
         if not self.window_type == "boxcar":
             raise ValueError(
