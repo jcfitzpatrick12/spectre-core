@@ -2,7 +2,6 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from gnuradio import gr
 from gnuradio import sdrplay3
 from gnuradio import spectre
 
@@ -14,7 +13,6 @@ from ._base import Base, BaseModel
 class RSP1AFixedCenterFrequencyModel(BaseModel):
     sample_rate: spectre_core.fields.Field.sample_rate = 500000
     batch_size: spectre_core.fields.Field.batch_size = 3
-    amplitude: spectre_core.fields.Field.amplitude = 1
     center_frequency: spectre_core.fields.Field.center_frequency = 95.8e6
     bandwidth: spectre_core.fields.Field.bandwidth = 300000
     if_gain: spectre_core.fields.Field.if_gain = -30
@@ -47,15 +45,12 @@ class RSP1AFixedCenterFrequency(Base[RSP1AFixedCenterFrequencyModel]):
         self.sdrplay3_rsp1a.set_sample_sequence_gaps_check(False)
         self.sdrplay3_rsp1a.set_show_gain_changes(False)
 
-        # Connections
         self.connect((self.sdrplay3_rsp1a, 0), (self.spectre_batched_file_sink, 0))
 
 
 class RSP1ASweptCenterFrequencyModel(BaseModel):
     sample_rate: spectre_core.fields.Field.sample_rate = 2000000
     batch_size: spectre_core.fields.Field.batch_size = 3
-    amplitude: spectre_core.fields.Field.amplitude = 1
-    center_frequency: spectre_core.fields.Field.center_frequency = 95.8e6
     bandwidth: spectre_core.fields.Field.bandwidth = 1.536e6
     if_gain: spectre_core.fields.Field.if_gain = -30
     rf_gain: spectre_core.fields.Field.rf_gain = 0
@@ -106,7 +101,6 @@ class RSP1ASweptCenterFrequency(Base[RSP1ASweptCenterFrequencyModel]):
         self.sdrplay3_rsp1a.set_sample_sequence_gaps_check(False)
         self.sdrplay3_rsp1a.set_show_gain_changes(False)
 
-        # Connections
         self.msg_connect(
             (self.spectre_sweep_driver, "retune_command"),
             (self.sdrplay3_rsp1a, "command"),

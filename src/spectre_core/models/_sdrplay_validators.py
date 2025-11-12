@@ -2,7 +2,12 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+import typing
+import logging
+
 from ._validators import validate_in_range, validate_one_of
+
+_LOGGER = logging.getLogger(__name__)
 
 SAMPLE_RATE_LOWER_BOUND = 62.5e3
 SAMPLE_RATE_UPPER_BOUND = 10.66e6
@@ -27,6 +32,17 @@ def validate_center_frequency(center_frequency: float) -> None:
         upper_bound=CENTER_FREQUENCY_UPPER_BOUND,
         name="center_frequency",
     )
+
+
+def validate_constant_lna_state(
+    min_frequency: float,
+    max_frequency: float,
+    get_rf_gains: typing.Callable[[float], list[int]],
+):
+    if get_rf_gains(min_frequency) != get_rf_gains(max_frequency):
+        _LOGGER.warning(
+            "Crossing a threshold where the LNA state has to change. Performance may be reduced."
+        )
 
 
 def validate_sample_rate(sample_rate: int) -> None:
