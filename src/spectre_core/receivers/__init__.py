@@ -20,6 +20,8 @@ from ._signal_generator import SignalGenerator
 from ._rsp1a import RSP1A
 from ._rspduo import RSPduo
 from ._rspdx import RSPdx
+from ._usrp import USRP
+from ._b200mini import B200mini
 from ._record import record_signal, record_spectrograms
 
 __all__ = [
@@ -39,6 +41,8 @@ __all__ = [
     "RSP1A",
     "RSPduo",
     "RSPdx",
+    "USRP",
+    "B200mini",
     "ReceiverName",
     "record_signal",
     "record_spectrograms",

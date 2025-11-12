@@ -15,7 +15,10 @@ from ._validators import (
     validate_num_steps_per_sweep,
     validate_num_samples_per_step,
 )
-from ._usrp_validators import validate_wire_format
+from ._usrp_validators import (
+    validate_wire_format,
+    validate_sample_rate_with_master_clock_rate,
+)
 
 
 class USRPFixedCenterFrequency(
@@ -29,11 +32,14 @@ class USRPFixedCenterFrequency(
         validate_nyquist_criterion(self.sample_rate, self.bandwidth)
         validate_window_size(self.window_size)
         validate_wire_format(self.wire_format)
+        validate_sample_rate_with_master_clock_rate(
+            self.sample_rate, self.master_clock_rate
+        )
         return self
 
 
 class USRPSweptCenterFrequency(
-    spectre_core.flowgraphs.RSP1ASweptCenterFrequencyModel,
+    spectre_core.flowgraphs.USRPSweptCenterFrequencyModel,
     spectre_core.events.SweptCenterFrequencyModel,
 ):
     @pydantic.model_validator(mode="after")
@@ -45,5 +51,8 @@ class USRPSweptCenterFrequency(
         validate_num_samples_per_step(self.window_size, self.samples_per_step)
         validate_num_steps_per_sweep(
             self.min_frequency, self.max_frequency, self.frequency_step
+        )
+        validate_sample_rate_with_master_clock_rate(
+            self.sample_rate, self.master_clock_rate
         )
         return self
