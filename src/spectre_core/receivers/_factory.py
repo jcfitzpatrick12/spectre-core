@@ -28,19 +28,23 @@ def get_receiver(
 ) -> SignalGenerator: ...
 @typing.overload
 def get_receiver(
-    receiver_name: typing.Literal["RSP1A"], mode: typing.Optional[str] = None
+    receiver_name: typing.Literal["rsp1a"], mode: typing.Optional[str] = None
 ) -> RSP1A: ...
 @typing.overload
 def get_receiver(
-    receiver_name: typing.Literal["RSPduo"], mode: typing.Optional[str] = None
+    receiver_name: typing.Literal["rspduo"], mode: typing.Optional[str] = None
 ) -> RSPduo: ...
 @typing.overload
 def get_receiver(
-    receiver_name: typing.Literal["RSPdx"], mode: typing.Optional[str] = None
+    receiver_name: typing.Literal["rspdx"], mode: typing.Optional[str] = None
 ) -> RSPdx: ...
 @typing.overload
 def get_receiver(
-    receiver_name: typing.Literal["USRP"], mode: typing.Optional[str] = None
+    receiver_name: typing.Literal["usrp"], mode: typing.Optional[str] = None
+) -> USRP: ...
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["b200mini"], mode: typing.Optional[str] = None
 ) -> USRP: ...
 @typing.overload
 def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base: ...
