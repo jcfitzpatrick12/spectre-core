@@ -15,6 +15,7 @@ from ._custom import Custom
 from ._rsp1a import RSP1A
 from ._rspduo import RSPduo
 from ._rspdx import RSPdx
+from ._usrp import USRP
 
 
 @typing.overload
@@ -37,6 +38,10 @@ def get_receiver(
 def get_receiver(
     receiver_name: typing.Literal["RSPdx"], mode: typing.Optional[str] = None
 ) -> RSPdx: ...
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["USRP"], mode: typing.Optional[str] = None
+) -> USRP: ...
 @typing.overload
 def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base: ...
 

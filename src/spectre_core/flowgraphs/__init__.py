@@ -32,6 +32,13 @@ from ._rspdx import (
     RSPdxSweptCenterFrequencyModel,
     RSPdxPort,
 )
+from ._usrp import (
+    USRPFixedCenterFrequency,
+    USRPFixedCenterFrequencyModel,
+    USRPSweptCenterFrequency,
+    USRPSweptCenterFrequencyModel,
+    USRPWireFormat,
+)
 
 __all__ = [
     "Base",
@@ -53,4 +60,9 @@ __all__ = [
     "RSPdxSweptCenterFrequency",
     "RSPdxSweptCenterFrequencyModel",
     "RSPdxPort",
+    "USRPFixedCenterFrequency",
+    "USRPFixedCenterFrequencyModel",
+    "USRPSweptCenterFrequency",
+    "USRPSweptCenterFrequencyModel",
+    "USRPWireFormat",
 ]

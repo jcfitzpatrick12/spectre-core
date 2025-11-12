@@ -14,6 +14,8 @@ class ReceiverName:
     :ivar RSP1A: SDRPlay RSP1A.
     :ivar RSPDUO: SDRPlay RSPduo.
     :ivar RSPDX: SDRPlay RSPdx.
+    :ivar USRP: A general USRP receiver.
+    :ivar B200MINI: USRP B200mini.
     """
 
     CUSTOM = "custom"
@@ -21,3 +23,5 @@ class ReceiverName:
     RSP1A = "rsp1a"
     RSPDUO = "rspduo"
     RSPDX = "rspdx"
+    USRP = "usrp"
+    B200MINI = "b200mini"

@@ -12,6 +12,7 @@ from ._signal_generator import (
 from ._rsp1a import RSP1AFixedCenterFrequency, RSP1ASweptCenterFrequency
 from ._rspduo import RSPduoFixedCenterFrequency, RSPduoSweptCenterFrequency
 from ._rspdx import RSPdxFixedCenterFrequency, RSPdxSweptCenterFrequency
+from ._usrp import USRPFixedCenterFrequency, USRPSweptCenterFrequency
 
 __all__ = [
     "SignalGeneratorCosineWaveModel",
