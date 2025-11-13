@@ -16,8 +16,6 @@ from ._names import ReceiverName
 
 @dataclasses.dataclass(frozen=True)
 class _Mode:
-    """An operating mode for the `SignalGenerator` receiver."""
-
     FIXED_CENTER_FREQUENCY = "fixed_center_frequency"
     SWEPT_CENTER_FREQUENCY = "swept_center_frequency"
 

@@ -168,8 +168,6 @@ class ConstantStaircaseSolver(
 
 @dataclasses.dataclass(frozen=True)
 class _Mode:
-    """An operating mode for the `SignalGenerator` receiver."""
-
     COSINE_WAVE = "cosine_wave"
     CONSTANT_STAIRCASE = "constant_staircase"
 

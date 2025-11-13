@@ -19,6 +19,7 @@ from ._usrp import USRP
 from ._b200mini import B200mini
 from ._hackrf import HackRF
 from ._hackrfone import HackRFOne
+from ._rtlsdr import RTLSDR
 
 
 @typing.overload
@@ -57,6 +58,10 @@ def get_receiver(
 def get_receiver(
     receiver_name: typing.Literal["hackrfone"], mode: typing.Optional[str] = None
 ) -> HackRFOne: ...
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["rtlsdr"], mode: typing.Optional[str] = None
+) -> RTLSDR: ...
 @typing.overload
 def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base: ...
 
