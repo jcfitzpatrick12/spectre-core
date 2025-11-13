@@ -24,6 +24,7 @@ from ._usrp import USRP
 from ._b200mini import B200mini
 from ._hackrf import HackRF
 from ._hackrfone import HackRFOne
+from ._rtlsdr import RTLSDR
 from ._record import record_signal, record_spectrograms
 
 __all__ = [
@@ -47,6 +48,7 @@ __all__ = [
     "B200mini",
     "HackRF",
     "HackRFOne",
+    "RTLSDR",
     "ReceiverName",
     "record_signal",
     "record_spectrograms",

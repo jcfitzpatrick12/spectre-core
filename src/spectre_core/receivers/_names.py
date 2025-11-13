@@ -18,6 +18,7 @@ class ReceiverName:
     :ivar B200MINI: USRP B200mini.
     :ivar HACKRF: Any general HackRF receiver.
     :ivar HACKRFONE: Hack RF One.
+    :ivar RTLSDR: RTL-SDR.
     """
 
     CUSTOM = "custom"
@@ -29,3 +30,4 @@ class ReceiverName:
     B200MINI = "b200mini"
     HACKRF = "hackrf"
     HACKRFONE = "hackrfone"
+    RTLSDR = "rtlsdr"

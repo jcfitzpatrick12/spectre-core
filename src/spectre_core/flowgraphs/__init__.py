@@ -40,6 +40,7 @@ from ._usrp import (
     USRPWireFormat,
 )
 from ._hackrf import HackRFFixedCenterFrequency, HackRFFixedCenterFrequencyModel
+from ._rtlsdr import RTLSDRFixedCenterFrequency, RTLSDRFixedCenterFrequencyModel
 
 __all__ = [
     "Base",
@@ -65,7 +66,9 @@ __all__ = [
     "USRPFixedCenterFrequencyModel",
     "USRPSweptCenterFrequency",
     "USRPSweptCenterFrequencyModel",
+    "USRPWireFormat",
     "HackRFFixedCenterFrequency",
     "HackRFFixedCenterFrequencyModel",
-    "USRPWireFormat",
+    "RTLSDRFixedCenterFrequency",
+    "RTLSDRFixedCenterFrequencyModel",
 ]

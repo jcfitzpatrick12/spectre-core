@@ -21,15 +21,15 @@ class _Mode:
     FIXED_CENTER_FREQUENCY = "fixed_center_frequency"
 
 
-@register_receiver(ReceiverName.HACKRFONE)
-class HackRFOne(Base):
+@register_receiver(ReceiverName.RTLSDR)
+class RTLSDR(Base):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.add_mode(
             _Mode.FIXED_CENTER_FREQUENCY,
-            spectre_core.models.HackRFOneFixedCenterFrequency,
-            spectre_core.flowgraphs.HackRFFixedCenterFrequency,
+            spectre_core.models.RTLSDRFixedCenterFrequency,
+            spectre_core.flowgraphs.RTLSDRFixedCenterFrequency,
             spectre_core.events.FixedCenterFrequency,
             spectre_core.batches.IQStreamBatch,
         )
