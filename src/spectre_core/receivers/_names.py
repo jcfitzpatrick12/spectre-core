@@ -16,6 +16,8 @@ class ReceiverName:
     :ivar RSPDX: SDRPlay RSPdx.
     :ivar USRP: A general USRP receiver.
     :ivar B200MINI: USRP B200mini.
+    :ivar HACKRF: Any general HackRF receiver.
+    :ivar HACKRFONE: Hack RF One.
     """
 
     CUSTOM = "custom"
@@ -25,3 +27,5 @@ class ReceiverName:
     RSPDX = "rspdx"
     USRP = "usrp"
     B200MINI = "b200mini"
+    HACKRF = "hackrf"
+    HACKRFONE = "hackrfone"

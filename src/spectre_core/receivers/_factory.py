@@ -16,6 +16,9 @@ from ._rsp1a import RSP1A
 from ._rspduo import RSPduo
 from ._rspdx import RSPdx
 from ._usrp import USRP
+from ._b200mini import B200mini
+from ._hackrf import HackRF
+from ._hackrfone import HackRFOne
 
 
 @typing.overload
@@ -45,7 +48,15 @@ def get_receiver(
 @typing.overload
 def get_receiver(
     receiver_name: typing.Literal["b200mini"], mode: typing.Optional[str] = None
-) -> USRP: ...
+) -> B200mini: ...
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["hackrf"], mode: typing.Optional[str] = None
+) -> HackRF: ...
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["hackrfone"], mode: typing.Optional[str] = None
+) -> HackRFOne: ...
 @typing.overload
 def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base: ...
 

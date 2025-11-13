@@ -130,6 +130,8 @@ class TestReceivers:
             spectre_core.receivers.ReceiverName.RSPDX,
             spectre_core.receivers.ReceiverName.USRP,
             spectre_core.receivers.ReceiverName.B200MINI,
+            spectre_core.receivers.ReceiverName.HACKRF,
+            spectre_core.receivers.ReceiverName.HACKRFONE,
         ],
     )
     def test_write_default_config(

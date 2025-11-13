@@ -22,6 +22,8 @@ from ._rspduo import RSPduo
 from ._rspdx import RSPdx
 from ._usrp import USRP
 from ._b200mini import B200mini
+from ._hackrf import HackRF
+from ._hackrfone import HackRFOne
 from ._record import record_signal, record_spectrograms
 
 __all__ = [
@@ -43,6 +45,8 @@ __all__ = [
     "RSPdx",
     "USRP",
     "B200mini",
+    "HackRF",
+    "HackRFOne",
     "ReceiverName",
     "record_signal",
     "record_spectrograms",

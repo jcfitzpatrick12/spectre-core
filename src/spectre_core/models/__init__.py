@@ -14,6 +14,8 @@ from ._rspduo import RSPduoFixedCenterFrequency, RSPduoSweptCenterFrequency
 from ._rspdx import RSPdxFixedCenterFrequency, RSPdxSweptCenterFrequency
 from ._usrp import USRPFixedCenterFrequency, USRPSweptCenterFrequency
 from ._b200mini import B200miniFixedCenterFrequency, B200miniSweptCenterFrequency
+from ._hackrf import HackRFFixedCenterFrequency
+from ._hackrfone import HackRFOneFixedCenterFrequency
 
 __all__ = [
     "SignalGeneratorCosineWaveModel",
@@ -28,4 +30,6 @@ __all__ = [
     "USRPSweptCenterFrequency",
     "B200miniFixedCenterFrequency",
     "B200miniSweptCenterFrequency",
+    "HackRFFixedCenterFrequency",
+    "HackRFOneFixedCenterFrequency",
 ]
