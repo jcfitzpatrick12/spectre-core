@@ -31,11 +31,11 @@ class Base(gnuradio.gr.top_block, typing.Generic[M]):
         model: M,
         batches_dir_path: typing.Optional[str] = None,
     ):
-        """An abstract interface for a configurable GNU Radio flowgaph.
+        """An abstract interface for a configurable GNU Radio flowgraph.
 
         :param tag: The data tag.
-        :param parameters: Configurable parameters.
-        :param batches_dir_path: Optionally specify the directory to store data produced at runtime.
+        :param model: The model containing configurable parameters.
+        :param batches_dir_path: Directory to store data produced at runtime.
         """
         super().__init__()
         self.__model = model
@@ -45,7 +45,11 @@ class Base(gnuradio.gr.top_block, typing.Generic[M]):
         self.configure(tag, self.__model)
 
     def configure(self, tag: str, model: M) -> None:
-        """Configure the flowgraph for the block."""
+        """Configure the flowgraph for the block.
+
+        :param tag: The data tag.
+        :param model: Contains parameters to configure the flowgraph.
+        """
         # TODO: Using the `@abc.abstractmethod` decorator causes static type checking to complain that subclasses are abstract, even
         # when they implement this method. I think inheriting from `gnuradio.gr.top_block` is throwing things off.
         raise NotImplementedError("Flowgraphs must implement the `configure` method.")

@@ -48,7 +48,7 @@ class Job:
     def restart(
         self,
     ) -> None:
-        """Tell each worker to restart it's process."""
+        """Tell each worker to restart its process."""
         for worker in self._workers:
             worker.restart()
 

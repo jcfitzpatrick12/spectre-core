@@ -110,7 +110,7 @@ class Logs:
 
         :param pid: The process ID to search for.
         :raises FileNotFoundError: If a log file corresponding to the process ID is not found.
-        :return: The `Log` instance corresponding to the process ID.
+        :return: The log corresponding to the process ID.
         """
         for log in self:
             if log.pid == pid:

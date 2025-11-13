@@ -65,7 +65,10 @@ class Base(abc.ABC, Generic[T]):
         return os.path.exists(self._file_path)
 
     def cached_read(self) -> T:
-        """Read the file contents, caching the result for repeated calls."""
+        """Read the file contents, caching the result for repeated calls.
+
+        :return: The cached contents of the file.
+        """
         if self._cache is None:
             self._cache = self.read()
         return self._cache

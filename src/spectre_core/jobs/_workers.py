@@ -31,7 +31,7 @@ class Worker:
     def __init__(self, name: str, target: typing.Callable[[], None]) -> None:
         """A lightweight wrapper for a `multiprocessing.Process` daemon.
 
-        Provides a very simple API to start, and restart a multiprocessing process.
+        Provides a very simple API to start, kill, and restart a multiprocessing process.
 
         :param name: The name assigned to the process.
         :param target: The callable to be executed by the worker process.
@@ -100,13 +100,13 @@ def make_worker(
     """Create a `Worker` instance to manage a target function in a multiprocessing background daemon process.
 
     This function returns a `Worker` that is configured to run the given target function with the provided arguments
-    in a separate process. The worker is not started automatically; you must call `start()` to call the target.  The target should not return anything,
+    in a separate process. The worker is not started automatically; you must call `start()` to call the target. The target should not return anything,
     as its return value will be discarded.
 
     :param name: Human-readable name for the worker process.
     :param target: The function to be executed by the worker process.
     :param args: Arguments to pass to the target function.
-    :param configure_root_logger: If True, configure the root logger to write log events to file. Defaults to True.
+    :param configure_logging: If True, configure the root logger to write log events to file. Defaults to True.
     :param spectre_data_dir_path: If specified, override the `SPECTRE_DATA_DIR_PATH` environment variable to this value in the process
     managed by the worker.
     :return: A `Worker` instance managing the background process (not started).

@@ -48,7 +48,7 @@ class Base(abc.ABC, typing.Generic[M, B], watchdog.events.FileSystemEventHandler
         """An abstract interface enabling event-driven file processing.
 
         :param tag: The data tag.
-        :param parameters: Configurable parameters.
+        :param model: Defines configurable parameters.
         :param batch_cls: The batch used to read data files.
         :param queued_file: Optionally override the queued file, defaults to None
         :param cached_spectrogram: Optionally override the cached spectrogram, defaults to None

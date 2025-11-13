@@ -180,10 +180,10 @@ class Base:
     def model_validate(
         self, parameters: dict[str, typing.Any], skip: bool = False
     ) -> pydantic.BaseModel:
-        """Validate the input parameters against the model for the active operating mode.
+        """Create a model for the active operating mode using the input parameters.
 
-        :param parameters: The parameters to validate
-        :param skip: If True, skip validating the parameters against the model.
+        :param parameters: The parameters used to create the model.
+        :param skip: If True, skip validating the parameters.
         :return: The validated model.
         """
         _LOGGER.info("Validating parameters...")
@@ -195,12 +195,12 @@ class Base:
         skip_validation: bool = False,
         configs_dir_path: typing.Optional[str] = None,
     ) -> Config:
-        """Read a config for this receiver, applying validations by default.
+        """Read a config for this receiver.
 
         :param tag: The tag of the config.
-        :param skip_validation: If True, skip validating the parameters against the model.
+        :param skip_validation: If True, skip validating the parameters.
         :param configs_dir_path: Optionally override the directory which stores the configs, defaults to None
-        :return: A container storing the file contents.
+        :return: A structure storing the file contents.
         :raises ValueError: If the config does not belong to this receiver.
         """
         configs_dir_path = (
@@ -225,7 +225,7 @@ class Base:
 
         :param tag: The tag of the config.
         :param parameters: The parameters to save.
-        :param skip_validation: If True, skip validating the parameters against the model.
+        :param skip_validation: If True, skip validating the parameters.
         :param configs_dir_path: Optionally override the directory which stores the configs, defaults to None
         """
         write_config(
@@ -247,7 +247,7 @@ class Base:
         """Activate a flowgraph.
 
         :param config: The config used to configure the flowgraph.
-        :param skip_validation: If True, skip validating the parameters against the model.
+        :param skip_validation: If True, skip validating the parameters.
         :param batches_dir_path: Optionally override the directory which stores the runtime data, defaults to None
         """
         _LOGGER.info("Starting the flowgraph...")
@@ -268,7 +268,7 @@ class Base:
         """Activate post processing.
 
         :param config: The config used to configure post processing.
-        :param skip_validation: If True, skip validating the parameters against the model.
+        :param skip_validation: If True, skip validating the parameters.
         :param batches_dir_path: Optionally override the directory which stores the runtime data, defaults to None
         """
 
