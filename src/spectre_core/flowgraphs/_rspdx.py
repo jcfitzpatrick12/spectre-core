@@ -14,7 +14,7 @@ from ._base import Base, BaseModel
 
 @dataclasses.dataclass(frozen=True)
 class RSPdxPort:
-    """Specifies one of the antenna ports on the RSPduo.
+    """Specifies one of the antenna ports on the RSPdx.
 
     These are easier to type in the CLI tool, than the values we must pass to `gr-sdrplay3`.
     Namely 'Antenna A', 'Antenna B' and 'Antenna C'
