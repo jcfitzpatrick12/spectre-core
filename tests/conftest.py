@@ -3,17 +3,15 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import pytest
-from tempfile import TemporaryDirectory
+import tempfile
 
-from spectre_core.config import set_spectre_data_dir_path
+import spectre_core.config
 
 
 @pytest.fixture
-def spectre_data_dir_path():
-    """Fixture to set up a temporary directory for Spectre filesystem data.
-
-    Returns the name of the temporary directory.
-    """
-    with TemporaryDirectory() as temp_dir:
-        set_spectre_data_dir_path(temp_dir)
-        yield temp_dir
+def spectre_config_paths():
+    """Provide a temporary directory for Spectre file system data during each test."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        env = {"SPECTRE_DATA_DIR_PATH": tmpdir}
+        paths = spectre_core.config.Paths(env)
+        yield paths

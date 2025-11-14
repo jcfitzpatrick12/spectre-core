@@ -3,38 +3,21 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import os
-import numpy as np
-from typing import Optional, Tuple, cast
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-from matplotlib.axes import Axes
-from matplotlib import use
-from datetime import datetime
+import typing
+import datetime
 import gc
 
-from spectre_core.spectrograms import TimeType
-from spectre_core.config import TimeFormat, get_batches_dir_path
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.figure
+import matplotlib.axes
+from matplotlib import use
+
+import spectre_core.spectrograms
+import spectre_core.config
+
 from ._base import BasePanel, XAxisType
 from ._format import PanelFormat
-from ._panels import PanelName, SpectrogramPanel, TimeCutsPanel, FrequencyCutsPanel
-
-
-def _is_cuts_panel(panel: BasePanel) -> bool:
-    """Check if a panel contains spectrogram cuts.
-
-    :param panel: The panel to check.
-    :return: True if the panel is a frequency or time cuts panel, otherwise False.
-    """
-    return panel.name in {PanelName.FREQUENCY_CUTS, PanelName.TIME_CUTS}
-
-
-def _is_spectrogram_panel(panel: BasePanel) -> bool:
-    """Check if a panel is a spectrogram panel.
-
-    :param panel: The panel to check.
-    :return: True if the panel is a spectrogram panel, otherwise False.
-    """
-    return panel.name == PanelName.SPECTROGRAM
 
 
 class PanelStack:
@@ -43,14 +26,14 @@ class PanelStack:
     def __init__(
         self,
         panel_format: PanelFormat = PanelFormat(),
-        time_type: TimeType = TimeType.RELATIVE,
-        figsize: Tuple[int, int] = (15, 8),
+        time_type: spectre_core.spectrograms.TimeType = spectre_core.spectrograms.TimeType.RELATIVE,
+        figsize: tuple[int, int] = (15, 8),
         non_interactive: bool = False,
     ) -> None:
         """Initialize an instance of `PanelStack`.
 
         :param panel_format: Formatting applied across all panels in the stack. Defaults to `PanelFormat()`.
-        :param time_type: The type of time assigned to spectrograms, defaults to `TimeType.RELATIVE`.
+        :param time_type: The type of time assigned to spectrograms, defaults to `spectre_core.spectrograms.TimeType.RELATIVE`.
         :param figsize: The size of the `matplotlib` figure as (width, height). Defaults to (15, 8).
         """
         self._panel_format = panel_format
@@ -64,8 +47,8 @@ class PanelStack:
         self._panels: list[BasePanel] = []
         self._superimposed_panels: list[BasePanel] = []
 
-        self._fig: Optional[Figure] = None
-        self._axs: Optional[np.ndarray] = None
+        self._fig: typing.Optional[matplotlib.figure.Figure] = None
+        self._axs: typing.Optional[np.ndarray] = None
 
     def _sort_by_xaxis_type(self, panels: list[BasePanel]) -> list[BasePanel]:
         return list(sorted(panels, key=lambda panel: panel.xaxis_type.value))
@@ -91,7 +74,7 @@ class PanelStack:
         return len(self._superimposed_panels)
 
     @property
-    def time_type(self) -> TimeType:
+    def time_type(self) -> spectre_core.spectrograms.TimeType:
         """The imposed time type on all time series panels in the stack.
 
         :raises ValueError: If the `time_type` has not been set.
@@ -99,16 +82,16 @@ class PanelStack:
         return self._time_type
 
     @time_type.setter
-    def time_type(self, value: TimeType) -> None:
-        """Set the `TimeType` for all time series panels in the stack.
+    def time_type(self, value: spectre_core.spectrograms.TimeType) -> None:
+        """Set the `spectre_core.spectrograms.TimeType` for all time series panels in the stack.
 
         This controls how time is represented and annotated on the panel.
 
-        :param value: The `TimeType` to impose on all time series panels in the stack.
+        :param value: The `spectre_core.spectrograms.TimeType` to impose on all time series panels in the stack.
         """
         self._time_type = value
 
-    def _get_fig(self) -> Figure:
+    def _get_fig(self) -> matplotlib.figure.Figure:
         """Get the shared `matplotlib` figure for the panel stack.
 
         :raises ValueError: If the axes have not been initialized.
@@ -142,15 +125,15 @@ class PanelStack:
     def add_panel(
         self,
         panel: BasePanel,
-        identifier: Optional[str] = None,
-        panel_format: Optional[PanelFormat] = None,
+        identifier: typing.Optional[str] = None,
+        panel_format: typing.Optional[PanelFormat] = None,
     ) -> None:
         """Add a panel to the stack.
 
         Overrides the time type of the panel, to the time type of the stack.
 
         :param panel: An instance of a `BasePanel` subclass to be added to the stack.
-        :param identifier: An optional string to link the panel with others for superimposing.
+        :param identifier: An typing.Optional string to link the panel with others for superimposing.
         """
         panel.set_panel_format(panel_format or self._panel_format)
         panel.set_time_type(self._time_type)
@@ -162,15 +145,15 @@ class PanelStack:
     def superimpose_panel(
         self,
         panel: BasePanel,
-        identifier: Optional[str] = None,
-        panel_format: Optional[PanelFormat] = None,
+        identifier: typing.Optional[str] = None,
+        panel_format: typing.Optional[PanelFormat] = None,
     ) -> None:
         """Superimpose a panel onto an existing panel in the stack.
 
         Overrides the time type of the panel, to the time type of the stack.
 
         :param panel: The panel to superimpose.
-        :param identifier: An optional identifier to link panels during superimposing, defaults to None
+        :param identifier: An typing.Optional identifier to link panels during superimposing, defaults to None
         """
         if identifier:
             panel.set_identifier(identifier)
@@ -214,7 +197,7 @@ class PanelStack:
 
         Axes are shared between panels with common `XAxisType`.
         """
-        shared_axes: dict[XAxisType, Axes] = {}
+        shared_axes: dict[XAxisType, matplotlib.axes.Axes] = {}
         for i, panel in enumerate(self.panels):
             ax = self._get_axes()[i]
             panel.set_ax(ax)
@@ -223,22 +206,6 @@ class PanelStack:
                 panel.sharex(shared_axes[panel.xaxis_type])
             else:
                 shared_axes[panel.xaxis_type] = ax
-
-    def _overlay_cuts(self, cuts_panel: BasePanel) -> None:
-        """Overlay cuts onto corresponding spectrogram panels.
-
-        For a given cuts panel, locate any spectrogram panels in the stack with a matching tag
-        and add the appropriate frequency or time cuts overlay.
-
-        :param cuts_panel: A panel containing frequency or time cuts.
-        """
-        for panel in self.panels:
-            if _is_spectrogram_panel(panel) and panel.tag == cuts_panel.tag:
-                panel = cast(SpectrogramPanel, panel)
-                if cuts_panel.name == PanelName.FREQUENCY_CUTS:
-                    panel.overlay_frequency_cuts(cast(FrequencyCutsPanel, cuts_panel))
-                elif cuts_panel.name == PanelName.TIME_CUTS:
-                    panel.overlay_time_cuts(cast(TimeCutsPanel, cuts_panel))
 
     def _overlay_superimposed_panels(self) -> None:
         """Superimpose panels onto matching panels in the stack.
@@ -254,8 +221,6 @@ class PanelStack:
                 ):
                     super_panel.share_axes(panel)
                     super_panel.draw()
-                    if _is_cuts_panel(super_panel):
-                        self._overlay_cuts(super_panel)
 
     def _make_figure(self) -> None:
         """Make the panel stack figure."""
@@ -277,9 +242,6 @@ class PanelStack:
             else:
                 panel.hide_xaxis_labels()
 
-            if _is_cuts_panel(panel):
-                self._overlay_cuts(panel)
-
         self._overlay_superimposed_panels()
 
     def _close(self) -> None:
@@ -296,25 +258,26 @@ class PanelStack:
         self._get_fig().show()
         self._close()
 
-    def save(
-        self,
-    ) -> str:
-        """Save the panel stack figure as a batch file under the tag of the first
-        panel in the stack. The file format is `png`.
+    def save(self, tag: str, batches_dir_path: typing.Optional[str] = None) -> str:
+        """Save the panel stack figure as a batch file under the input tag.
 
         :return: The file path of the newly created batch file containing the figure.
         """
         self._make_figure()
         first_panel = self._panels[0]
 
-        start_dt = cast(
-            datetime, first_panel.spectrogram.start_datetime.astype(datetime)
+        start_dt = typing.cast(
+            datetime.datetime,
+            first_panel.spectrogram.start_datetime.astype(datetime.datetime),
         )
         batch_name = (
-            f"{start_dt.strftime(TimeFormat.DATETIME)}_{first_panel.spectrogram.tag}"
+            f"{start_dt.strftime(spectre_core.config.TimeFormat.DATETIME)}_{tag}"
         )
         batch_file_path = os.path.join(
-            get_batches_dir_path(start_dt.year, start_dt.month, start_dt.day),
+            batches_dir_path
+            or spectre_core.config.paths.get_batches_dir_path(
+                start_dt.year, start_dt.month, start_dt.day
+            ),
             f"{batch_name}.png",
         )
         # If the parent directory does not exist, create it.

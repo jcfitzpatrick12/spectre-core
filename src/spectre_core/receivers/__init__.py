@@ -2,36 +2,54 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""A vendor-neutral interface for capturing data from SDRs."""
+"""A vendor-neutral interface for recording signals and spectrograms from SDRs."""
 
-from .plugins._receiver_names import ReceiverName
-from .plugins._signal_generator import SignalGenerator
-from .plugins._rsp1a import RSP1A
-from .plugins._rspduo import RSPduo
-from .plugins._b200mini import B200mini
-from .plugins._rspdx import RSPdx
-from .plugins._hackrf import HackRFOne
-from .plugins._rtlsdr import RTLSDR
-
-from ._receiver import Receiver, ReceiverComponents
-from ._specs import SpecName, Specs
-from ._factory import get_receiver
-from ._register import get_registered_receivers
+from ._register import register_receiver, get_registered_receivers
+from ._factory import get_receiver, get_batch_cls
+from ._config import (
+    Config,
+    read_config,
+    write_config,
+    get_config_file_path,
+    parse_config_file_name,
+)
+from ._base import Base
+from ._names import ReceiverName
+from ._custom import Custom
+from ._signal_generator import SignalGenerator
+from ._rsp1a import RSP1A
+from ._rspduo import RSPduo
+from ._rspdx import RSPdx
+from ._usrp import USRP
+from ._b200mini import B200mini
+from ._hackrf import HackRF
+from ._hackrfone import HackRFOne
+from ._rtlsdr import RTLSDR
+from ._record import record_signal, record_spectrograms
 
 __all__ = [
-    "Receiver",
-    "ReceiverComponents",
-    "Specs",
-    "SpecName",
+    "register_receiver",
+    "get_registered_receivers",
+    "get_receiver",
+    "get_batch_cls",
+    "get_config_file_path",
+    "parse_config_file_name",
     "ReceiverName",
+    "Config",
+    "read_config",
+    "write_config",
+    "Base",
+    "Custom",
     "SignalGenerator",
     "RSP1A",
     "RSPduo",
     "RSPdx",
+    "USRP",
     "B200mini",
+    "HackRF",
     "HackRFOne",
     "RTLSDR",
-    "Custom",
-    "get_receiver",
-    "get_registered_receivers",
+    "ReceiverName",
+    "record_signal",
+    "record_spectrograms",
 ]

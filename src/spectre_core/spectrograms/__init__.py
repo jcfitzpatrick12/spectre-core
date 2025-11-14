@@ -4,7 +4,6 @@
 
 """Create and transform spectrogram data."""
 
-from ._analytical import get_analytical_spectrogram, validate_analytically, TestResults
 from ._spectrogram import Spectrogram, FrequencyCut, TimeCut, SpectrumUnit, TimeType
 from ._transform import (
     frequency_chop,
@@ -15,9 +14,6 @@ from ._transform import (
 )
 
 __all__ = [
-    "get_analytical_spectrogram",
-    "validate_analytically",
-    "TestResults",
     "Spectrogram",
     "FrequencyCut",
     "TimeCut",

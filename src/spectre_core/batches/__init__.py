@@ -4,35 +4,19 @@
 
 """IO operations on batched data files."""
 
-from .plugins._batch_keys import BatchKey
-
-# register decorators take effect on import
-from .plugins._iq_stream import IQStreamBatch, IQMetadata
-from .plugins._callisto import CallistoBatch
-
-from ._base import (
-    BaseBatch,
-    BatchFile,
-    parse_batch_file_name,
-    parse_batch_base_file_name,
-)
+from ._base import Base, BatchFile, parse_batch_file_name, parse_batch_file_path
 from ._batches import Batches
-from ._factory import get_batch_cls, get_batch_cls_from_tag
+from ._callisto import CallistoBatch
+from ._iq_stream import IQMetadata, IQStreamBatch, IQStreamBatchExtension
 
 __all__ = [
-    "IQStreamBatch",
-    "IQMetadata",
-    "CallistoBatch",
-    "BaseBatch",
+    "Base",
     "BatchFile",
-    "Batches",
-    "get_batch_cls",
-    "BatchKey",
-    "get_batch_cls_from_tag",
     "parse_batch_file_name",
-]
-
-# To be deprecated.
-__all__ += [
-    "parse_batch_base_file_name",
+    "parse_batch_file_path",
+    "Batches",
+    "CallistoBatch",
+    "IQMetadata",
+    "IQStreamBatch",
+    "IQStreamBatchExtension",
 ]

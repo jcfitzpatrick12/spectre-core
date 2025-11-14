@@ -17,9 +17,6 @@ def log_call(func: Callable[P, RT]) -> Callable[P, RT]:
 
     Logs an informational message when the decorated function is called,
     and an error message if the function raises an exception.
-
-    :param func: The function to be decorated.
-    :return: The decorated function with added logging behaviour.
     """
 
     @wraps(func)

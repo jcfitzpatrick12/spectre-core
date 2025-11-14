@@ -2,21 +2,20 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from logging import getLogger
-
-_LOGGER = getLogger(__name__)
-
+import logging
 import time
-from typing import Callable, Optional
+import typing
 import multiprocessing
 
-from spectre_core.logs import configure_root_logger, ProcessType
-from spectre_core.config import set_spectre_data_dir_path
+import spectre_core.logs
+import spectre_core.config
 from ._duration import Duration
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def _make_daemon_process(
-    name: str, target: Callable[[], None]
+    name: str, target: typing.Callable[[], None]
 ) -> multiprocessing.Process:
     """
     Creates and returns a daemon `multiprocessing.Process` instance.
@@ -29,13 +28,10 @@ def _make_daemon_process(
 
 
 class Worker:
-    """A lightweight wrapper for a `multiprocessing.Process` daemon.
+    def __init__(self, name: str, target: typing.Callable[[], None]) -> None:
+        """A lightweight wrapper for a `multiprocessing.Process` daemon.
 
-    Provides a very simple API to start, and restart a multiprocessing process.
-    """
-
-    def __init__(self, name: str, target: Callable[[], None]) -> None:
-        """Initialise a `Worker` instance.
+        Provides a very simple API to start, kill, and restart a multiprocessing process.
 
         :param name: The name assigned to the process.
         :param target: The callable to be executed by the worker process.
@@ -96,32 +92,34 @@ class Worker:
 # TODO: Somehow statically type check that `args` match the arguments to `target`
 def make_worker(
     name: str,
-    target: Callable[..., None],
+    target: typing.Callable[..., None],
     args: tuple = (),
     configure_logging: bool = True,
-    spectre_data_dir_path: Optional[str] = None,
+    spectre_data_dir_path: typing.Optional[str] = None,
 ) -> Worker:
     """Create a `Worker` instance to manage a target function in a multiprocessing background daemon process.
 
     This function returns a `Worker` that is configured to run the given target function with the provided arguments
-    in a separate process. The worker is not started automatically; you must call `start()` to call the target.  The target should not return anything,
+    in a separate process. The worker is not started automatically; you must call `start()` to call the target. The target should not return anything,
     as its return value will be discarded.
 
     :param name: Human-readable name for the worker process.
     :param target: The function to be executed by the worker process.
     :param args: Arguments to pass to the target function.
-    :param configure_root_logger: If True, configure the root logger to write log events to file. Defaults to True.
+    :param configure_logging: If True, configure the root logger to write log events to file. Defaults to True.
     :param spectre_data_dir_path: If specified, override the `SPECTRE_DATA_DIR_PATH` environment variable to this value in the process
     managed by the worker.
     :return: A `Worker` instance managing the background process (not started).
     """
 
     def _worker_target() -> None:
-        if configure_logging:
-            configure_root_logger(ProcessType.WORKER)
-
         if spectre_data_dir_path is not None:
-            set_spectre_data_dir_path(spectre_data_dir_path)
+            spectre_core.config.paths.set_spectre_data_dir_path(spectre_data_dir_path)
+
+        if configure_logging:
+            spectre_core.logs.configure_root_logger(
+                spectre_core.logs.ProcessType.WORKER,
+            )
 
         target(*args)
 

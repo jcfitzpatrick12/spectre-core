@@ -2,32 +2,18 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-# TODO:
-# - Make sure docstrings are filled in.
-# - Make the tests more clear... Some seem opaque, and rely on particular properties of the fixtures.
-# - Write a test for saving the batch file to a temp directory and making sure the filename is right etc.
-
 import pytest
-import tempfile
-import numpy as np
 import os
-from datetime import datetime, timedelta
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
+import datetime
 
-from spectre_core.plotting import (
-    BasePanel,
-    XAxisType,
-    PanelName,
-    SpectrogramPanel,
-    BaseTimeSeriesPanel,
-    FrequencyCutsPanel,
-    TimeCutsPanel,
-    IntegralOverFrequencyPanel,
-    PanelStack,
-)
-from spectre_core.config import TimeFormat
-from spectre_core.spectrograms import Spectrogram, SpectrumUnit, TimeType
+import numpy as np
+import matplotlib.axes
+import matplotlib.figure
+
+import spectre_core.plotting
+import spectre_core.config
+import spectre_core.spectrograms
+import spectre_core.io
 
 
 @pytest.fixture(autouse=True)
@@ -38,25 +24,23 @@ def setup_random_seed():
 
 
 @pytest.fixture
-def figure() -> Figure:
-    return Figure()
+def figure() -> matplotlib.figure.Figure:
+    return matplotlib.figure.Figure()
 
 
 @pytest.fixture
-def axes(figure: Figure) -> Axes:
-    return Axes(figure, [0.1, 0.1, 0.8, 0.8])
+def axes(figure: matplotlib.figure.Figure) -> matplotlib.axes.Axes:
+    return matplotlib.axes.Axes(figure, [0.1, 0.1, 0.8, 0.8])
 
 
 # An arbitrary datetime to assign to the first spectrum in the spectrogram fixture.
-_ARBITRARY_DATETIME = datetime(2025, 2, 13, 6, 0, 0)
+ARBITRARY_DATETIME = datetime.datetime(2025, 2, 13, 6, 0, 0)
+TAG = "tag"
 
 
 @pytest.fixture
-def spectrogram() -> Spectrogram:
-    """Create a spectrogram, using random values for the spectral components.
-
-    This is used to instantiate some panels.
-    """
+def spectrogram() -> spectre_core.spectrograms.Spectrogram:
+    """Create a spectrogram, using random values for the spectral components."""
     num_spectrums = 20
     num_spectral_components = 64
 
@@ -69,131 +53,164 @@ def spectrogram() -> Spectrogram:
     # Arbitrarily, consider `num_spectral_components` spectral components, over the FM band
     frequencies = np.linspace(90e6, 110e6, num_spectral_components).astype(np.float32)
     # Arbitrarily, assign some date to be the datetime corresponding to the first spectrum.
-    start_datetime = _ARBITRARY_DATETIME
-    # Arbitrarily, set the unit (the plotting module does not care about this)
-    spectrum_unit = SpectrumUnit.AMPLITUDE
-    # Create a mock tag.
-    tag = f"mock-{spectrum_unit.value}-spectrogram"
-    return Spectrogram(
-        dynamic_spectra, times, frequencies, tag, spectrum_unit, start_datetime
+    start_datetime = ARBITRARY_DATETIME
+    spectrum_unit = spectre_core.spectrograms.SpectrumUnit.AMPLITUDE
+    return spectre_core.spectrograms.Spectrogram(
+        dynamic_spectra, times, frequencies, spectrum_unit, start_datetime
     )
 
 
 @pytest.fixture
-def base_panel(spectrogram: Spectrogram) -> BasePanel:
+def base_panel(
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.BasePanel:
     """Arbitrarily create an instance of any `BasePanel` subclass, to test functionality of `BasePanel`."""
-    return SpectrogramPanel(spectrogram)
+    return spectre_core.plotting.SpectrogramPanel(spectrogram)
 
 
 @pytest.fixture
-def base_time_series_panel(spectrogram: Spectrogram) -> BaseTimeSeriesPanel:
+def base_time_series_panel(
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.BaseTimeSeriesPanel:
     """Arbitrarily create an instance of any `BaseTimeSeriesPanel` subclass, to test functionality of `BaseTimeSeriesPanel`."""
-    return SpectrogramPanel(spectrogram)
+    return spectre_core.plotting.SpectrogramPanel(spectrogram)
 
 
 @pytest.fixture
-def frequency_cuts_panel_relative_cuts(spectrogram: Spectrogram) -> FrequencyCutsPanel:
+def frequency_cuts_panel_relative_cuts(
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.FrequencyCutsPanel:
     """A frequency cuts panel, with cuts indicated by relative times, using default keyword arguments."""
-    return FrequencyCutsPanel(spectrogram, 0.0, 1.0)
+    return spectre_core.plotting.FrequencyCutsPanel(spectrogram, 0.0, 1.0)
 
 
 @pytest.fixture
-def frequency_cuts_panel_datetime_cuts(spectrogram: Spectrogram) -> FrequencyCutsPanel:
+def frequency_cuts_panel_datetime_cuts(
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.FrequencyCutsPanel:
     """A frequency cuts panel, with cuts indicated by datetimes, using default keyword arguments."""
     cuts = [
-        datetime.strftime(_ARBITRARY_DATETIME, TimeFormat.DATETIME),
-        datetime.strftime(_ARBITRARY_DATETIME + timedelta(1), TimeFormat.DATETIME),
+        datetime.datetime.strftime(
+            ARBITRARY_DATETIME, spectre_core.config.TimeFormat.DATETIME
+        ),
+        datetime.datetime.strftime(
+            ARBITRARY_DATETIME + datetime.timedelta(1),
+            spectre_core.config.TimeFormat.DATETIME,
+        ),
     ]
-    return FrequencyCutsPanel(spectrogram, *cuts)
+    return spectre_core.plotting.FrequencyCutsPanel(spectrogram, *cuts)
 
 
 @pytest.fixture
-def frequency_cuts_panel_dBb(spectrogram: Spectrogram) -> FrequencyCutsPanel:
+def frequency_cuts_panel_dBb(
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.FrequencyCutsPanel:
     """A frequency cuts panel, whose spectrums are in units of decibels above the background."""
-    return FrequencyCutsPanel(spectrogram, 0.0, 1.0, dBb=True)
+    return spectre_core.plotting.FrequencyCutsPanel(spectrogram, 0.0, 1.0, dBb=True)
 
 
 @pytest.fixture
 def frequency_cuts_panel_peak_normalised(
-    spectrogram: Spectrogram,
-) -> FrequencyCutsPanel:
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.FrequencyCutsPanel:
     """A frequency cuts panel, whose spectrums are in units normalised to the peak values, respectively."""
-    return FrequencyCutsPanel(spectrogram, 0.0, 1.0, peak_normalise=True)
+    return spectre_core.plotting.FrequencyCutsPanel(
+        spectrogram, 0.0, 1.0, peak_normalise=True
+    )
 
 
 @pytest.fixture
-def time_cuts_panel(spectrogram: Spectrogram) -> TimeCutsPanel:
+def time_cuts_panel(
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.TimeCutsPanel:
     """A time cuts panel, using the default keyword arguments."""
-    return TimeCutsPanel(spectrogram, 90e6, 90.3e6)
+    return spectre_core.plotting.TimeCutsPanel(spectrogram, 90e6, 90.3e6)
 
 
 @pytest.fixture
-def time_cuts_panel_dBb(spectrogram: Spectrogram) -> TimeCutsPanel:
+def time_cuts_panel_dBb(
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.TimeCutsPanel:
     """A time cuts panel, whose spectrums are in units of decibels above the background."""
-    return TimeCutsPanel(spectrogram, 90e6, 90.3e6, dBb=True)
+    return spectre_core.plotting.TimeCutsPanel(spectrogram, 90e6, 90.3e6, dBb=True)
 
 
 @pytest.fixture
-def time_cuts_panel_peak_normalised(spectrogram: Spectrogram) -> TimeCutsPanel:
-    """A time cuts panel, whose spectrums are in units normalised to the peak values, respectively.."""
-    return TimeCutsPanel(spectrogram, 90e6, 90.3e6, peak_normalise=True)
+def time_cuts_panel_peak_normalised(
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.TimeCutsPanel:
+    """A time cuts panel, whose spectrums are in units normalised to the peak values, respectively."""
+    return spectre_core.plotting.TimeCutsPanel(
+        spectrogram, 90e6, 90.3e6, peak_normalise=True
+    )
 
 
 @pytest.fixture
 def integral_over_frequency_panel(
-    spectrogram: Spectrogram,
-) -> IntegralOverFrequencyPanel:
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.IntegralOverFrequencyPanel:
     """A panel plotting the integral of the spectrogram over frequency, using default system arguments."""
-    return IntegralOverFrequencyPanel(spectrogram)
+    return spectre_core.plotting.IntegralOverFrequencyPanel(spectrogram)
 
 
 @pytest.fixture
-def spectrogram_panel(spectrogram: Spectrogram) -> SpectrogramPanel:
+def spectrogram_panel(
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.SpectrogramPanel:
     """A spectrogram panel using default keyword arguments."""
-    return SpectrogramPanel(spectrogram)
+    return spectre_core.plotting.SpectrogramPanel(spectrogram)
 
 
 @pytest.fixture
-def spectrogram_panel_dBb(spectrogram: Spectrogram) -> SpectrogramPanel:
+def spectrogram_panel_dBb(
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.SpectrogramPanel:
     """A spectrogram panel with dBb visualization."""
-    return SpectrogramPanel(spectrogram, dBb=True)
+    return spectre_core.plotting.SpectrogramPanel(spectrogram, dBb=True)
 
 
 @pytest.fixture
-def spectrogram_panel_log_norm(spectrogram: Spectrogram) -> SpectrogramPanel:
+def spectrogram_panel_log_norm(
+    spectrogram: spectre_core.spectrograms.Spectrogram,
+) -> spectre_core.plotting.SpectrogramPanel:
     """A spectrogram panel with logarithmic normalization."""
-    return SpectrogramPanel(spectrogram, log_norm=True)
+    return spectre_core.plotting.SpectrogramPanel(spectrogram, log_norm=True)
 
 
 @pytest.fixture
-def panel_stack() -> PanelStack:
+def panel_stack() -> spectre_core.plotting.PanelStack:
     """Create a non-interactive panel stack for testing."""
-    return PanelStack(non_interactive=True)
+    return spectre_core.plotting.PanelStack(non_interactive=True)
 
 
 class TestBasePanel:
     """Test shared functionality between all `BasePanel` subclasses."""
 
     def test_initialisation(
-        self, base_panel: BasePanel, spectrogram: Spectrogram
+        self,
+        base_panel: spectre_core.plotting.BasePanel,
+        spectrogram: spectre_core.spectrograms.Spectrogram,
     ) -> None:
         """Check that a `BasePanel` subclass is initialised correctly."""
         # Test the public instance attributes are set correctly
-        assert base_panel.name == PanelName.SPECTROGRAM
+        assert base_panel.name == spectre_core.plotting.PanelName.SPECTROGRAM
         assert base_panel.spectrogram == spectrogram
-        assert base_panel.tag == spectrogram.tag
         assert base_panel.get_identifier() is None
 
         with pytest.raises(ValueError):
             _ = base_panel.get_panel_format()
 
-    def test_xaxis_hidden(self, base_panel: BasePanel, axes: Axes) -> None:
+    def test_xaxis_hidden(
+        self, base_panel: spectre_core.plotting.BasePanel, axes: matplotlib.axes.Axes
+    ) -> None:
         """Check that calling for the xaxis labels to be hidden, actually hides them."""
         base_panel.set_ax(axes)
         base_panel.hide_xaxis_labels()
         assert not base_panel.get_xaxis_labels()
 
-    def test_yaxis_hidden(self, base_panel: BasePanel, axes: Axes) -> None:
+    def test_yaxis_hidden(
+        self, base_panel: spectre_core.plotting.BasePanel, axes: matplotlib.axes.Axes
+    ) -> None:
         """Check that calling for the yaxis labels to be hidden, actually hides them."""
         base_panel.set_ax(axes)
         base_panel.hide_yaxis_labels()
@@ -201,12 +218,16 @@ class TestBasePanel:
 
 
 class TestBaseTimeSeriesPanel:
-    def test_xaxis_is_time(self, base_time_series_panel: BaseTimeSeriesPanel) -> None:
+    def test_xaxis_is_time(
+        self, base_time_series_panel: spectre_core.plotting.BaseTimeSeriesPanel
+    ) -> None:
         """Check that the xaxis type for a time series panel is always time."""
-        assert base_time_series_panel.xaxis_type == XAxisType.TIME
+        assert base_time_series_panel.xaxis_type == spectre_core.plotting.XAxisType.TIME
 
     def test_times(
-        self, base_time_series_panel: BaseTimeSeriesPanel, spectrogram: Spectrogram
+        self,
+        base_time_series_panel: spectre_core.plotting.BaseTimeSeriesPanel,
+        spectrogram: spectre_core.spectrograms.Spectrogram,
     ) -> None:
         """Check that setting the time type for the panel, updates the times of each spectrum appropriately.
 
@@ -214,24 +235,31 @@ class TestBaseTimeSeriesPanel:
         """
 
         # Check both cases of time type.
-        base_time_series_panel.set_time_type(TimeType.RELATIVE)
+        base_time_series_panel.set_time_type(
+            spectre_core.spectrograms.TimeType.RELATIVE
+        )
         assert np.array_equal(base_time_series_panel.times, spectrogram.times)
 
-        base_time_series_panel.set_time_type(TimeType.DATETIMES)
+        base_time_series_panel.set_time_type(
+            spectre_core.spectrograms.TimeType.DATETIMES
+        )
         assert np.array_equal(base_time_series_panel.times, spectrogram.datetimes)
 
     @pytest.mark.parametrize(
-        "time_type,expected_label",
+        ("time_type", "expected_label"),
         [
-            (TimeType.RELATIVE, "Time [s]"),
-            (TimeType.DATETIMES, "Time [UTC] (Start Date: 2025-02-13)"),
+            (spectre_core.spectrograms.TimeType.RELATIVE, "Time [s]"),
+            (
+                spectre_core.spectrograms.TimeType.DATETIMES,
+                "Time [UTC] (Start Date: 2025-02-13)",
+            ),
         ],
     )
     def test_xaxis_labelling(
         self,
-        base_time_series_panel: BaseTimeSeriesPanel,
-        axes: Axes,
-        time_type: TimeType,
+        base_time_series_panel: spectre_core.plotting.BaseTimeSeriesPanel,
+        axes: matplotlib.axes.Axes,
+        time_type: spectre_core.spectrograms.TimeType,
         expected_label: str,
     ) -> None:
         """Check axis labeling for different time types."""
@@ -241,20 +269,27 @@ class TestBaseTimeSeriesPanel:
         assert base_time_series_panel.get_xlabel() == expected_label
 
 
+# ...existing code...
+
+
 class TestFrequencyCutsPanel:
     def test_xaxis_is_frequency(
-        self, frequency_cuts_panel_relative_cuts: FrequencyCutsPanel
+        self,
+        frequency_cuts_panel_relative_cuts: spectre_core.plotting.FrequencyCutsPanel,
     ) -> None:
         """Check that the xaxis type for a time series panel is always frequency.
 
         Arbitrarily choose the relative cuts panel, as it doesn't matter for this test.
         """
-        assert frequency_cuts_panel_relative_cuts.xaxis_type == XAxisType.FREQUENCY
+        assert (
+            frequency_cuts_panel_relative_cuts.xaxis_type
+            == spectre_core.plotting.XAxisType.FREQUENCY
+        )
 
     def test_frequencies(
         self,
-        frequency_cuts_panel_relative_cuts: FrequencyCutsPanel,
-        spectrogram: Spectrogram,
+        frequency_cuts_panel_relative_cuts: spectre_core.plotting.FrequencyCutsPanel,
+        spectrogram: spectre_core.spectrograms.Spectrogram,
     ) -> None:
         """Check that the frequencies assigned to each spectral component as managed by the panel, are equal to the frequencies
         assigned to each spectral component in the spectrogram used to construct the panel.
@@ -266,21 +301,27 @@ class TestFrequencyCutsPanel:
         )
 
     def test_xaxis_annotation(
-        self, frequency_cuts_panel_relative_cuts: FrequencyCutsPanel, axes: Axes
+        self,
+        frequency_cuts_panel_relative_cuts: spectre_core.plotting.FrequencyCutsPanel,
+        axes: matplotlib.axes.Axes,
     ) -> None:
         """Check that the xaxis gets annotated appropriately."""
         frequency_cuts_panel_relative_cuts.set_ax(axes)
         frequency_cuts_panel_relative_cuts.annotate_xaxis()
         assert frequency_cuts_panel_relative_cuts.get_xlabel() == "Frequency [Hz]"
 
-    def test_no_times_specified(self, spectrogram: Spectrogram) -> None:
+    def test_no_times_specified(
+        self, spectrogram: spectre_core.spectrograms.Spectrogram
+    ) -> None:
         """Check that an error is raised when the class is instantiated with no times specified."""
         times: list[float] = []
         with pytest.raises(ValueError):
-            FrequencyCutsPanel(spectrogram, *times)
+            spectre_core.plotting.FrequencyCutsPanel(spectrogram, *times)
 
     def test_yaxis_annotation_dBb(
-        self, frequency_cuts_panel_dBb: FrequencyCutsPanel, axes: Axes
+        self,
+        frequency_cuts_panel_dBb: spectre_core.plotting.FrequencyCutsPanel,
+        axes: matplotlib.axes.Axes,
     ) -> None:
         """Check that the ylabel is annotated appropriately, in the case where the spectrum units are `dBb`."""
         frequency_cuts_panel_dBb.set_ax(axes)
@@ -288,7 +329,9 @@ class TestFrequencyCutsPanel:
         assert frequency_cuts_panel_dBb.get_ylabel() == "dBb"
 
     def test_yaxis_annotation_peak_normalised(
-        self, frequency_cuts_panel_peak_normalised: FrequencyCutsPanel, axes: Axes
+        self,
+        frequency_cuts_panel_peak_normalised: spectre_core.plotting.FrequencyCutsPanel,
+        axes: matplotlib.axes.Axes,
     ) -> None:
         """Check that the ylabel is annotated appropriately, in the case where the spectrum units are normalised to their peak values, respectively."""
         frequency_cuts_panel_peak_normalised.set_ax(axes)
@@ -298,9 +341,9 @@ class TestFrequencyCutsPanel:
 
     def test_yaxis_annotation(
         self,
-        frequency_cuts_panel_relative_cuts: FrequencyCutsPanel,
-        axes: Axes,
-        spectrogram: Spectrogram,
+        frequency_cuts_panel_relative_cuts: spectre_core.plotting.FrequencyCutsPanel,
+        axes: matplotlib.axes.Axes,
+        spectrogram: spectre_core.spectrograms.Spectrogram,
     ) -> None:
         """Check that the ylabel is annotated appropriately, when the spectrum units are those defined by the spectrogram used to construct
         the panel.
@@ -314,36 +357,42 @@ class TestFrequencyCutsPanel:
 
 
 class TestTimeCutsPanel:
-    def test_no_frequencies_specified(self, spectrogram: Spectrogram) -> None:
+    def test_no_frequencies_specified(
+        self, spectrogram: spectre_core.spectrograms.Spectrogram
+    ) -> None:
         """Check that an error is raised when the class is instantiated with no frequencies specified."""
         frequencies: list[float] = []
         with pytest.raises(ValueError):
-            TimeCutsPanel(spectrogram, *frequencies)
+            spectre_core.plotting.TimeCutsPanel(spectrogram, *frequencies)
 
     def test_yaxis_annotation_dBb(
-        self, time_cuts_panel_dBb: TimeCutsPanel, axes: Axes
+        self,
+        time_cuts_panel_dBb: spectre_core.plotting.TimeCutsPanel,
+        axes: matplotlib.axes.Axes,
     ) -> None:
         """Check that the ylabel is annotated appropriately, in the case where the spectrum units are `dBb`."""
         # Arbitrarily set the time type (it has to be set)
-        time_cuts_panel_dBb.set_time_type(TimeType.RELATIVE)
+        time_cuts_panel_dBb.set_time_type(spectre_core.spectrograms.TimeType.RELATIVE)
         time_cuts_panel_dBb.set_ax(axes)
         time_cuts_panel_dBb.annotate_yaxis()
         assert time_cuts_panel_dBb.get_ylabel() == "dBb"
 
     def test_yaxis_annotation_peak_normalised(
-        self, time_cuts_panel_peak_normalised: TimeCutsPanel, axes: Axes
+        self,
+        time_cuts_panel_peak_normalised: spectre_core.plotting.TimeCutsPanel,
+        axes: matplotlib.axes.Axes,
     ) -> None:
         """Check that the ylabel is annotated appropriately, in the case where the spectrum units are normalised to their peak values, respectively."""
         time_cuts_panel_peak_normalised.set_ax(axes)
         time_cuts_panel_peak_normalised.annotate_yaxis()
-        # We don't expected any label in this case
+        # We don't expect any label in this case
         assert not time_cuts_panel_peak_normalised.get_ylabel()
 
     def test_yaxis_annotation(
         self,
-        time_cuts_panel: TimeCutsPanel,
-        axes: Axes,
-        spectrogram: Spectrogram,
+        time_cuts_panel: spectre_core.plotting.TimeCutsPanel,
+        axes: matplotlib.axes.Axes,
+        spectrogram: spectre_core.spectrograms.Spectrogram,
     ) -> None:
         """Check that the ylabel is annotated appropriately, when the spectrum units are those defined by the spectrogram used to construct
         the panel.
@@ -358,7 +407,9 @@ class TestTimeCutsPanel:
 
 class TestIntegralOverFrequencyPanel:
     def test_yaxis_annotation(
-        self, integral_over_frequency_panel: IntegralOverFrequencyPanel, axes: Axes
+        self,
+        integral_over_frequency_panel: spectre_core.plotting.IntegralOverFrequencyPanel,
+        axes: matplotlib.axes.Axes,
     ) -> None:
         """Check that the yaxis is not annotated."""
         integral_over_frequency_panel.set_ax(axes)
@@ -371,7 +422,9 @@ class TestSpectrogramPanel:
     """Test functionality specific to SpectrogramPanel."""
 
     def test_yaxis_annotation(
-        self, spectrogram_panel: SpectrogramPanel, axes: Axes
+        self,
+        spectrogram_panel: spectre_core.plotting.SpectrogramPanel,
+        axes: matplotlib.axes.Axes,
     ) -> None:
         """Check that the yaxis is annotated appropriately."""
         spectrogram_panel.set_ax(axes)
@@ -380,17 +433,20 @@ class TestSpectrogramPanel:
 
 
 class TestPanelStack:
-
-    def test_time_type_getter_setters(self, panel_stack: PanelStack) -> None:
+    def test_time_type_getter_setters(
+        self, panel_stack: spectre_core.plotting.PanelStack
+    ) -> None:
         """Check that the time type getters and setters work as expected."""
-        panel_stack.time_type = TimeType.RELATIVE
-        assert panel_stack.time_type == TimeType.RELATIVE
+        panel_stack.time_type = spectre_core.spectrograms.TimeType.RELATIVE
+        assert panel_stack.time_type == spectre_core.spectrograms.TimeType.RELATIVE
 
-        panel_stack.time_type = TimeType.DATETIMES
-        assert panel_stack.time_type == TimeType.DATETIMES
+        panel_stack.time_type = spectre_core.spectrograms.TimeType.DATETIMES
+        assert panel_stack.time_type == spectre_core.spectrograms.TimeType.DATETIMES
 
     def test_adding_panel_increments_panel_count(
-        self, panel_stack: PanelStack, spectrogram_panel: SpectrogramPanel
+        self,
+        panel_stack: spectre_core.plotting.PanelStack,
+        spectrogram_panel: spectre_core.plotting.SpectrogramPanel,
     ) -> None:
         """Check that adding a panel increments the number of panels in the stack."""
         # Take a record of the initial number of panels
@@ -408,7 +464,9 @@ class TestPanelStack:
         assert panel_stack.num_panels == initial_num_panels + 2
 
     def test_adding_superimposed_panel_increments_panel_count(
-        self, panel_stack: PanelStack, spectrogram_panel: SpectrogramPanel
+        self,
+        panel_stack: spectre_core.plotting.PanelStack,
+        spectrogram_panel: spectre_core.plotting.SpectrogramPanel,
     ) -> None:
         """Check that adding a superimposed panel increments the number of panels in the stack."""
         # Take a record of the initial number of superimposed panels
@@ -431,10 +489,10 @@ class TestPanelStack:
 
     def test_check_panel_ordering(
         self,
-        panel_stack: PanelStack,
-        spectrogram_panel: SpectrogramPanel,
-        time_cuts_panel: TimeCutsPanel,
-        frequency_cuts_panel_relative_cuts: FrequencyCutsPanel,
+        panel_stack: spectre_core.plotting.PanelStack,
+        spectrogram_panel: spectre_core.plotting.SpectrogramPanel,
+        time_cuts_panel: spectre_core.plotting.TimeCutsPanel,
+        frequency_cuts_panel_relative_cuts: spectre_core.plotting.FrequencyCutsPanel,
     ) -> None:
         """Check that panels are ordered by their `XAxisType`.
 
@@ -453,48 +511,54 @@ class TestPanelStack:
         ]
 
     def test_incompatible_time_types(
-        self, panel_stack: PanelStack, spectrogram_panel: SpectrogramPanel
+        self,
+        panel_stack: spectre_core.plotting.PanelStack,
+        spectrogram_panel: spectre_core.plotting.SpectrogramPanel,
     ) -> None:
         """Check that the panel stack overrides the time type of the panel, if they are incompatible."""
-        panel_stack.time_type = TimeType.RELATIVE
-        spectrogram_panel.set_time_type(TimeType.DATETIMES)
+        panel_stack.time_type = spectre_core.spectrograms.TimeType.RELATIVE
+        spectrogram_panel.set_time_type(spectre_core.spectrograms.TimeType.DATETIMES)
         panel_stack.add_panel(spectrogram_panel)
-        assert spectrogram_panel.get_time_type() == TimeType.RELATIVE
+        assert (
+            spectrogram_panel.get_time_type()
+            == spectre_core.spectrograms.TimeType.RELATIVE
+        )
 
     def test_save_creates_file(
-        self, panel_stack: PanelStack, spectrogram_panel: SpectrogramPanel
+        self,
+        spectre_config_paths: spectre_core.config.Paths,
+        panel_stack: spectre_core.plotting.PanelStack,
+        spectrogram_panel: spectre_core.plotting.SpectrogramPanel,
     ) -> None:
         """Test that saving a panel stack, creates a file in the filesystem with the appropriate path."""
         # Add a panel to the stack, so there's something in the figure.
         panel_stack.add_panel(spectrogram_panel)
 
-        # Create a temporary directory
-        with tempfile.TemporaryDirectory() as temp_dir:
-            # Assign this to be the directory where `batches` are stored.
-            pytest.MonkeyPatch().setenv("SPECTRE_DATA_DIR_PATH", temp_dir)
+        batches_dir_path = spectre_config_paths.get_batches_dir_path(2025, 2, 13)
 
-            # Save the figure to this temporary directory.
-            file_path = panel_stack.save()
+        file_path = panel_stack.save(TAG, batches_dir_path)
 
-            # Check that the file path is as expected.
-            assert file_path == os.path.join(
-                temp_dir,
-                "batches",
-                "2025",
-                "02",
-                "13",
-                "2025-02-13T06:00:00_mock-amplitude-spectrogram.png",
-            )
+        assert file_path == os.path.join(
+            batches_dir_path,
+            f"2025-02-13T06:00:00_{TAG}.png",
+        )
 
-            # Check that the file was actually created.
-            assert os.path.exists(file_path)
+        # Check that the file was actually created.
+        assert os.path.exists(file_path)
 
-    def test_save_no_panels(self, panel_stack: PanelStack) -> None:
+    def test_save_no_panels(
+        self,
+        spectre_config_paths: spectre_core.config.Paths,
+        panel_stack: spectre_core.plotting.PanelStack,
+    ) -> None:
         """Check that trying to save a plot with no panels raises an error."""
+        batches_dir_path = spectre_config_paths.get_batches_dir_path(2025, 2, 13)
         with pytest.raises(ValueError):
-            panel_stack.save()
+            _ = panel_stack.save(TAG, batches_dir_path)
 
-    def test_show_no_panels(self, panel_stack: PanelStack) -> None:
+    def test_show_no_panels(
+        self, panel_stack: spectre_core.plotting.PanelStack
+    ) -> None:
         """Check that trying to show a plot with no panels raises an error."""
         with pytest.raises(ValueError):
             panel_stack.show()

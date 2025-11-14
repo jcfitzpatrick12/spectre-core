@@ -2,77 +2,71 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import Optional, overload, Literal
+import typing
 
-from spectre_core.exceptions import ReceiverNotFoundError
+import spectre_core.exceptions
+import spectre_core.batches
+
 from ._register import receivers
-from ._receiver import Receiver
-from .plugins._receiver_names import ReceiverName
-from .plugins._signal_generator import SignalGenerator
-from .plugins._rsp1a import RSP1A
-from .plugins._rspduo import RSPduo
-from .plugins._b200mini import B200mini
-from .plugins._rspdx import RSPdx
-from .plugins._hackrf import HackRFOne
-from .plugins._custom import CustomReceiver
-from .plugins._rtlsdr import RTLSDR
+from ._base import Base
+from ._config import _ReservedTagStr, read_config
+from ._signal_generator import SignalGenerator
+from ._custom import Custom
+from ._rsp1a import RSP1A
+from ._rspduo import RSPduo
+from ._rspdx import RSPdx
+from ._usrp import USRP
+from ._b200mini import B200mini
+from ._hackrf import HackRF
+from ._hackrfone import HackRFOne
+from ._rtlsdr import RTLSDR
 
 
-@overload
+@typing.overload
 def get_receiver(
-    receiver_name: Literal[ReceiverName.SIGNAL_GENERATOR], mode: Optional[str] = None
+    receiver_name: typing.Literal["custom"], mode: typing.Optional[str] = None
+) -> Custom: ...
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["signal_generator"], mode: typing.Optional[str] = None
 ) -> SignalGenerator: ...
-
-
-@overload
+@typing.overload
 def get_receiver(
-    receiver_name: Literal[ReceiverName.RSP1A], mode: Optional[str] = None
+    receiver_name: typing.Literal["rsp1a"], mode: typing.Optional[str] = None
 ) -> RSP1A: ...
-
-
-@overload
+@typing.overload
 def get_receiver(
-    receiver_name: Literal[ReceiverName.RSPDUO], mode: Optional[str] = None
+    receiver_name: typing.Literal["rspduo"], mode: typing.Optional[str] = None
 ) -> RSPduo: ...
-
-
-@overload
+@typing.overload
 def get_receiver(
-    receiver_name: Literal[ReceiverName.RSPDX], mode: Optional[str] = None
+    receiver_name: typing.Literal["rspdx"], mode: typing.Optional[str] = None
 ) -> RSPdx: ...
-
-
-@overload
+@typing.overload
 def get_receiver(
-    receiver_name: Literal[ReceiverName.B200MINI], mode: Optional[str] = None
+    receiver_name: typing.Literal["usrp"], mode: typing.Optional[str] = None
+) -> USRP: ...
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["b200mini"], mode: typing.Optional[str] = None
 ) -> B200mini: ...
-
-
-@overload
+@typing.overload
 def get_receiver(
-    receiver_name: Literal[ReceiverName.HACKRFONE], mode: Optional[str] = None
+    receiver_name: typing.Literal["hackrf"], mode: typing.Optional[str] = None
+) -> HackRF: ...
+@typing.overload
+def get_receiver(
+    receiver_name: typing.Literal["hackrfone"], mode: typing.Optional[str] = None
 ) -> HackRFOne: ...
-
-
-@overload
+@typing.overload
 def get_receiver(
-    receiver_name: Literal[ReceiverName.RTLSDR], mode: Optional[str] = None
+    receiver_name: typing.Literal["rtlsdr"], mode: typing.Optional[str] = None
 ) -> RTLSDR: ...
+@typing.overload
+def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base: ...
 
 
-@overload
-def get_receiver(
-    receiver_name: Literal[ReceiverName.CUSTOM], mode: Optional[str] = None
-) -> CustomReceiver: ...
-
-
-@overload
-def get_receiver(
-    receiver_name: ReceiverName, mode: Optional[str] = None
-) -> Receiver: ...
-
-
-def get_receiver(receiver_name: ReceiverName, mode: Optional[str] = None) -> Receiver:
+def get_receiver(receiver_name: str, mode: typing.Optional[str] = None) -> Base:
     """Get a registered receiver.
 
     :param receiver_name: The name of the receiver.
@@ -83,8 +77,25 @@ def get_receiver(receiver_name: ReceiverName, mode: Optional[str] = None) -> Rec
     receiver_cls = receivers.get(receiver_name)
     if receiver_cls is None:
         valid_receivers = list(receivers.keys())
-        raise ReceiverNotFoundError(
-            f"No class found for the receiver: {receiver_name}. "
-            f"Please specify one of the following receivers {valid_receivers}"
+        raise spectre_core.exceptions.ReceiverNotFoundError(
+            f"Could not find the receiver '{receiver_name}', "
+            f"expected one of {valid_receivers}"
         )
     return receiver_cls(receiver_name, mode=mode)
+
+
+def get_batch_cls(
+    tag: str, configs_dir_path: typing.Optional[str] = None
+) -> typing.Type[spectre_core.batches.Base]:
+    """Get the right API used to read batch files under the input tag, accounting for
+    batch files containing third-party spectrogram data.
+
+    :param tag: The batch file tag.
+    """
+    for s in _ReservedTagStr:
+        if s.value in tag and s == _ReservedTagStr.CALLISTO:
+            return spectre_core.batches.CallistoBatch
+
+    config = read_config(tag, configs_dir_path)
+    receiver = get_receiver(config.receiver_name, config.receiver_mode)
+    return receiver.batch_cls

@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Manage `spectre` jobs and workers."""
+"""Manage background tasks and long-running processes."""
 
 from ._jobs import Job, start_job
 from ._workers import Worker, make_worker

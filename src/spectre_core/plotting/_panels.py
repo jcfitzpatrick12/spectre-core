@@ -2,26 +2,25 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import TypeVar, Tuple, Iterator, Optional, Literal
-from datetime import datetime
+import typing
+import datetime
 
-from matplotlib.colors import LogNorm
-from matplotlib import cm
-from matplotlib.colorbar import Colorbar
+import matplotlib.colors
+import matplotlib.cm
 import numpy as np
 import numpy.typing as npt
 
-from spectre_core.spectrograms import Spectrogram, FrequencyCut, TimeCut
+import spectre_core.spectrograms
 from ._base import BasePanel, BaseTimeSeriesPanel, XAxisType
 from ._panel_names import PanelName
 
 
-T = TypeVar("T")
+T = typing.TypeVar("T")
 
 
 def _bind_to_colors(
     values: list[T], cmap: str = "winter"
-) -> Iterator[Tuple[T, npt.NDArray[np.float32]]]:
+) -> typing.Iterator[tuple[T, npt.NDArray[np.float32]]]:
     """
     Assign RGBA colors to a list of values using a colormap.
 
@@ -32,7 +31,7 @@ def _bind_to_colors(
     :param cmap: Name of the Matplotlib colormap to use. Defaults to "winter".
     :return: An iterator of tuples, each containing a value and its corresponding RGBA color.
     """
-    colormap = cm.get_cmap(cmap)
+    colormap = matplotlib.cm.get_cmap(cmap)
     rgbas = colormap(np.linspace(0.1, 0.9, len(values)))
     return zip(values, rgbas)
 
@@ -48,7 +47,7 @@ class FrequencyCutsPanel(BasePanel):
 
     def __init__(
         self,
-        spectrogram: Spectrogram,
+        spectrogram: spectre_core.spectrograms.Spectrogram,
         *times: float | str,
         dBb: bool = False,
         peak_normalise: bool = False,
@@ -72,10 +71,12 @@ class FrequencyCutsPanel(BasePanel):
 
         self._dBb = dBb
         self._peak_normalise = peak_normalise
-        self._frequency_cuts: dict[float | datetime, FrequencyCut] = {}
+        self._frequency_cuts: dict[
+            float | datetime.datetime, spectre_core.spectrograms.FrequencyCut
+        ] = {}
 
     @property
-    def xaxis_type(self) -> Literal[XAxisType.FREQUENCY]:
+    def xaxis_type(self) -> typing.Literal[XAxisType.FREQUENCY]:
         return XAxisType.FREQUENCY
 
     @property
@@ -87,7 +88,9 @@ class FrequencyCutsPanel(BasePanel):
         """Annotate the x-axis assuming frequency in units of Hz."""
         self._get_ax().set_xlabel("Frequency [Hz]")
 
-    def get_frequency_cuts(self) -> dict[float | datetime, FrequencyCut]:
+    def get_frequency_cuts(
+        self,
+    ) -> dict[float | datetime.datetime, spectre_core.spectrograms.FrequencyCut]:
         """
         Get the frequency cuts for the specified times.
 
@@ -104,7 +107,7 @@ class FrequencyCutsPanel(BasePanel):
                 self._frequency_cuts[frequency_cut.time] = frequency_cut
         return self._frequency_cuts
 
-    def get_cut_times(self) -> list[float | datetime]:
+    def get_cut_times(self) -> list[float | datetime.datetime]:
         """
         Get the exact times of the frequency cuts.
 
@@ -144,7 +147,7 @@ class FrequencyCutsPanel(BasePanel):
 
     def bind_to_colors(
         self,
-    ) -> Iterator[Tuple[float | datetime, npt.NDArray[np.float32]]]:
+    ) -> typing.Iterator[tuple[float | datetime.datetime, npt.NDArray[np.float32]]]:
         """
         Bind each frequency cut time to an RGBA color.
 
@@ -168,7 +171,7 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
 
     def __init__(
         self,
-        spectrogram: Spectrogram,
+        spectrogram: spectre_core.spectrograms.Spectrogram,
         *frequencies: float,
         dBb: bool = False,
         peak_normalise: bool = False,
@@ -195,9 +198,9 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
         self._dBb = dBb
         self._peak_normalise = peak_normalise
         self._background_subtract = background_subtract
-        self._time_cuts: dict[float, TimeCut] = {}
+        self._time_cuts: dict[float, spectre_core.spectrograms.TimeCut] = {}
 
-    def get_time_cuts(self) -> dict[float, TimeCut]:
+    def get_time_cuts(self) -> dict[float, spectre_core.spectrograms.TimeCut]:
         """
         Get the time cuts for the specified frequencies.
 
@@ -249,7 +252,7 @@ class TimeCutsPanel(BaseTimeSeriesPanel):
         else:
             ax.set_ylabel(f"{self._spectrogram.spectrum_unit.value.capitalize()}")
 
-    def bind_to_colors(self) -> Iterator[Tuple[float, npt.NDArray[np.float32]]]:
+    def bind_to_colors(self) -> typing.Iterator[tuple[float, npt.NDArray[np.float32]]]:
         """
         Bind each spectral component's frequency to an RGBA color.
 
@@ -272,7 +275,7 @@ class IntegralOverFrequencyPanel(BaseTimeSeriesPanel):
 
     def __init__(
         self,
-        spectrogram: Spectrogram,
+        spectrogram: spectre_core.spectrograms.Spectrogram,
         peak_normalise: bool = False,
         background_subtract: bool = False,
     ):
@@ -310,11 +313,11 @@ class SpectrogramPanel(BaseTimeSeriesPanel):
 
     def __init__(
         self,
-        spectrogram: Spectrogram,
+        spectrogram: spectre_core.spectrograms.Spectrogram,
         log_norm: bool = False,
         dBb: bool = False,
-        vmin: Optional[float] = None,
-        vmax: Optional[float] = None,
+        vmin: typing.Optional[float] = None,
+        vmax: typing.Optional[float] = None,
     ) -> None:
         """Initialise an instance of `SpectrogramPanel`.
 
@@ -367,7 +370,7 @@ class SpectrogramPanel(BaseTimeSeriesPanel):
         dynamic_spectra = self._spectrogram.dynamic_spectra
 
         if self._log_norm:
-            norm = LogNorm(
+            norm = matplotlib.colors.LogNorm(
                 vmin=np.nanmin(dynamic_spectra[dynamic_spectra > 0]),
                 vmax=np.nanmax(dynamic_spectra),
             )

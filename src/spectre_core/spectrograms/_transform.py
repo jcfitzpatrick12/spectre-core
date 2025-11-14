@@ -3,12 +3,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import numpy as np
-import numpy.typing as npt
-from datetime import datetime, timedelta
-from typing import Optional
-from math import floor
+import datetime
+import typing
+import math
 
-from spectre_core.config import TimeFormat
 from ._array_operations import find_closest_index, average_array, time_elapsed
 from ._spectrogram import Spectrogram
 
@@ -65,14 +63,15 @@ def frequency_chop(
         transformed_dynamic_spectra,
         spectrogram.times,
         transformed_frequencies,
-        spectrogram.tag,
         spectrogram.spectrum_unit,
         spectrogram.start_datetime,
     )
 
 
 def time_chop(
-    spectrogram: Spectrogram, start_datetime: datetime, end_datetime: datetime
+    spectrogram: Spectrogram,
+    start_datetime: datetime.datetime,
+    end_datetime: datetime.datetime,
 ) -> Spectrogram:
     """
     Extracts a portion of the spectrogram within the specified time range.
@@ -128,14 +127,13 @@ def time_chop(
         transformed_dynamic_spectra,
         transformed_times,
         spectrogram.frequencies,
-        spectrogram.tag,
         spectrogram.spectrum_unit,
         transformed_start_datetime,
     )
 
 
 def _validate_and_compute_average_over(
-    original_resolution: float, resolution: Optional[float], average_over: int
+    original_resolution: float, resolution: typing.Optional[float], average_over: int
 ) -> int:
     """
     Validates the input parameters and computes `average_over` if `resolution` is specified.
@@ -155,7 +153,7 @@ def _validate_and_compute_average_over(
         )
 
     if resolution is not None:
-        return max(1, floor(resolution / original_resolution))
+        return max(1, math.floor(resolution / original_resolution))
 
     else:
         return average_over
@@ -163,7 +161,7 @@ def _validate_and_compute_average_over(
 
 def time_average(
     spectrogram: Spectrogram,
-    resolution: Optional[float] = None,
+    resolution: typing.Optional[float] = None,
     average_over: int = 1,
 ) -> Spectrogram:
     """
@@ -201,7 +199,6 @@ def time_average(
         transformed_dynamic_spectra,
         transformed_times,
         spectrogram.frequencies,
-        spectrogram.tag,
         spectrogram.spectrum_unit,
         transformed_start_datetime,
     )
@@ -209,7 +206,7 @@ def time_average(
 
 def frequency_average(
     spectrogram: Spectrogram,
-    resolution: Optional[float] = None,
+    resolution: typing.Optional[float] = None,
     average_over: int = 1,
 ) -> Spectrogram:
     """
@@ -235,7 +232,6 @@ def frequency_average(
         transformed_dynamic_spectra,
         spectrogram.times,
         transformed_frequencies,
-        spectrogram.tag,
         spectrogram.spectrum_unit,
         spectrogram.start_datetime,
     )
@@ -268,10 +264,6 @@ def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
             np.equal(spectrogram.frequencies, reference_spectrogram.frequencies)
         ):
             raise ValueError(f"All spectrograms must have identical frequency ranges")
-        if spectrogram.tag != reference_spectrogram.tag:
-            raise ValueError(
-                f"All tags must be equal for each spectrogram in the input list!"
-            )
         if spectrogram.spectrum_unit != reference_spectrogram.spectrum_unit:
             raise ValueError(
                 f"All units must be equal for each spectrogram in the input list!"
@@ -292,7 +284,6 @@ def join_spectrograms(spectrograms: list[Spectrogram]) -> Spectrogram:
         transformed_dynamic_spectra,
         transformed_times,
         reference_spectrogram.frequencies,
-        reference_spectrogram.tag,
         reference_spectrogram.spectrum_unit,
         reference_spectrogram.start_datetime,
     )

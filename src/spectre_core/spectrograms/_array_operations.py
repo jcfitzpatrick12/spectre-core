@@ -2,7 +2,7 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from typing import TypeVar
+import typing
 
 import numpy as np
 import numpy.typing as npt
@@ -69,23 +69,7 @@ def average_array(
     return averaged_array
 
 
-def is_close(
-    ar: npt.NDArray[np.float32],
-    ar_comparison: npt.NDArray[np.float32],
-    absolute_tolerance: float,
-) -> bool:
-    """
-    Checks if all elements in two arrays are element-wise close within a given tolerance.
-
-    :param ar: First array for comparison.
-    :param ar_comparison: Second array for comparison.
-    :param absolute_tolerance: Absolute tolerance for element-wise comparison.
-    :return: `True` if all elements are close within the specified tolerance, otherwise `False`.
-    """
-    return bool(np.all(np.isclose(ar, ar_comparison, atol=absolute_tolerance)))
-
-
-T = TypeVar("T", np.float32, np.datetime64)
+T = typing.TypeVar("T", np.float32, np.datetime64)
 
 
 def find_closest_index(

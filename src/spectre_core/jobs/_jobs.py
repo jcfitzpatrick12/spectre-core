@@ -2,26 +2,19 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-from logging import getLogger
-
-_LOGGER = getLogger(__name__)
-
+import logging
 import time
 
 from ._workers import Worker
 from ._duration import Duration
 
+_LOGGER = logging.getLogger(__name__)
+
 
 class Job:
-    """Represents a collection of workers that run long-running tasks as
-    multiprocessing processes.
-
-    A `Job` manages the lifecycle of its workers, including starting,
-    monitoring, and killing them.
-    """
-
     def __init__(self, workers: list[Worker]) -> None:
-        """Initialise a `Job` with a list of workers.
+        """Represents a collection of workers that run long-running tasks as
+        multiprocessing processes.
 
         :param workers: A list of `Worker` instances to manage as part of the job.
         """
@@ -55,12 +48,12 @@ class Job:
     def restart(
         self,
     ) -> None:
-        """Tell each worker to restart it's process."""
+        """Tell each worker to restart its process."""
         for worker in self._workers:
             worker.restart()
 
     def monitor(
-        self, total_runtime: float, force_restart: bool = False, max_restarts: int = 5
+        self, duration: float, force_restart: bool = False, max_restarts: int = 5
     ) -> None:
         """
         Monitor the workers during execution and handle unexpected exits.
@@ -70,7 +63,7 @@ class Job:
         - Restarts all workers if `force_restart` is True.
         - Kills all workers and raises an exception if `force_restart` is False.
 
-        :param total_runtime: Total time to monitor the workers, in seconds.
+        :param duration: Total time to monitor the workers, in seconds.
         :param force_restart: Whether to restart all workers if one dies unexpectedly.
         :param max_restarts: Maximum number of times workers can be restarted before giving up and killing all workers.
         Only applies when force_restart is True. Defaults to 5.
@@ -82,7 +75,7 @@ class Job:
         restarts_remaining = max_restarts
         try:
             # Check that the elapsed time since the job started is within the total runtime configured by the user.
-            while time.time() - start_time < total_runtime:
+            while time.time() - start_time < duration:
                 for worker in self._workers:
                     if not worker.is_alive:
                         error_message = (
@@ -120,7 +113,7 @@ class Job:
 
 def start_job(
     workers: list[Worker],
-    total_runtime: float,
+    duration: float,
     force_restart: bool = False,
     max_restarts: int = 5,
 ) -> None:
@@ -130,11 +123,11 @@ def start_job(
     unexpected exits according to the `force_restart` policy.
 
     :param workers: A list of `Worker` instances to include in the job.
-    :param total_runtime: Total time to monitor the workers, in seconds.
+    :param duration: Total time to monitor the workers, in seconds.
     :param force_restart: Whether to restart all workers if one dies unexpectedly.
     :param max_restarts: Maximum number of times workers can be restarted before giving up and killing all workers.
     Only applies when force_restart is True. Defaults to 5.
     """
     job = Job(workers)
     job.start()
-    job.monitor(total_runtime, force_restart, max_restarts)
+    job.monitor(duration, force_restart, max_restarts)
