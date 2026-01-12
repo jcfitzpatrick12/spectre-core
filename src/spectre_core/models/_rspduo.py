@@ -91,7 +91,7 @@ class RSPduoSweptCenterFrequency(
         validate_center_frequency(self.min_frequency)
         validate_center_frequency(self.max_frequency)
         validate_window_size(self.window_size)
-        validate_window_type(self.window_size)
+        validate_window_type(self.window_type)
         validate_sample_rate(self.sample_rate)
         validate_bandwidth(self.bandwidth)
         validate_if_gain(self.if_gain)
