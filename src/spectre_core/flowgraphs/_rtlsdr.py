@@ -30,7 +30,7 @@ class RTLSDRFixedCenterFrequency(Base[RTLSDRFixedCenterFrequencyModel]):
         stream_args = ""
         tune_args = [""]
         settings = [""]
-        self.soapy_hackrf_source = soapy.source(
+        self.soapy_rtlsdr_source = soapy.source(
             device, type, nchan, dev_args, stream_args, tune_args, settings
         )
         self.soapy_rtlsdr_source.set_sample_rate(0, model.sample_rate)
