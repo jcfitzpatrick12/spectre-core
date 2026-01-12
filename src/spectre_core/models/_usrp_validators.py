@@ -3,8 +3,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import spectre_core.flowgraphs
+import spectre_core.fields
 
 from ._validators import validate_one_of
+
+EXPECTED_OUTPUT_TYPES = ["fc32", "sc16"]
 
 
 def validate_wire_format(wire_format: str) -> None:
@@ -17,6 +20,11 @@ def validate_wire_format(wire_format: str) -> None:
         ],
         "wire_format",
     )
+
+
+def validate_output_type(output_type: str) -> None:
+    """Checks the output type is supported."""
+    validate_one_of(output_type, EXPECTED_OUTPUT_TYPES, "output_type")
 
 
 def validate_sample_rate_with_master_clock_rate(

@@ -18,6 +18,7 @@ from ._validators import (
 )
 from ._usrp_validators import (
     validate_wire_format,
+    validate_output_type,
     validate_sample_rate_with_master_clock_rate,
 )
 
@@ -74,6 +75,7 @@ class B200miniFixedCenterFrequency(
         validate_nyquist_criterion(self.sample_rate, self.bandwidth)
         validate_window_size(self.window_size)
         validate_wire_format(self.wire_format)
+        validate_output_type(self.output_type)
         validate_sample_rate_with_master_clock_rate(
             self.sample_rate, self.master_clock_rate
         )
