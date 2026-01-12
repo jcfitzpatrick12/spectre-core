@@ -23,7 +23,7 @@ LOW_IF_PERMITTED_SAMPLE_RATES = [LOW_IF_SAMPLE_RATE_CUTOFF / (2**i) for i in ran
 BANDWIDTH_OPTIONS = [0, 200e3, 300e3, 600e3, 1.536e6, 5e6, 6e6, 7e6, 8e6]
 LOW_IF_SAMPLE_RATE_CUTOFF = 2e6
 LOW_IF_PERMITTED_SAMPLE_RATES = [LOW_IF_SAMPLE_RATE_CUTOFF / (2**i) for i in range(6)]
-EXPECTED_OUTPUT_TYPES = ["fc32", "sc16"]
+EXPECTED_OUTPUT_TYPES: list[str] = ["fc32", "sc16"]
 
 
 def validate_center_frequency(center_frequency: float) -> None:
@@ -98,17 +98,11 @@ def validate_rf_gain(rf_gain: float, expected_rf_gains: list[int]):
     For implementation details, refer to the `gr-sdrplay3` OOT module:
     https://github.com/fventuri/gr-sdrplay3/blob/v3.11.0.9/lib/rsp_impl.cc#L378-L387
     """
-    if rf_gain not in expected_rf_gains:
-        raise ValueError(
-            f"The value of RF gain must be one of {expected_rf_gains}. "
-            f"Got {rf_gain}."
-        )
+    validate_one_of(
+        rf_gain, [float(rf_gain) for rf_gain in expected_rf_gains], "rf_gain"
+    )
 
 
 def validate_output_type(output_type: str):
     """Checks the output type is supported."""
-    if output_type not in EXPECTED_OUTPUT_TYPES:
-        raise ValueError(
-            f"The output type must be one of {EXPECTED_OUTPUT_TYPES}. "
-            f"Got {output_type}."
-        )
+    validate_one_of(output_type, EXPECTED_OUTPUT_TYPES, "output_type")
