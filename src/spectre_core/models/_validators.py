@@ -111,7 +111,7 @@ def validate_non_overlapping_steps(frequency_hop: float, sample_rate: float) -> 
     if frequency_hop < sample_rate:
         raise NotImplementedError(
             f"Spectre does not yet support spectral steps overlapping in frequency. "
-            f"Got frequency step {frequency_hop * 1e-6} [MHz] which is less than the sample "
+            f"Got frequency hop {frequency_hop * 1e-6} [MHz] which is less than the sample "
             f"rate {sample_rate * 1e-6} [MHz]"
         )
 

@@ -69,7 +69,7 @@ class SignalGeneratorConstantStaircaseModel(
                 f"The window type must be boxcar. Got '{self.window_type}'"
             )
         if self.frequency_hop != self.sample_rate:
-            raise ValueError(f"The frequency step must be equal to the sampling rate")
+            raise ValueError(f"The frequency hop must be equal to the sampling rate")
 
         if self.min_samples_per_step > self.max_samples_per_step:
             raise ValueError(
