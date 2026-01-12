@@ -28,14 +28,18 @@ _LOGGER = logging.getLogger(__name__)
 class FixedCenterFrequencyModel(BaseModel):
     window_size: spectre_core.fields.Field.window_size = 1024
     window_hop: spectre_core.fields.Field.window_hop = 1024
-    window_type: spectre_core.fields.Field.window_type = "blackman"
+    window_type: spectre_core.fields.Field.window_type = (
+        spectre_core.fields.WindowType.BLACKMAN
+    )
     center_frequency: spectre_core.fields.Field.center_frequency = 95.8e6
-    sample_rate: spectre_core.fields.Field.sample_rate = 1000000
+    sample_rate: spectre_core.fields.Field.sample_rate = 32e3
     frequency_resolution: spectre_core.fields.Field.frequency_resolution = 0
     time_resolution: spectre_core.fields.Field.time_resolution = 0
     batch_size: spectre_core.fields.Field.batch_size = 3
     keep_signal: spectre_core.fields.Field.keep_signal = True
-    output_type: spectre_core.fields.Field.output_type = "fc32"
+    output_type: spectre_core.fields.Field.output_type = (
+        spectre_core.fields.OutputType.FC32
+    )
 
 
 class FixedCenterFrequency(

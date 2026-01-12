@@ -363,13 +363,17 @@ def _reconstruct_initial_sweep(
 class SweptCenterFrequencyModel(BaseModel):
     window_size: spectre_core.fields.Field.window_size = 1024
     window_hop: spectre_core.fields.Field.window_hop = 1024
-    window_type: spectre_core.fields.Field.window_type = "blackman"
-    sample_rate: spectre_core.fields.Field.sample_rate = 1000000
+    window_type: spectre_core.fields.Field.window_type = (
+        spectre_core.fields.WindowType.BLACKMAN
+    )
+    sample_rate: spectre_core.fields.Field.sample_rate = 32e3
     frequency_resolution: spectre_core.fields.Field.frequency_resolution = 0
     time_resolution: spectre_core.fields.Field.time_resolution = 0
-    keep_signal: spectre_core.fields.Field.keep_signal = False
-    frequency_hop: spectre_core.fields.Field.frequency_hop = 1000000
-    output_type: spectre_core.fields.Field.output_type = "fc32"
+    keep_signal: spectre_core.fields.Field.keep_signal = True
+    frequency_hop: spectre_core.fields.Field.frequency_hop = 32e3
+    output_type: spectre_core.fields.Field.output_type = (
+        spectre_core.fields.OutputType.FC32
+    )
 
 
 class SweptCenterFrequency(
