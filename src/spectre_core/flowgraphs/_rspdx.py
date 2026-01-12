@@ -108,7 +108,7 @@ class RSPdxSweptCenterFrequencyModel(BaseModel):
 class RSPdxSweptCenterFrequency(Base[RSPdxSweptCenterFrequencyModel]):
     def configure(self, tag: str, model: RSPdxSweptCenterFrequencyModel) -> None:
         retune_cmd_name = "freq"
-        self.spectre_sweep_driver = spectre.frequency_sweeper(
+        self.spectre_frequency_sweeper = spectre.frequency_sweeper(
             model.min_frequency,
             model.max_frequency,
             model.frequency_hop,
@@ -157,8 +157,8 @@ class RSPdxSweptCenterFrequency(Base[RSPdxSweptCenterFrequencyModel]):
         self.sdrplay3_rspdx.set_show_gain_changes(False)
 
         self.msg_connect(
-            (self.spectre_sweep_driver, "retune_command"),
+            (self.spectre_frequency_sweeper, "retune_command"),
             (self.sdrplay3_rspdx, "command"),
         )
         self.connect((self.sdrplay3_rspdx, 0), (self.spectre_batched_file_sink, 0))
-        self.connect((self.sdrplay3_rspdx, 0), (self.spectre_sweep_driver, 0))
+        self.connect((self.sdrplay3_rspdx, 0), (self.spectre_frequency_sweeper, 0))
