@@ -6,7 +6,6 @@
 
 from ._base import Base, BatchFile, parse_batch_file_name, parse_batch_file_path
 from ._batches import Batches
-from ._callisto import CallistoBatch
 from ._iq_stream import IQMetadata, IQStreamBatch, IQStreamBatchExtension
 
 __all__ = [
