@@ -33,7 +33,7 @@ class Field:
         pydantic.Field(
             ...,
             validate_default=True,
-            ge=1,
+            gt=0,
             description="Samples are recorded in batches of this size, specified in seconds.",
         ),
     ]
