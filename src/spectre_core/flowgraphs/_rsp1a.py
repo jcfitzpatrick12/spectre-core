@@ -12,10 +12,10 @@ from ._constants import FlowgraphConstant
 
 
 class RSP1AFixedCenterFrequencyModel(BaseModel):
-    sample_rate: spectre_core.fields.Field.sample_rate = 5e6
+    sample_rate: spectre_core.fields.Field.sample_rate = 2e6
     batch_size: spectre_core.fields.Field.batch_size = 3
     center_frequency: spectre_core.fields.Field.center_frequency = 95.8e6
-    bandwidth: spectre_core.fields.Field.bandwidth = 3e5
+    bandwidth: spectre_core.fields.Field.bandwidth = 1.536e6
     if_gain: spectre_core.fields.Field.if_gain = -30
     rf_gain: spectre_core.fields.Field.rf_gain = 0
     output_type: spectre_core.fields.Field.output_type = (
@@ -31,6 +31,7 @@ class RSP1AFixedCenterFrequency(Base[RSP1AFixedCenterFrequencyModel]):
             model.output_type,
             model.batch_size,
             model.sample_rate,
+            FlowgraphConstant.GROUP_BY_DATE
         )
         self.sdrplay3_rsp1a = sdrplay3.rsp1a(
             "",
