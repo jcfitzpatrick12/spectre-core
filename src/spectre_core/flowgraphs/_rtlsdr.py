@@ -8,6 +8,7 @@ from gnuradio import soapy
 import spectre_core.fields
 
 from ._base import Base, BaseModel
+from ._constants import FlowgraphConstant
 
 
 class RTLSDRFixedCenterFrequencyModel(BaseModel):
@@ -15,15 +16,22 @@ class RTLSDRFixedCenterFrequencyModel(BaseModel):
     center_frequency: spectre_core.fields.Field.center_frequency = 95.8e6
     rf_gain: spectre_core.fields.Field.rf_gain = 30
     batch_size: spectre_core.fields.Field.batch_size = 3
+    output_type: spectre_core.fields.Field.output_type = (
+        spectre_core.fields.OutputType.FC32
+    )
 
 
 class RTLSDRFixedCenterFrequency(Base[RTLSDRFixedCenterFrequencyModel]):
     def configure(self, tag: str, model: RTLSDRFixedCenterFrequencyModel) -> None:
+        device = "driver=rtlsdr"
+        type = model.output_type
+        nchan = 1
+        dev_args = ""
         stream_args = ""
         tune_args = [""]
         settings = [""]
-        self.soapy_rtlsdr_source = soapy.source(
-            "driver=rtlsdr", "fc32", 1, "", stream_args, tune_args, settings
+        self.soapy_hackrf_source = soapy.source(
+            device, type, nchan, dev_args, stream_args, tune_args, settings
         )
         self.soapy_rtlsdr_source.set_sample_rate(0, model.sample_rate)
         self.soapy_rtlsdr_source.set_gain_mode(0, False)
@@ -33,10 +41,9 @@ class RTLSDRFixedCenterFrequency(Base[RTLSDRFixedCenterFrequencyModel]):
         self.spectre_batched_file_sink = spectre.batched_file_sink(
             self._batches_dir_path,
             tag,
+            model.output_type,
             model.batch_size,
             model.sample_rate,
-            False,
-            "rx_freq",
-            0,
+            FlowgraphConstant.GROUP_BY_DATE,
         )
         self.connect((self.soapy_rtlsdr_source, 0), (self.spectre_batched_file_sink, 0))

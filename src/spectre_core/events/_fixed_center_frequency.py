@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import logging
-import datetime
 import typing
 
 import numpy as np
@@ -21,7 +20,6 @@ from ._stfft import (
     get_frequencies,
     get_fftw_obj,
     stfft,
-    WindowType,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,6 +35,7 @@ class FixedCenterFrequencyModel(BaseModel):
     time_resolution: spectre_core.fields.Field.time_resolution = 0
     batch_size: spectre_core.fields.Field.batch_size = 3
     keep_signal: spectre_core.fields.Field.keep_signal = False
+    output_type: spectre_core.fields.Field.output_type = "fc32"
 
 
 class FixedCenterFrequency(
@@ -52,9 +51,7 @@ class FixedCenterFrequency(
         self.__model = model
 
         # Make the window.
-        self.__window = get_window(
-            WindowType(self.__model.window_type), self.__model.window_size
-        )
+        self.__window = get_window(self.__model.window_type, self.__model.window_size)
 
         # Pre-allocate the buffer.
         self.__buffer = get_buffer(self.__model.window_size)
@@ -64,19 +61,18 @@ class FixedCenterFrequency(
         # the watchdog observer isn't set up in time before the receiver starts capturing data.
         self.__fftw_obj = None
 
+        self.__output_type = self.__model.output_type
+
     @property
     def _watch_extension(self) -> str:
-        return spectre_core.batches.IQStreamBatchExtension.BIN
+        return self.__output_type
 
     def process(
         self, batch: spectre_core.batches.IQStreamBatch
     ) -> spectre_core.spectrograms.Spectrogram:
         """Compute the spectrogram of IQ samples captured at a fixed center frequency."""
-        _LOGGER.info(f"Reading {batch.bin_file.file_name}")
-        iq_data = batch.bin_file.read()
-
-        _LOGGER.info(f"Reading {batch.hdr_file.file_name}")
-        iq_metadata = batch.hdr_file.read()
+        _LOGGER.info(f"Reading the I/Q samples")
+        iq_data = batch.cached_read_iq(self.__output_type)
 
         if self.__fftw_obj is None:
             _LOGGER.info(f"Creating the FFTW plan")
@@ -111,18 +107,13 @@ class FixedCenterFrequency(
         # Shift the zero-frequency component to the middle of the spectrum.
         dynamic_spectra = np.fft.fftshift(dynamic_spectra, axes=0)
 
-        # Account for the millisecond correction.
-        start_datetime = batch.start_datetime + datetime.timedelta(
-            milliseconds=iq_metadata.millisecond_correction
-        )
-
         _LOGGER.info("Creating the spectrogram")
         spectrogram = spectre_core.spectrograms.Spectrogram(
             dynamic_spectra,
             times,
             frequencies,
             spectre_core.spectrograms.SpectrumUnit.AMPLITUDE,
-            start_datetime,
+            batch.start_datetime,
         )
 
         spectrogram = spectre_core.spectrograms.time_average(
@@ -135,10 +126,7 @@ class FixedCenterFrequency(
         _LOGGER.info("Spectrogram created successfully")
 
         if not self.__model.keep_signal:
-            _LOGGER.info(f"Deleting {batch.bin_file.file_path}")
-            batch.bin_file.delete()
-
-            _LOGGER.info(f"Deleting {batch.hdr_file.file_path}")
-            batch.hdr_file.delete()
+            _LOGGER.info(f"Deleting the I/Q samples")
+            batch.delete_iq(self.__output_type)
 
         return spectrogram

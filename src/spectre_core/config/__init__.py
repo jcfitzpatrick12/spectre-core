@@ -8,8 +8,4 @@
 from ._paths import paths, Paths
 from ._time_formats import TimeFormat
 
-__all__ = [
-    "paths",
-    "Paths",
-    "TimeFormat",
-]
+__all__ = ["paths", "Paths", "TimeFormat"]

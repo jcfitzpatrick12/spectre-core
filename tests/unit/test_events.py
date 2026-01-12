@@ -7,6 +7,7 @@ import pytest
 import numpy as np
 
 import spectre_core.events
+import spectre_core.fields
 
 
 def is_close(a, b, atol=1e-5, rtol=0):
@@ -18,13 +19,17 @@ class TestSTFFT:
     @pytest.mark.parametrize(
         ("window_type", "window_size", "expected_result"),
         [
-            ("boxcar", 2, [1.0, 1.0]),
-            ("boxcar", 4, [1.0, 1.0, 1.0, 1.0]),
-            ("boxcar", 8, [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]),
-            ("hann", 2, [0.0, 1.0]),
-            ("hann", 4, [0.0, 0.5, 1.0, 0.5]),
+            (spectre_core.fields.WindowType.BOXCAR, 2, [1.0, 1.0]),
+            (spectre_core.fields.WindowType.BOXCAR, 4, [1.0, 1.0, 1.0, 1.0]),
             (
-                "hann",
+                spectre_core.fields.WindowType.BOXCAR,
+                8,
+                [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
+            ),
+            (spectre_core.fields.WindowType.HANN, 2, [0.0, 1.0]),
+            (spectre_core.fields.WindowType.HANN, 4, [0.0, 0.5, 1.0, 0.5]),
+            (
+                spectre_core.fields.WindowType.HANN,
                 8,
                 [
                     0.0,
@@ -37,10 +42,10 @@ class TestSTFFT:
                     0.14644661,
                 ],
             ),
-            ("blackman", 2, [0.0, 1.0]),
-            ("blackman", 4, [0.0, 0.34, 1.0, 0.34]),
+            (spectre_core.fields.WindowType.BLACKMAN, 2, [0.0, 1.0]),
+            (spectre_core.fields.WindowType.BLACKMAN, 4, [0.0, 0.34, 1.0, 0.34]),
             (
-                "blackman",
+                spectre_core.fields.WindowType.BLACKMAN,
                 8,
                 [
                     0.0,
@@ -63,9 +68,7 @@ class TestSTFFT:
         expected = np.array(expected_result, dtype=np.float32)
 
         # Check that our own implementation is consistent with Scipy.
-        actual = spectre_core.events.get_window(
-            spectre_core.events.WindowType(window_type), window_size
-        )
+        actual = spectre_core.events.get_window(window_type, window_size)
         assert is_close(actual, expected)
 
     def test_compute_times(self) -> None:
@@ -196,7 +199,7 @@ class TestSTFFT:
         amplitude = 1
 
         # Define the window.
-        window_type = spectre_core.events.WindowType.BOXCAR
+        window_type = spectre_core.fields.WindowType.BOXCAR
         window_size = 8
         window_hop = 8
 

@@ -10,6 +10,7 @@ from gnuradio import spectre
 import spectre_core.fields
 
 from ._base import Base, BaseModel
+from ._constants import FlowgraphConstant
 
 
 @dataclasses.dataclass(frozen=True)
@@ -43,17 +44,26 @@ class RSPdxFixedCenterFrequencyModel(BaseModel):
     if_gain: spectre_core.fields.Field.if_gain = -30
     rf_gain: spectre_core.fields.Field.rf_gain = 0
     antenna_port: spectre_core.fields.Field.antenna_port = RSPdxPort.ANT_A
+    output_type: spectre_core.fields.Field.output_type = (
+        spectre_core.fields.OutputType.FC32
+    )
 
 
 class RSPdxFixedCenterFrequency(Base[RSPdxFixedCenterFrequencyModel]):
     def configure(self, tag: str, model: RSPdxFixedCenterFrequencyModel) -> None:
         self.spectre_batched_file_sink = spectre.batched_file_sink(
-            self._batches_dir_path, tag, model.batch_size, model.sample_rate
+            self._batches_dir_path,
+            tag,
+            model.output_type,
+            model.batch_size,
+            model.sample_rate,
         )
 
         self.sdrplay3_rspdx = sdrplay3.rspdx(
             "",
-            stream_args=sdrplay3.stream_args(output_type="fc32", channels_size=1),
+            stream_args=sdrplay3.stream_args(
+                output_type=model.output_type, channels_size=1
+            ),
         )
         self.sdrplay3_rspdx.set_sample_rate(model.sample_rate)
         self.sdrplay3_rspdx.set_center_freq(model.center_frequency)
@@ -86,33 +96,44 @@ class RSPdxSweptCenterFrequencyModel(BaseModel):
     rf_gain: spectre_core.fields.Field.rf_gain = 0
     min_frequency: spectre_core.fields.Field.min_frequency = 95e6
     max_frequency: spectre_core.fields.Field.max_frequency = 100e6
-    samples_per_step: spectre_core.fields.Field.samples_per_step = 120000
-    frequency_step: spectre_core.fields.Field.frequency_step = 2e6
     antenna_port: spectre_core.fields.Field.antenna_port = RSPdxPort.ANT_A
+    dwell_time: spectre_core.fields.Field.dwell_time = 0.15
+    frequency_hop: spectre_core.fields.Field.frequency_hop = 2e6
+    output_type: spectre_core.fields.Field.output_type = (
+        spectre_core.fields.OutputType.FC32
+    )
 
 
 class RSPdxSweptCenterFrequency(Base[RSPdxSweptCenterFrequencyModel]):
     def configure(self, tag: str, model: RSPdxSweptCenterFrequencyModel) -> None:
-        self.spectre_sweep_driver = spectre.sweep_driver(
+        retune_cmd_name = "freq"
+        self.spectre_sweep_driver = spectre.frequency_sweeper(
             model.min_frequency,
             model.max_frequency,
-            model.frequency_step,
+            model.frequency_hop,
+            model.dwell_time,
             model.sample_rate,
-            model.samples_per_step,
-            "freq",
+            retune_cmd_name,
+            model.output_type,
         )
+        is_tagged = True
+        frequency_tag_key = "freq"
         self.spectre_batched_file_sink = spectre.batched_file_sink(
             self._batches_dir_path,
             tag,
+            model.output_type,
             model.batch_size,
             model.sample_rate,
-            True,
-            "freq",
+            FlowgraphConstant.GROUP_BY_DATE,
+            is_tagged,
+            frequency_tag_key,
             model.min_frequency,
         )
         self.sdrplay3_rspdx = sdrplay3.rspdx(
             "",
-            stream_args=sdrplay3.stream_args(output_type="fc32", channels_size=1),
+            stream_args=sdrplay3.stream_args(
+                output_type=model.output_type, channels_size=1
+            ),
         )
         self.sdrplay3_rspdx.set_sample_rate(model.sample_rate)
         self.sdrplay3_rspdx.set_center_freq(model.min_frequency)

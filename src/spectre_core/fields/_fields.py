@@ -20,7 +20,7 @@ class Field:
         ),
     ]
     sample_rate = typing.Annotated[
-        int,
+        float,
         pydantic.Field(
             ...,
             validate_default=True,
@@ -73,7 +73,7 @@ class Field:
         ),
     ]
     window_type = typing.Annotated[
-        typing.Literal["blackman", "hann", "boxcar"],
+        str,
         pydantic.Field(
             ...,
             validate_default=True,
@@ -181,7 +181,7 @@ class Field:
             description="If True, keep the signal after creating the spectrogram. Otherwise, it is deleted from the file system.",
         ),
     ]
-    frequency_step = typing.Annotated[
+    frequency_hop = typing.Annotated[
         float,
         pydantic.Field(
             ...,
@@ -284,13 +284,21 @@ class Field:
             description="Controls the form of the data over the bus/network.",
         ),
     ]
-    samples_per_step = typing.Annotated[
-        int,
+    dwell_time = typing.Annotated[
+        float,
         pydantic.Field(
             ...,
             validate_default=True,
             gt=0,
-            description="The number of samples taken at each center frequency in the sweep. This may vary slightly from what is specified due to the nature of GNU Radio runtime.",
+            description="The amount of time spent at each center frequency in the sweep. This may vary slightly from what is specified due to the nature of GNU Radio runtime.",
+        ),
+    ]
+    output_type = typing.Annotated[
+        str,
+        pydantic.Field(
+            ...,
+            validate_default=True,
+            description="The type of samples produced by the receiver.",
         ),
     ]
     antenna_port = typing.Annotated[

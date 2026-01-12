@@ -135,6 +135,23 @@ class TestReceivers:
             spectre_core.receivers.ReceiverName.RTLSDR,
         ],
     )
+    def test_construction(self, receiver_name: str) -> None:
+        """Check that each receiver can be constructed."""
+        _ = spectre_core.receivers.get_receiver(receiver_name)
+
+    @pytest.mark.parametrize(
+        ("receiver_name"),
+        [
+            spectre_core.receivers.ReceiverName.RSP1A,
+            spectre_core.receivers.ReceiverName.RSPDUO,
+            spectre_core.receivers.ReceiverName.RSPDX,
+            spectre_core.receivers.ReceiverName.USRP,
+            spectre_core.receivers.ReceiverName.B200MINI,
+            spectre_core.receivers.ReceiverName.HACKRF,
+            spectre_core.receivers.ReceiverName.HACKRFONE,
+            spectre_core.receivers.ReceiverName.RTLSDR,
+        ],
+    )
     def test_write_default_config(
         self, spectre_config_paths: spectre_core.config.Paths, receiver_name: str
     ) -> None:

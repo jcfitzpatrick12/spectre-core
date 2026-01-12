@@ -10,20 +10,29 @@ from gnuradio import spectre
 import spectre_core.fields
 
 from ._base import Base, BaseModel
+from ._constants import FlowgraphConstant
 
 
 class SignalGeneratorCosineWaveModel(BaseModel):
-    sample_rate: spectre_core.fields.Field.sample_rate = 128000
-    batch_size: spectre_core.fields.Field.batch_size = 3
-    frequency: spectre_core.fields.Field.frequency = 32000
+    sample_rate: spectre_core.fields.Field.sample_rate = 128e3
+    batch_size: spectre_core.fields.Field.batch_size = 1
+    frequency: spectre_core.fields.Field.frequency = 32e3
     amplitude: spectre_core.fields.Field.amplitude = 1
+    output_type: spectre_core.fields.Field.output_type = (
+        spectre_core.fields.OutputType.FC32
+    )
 
 
 class SignalGeneratorCosineWave(Base[SignalGeneratorCosineWaveModel]):
     def configure(self, tag: str, model: SignalGeneratorCosineWaveModel) -> None:
-        """Record a complex-valued cosine signal to batched data files."""
+        """Record a complex-valued cosine signal."""
         self.spectre_batched_file_sink = spectre.batched_file_sink(
-            self._batches_dir_path, tag, model.batch_size, model.sample_rate
+            self._batches_dir_path,
+            tag,
+            model.output_type,
+            model.batch_size,
+            model.sample_rate,
+            FlowgraphConstant.GROUP_BY_DATE,
         )
         self.blocks_throttle_0 = blocks.throttle(
             gr.sizeof_float * 1, model.sample_rate, True
@@ -33,13 +42,12 @@ class SignalGeneratorCosineWave(Base[SignalGeneratorCosineWaveModel]):
         )
         self.blocks_null_source = blocks.null_source(gr.sizeof_float * 1)
         self.blocks_float_to_complex = blocks.float_to_complex(1)
+
         self.analog_sig_source = analog.sig_source_f(
             model.sample_rate,
             analog.GR_COS_WAVE,
             model.frequency,
             model.amplitude,
-            0,
-            0,
         )
 
         self.connect((self.analog_sig_source, 0), (self.blocks_throttle_0, 0))
@@ -56,8 +64,11 @@ class SignalGeneratorConstantStaircaseModel(BaseModel):
     sample_rate: spectre_core.fields.Field.sample_rate = 128000
     min_samples_per_step: spectre_core.fields.Field.min_samples_per_step = 4000
     max_samples_per_step: spectre_core.fields.Field.max_samples_per_step = 5000
-    frequency_step: spectre_core.fields.Field.frequency_step = 128000
-    batch_size: spectre_core.fields.Field.batch_size = 3
+    frequency_hop: spectre_core.fields.Field.frequency_hop = 128000
+    batch_size: spectre_core.fields.Field.batch_size = 1
+    output_type: spectre_core.fields.Field.output_type = (
+        spectre_core.fields.OutputType.FC32
+    )
 
 
 class SignalGeneratorConstantStaircase(Base[SignalGeneratorConstantStaircaseModel]):
@@ -67,21 +78,26 @@ class SignalGeneratorConstantStaircase(Base[SignalGeneratorConstantStaircaseMode
         self.spectre_constant_staircase = spectre.tagged_staircase(
             model.min_samples_per_step,
             model.max_samples_per_step,
-            model.frequency_step,
+            model.frequency_hop,
             model.step_increment,
             model.sample_rate,
         )
+
+        is_tagged = True
+        frequency_tag_key = "rx_freq"
         self.spectre_batched_file_sink = spectre.batched_file_sink(
             self._batches_dir_path,
             tag,
+            model.output_type,
             model.batch_size,
             model.sample_rate,
-            True,
-            "rx_freq",
-            0,
-        )  # zero means the center frequency is unset
+            FlowgraphConstant.GROUP_BY_DATE,
+            is_tagged,
+            frequency_tag_key,
+            FlowgraphConstant.NO_INITIAL_TAG_VALUE,
+        )
         self.blocks_throttle = blocks.throttle(
-            gr.sizeof_gr_complex * 1, model.sample_rate, True
+            gr.sizeof_gr_complex * 1, model.sample_rate
         )
 
         self.connect((self.spectre_constant_staircase, 0), (self.blocks_throttle, 0))

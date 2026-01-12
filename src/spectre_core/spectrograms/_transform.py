@@ -183,24 +183,19 @@ def time_average(
         spectrogram.time_resolution, resolution, average_over
     )
 
-    # Perform averaging
     transformed_dynamic_spectra = average_array(
         spectrogram.dynamic_spectra, average_over, axis=1
     )
-    transformed_times = average_array(spectrogram.times, average_over)
 
-    # Update start datetime and adjust times to start at t=0
-    transformed_start_datetime = spectrogram.datetimes[0] + (
-        transformed_times[0] * 1e6
-    ).astype("timedelta64[us]")
-    transformed_times -= transformed_times[0]
+    # Take the start time of each block (this preserves the original start time.)
+    transformed_times = spectrogram.times[0::average_over]
 
     return Spectrogram(
         transformed_dynamic_spectra,
         transformed_times,
         spectrogram.frequencies,
         spectrogram.spectrum_unit,
-        transformed_start_datetime,
+        spectrogram.start_datetime,
     )
 
 

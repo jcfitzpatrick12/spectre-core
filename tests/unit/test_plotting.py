@@ -13,7 +13,6 @@ import matplotlib.figure
 import spectre_core.plotting
 import spectre_core.config
 import spectre_core.spectrograms
-import spectre_core.io
 
 
 @pytest.fixture(autouse=True)
@@ -540,7 +539,7 @@ class TestPanelStack:
 
         assert file_path == os.path.join(
             batches_dir_path,
-            f"2025-02-13T06:00:00_{TAG}.png",
+            f"2025-02-13T06:00:00.000000Z_{TAG}.png",
         )
 
         # Check that the file was actually created.

@@ -63,7 +63,7 @@ class BatchFile(spectre_core.io.Base[T]):
 
     @functools.cached_property
     def start_datetime(self) -> datetime.datetime:
-        """The start time of the batch, up to seconds precision."""
+        """The start time of the batch."""
         return datetime.datetime.strptime(
             self.start_time, spectre_core.config.TimeFormat.DATETIME
         )
@@ -117,7 +117,7 @@ class Base(abc.ABC):
 
     @functools.cached_property
     def start_datetime(self) -> datetime.datetime:
-        """The start time of the batch, up to seconds precision."""
+        """The start time of the batch."""
         return datetime.datetime.strptime(
             self.start_time, spectre_core.config.TimeFormat.DATETIME
         )

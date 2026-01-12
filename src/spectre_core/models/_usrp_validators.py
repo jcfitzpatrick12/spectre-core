@@ -20,7 +20,7 @@ def validate_wire_format(wire_format: str) -> None:
 
 
 def validate_sample_rate_with_master_clock_rate(
-    sample_rate: int, master_clock_rate: int
+    sample_rate: float, master_clock_rate: int
 ) -> None:
     """Ensure that the master clock rate is an integer multiple of the sample rate."""
     if master_clock_rate % sample_rate != 0:

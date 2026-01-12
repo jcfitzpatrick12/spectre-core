@@ -11,13 +11,11 @@ class TimeFormat:
 
     :ivar DATE: Format for dates (e.g., '2025-01-11').
     :ivar TIME: Format for times (e.g., '23:59:59').
-    :ivar DATETIME: Combined date and time format (e.g., '2025-01-11T23:59:59').
-    :ivar PRECISE_TIME: Format for times with microseconds (e.g., '23:59:59.123456').
-    :ivar PRECISE_DATETIME: Combined date and precise time format (e.g., '2025-01-11T23:59:59.123456').
+    :ivar FRACTIONAL_TIME: Format for times with microsecond precision (e.g., '23:59:59.123456')
+    :ivar DATETIME: Format for datetimes compliant with the ISO-8601 standard (e.g., '2025-01-11T23:59:59.123456Z')
     """
 
     DATE = "%Y-%m-%d"
     TIME = "%H:%M:%S"
-    DATETIME = f"{DATE}T{TIME}"
-    PRECISE_TIME = "%H:%M:%S.%f"
-    PRECISE_DATETIME = f"{DATE}T{PRECISE_TIME}"
+    FRACTIONAL_TIME = "%H:%M:%S.%f"
+    DATETIME = f"{DATE}T{FRACTIONAL_TIME}Z"

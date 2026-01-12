@@ -9,7 +9,7 @@ import spectre_core.batches
 
 from ._register import receivers
 from ._base import Base
-from ._config import _ReservedTagStr, read_config
+from ._config import read_config
 from ._signal_generator import SignalGenerator
 from ._custom import Custom
 from ._rsp1a import RSP1A
@@ -92,10 +92,6 @@ def get_batch_cls(
 
     :param tag: The batch file tag.
     """
-    for s in _ReservedTagStr:
-        if s.value in tag and s == _ReservedTagStr.CALLISTO:
-            return spectre_core.batches.CallistoBatch
-
     config = read_config(tag, configs_dir_path)
     receiver = get_receiver(config.receiver_name, config.receiver_mode)
     return receiver.batch_cls

@@ -23,7 +23,6 @@ from ._stfft import (
     get_frequencies,
     get_num_spectrums,
     stfft,
-    WindowType,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -147,7 +146,7 @@ def _compute_frequencies(
     frequencies: npt.NDArray[np.float32],
     center_frequencies: npt.NDArray[np.float32],
     window_size: int,
-    sample_rate: int,
+    sample_rate: float,
 ) -> None:
     """Assign physical frequencies to each of the spectral components in the stitched spectrum."""
     baseband_frequencies = np.fft.fftshift(get_frequencies(window_size, sample_rate))
@@ -186,12 +185,12 @@ def _swept_stfft(
     iq_data: npt.NDArray[np.complex64],
     window: npt.NDArray[np.float32],
     window_hop: int,
-    sample_rate: int,
-    frequency_step: float,
+    sample_rate: float,
+    frequency_hop: float,
     center_frequencies: npt.NDArray[np.float32],
     num_samples: npt.NDArray[np.int32],
 ) -> tuple[npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]:
-    _validate_center_frequencies_ordering(center_frequencies, frequency_step)
+    _validate_center_frequencies_ordering(center_frequencies, frequency_hop)
 
     num_steps_per_sweep = _compute_num_steps_per_sweep(center_frequencies)
     num_full_sweeps = _compute_num_full_sweeps(center_frequencies)
@@ -332,9 +331,6 @@ def _reconstruct_initial_sweep(
     we prepended, which will allow us to correct the spectrogram start time of the current batch.
     """
 
-    if iq_metadata.center_frequencies is None or iq_metadata.num_samples is None:
-        raise ValueError(f"Expected non-empty IQ metadata")
-
     # Extract the final sweep of the previous batch, to carryover to the first sweep of the current batch.
     carryover_iq_data, carryover_center_frequencies, carryover_num_samples = (
         _get_final_sweep(previous_iq_data, previous_iq_metadata)
@@ -372,7 +368,8 @@ class SweptCenterFrequencyModel(BaseModel):
     frequency_resolution: spectre_core.fields.Field.frequency_resolution = 0
     time_resolution: spectre_core.fields.Field.time_resolution = 0
     keep_signal: spectre_core.fields.Field.keep_signal = False
-    frequency_step: spectre_core.fields.Field.frequency_step = 1000000
+    frequency_hop: spectre_core.fields.Field.frequency_hop = 1000000
+    output_type: spectre_core.fields.Field.output_type = "fc32"
 
 
 class SweptCenterFrequency(
@@ -386,9 +383,7 @@ class SweptCenterFrequency(
     ) -> None:
         super().__init__(tag, model, batch_cls)
         self.__model = model
-        self.__window = get_window(
-            WindowType(self.__model.window_type), self.__model.window_size
-        )
+        self.__window = get_window(self.__model.window_type, self.__model.window_size)
 
         # Pre-allocate the buffer.
         self.__buffer = get_buffer(self.__model.window_size)
@@ -398,6 +393,8 @@ class SweptCenterFrequency(
         # the watchdog observer isn't set up in time before the receiver starts capturing data.
         self.__fftw_obj = None
 
+        self.__output_type = self.__model.output_type
+
         # Initialise a cache to hold the previous batches data.
         self.__previous_batch: typing.Optional[spectre_core.batches.IQStreamBatch] = (
             None
@@ -405,7 +402,7 @@ class SweptCenterFrequency(
 
     @property
     def _watch_extension(self) -> str:
-        return spectre_core.batches.IQStreamBatchExtension.BIN
+        return self.__output_type
 
     def process(
         self, batch: spectre_core.batches.IQStreamBatch
@@ -420,25 +417,17 @@ class SweptCenterFrequency(
         spectrum for each sweep. These swept spectra are stiched in time to produce the final spectrogram, which is saved to file
         in the FITS format.
         """
-        _LOGGER.info(f"Reading {batch.bin_file.file_name}")
-        iq_data = batch.bin_file.cached_read()
+        _LOGGER.info(f"Reading the I/Q samples")
+        iq_data = batch.cached_read_iq(self.__output_type)
 
-        _LOGGER.info(f"Reading {batch.hdr_file.file_name}")
+        _LOGGER.info(f"Reading the tag metadata")
         iq_metadata = batch.hdr_file.cached_read()
+
+        start_datetime = batch.start_datetime
 
         center_frequencies, num_samples = (
             iq_metadata.center_frequencies,
             iq_metadata.num_samples,
-        )
-        if center_frequencies is None or num_samples is None:
-            raise ValueError(
-                f"An unexpected error has occured, expected frequency tag metadata "
-                f"in the detached header."
-            )
-
-        # Account for the millisecond correction.
-        start_datetime = batch.start_datetime + datetime.timedelta(
-            milliseconds=iq_metadata.millisecond_correction
         )
 
         # If a previous batch is stored, the initial sweep may span two adjacent batched files.
@@ -447,7 +436,7 @@ class SweptCenterFrequency(
             # by prepending the final sweep of the previous batch.
             iq_data, center_frequencies, num_samples, num_samples_prepended = (
                 _reconstruct_initial_sweep(
-                    self.__previous_batch.bin_file.cached_read(),
+                    self.__previous_batch.cached_read_iq(self.__output_type),
                     self.__previous_batch.hdr_file.cached_read(),
                     iq_data,
                     iq_metadata,
@@ -471,7 +460,7 @@ class SweptCenterFrequency(
             self.__window,
             self.__model.window_hop,
             self.__model.sample_rate,
-            self.__model.frequency_step,
+            self.__model.frequency_hop,
             center_frequencies,
             num_samples,
         )
@@ -495,10 +484,10 @@ class SweptCenterFrequency(
         # If the previous batch exists, then by this point it has already been processed.
         if self.__previous_batch is not None:
             if not self.__model.keep_signal:
-                _LOGGER.info(f"Deleting {self.__previous_batch.bin_file.file_path}")
-                self.__previous_batch.bin_file.delete()
+                _LOGGER.info(f"Deleting the I/Q samples from the previous batch")
+                self.__previous_batch.delete_iq(self.__output_type)
 
-                _LOGGER.info(f"Deleting {self.__previous_batch.hdr_file.file_path}")
+                _LOGGER.info(f"Deleting metadata from the previous batch")
                 self.__previous_batch.hdr_file.delete()
 
         # Assign the current batch to be used as the previous batch at the next call of this method.

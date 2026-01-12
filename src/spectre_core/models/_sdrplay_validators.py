@@ -45,7 +45,7 @@ def validate_constant_lna_state(
         )
 
 
-def validate_sample_rate(sample_rate: int) -> None:
+def validate_sample_rate(sample_rate: float) -> None:
     validate_in_range(
         sample_rate,
         lower_bound=SAMPLE_RATE_LOWER_BOUND,
@@ -67,7 +67,7 @@ def validate_if_gain(if_gain: float) -> None:
     )
 
 
-def validate_low_if_sample_rate(sample_rate: int) -> None:
+def validate_low_if_sample_rate(sample_rate: float) -> None:
     """Validate the sample rate if the receiver is operating in low IF mode.
 
     The minimum physical sampling rate of the SDRplay hardware is 2 MHz. Lower effective rates can be achieved
