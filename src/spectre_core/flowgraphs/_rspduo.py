@@ -36,16 +36,16 @@ def _map_port(antenna_port: str | None) -> str:
 
 
 class RSPduoFixedCenterFrequencyModel(BaseModel):
-    sample_rate: spectre_core.fields.Field.sample_rate = 500000
+    sample_rate: spectre_core.fields.Field.sample_rate = 2e6
     batch_size: spectre_core.fields.Field.batch_size = 3
     center_frequency: spectre_core.fields.Field.center_frequency = 95.8e6
-    bandwidth: spectre_core.fields.Field.bandwidth = 300000
+    bandwidth: spectre_core.fields.Field.bandwidth = 1.536e6
     if_gain: spectre_core.fields.Field.if_gain = -30
     rf_gain: spectre_core.fields.Field.rf_gain = 0
-    antenna_port: spectre_core.fields.Field.antenna_port = RSPduoPort.TUNER_1
     output_type: spectre_core.fields.Field.output_type = (
         spectre_core.fields.OutputType.FC32
     )
+    antenna_port: spectre_core.fields.Field.antenna_port = RSPduoPort.TUNER_1
 
 
 class RSPduoFixedCenterFrequency(Base[RSPduoFixedCenterFrequencyModel]):
@@ -87,19 +87,19 @@ class RSPduoFixedCenterFrequency(Base[RSPduoFixedCenterFrequencyModel]):
 
 
 class RSPduoSweptCenterFrequencyModel(BaseModel):
-    sample_rate: spectre_core.fields.Field.sample_rate = 2000000
+    sample_rate: spectre_core.fields.Field.sample_rate = 2e6
     batch_size: spectre_core.fields.Field.batch_size = 3
     bandwidth: spectre_core.fields.Field.bandwidth = 1.536e6
     if_gain: spectre_core.fields.Field.if_gain = -30
     rf_gain: spectre_core.fields.Field.rf_gain = 0
     min_frequency: spectre_core.fields.Field.min_frequency = 95e6
     max_frequency: spectre_core.fields.Field.max_frequency = 100e6
-    antenna_port: spectre_core.fields.Field.antenna_port = RSPduoPort.TUNER_1
     dwell_time: spectre_core.fields.Field.dwell_time = 0.15
     frequency_hop: spectre_core.fields.Field.frequency_hop = 2e6
     output_type: spectre_core.fields.Field.output_type = (
         spectre_core.fields.OutputType.FC32
     )
+    antenna_port: spectre_core.fields.Field.antenna_port = RSPduoPort.TUNER_1
 
 
 class RSPduoSweptCenterFrequency(Base[RSPduoSweptCenterFrequencyModel]):
