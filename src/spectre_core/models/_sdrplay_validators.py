@@ -109,6 +109,6 @@ def validate_output_type(output_type: str):
     """Checks the output type is supported."""
     if output_type not in EXPECTED_OUTPUT_TYPES:
         raise ValueError(
-            f"Unexpected output type: {output_type}. "
-            f"Expected one of: {EXPECTED_OUTPUT_TYPES}."
+            f"The output type must be one of {EXPECTED_OUTPUT_TYPES}. "
+            f"Got {output_type}."
         )
