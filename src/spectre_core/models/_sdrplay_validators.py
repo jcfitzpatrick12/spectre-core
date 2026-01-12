@@ -23,6 +23,7 @@ LOW_IF_PERMITTED_SAMPLE_RATES = [LOW_IF_SAMPLE_RATE_CUTOFF / (2**i) for i in ran
 BANDWIDTH_OPTIONS = [0, 200e3, 300e3, 600e3, 1.536e6, 5e6, 6e6, 7e6, 8e6]
 LOW_IF_SAMPLE_RATE_CUTOFF = 2e6
 LOW_IF_PERMITTED_SAMPLE_RATES = [LOW_IF_SAMPLE_RATE_CUTOFF / (2**i) for i in range(6)]
+EXPECTED_OUTPUT_TYPES = ["fc32", "sc16"]
 
 
 def validate_center_frequency(center_frequency: float) -> None:
@@ -101,4 +102,13 @@ def validate_rf_gain(rf_gain: float, expected_rf_gains: list[int]):
         raise ValueError(
             f"The value of RF gain must be one of {expected_rf_gains}. "
             f"Got {rf_gain}."
+        )
+
+
+def validate_output_type(output_type: str):
+    """Checks the output type is supported."""
+    if output_type not in EXPECTED_OUTPUT_TYPES:
+        raise ValueError(
+            f"Unexpected output type: {output_type}. "
+            f"Expected one of: {EXPECTED_OUTPUT_TYPES}."
         )

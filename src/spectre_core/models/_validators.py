@@ -7,6 +7,8 @@ import math
 
 import pydantic
 
+import spectre_core.fields
+
 
 def skip_validator(info: pydantic.ValidationInfo) -> bool:
     return True if info.context and info.context.get("skip", False) else False
@@ -76,6 +78,19 @@ def validate_window_size(window_size: int):
     """Check that the window size is a power of two."""
     if window_size & (window_size - 1) != 0:
         raise ValueError("The window size must be a power of 2")
+
+
+def validate_window_type(window_type: str):
+    """Check that the window is supported."""
+    expected_window_types = [
+        spectre_core.fields.WindowType.BLACKMAN,
+        spectre_core.fields.WindowType.HANN,
+        spectre_core.fields.WindowType.BOXCAR,
+    ]
+    if window_type not in expected_window_types:
+        raise ValueError(
+            f"{window_type} not supported. Expected one of {expected_window_types}"
+        )
 
 
 def validate_nyquist_criterion(sample_rate: float, bandwidth: float) -> None:
