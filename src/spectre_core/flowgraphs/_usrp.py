@@ -62,6 +62,7 @@ class USRPFixedCenterFrequency(Base[USRPFixedCenterFrequencyModel]):
             model.output_type,
             model.batch_size,
             model.sample_rate,
+            FlowgraphConstant.GROUP_BY_DATE
         )
         self.connect((self.uhd_usrp_source, 0), (self.spectre_batched_file_sink, 0))
 
