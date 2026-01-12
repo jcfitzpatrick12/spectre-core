@@ -32,7 +32,7 @@ def _make_post_processing_worker(
 ) -> spectre_core.jobs.Worker:
     receiver = get_receiver(config.receiver_name, config.receiver_mode)
     return spectre_core.jobs.make_worker(
-        "flowgraph",
+        "post_processing",
         receiver.activate_post_processing,
         (config.tag, config.parameters, skip_validation),
         spectre_data_dir_path=spectre_data_dir_path,
