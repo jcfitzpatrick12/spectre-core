@@ -189,6 +189,19 @@ class IQStreamBatch(Base):
     def spectrogram_file(self) -> _FitsFile:
         return self.fits_file
 
+    def read_iq(self, extension: str) -> npt.NDArray[np.complex64]:
+        """Read I/Q samples from the batch."""
+        if extension == IQStreamBatchExtension.FC32:
+            return self.fc32_file.read()
+        elif extension == IQStreamBatchExtension.FC64:
+            return self.fc64_file.read()
+        elif extension == IQStreamBatchExtension.SC8:
+            return self.sc8_file.read()
+        elif extension == IQStreamBatchExtension.SC16:
+            return self.sc16_file.read()
+        else:
+            raise ValueError(f"Unsupported output type: {extension}")
+
     def cached_read_iq(self, extension: str) -> npt.NDArray[np.complex64]:
         """Read I/Q samples from the batch."""
         if extension == IQStreamBatchExtension.FC32:

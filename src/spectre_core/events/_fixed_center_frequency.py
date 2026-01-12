@@ -34,7 +34,7 @@ class FixedCenterFrequencyModel(BaseModel):
     frequency_resolution: spectre_core.fields.Field.frequency_resolution = 0
     time_resolution: spectre_core.fields.Field.time_resolution = 0
     batch_size: spectre_core.fields.Field.batch_size = 3
-    keep_signal: spectre_core.fields.Field.keep_signal = False
+    keep_signal: spectre_core.fields.Field.keep_signal = True
     output_type: spectre_core.fields.Field.output_type = "fc32"
 
 
@@ -72,7 +72,7 @@ class FixedCenterFrequency(
     ) -> spectre_core.spectrograms.Spectrogram:
         """Compute the spectrogram of IQ samples captured at a fixed center frequency."""
         _LOGGER.info(f"Reading the I/Q samples")
-        iq_data = batch.cached_read_iq(self.__output_type)
+        iq_data = batch.read_iq(self.__output_type)
 
         if self.__fftw_obj is None:
             _LOGGER.info(f"Creating the FFTW plan")
