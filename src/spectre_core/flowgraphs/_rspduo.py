@@ -56,7 +56,7 @@ class RSPduoFixedCenterFrequency(Base[RSPduoFixedCenterFrequencyModel]):
             model.output_type,
             model.batch_size,
             model.sample_rate,
-            FlowgraphConstant.GROUP_BY_DATE
+            FlowgraphConstant.GROUP_BY_DATE,
         )
         self.sdrplay3_rspduo = sdrplay3.rspduo(
             "",
