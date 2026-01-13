@@ -282,7 +282,7 @@ class Field:
             ...,
             validate_default=True,
             description="The number of receive buffers to allocate",
-            gt=0
+            gt=0,
         ),
     ]
     wire_format = typing.Annotated[
