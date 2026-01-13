@@ -31,6 +31,7 @@ class USRPFixedCenterFrequencyModel(BaseModel):
     gain: spectre_core.fields.Field.gain = 35
     wire_format: spectre_core.fields.Field.wire_format = USRPWireFormat.SC12
     master_clock_rate: spectre_core.fields.Field.master_clock_rate = 60000000
+    num_recv_frames: spectre_core.fields.Field.num_recv_frames = 32
     output_type: spectre_core.fields.Field.output_type = (
         spectre_core.fields.OutputType.FC32
     )
@@ -39,8 +40,9 @@ class USRPFixedCenterFrequencyModel(BaseModel):
 class USRPFixedCenterFrequency(Base[USRPFixedCenterFrequencyModel]):
     def configure(self, tag: str, model: USRPFixedCenterFrequencyModel) -> None:
         master_clock_rate = f"master_clock_rate={model.master_clock_rate}"
+        num_recv_frames = f"num_recv_frames={model.num_recv_frames}"
         self.uhd_usrp_source = uhd.usrp_source(
-            ",".join(("", "", master_clock_rate)),
+            ",".join(("", "", master_clock_rate, num_recv_frames)),
             uhd.stream_args(
                 cpu_format=model.output_type,
                 otw_format=model.wire_format,
@@ -76,6 +78,7 @@ class USRPSweptCenterFrequencyModel(BaseModel):
     gain: spectre_core.fields.Field.gain = 35
     wire_format: spectre_core.fields.Field.wire_format = USRPWireFormat.SC12
     master_clock_rate: spectre_core.fields.Field.master_clock_rate = 60000000
+    num_recv_frames: spectre_core.fields.Field.num_recv_frames = 32
     dwell_time: spectre_core.fields.Field.dwell_time = 0.15
     frequency_hop: spectre_core.fields.Field.frequency_hop = 2e6
     output_type: spectre_core.fields.Field.output_type = (
@@ -86,8 +89,9 @@ class USRPSweptCenterFrequencyModel(BaseModel):
 class USRPSweptCenterFrequency(Base[USRPSweptCenterFrequencyModel]):
     def configure(self, tag: str, model: USRPSweptCenterFrequencyModel) -> None:
         master_clock_rate = f"master_clock_rate={model.master_clock_rate}"
+        num_recv_frames = f"num_recv_frames={model.num_recv_frames}"
         self.uhd_usrp_source = uhd.usrp_source(
-            ",".join(("", "", master_clock_rate)),
+            ",".join(("", "", master_clock_rate, num_recv_frames)),
             uhd.stream_args(
                 cpu_format=model.output_type,
                 otw_format=model.wire_format,
@@ -114,7 +118,7 @@ class USRPSweptCenterFrequency(Base[USRPSweptCenterFrequencyModel]):
             retune_cmd_name,
             model.output_type,
         )
-        
+
         is_tagged = True
         frequency_tag_key = "rx_freq"
         self.spectre_batched_file_sink = spectre.batched_file_sink(

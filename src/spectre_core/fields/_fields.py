@@ -276,6 +276,15 @@ class Field:
             description="The primary reference clock for the SDR, specified in Hz.",
         ),
     ]
+    num_recv_frames = typing.Annotated[
+        int,
+        pydantic.Field(
+            ...,
+            validate_default=True,
+            description="The number of receive buffers to allocate",
+            gt=0
+        ),
+    ]
     wire_format = typing.Annotated[
         str,
         pydantic.Field(
