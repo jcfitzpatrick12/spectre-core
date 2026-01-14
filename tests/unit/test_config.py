@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -117,18 +117,8 @@ def test_set_spectre_data_dir_path():
         ),
         (
             spectre_core.config.TimeFormat.DATETIME,
-            "2025-01-11T23:59:59",
-            datetime.datetime(2025, 1, 11, 23, 59, 59),
-        ),
-        (
-            spectre_core.config.TimeFormat.PRECISE_TIME,
-            "23:59:59.123456",
-            datetime.datetime.strptime("23:59:59.123456", "%H:%M:%S.%f"),
-        ),
-        (
-            spectre_core.config.TimeFormat.PRECISE_DATETIME,
-            "2025-01-11T23:59:59.123456",
-            datetime.datetime(2025, 1, 11, 23, 59, 59, 123456),
+            "2025-01-11T23:59:59.233Z",
+            datetime.datetime(2025, 1, 11, 23, 59, 59, 233000),
         ),
     ],
 )

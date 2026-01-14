@@ -1,10 +1,13 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import spectre_core.flowgraphs
+import spectre_core.fields
 
 from ._validators import validate_one_of
+
+EXPECTED_OUTPUT_TYPES = ["fc32", "sc16"]
 
 
 def validate_wire_format(wire_format: str) -> None:
@@ -19,8 +22,13 @@ def validate_wire_format(wire_format: str) -> None:
     )
 
 
+def validate_output_type(output_type: str) -> None:
+    """Checks the output type is supported."""
+    validate_one_of(output_type, EXPECTED_OUTPUT_TYPES, "output_type")
+
+
 def validate_sample_rate_with_master_clock_rate(
-    sample_rate: int, master_clock_rate: int
+    sample_rate: float, master_clock_rate: int
 ) -> None:
     """Ensure that the master clock rate is an integer multiple of the sample rate."""
     if master_clock_rate % sample_rate != 0:

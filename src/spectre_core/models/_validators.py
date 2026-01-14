@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,6 +6,8 @@ import typing
 import math
 
 import pydantic
+
+import spectre_core.fields
 
 
 def skip_validator(info: pydantic.ValidationInfo) -> bool:
@@ -78,6 +80,19 @@ def validate_window_size(window_size: int):
         raise ValueError("The window size must be a power of 2")
 
 
+def validate_window_type(window_type: str):
+    """Check that the window is supported."""
+    expected_window_types = [
+        spectre_core.fields.WindowType.BLACKMAN,
+        spectre_core.fields.WindowType.HANN,
+        spectre_core.fields.WindowType.BOXCAR,
+    ]
+    if window_type not in expected_window_types:
+        raise ValueError(
+            f"{window_type} not supported. Expected one of {expected_window_types}"
+        )
+
+
 def validate_nyquist_criterion(sample_rate: float, bandwidth: float) -> None:
     """Ensure that the Nyquist criterion is satisfied."""
     if sample_rate < bandwidth:
@@ -90,23 +105,23 @@ def validate_nyquist_criterion(sample_rate: float, bandwidth: float) -> None:
         )
 
 
-def validate_non_overlapping_steps(frequency_step: float, sample_rate: float) -> None:
+def validate_non_overlapping_steps(frequency_hop: float, sample_rate: float) -> None:
     """Ensure that the stepped spectrograms are non-overlapping in the frequency domain."""
 
-    if frequency_step < sample_rate:
+    if frequency_hop < sample_rate:
         raise NotImplementedError(
             f"Spectre does not yet support spectral steps overlapping in frequency. "
-            f"Got frequency step {frequency_step * 1e-6} [MHz] which is less than the sample "
+            f"Got frequency hop {frequency_hop * 1e-6} [MHz] which is less than the sample "
             f"rate {sample_rate * 1e-6} [MHz]"
         )
 
 
 def validate_num_steps_per_sweep(
-    min_frequency: float, max_frequency: float, frequency_step: float
+    min_frequency: float, max_frequency: float, frequency_hop: float
 ) -> None:
     """Ensure that there are at least two steps in frequency per sweep."""
 
-    num_steps_per_sweep = math.floor((max_frequency - min_frequency) / frequency_step)
+    num_steps_per_sweep = math.floor((max_frequency - min_frequency) / frequency_hop)
     if num_steps_per_sweep <= 1:
         raise ValueError(
             (
@@ -116,13 +131,17 @@ def validate_num_steps_per_sweep(
         )
 
 
-def validate_num_samples_per_step(window_size: int, samples_per_step: int) -> None:
+def validate_num_samples_per_step(
+    window_size: int, dwell_time: float, sample_rate: float
+) -> None:
     """Ensure that the number of samples per step is greater than the window size."""
-    if window_size >= samples_per_step:
+    num_samples_per_step = dwell_time * sample_rate
+    if window_size >= num_samples_per_step:
         raise ValueError(
             (
                 f"Window size must be strictly less than the number of samples per step. "
                 f"Got window size {window_size}, which is more than or equal "
-                f"to the number of samples per step {samples_per_step}"
+                f"to the number of samples per step {num_samples_per_step}. "
+                f"Please increase the dwell time."
             )
         )

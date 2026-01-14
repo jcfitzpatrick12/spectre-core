@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -36,7 +36,7 @@ CONSTANT_STAIRCASE_PARAMETERS = {
     "window_hop": 512,
     "window_size": 512,
     "window_type": "boxcar",
-    "frequency_step": 128000.0,
+    "frequency_hop": 128000.0,
     "max_samples_per_step": 5000,
     "min_samples_per_step": 4000,
     "sample_rate": 128000,

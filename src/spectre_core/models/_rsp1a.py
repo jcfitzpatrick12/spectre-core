@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -10,6 +10,7 @@ import spectre_core.flowgraphs
 from ._validators import (
     skip_validator,
     validate_window_size,
+    validate_window_type,
     validate_non_overlapping_steps,
     validate_num_samples_per_step,
     validate_nyquist_criterion,
@@ -23,6 +24,7 @@ from ._sdrplay_validators import (
     validate_rf_gain,
     validate_sample_rate,
     validate_constant_lna_state,
+    validate_output_type,
 )
 
 
@@ -50,9 +52,11 @@ class RSP1AFixedCenterFrequency(
         validate_nyquist_criterion(self.sample_rate, self.bandwidth)
         validate_center_frequency(self.center_frequency)
         validate_window_size(self.window_size)
+        validate_window_type(self.window_type)
         validate_sample_rate(self.sample_rate)
         validate_bandwidth(self.bandwidth)
         validate_if_gain(self.if_gain)
+        validate_output_type(self.output_type)
         validate_low_if_sample_rate(self.sample_rate)
         validate_rf_gain(self.rf_gain, _get_rf_gains(self.center_frequency))
         return self
@@ -69,14 +73,18 @@ class RSP1ASweptCenterFrequency(
         validate_center_frequency(self.min_frequency)
         validate_center_frequency(self.max_frequency)
         validate_window_size(self.window_size)
+        validate_window_type(self.window_type)
         validate_sample_rate(self.sample_rate)
         validate_bandwidth(self.bandwidth)
         validate_if_gain(self.if_gain)
+        validate_output_type(self.output_type)
         validate_low_if_sample_rate(self.sample_rate)
-        validate_non_overlapping_steps(self.frequency_step, self.sample_rate)
-        validate_num_samples_per_step(self.window_size, self.samples_per_step)
+        validate_non_overlapping_steps(self.frequency_hop, self.sample_rate)
+        validate_num_samples_per_step(
+            self.window_size, self.dwell_time, self.sample_rate
+        )
         validate_num_steps_per_sweep(
-            self.min_frequency, self.max_frequency, self.frequency_step
+            self.min_frequency, self.max_frequency, self.frequency_hop
         )
         validate_constant_lna_state(
             self.min_frequency, self.max_frequency, _get_rf_gains

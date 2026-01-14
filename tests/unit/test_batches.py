@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -87,13 +87,9 @@ def batches(
     "file_name, parsed_file_name",
     [
         (
-            "2025-06-01T00:00:00_tag.ext",
-            ("2025-06-01T00:00:00", "tag", "ext"),
+            "2025-06-01T00:00:00.000000Z_tag.ext",
+            ("2025-06-01T00:00:00.000000Z", "tag", "ext"),
         ),  # Happy path.
-        (
-            "2025-06-01T00:00:00_tag",
-            ("2025-06-01T00:00:00", "tag", ""),
-        ),  # No extension.
     ],
 )
 def test_parse_batch_file_name(
@@ -107,8 +103,8 @@ def test_parse_batch_file_name(
 @pytest.mark.parametrize(
     "file_name",
     [
-        "2025-06-01T00:00:00.ext",  # No tag
-        "2025-06-01T00:00:00_bad_tag.ext",  # Multiple underscores.
+        "2025-06-01T00:00:00.000000Z.ext",  # No tag
+        "2025-06-01T00:00:00.000000Z_bad_tag.ext",  # Multiple underscores.
     ],
 )
 def test_parse_batch_file_name_invalid_underscores(file_name: str) -> None:
@@ -126,37 +122,45 @@ class TestBatches:
                 -1,
                 4,
                 [
-                    "2000-01-01T00:00:00_tag",
-                    "2000-01-01T00:00:01_tag",
-                    "2000-01-01T00:00:02_tag",
+                    "2000-01-01T00:00:00.000000Z_tag",
+                    "2000-01-01T00:00:01.000000Z_tag",
+                    "2000-01-01T00:00:02.000000Z_tag",
                 ],
             ),
             (
                 0,
                 3,
                 [
-                    "2000-01-01T00:00:00_tag",
-                    "2000-01-01T00:00:01_tag",
-                    "2000-01-01T00:00:02_tag",
+                    "2000-01-01T00:00:00.000000Z_tag",
+                    "2000-01-01T00:00:01.000000Z_tag",
+                    "2000-01-01T00:00:02.000000Z_tag",
                 ],
             ),
             # Range includes only the first batch.
-            (0, 0.0001, ["2000-01-01T00:00:00_tag"]),
-            (0, 0.9999, ["2000-01-01T00:00:00_tag"]),
+            (0, 0.0001, ["2000-01-01T00:00:00.000000Z_tag"]),
+            (0, 0.9999, ["2000-01-01T00:00:00.000000Z_tag"]),
             # Range includes only the middle batch.
-            (1, 1.0001, ["2000-01-01T00:00:01_tag"]),
-            (1, 1.9999, ["2000-01-01T00:00:01_tag"]),
+            (1, 1.0001, ["2000-01-01T00:00:01.000000Z_tag"]),
+            (1, 1.9999, ["2000-01-01T00:00:01.000000Z_tag"]),
             # Range includes only the last batch.
-            (2, 2.0001, ["2000-01-01T00:00:02_tag"]),
-            (2, 2.9999, ["2000-01-01T00:00:02_tag"]),
+            (2, 2.0001, ["2000-01-01T00:00:02.000000Z_tag"]),
+            (2, 2.9999, ["2000-01-01T00:00:02.000000Z_tag"]),
             # Range includes first two batches.
-            (0, 1.5, ["2000-01-01T00:00:00_tag", "2000-01-01T00:00:01_tag"]),
+            (
+                0,
+                1.5,
+                ["2000-01-01T00:00:00.000000Z_tag", "2000-01-01T00:00:01.000000Z_tag"],
+            ),
             # Range includes last two batches.
-            (1, 3, ["2000-01-01T00:00:01_tag", "2000-01-01T00:00:02_tag"]),
+            (
+                1,
+                3,
+                ["2000-01-01T00:00:01.000000Z_tag", "2000-01-01T00:00:02.000000Z_tag"],
+            ),
             # Range before all batches
             (-10, -1, []),
             # Range after all batches (final batch has an indeterminate end)
-            (10, 20, ["2000-01-01T00:00:02_tag"]),
+            (10, 20, ["2000-01-01T00:00:02.000000Z_tag"]),
         ],
     )
     def test_get_batches_in_range(

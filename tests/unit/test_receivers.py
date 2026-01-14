@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -122,6 +122,23 @@ class TestReceiver:
 
 
 class TestReceivers:
+    @pytest.mark.parametrize(
+        ("receiver_name"),
+        [
+            spectre_core.receivers.ReceiverName.RSP1A,
+            spectre_core.receivers.ReceiverName.RSPDUO,
+            spectre_core.receivers.ReceiverName.RSPDX,
+            spectre_core.receivers.ReceiverName.USRP,
+            spectre_core.receivers.ReceiverName.B200MINI,
+            spectre_core.receivers.ReceiverName.HACKRF,
+            spectre_core.receivers.ReceiverName.HACKRFONE,
+            spectre_core.receivers.ReceiverName.RTLSDR,
+        ],
+    )
+    def test_construction(self, receiver_name: str) -> None:
+        """Check that each receiver can be constructed."""
+        _ = spectre_core.receivers.get_receiver(receiver_name)
+
     @pytest.mark.parametrize(
         ("receiver_name"),
         [

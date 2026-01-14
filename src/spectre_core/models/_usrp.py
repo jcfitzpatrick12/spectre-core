@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -17,6 +17,7 @@ from ._validators import (
 )
 from ._usrp_validators import (
     validate_wire_format,
+    validate_output_type,
     validate_sample_rate_with_master_clock_rate,
 )
 
@@ -32,6 +33,7 @@ class USRPFixedCenterFrequency(
         validate_nyquist_criterion(self.sample_rate, self.bandwidth)
         validate_window_size(self.window_size)
         validate_wire_format(self.wire_format)
+        validate_output_type(self.output_type)
         validate_sample_rate_with_master_clock_rate(
             self.sample_rate, self.master_clock_rate
         )
@@ -47,10 +49,13 @@ class USRPSweptCenterFrequency(
         if skip_validator(info):
             return self
         validate_window_size(self.window_size)
-        validate_non_overlapping_steps(self.frequency_step, self.sample_rate)
-        validate_num_samples_per_step(self.window_size, self.samples_per_step)
+        validate_non_overlapping_steps(self.frequency_hop, self.sample_rate)
+        validate_non_overlapping_steps(self.frequency_hop, self.sample_rate)
+        validate_num_samples_per_step(
+            self.window_size, self.dwell_time, self.sample_rate
+        )
         validate_num_steps_per_sweep(
-            self.min_frequency, self.max_frequency, self.frequency_step
+            self.min_frequency, self.max_frequency, self.frequency_hop
         )
         validate_sample_rate_with_master_clock_rate(
             self.sample_rate, self.master_clock_rate

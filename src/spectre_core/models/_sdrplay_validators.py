@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -23,6 +23,7 @@ LOW_IF_PERMITTED_SAMPLE_RATES = [LOW_IF_SAMPLE_RATE_CUTOFF / (2**i) for i in ran
 BANDWIDTH_OPTIONS = [0, 200e3, 300e3, 600e3, 1.536e6, 5e6, 6e6, 7e6, 8e6]
 LOW_IF_SAMPLE_RATE_CUTOFF = 2e6
 LOW_IF_PERMITTED_SAMPLE_RATES = [LOW_IF_SAMPLE_RATE_CUTOFF / (2**i) for i in range(6)]
+EXPECTED_OUTPUT_TYPES: list[str] = ["fc32", "sc16"]
 
 
 def validate_center_frequency(center_frequency: float) -> None:
@@ -45,7 +46,7 @@ def validate_constant_lna_state(
         )
 
 
-def validate_sample_rate(sample_rate: int) -> None:
+def validate_sample_rate(sample_rate: float) -> None:
     validate_in_range(
         sample_rate,
         lower_bound=SAMPLE_RATE_LOWER_BOUND,
@@ -67,7 +68,7 @@ def validate_if_gain(if_gain: float) -> None:
     )
 
 
-def validate_low_if_sample_rate(sample_rate: int) -> None:
+def validate_low_if_sample_rate(sample_rate: float) -> None:
     """Validate the sample rate if the receiver is operating in low IF mode.
 
     The minimum physical sampling rate of the SDRplay hardware is 2 MHz. Lower effective rates can be achieved
@@ -97,8 +98,11 @@ def validate_rf_gain(rf_gain: float, expected_rf_gains: list[int]):
     For implementation details, refer to the `gr-sdrplay3` OOT module:
     https://github.com/fventuri/gr-sdrplay3/blob/v3.11.0.9/lib/rsp_impl.cc#L378-L387
     """
-    if rf_gain not in expected_rf_gains:
-        raise ValueError(
-            f"The value of RF gain must be one of {expected_rf_gains}. "
-            f"Got {rf_gain}."
-        )
+    validate_one_of(
+        rf_gain, [float(rf_gain) for rf_gain in expected_rf_gains], "rf_gain"
+    )
+
+
+def validate_output_type(output_type: str):
+    """Checks the output type is supported."""
+    validate_one_of(output_type, EXPECTED_OUTPUT_TYPES, "output_type")

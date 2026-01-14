@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -26,14 +26,10 @@ from ._array_operations import (
 class SpectrumUnit(enum.Enum):
     """A defined unit for dynamic spectra values.
 
-    :ivar AMPLITUDE: Formal definition TBC.
-    :ivar POWER: Formal definition TBC.
-    :ivar DIGITS: Formal definition TBC.
+    :ivar AMPLITUDE: DFT amplitude (see https://www.fftw.org/fftw3_doc/What-FFTW-Really-Computes.html)
     """
 
     AMPLITUDE = "amplitude"
-    POWER = "power"
-    DIGITS = "digits"
 
 
 @dataclasses.dataclass
@@ -277,15 +273,8 @@ class Spectrogram:
         background_spectra = background_spectrum[:, np.newaxis]
         # Suppress divide by zero and invalid value warnings for this block of code
         with np.errstate(divide="ignore", invalid="ignore"):
-            if (
-                self._spectrum_unit == SpectrumUnit.AMPLITUDE
-                or self._spectrum_unit == SpectrumUnit.DIGITS
-            ):
+            if self._spectrum_unit == SpectrumUnit.AMPLITUDE:
                 dynamic_spectra_dBb = 10 * np.log10(
-                    self._dynamic_spectra / background_spectra
-                )
-            elif self._spectrum_unit == SpectrumUnit.POWER:
-                dynamic_spectra_dBb = 20 * np.log10(
                     self._dynamic_spectra / background_spectra
                 )
             else:
@@ -297,7 +286,7 @@ class Spectrogram:
     def format_start_time(self) -> str:
         """Format the datetime assigned to the first spectrum in the dynamic spectra.
 
-        :return: A string representation of the `start_datetime`, up to seconds precision.
+        :return: A string representation of the `start_datetime`.
         """
         dt = self.start_datetime.astype(datetime.datetime)
         return datetime.datetime.strftime(dt, spectre_core.config.TimeFormat.DATETIME)
@@ -307,9 +296,9 @@ class Spectrogram:
         background subtractions.
 
         :param start_background: The start time of the background interval, formatted as
-        a string in the format `TimeFormat.DATETIME` (up to seconds precision).
+        a string in the format `TimeFormat.DATETIME`.
         :param end_background: The end time of the background interval, formatted as
-        a string in the format `TimeFormat.DATETIME` (up to seconds precision).
+        a string in the format `TimeFormat.DATETIME`.
         """
         self._start_background = start_background
         self._end_background = end_background

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -6,26 +6,14 @@ import dataclasses
 import os
 import typing
 import json
-import enum
 
 import spectre_core.io
 import spectre_core.config
 
 
-class _ReservedTagStr(enum.Enum):
-    """Reserve substrings to indicate batch files derived from external spectrogram data."""
-
-    CALLISTO = "callisto"
-
-
 def _validate_tag(tag: str) -> None:
     if "_" in tag:
         raise ValueError("An underscore is not allowed in a config tag.")
-    for s in _ReservedTagStr:
-        if s.value in tag:
-            raise ValueError(
-                f"'{tag}' is an invalid tag, the substring '{s}' is reserved."
-            )
 
 
 def _validate_keys(content: dict[str, str]) -> None:

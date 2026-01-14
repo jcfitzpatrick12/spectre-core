@@ -1,12 +1,12 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
-
-import enum
 
 import numpy as np
 import numpy.typing as npt
 import pyfftw
+
+import spectre_core.fields
 
 
 def get_cosine_signal(
@@ -27,12 +27,6 @@ def get_cosine_signal(
     """
     n = np.arange(num_samples, dtype=np.complex64)
     return amplitude * np.cos(2 * np.pi * (frequency / sample_rate) * n + phase)
-
-
-class WindowType(str, enum.Enum):
-    HANN = "hann"
-    BLACKMAN = "blackman"
-    BOXCAR = "boxcar"
 
 
 def _window_general_cosine_asym(
@@ -58,7 +52,7 @@ def _window_blackman(window_size: int) -> npt.NDArray[np.float32]:
     return _window_general_cosine_asym(window_size, coefficients)
 
 
-def get_window(window_type: WindowType, window_size: int) -> npt.NDArray[np.float32]:
+def get_window(window_type: str, window_size: int) -> npt.NDArray[np.float32]:
     """Create a window of a specified type and length.
 
     :param window_type: The type of window to generate.
@@ -69,11 +63,11 @@ def get_window(window_type: WindowType, window_size: int) -> npt.NDArray[np.floa
     if window_size < 2:
         raise ValueError(f"The window size cannot be less than 2, got {window_size}")
 
-    if window_type == WindowType.BOXCAR:
+    if window_type == spectre_core.fields.WindowType.BOXCAR:
         return _window_boxcar(window_size)
-    elif window_type == WindowType.HANN:
+    elif window_type == spectre_core.fields.WindowType.HANN:
         return _window_hann(window_size)
-    elif window_type == WindowType.BLACKMAN:
+    elif window_type == spectre_core.fields.WindowType.BLACKMAN:
         return _window_blackman(window_size)
     else:
         raise ValueError(f"Unknown window type: {window_type}")

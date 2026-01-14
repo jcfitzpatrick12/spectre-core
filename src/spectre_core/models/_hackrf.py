@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -12,6 +12,7 @@ from ._validators import (
     validate_window_size,
     validate_nyquist_criterion,
 )
+from ._soapy_validators import validate_output_type
 
 
 class HackRFFixedCenterFrequency(
@@ -24,4 +25,5 @@ class HackRFFixedCenterFrequency(
             return self
         validate_nyquist_criterion(self.sample_rate, self.bandwidth)
         validate_window_size(self.window_size)
+        validate_output_type(self.output_type)
         return self

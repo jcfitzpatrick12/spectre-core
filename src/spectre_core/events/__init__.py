@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -17,7 +17,6 @@ from ._stfft import (
     get_times,
     get_cosine_signal,
     get_num_spectrums,
-    WindowType,
 )
 
 __all__ = [
@@ -34,5 +33,4 @@ __all__ = [
     "get_frequencies",
     "get_num_spectrums",
     "get_cosine_signal",
-    "WindowType",
 ]

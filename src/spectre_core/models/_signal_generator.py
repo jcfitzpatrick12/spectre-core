@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: © 2024-2025 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
+# SPDX-FileCopyrightText: © 2024-2026 Jimmy Fitzpatrick <jcfitzpatrick12@gmail.com>
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -15,7 +15,9 @@ class SignalGeneratorCosineWaveModel(
     spectre_core.flowgraphs.SignalGeneratorCosineWaveModel,
     spectre_core.events.FixedCenterFrequencyModel,
 ):
-    window_type: spectre_core.fields.Field.window_type = "boxcar"
+    window_type: spectre_core.fields.Field.window_type = (
+        spectre_core.fields.WindowType.BOXCAR
+    )
 
     @pydantic.model_validator(mode="after")
     def validator(self, info: pydantic.ValidationInfo):
@@ -23,7 +25,7 @@ class SignalGeneratorCosineWaveModel(
             return self
         validate_window_size(self.window_size)
 
-        if not self.window_type == "boxcar":
+        if not self.window_type == spectre_core.fields.WindowType.BOXCAR:
             raise ValueError(
                 f"The window type must be boxcar. Got '{self.window_type}'"
             )
@@ -53,19 +55,21 @@ class SignalGeneratorConstantStaircaseModel(
     spectre_core.flowgraphs.SignalGeneratorConstantStaircaseModel,
     spectre_core.events.FixedCenterFrequencyModel,
 ):
-    window_type: spectre_core.fields.Field.window_type = "boxcar"
+    window_type: spectre_core.fields.Field.window_type = (
+        spectre_core.fields.WindowType.BOXCAR
+    )
 
     @pydantic.model_validator(mode="after")
     def validator(self, info: pydantic.ValidationInfo):
         if skip_validator(info):
             return self
         validate_window_size(self.window_size)
-        if not self.window_type == "boxcar":
+        if not self.window_type == spectre_core.fields.WindowType.BOXCAR:
             raise ValueError(
                 f"The window type must be boxcar. Got '{self.window_type}'"
             )
-        if self.frequency_step != self.sample_rate:
-            raise ValueError(f"The frequency step must be equal to the sampling rate")
+        if self.frequency_hop != self.sample_rate:
+            raise ValueError(f"The frequency hop must be equal to the sampling rate")
 
         if self.min_samples_per_step > self.max_samples_per_step:
             raise ValueError(
