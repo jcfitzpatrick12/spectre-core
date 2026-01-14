@@ -1,7 +1,7 @@
 # spectre-core
 
 ## Description
-A receiver-agnostic toolkit for generating radio spectrograms in real-time. Contains server-side implementations for [_Spectre_](https://github.com/jcfitzpatrick12/spectre.git).
+Contains server-side implementations for [_Spectre_](https://github.com/jcfitzpatrick12/spectre.git).
 
 **⚠️ Note:**  
 This repository is not intended for direct consumption.
