@@ -18,6 +18,7 @@ from ._names import ReceiverName
 from ._custom import Custom
 from ._signal_generator import SignalGenerator
 from ._rsp1a import RSP1A
+from ._rsp1b import RSP1B
 from ._rspduo import RSPduo
 from ._rspdx import RSPdx
 from ._usrp import USRP
@@ -42,6 +43,7 @@ __all__ = [
     "Custom",
     "SignalGenerator",
     "RSP1A",
+    "RSP1B",
     "RSPduo",
     "RSPdx",
     "USRP",

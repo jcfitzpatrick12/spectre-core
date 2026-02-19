@@ -143,6 +143,7 @@ class TestReceivers:
         ("receiver_name"),
         [
             spectre_core.receivers.ReceiverName.RSP1A,
+            spectre_core.receivers.ReceiverName.RSP1B,
             spectre_core.receivers.ReceiverName.RSPDUO,
             spectre_core.receivers.ReceiverName.RSPDX,
             spectre_core.receivers.ReceiverName.USRP,

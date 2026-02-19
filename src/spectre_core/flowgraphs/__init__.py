@@ -4,7 +4,6 @@
 
 """Configurable, extensible GNURadio flowgraphs."""
 
-
 from ._base import Base
 from ._signal_generator import (
     SignalGeneratorCosineWave,
@@ -18,6 +17,7 @@ from ._rsp1a import (
     RSP1ASweptCenterFrequency,
     RSP1ASweptCenterFrequencyModel,
 )
+from ._rsp1b import RSP1BFixedCenterFrequency, RSP1BFixedCenterFrequencyModel
 from ._rspduo import (
     RSPduoFixedCenterFrequency,
     RSPduoFixedCenterFrequencyModel,
@@ -52,6 +52,8 @@ __all__ = [
     "RSP1AFixedCenterFrequencyModel",
     "RSP1ASweptCenterFrequency",
     "RSP1ASweptCenterFrequencyModel",
+    "RSP1BFixedCenterFrequency",
+    "RSP1BFixedCenterFrequencyModel",
     "RSPduoFixedCenterFrequency",
     "RSPduoFixedCenterFrequencyModel",
     "RSPduoSweptCenterFrequency",

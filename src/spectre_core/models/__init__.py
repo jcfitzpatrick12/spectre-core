@@ -10,6 +10,7 @@ from ._signal_generator import (
     SignalGeneratorConstantStaircaseModel,
 )
 from ._rsp1a import RSP1AFixedCenterFrequency, RSP1ASweptCenterFrequency
+from ._rsp1b import RSP1BFixedCenterFrequency
 from ._rspduo import RSPduoFixedCenterFrequency, RSPduoSweptCenterFrequency
 from ._rspdx import RSPdxFixedCenterFrequency, RSPdxSweptCenterFrequency
 from ._usrp import USRPFixedCenterFrequency, USRPSweptCenterFrequency
@@ -23,6 +24,7 @@ __all__ = [
     "SignalGeneratorConstantStaircaseModel",
     "RSP1AFixedCenterFrequency",
     "RSP1ASweptCenterFrequency",
+    "RSP1BFixedCenterFrequency",
     "RSPduoFixedCenterFrequency",
     "RSPduoSweptCenterFrequency",
     "RSPdxFixedCenterFrequency",

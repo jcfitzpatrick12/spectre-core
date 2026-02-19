@@ -10,7 +10,6 @@ from ._decorators import log_call
 from ._configure import configure_root_logger, get_root_logger_state
 from ._logs import Log, Logs, parse_log_file_name
 
-
 __all__ = [
     "log_call",
     "configure_root_logger",
