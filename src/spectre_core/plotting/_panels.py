@@ -14,7 +14,6 @@ import spectre_core.spectrograms
 from ._base import BasePanel, BaseTimeSeriesPanel, XAxisType
 from ._panel_names import PanelName
 
-
 T = typing.TypeVar("T")
 
 

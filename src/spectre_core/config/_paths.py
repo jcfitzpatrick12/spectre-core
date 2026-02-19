@@ -8,7 +8,6 @@ import os
 import pathlib
 from typing import Optional, Dict
 
-
 DEFAULT_SPECTRE_DATA_DIR_PATH = pathlib.Path(os.curdir) / ".spectre_data"
 
 

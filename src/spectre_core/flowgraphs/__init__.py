@@ -4,7 +4,6 @@
 
 """Configurable, extensible GNURadio flowgraphs."""
 
-
 from ._base import Base
 from ._signal_generator import (
     SignalGeneratorCosineWave,
