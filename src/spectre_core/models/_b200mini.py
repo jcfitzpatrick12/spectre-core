@@ -137,4 +137,6 @@ class B200miniSweptCenterFrequency(
         validate_sample_rate_with_master_clock_rate(
             self.sample_rate, self.master_clock_rate
         )
+        validate_wire_format(self.wire_format)
+        validate_output_type(self.output_type)
         return self

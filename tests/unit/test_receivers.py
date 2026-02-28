@@ -2,14 +2,18 @@
 # This file is part of SPECTRE
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-import pytest
+import typing
 import os
+
+import pytest
+import pydantic
 
 import spectre_core.receivers
 import spectre_core.exceptions
 import spectre_core.config
 
 ACTIVE_MODE = "cosine_wave"
+INVALID_STRING_FIELD = "foobarbaz"
 
 
 @pytest.fixture
@@ -173,3 +177,70 @@ class TestReceivers:
                     tag, spectre_config_paths.get_configs_dir_path()
                 )
             )
+
+    @pytest.mark.parametrize(
+        ("receiver_name", "field_name", "field_values"),
+        [
+            (
+                spectre_core.receivers.ReceiverName.B200MINI,
+                "wire_format",
+                ["sc8", "sc12", "sc16"],
+            ),
+            (
+                spectre_core.receivers.ReceiverName.B200MINI,
+                "output_type",
+                ["fc32", "sc16"],
+            ),
+            (
+                spectre_core.receivers.ReceiverName.USRP,
+                "wire_format",
+                ["sc8", "sc12", "sc16"],
+            ),
+            (spectre_core.receivers.ReceiverName.USRP, "output_type", ["fc32", "sc16"]),
+        ],
+    )
+    def test_valid_single_field_all_modes(
+        self, receiver_name: str, field_name: str, field_values: list[typing.Any]
+    ) -> None:
+        """Check a receiver accepts a valid single field, for all modes."""
+        receiver = spectre_core.receivers.get_receiver(receiver_name)
+        for mode in receiver.modes:
+            receiver.mode = mode
+            for field_value in field_values:
+                receiver.model_validate({field_name: field_value})
+
+    @pytest.mark.parametrize(
+        ("receiver_name", "field_name", "field_values"),
+        [
+            (
+                spectre_core.receivers.ReceiverName.B200MINI,
+                "wire_format",
+                [INVALID_STRING_FIELD],
+            ),
+            (
+                spectre_core.receivers.ReceiverName.B200MINI,
+                "output_type",
+                [INVALID_STRING_FIELD],
+            ),
+            (
+                spectre_core.receivers.ReceiverName.USRP,
+                "wire_format",
+                [INVALID_STRING_FIELD],
+            ),
+            (
+                spectre_core.receivers.ReceiverName.USRP,
+                "output_type",
+                [INVALID_STRING_FIELD],
+            ),
+        ],
+    )
+    def test_invalid_single_field_all_modes(
+        self, receiver_name: str, field_name: str, field_values: list[typing.Any]
+    ) -> None:
+        """Check a receiver rejects an invalid single field, for all modes."""
+        receiver = spectre_core.receivers.get_receiver(receiver_name)
+        for mode in receiver.modes:
+            receiver.mode = mode
+            for field_value in field_values:
+                with pytest.raises(pydantic.ValidationError):
+                    receiver.model_validate({field_name: field_value})
