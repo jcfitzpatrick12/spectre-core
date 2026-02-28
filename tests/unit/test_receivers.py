@@ -237,7 +237,7 @@ class TestReceivers:
     def test_invalid_single_field_all_modes(
         self, receiver_name: str, field_name: str, field_values: list[typing.Any]
     ) -> None:
-        """Check a receiver rejects a valid single field, for all modes."""
+        """Check a receiver rejects an invalid single field, for all modes."""
         receiver = spectre_core.receivers.get_receiver(receiver_name)
         for mode in receiver.modes:
             receiver.mode = mode
