@@ -1,4 +1,4 @@
 # spectre-core
 
 > [!IMPORTANT]
-> This library has been deprecated as of March 2026 and absorbed into [_Spectre_](https://github.com/spectregrams/spectre).
+> `spectre_core` is no longer being maintained as a stand-alone Python library as of March 2026. See [#217](https://github.com/spectregrams/spectre/issues/217).
